@@ -10,4 +10,3 @@ We have re-implemented and re-structured the communication stack for our wireles
 The software is released under the open source MIT License.
 
 Copyright(C) Monolit ApS 2015
-All rights reserved.
