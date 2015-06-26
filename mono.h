@@ -9,6 +9,14 @@
 #ifndef spiTest_mono_h
 #define spiTest_mono_h
 
+#include <stdint.h>
+
 #include <consoles.h>
+
+namespace mono {
+    
+    
+    
+}
 
 #endif

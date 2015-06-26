@@ -10,9 +10,11 @@
 #define __spiTest__consoles__
 
 #include <stdio.h>
-
+#include <mbed.h>
 
 namespace mono {
+    
+    static mbed::Serial defaultSerial(USBTX,USBRX);
     
     /** Print an error on screen or console */
     void error(const char *msg);
@@ -23,9 +25,9 @@ namespace mono {
     class Console
     {
     public:
-        FILE *fptr;
+        mbed::Serial *serial;
         
-        Console(FILE *f);
+        Console(mbed::Serial *ser);
         
         Console& operator<<(const char *txt);
         Console& operator<<(int integer);
@@ -34,14 +36,15 @@ namespace mono {
         
     };
     
+    static Console Error(&defaultSerial);
+    static Console Warn(&defaultSerial);
+    static Console Debug(&defaultSerial);
+    
 //    Console& operator<<(Console &console, const char *txt);
 //    Console& operator<<(Console &console, int integer);
 //    Console& operator<<(Console &console, char integer);
 //    Console& operator<<(Console &console, float number);
     
-    static Console Error(stderr);
-    static Console Warn(stdout);
-    static Console Debug(stdout);
 }
 
 #endif /* defined(__spiTest__consoles__) */

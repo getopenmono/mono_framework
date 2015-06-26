@@ -8,47 +8,48 @@
 
 
 #include "consoles.h"
+#include <Serial.h>
 
 using namespace mono;
 
 
 void mono::error(const char *msg)
 {
-    fprintf(stderr, "%s\n", msg);
+    defaultSerial.printf("%s\n", msg);
 }
 
 void mono::warning(const char *msg)
 {
-    printf("%s\n",msg);
+    defaultSerial.printf("%s\n",msg);
 }
 
-Console::Console(FILE *f)
+Console::Console(mbed::Serial *ser)
 {
-    fptr = f;
+    serial = ser;
 }
 
 
 Console& Console::operator<<(const char *txt)
 {
-    fprintf(fptr, "%s",txt);
+    serial->printf("%s",txt);
     return *this;
 }
 
 Console& Console::operator<<(int integer)
 {
-    fprintf(fptr, "%i",integer);
+    serial->printf("%i",integer);
     return *this;
 }
 
 Console& Console::operator<<(char integer)
 {
-    fprintf(fptr, "%x",integer);
+    serial->printf("%x",integer);
     return *this;
 }
 
 Console& Console::operator<<(float number)
 {
-    fprintf(fptr, "%f",number);
+    serial->printf("%f",number);
     return *this;
 }
 
