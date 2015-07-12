@@ -40,6 +40,18 @@ namespace mono {
          */
         display::IDisplayController *displayController;
         
+        /**
+         * This method starts the global run/event loop for the mono application.
+         * The method never returns, so a call to this function should be the 
+         * last line in your `main()` function.
+         *
+         * The event loop automatically schedules the sub system, such as the 
+         * network, inputs and the display.
+         *
+         * @brief Start the application run loop
+         */
+        virtual void exec() = 0;
+        
         
         /** Sets a pointer to the mono application object */
         virtual void setMonoApplication(mono::IApplication *app) = 0;

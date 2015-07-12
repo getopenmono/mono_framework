@@ -56,6 +56,29 @@ namespace mono { namespace ui {
          */
         geo::Size size;
         
+        /**
+         * @brief A pointer to the next view in the re-paint queue.
+         * 
+         * Then you call the @ref scheduleRepaint method, views use a chain of
+         * `nextDirtyView` pointers to realize a queue. This eliminates the need
+         * for a heap based variable length linked list, that implements a queue
+         * structure.
+         *
+         * The static member @ref firstDiryView is the top of the queue, and all
+         * views in the queue use this member to point to the next dirty view.
+         *
+         * The queue can be traversed by starting with @ref firstDirtyView and
+         * then following the `nextDirtyView` pointer, until a `NULL` is encountered.
+         */
+        View *nextDirtyView;
+        
+        /**
+         * The top of the scheduled repaint queue.
+         * See the describing of the repaint queue implementation in 
+         * @ref nextDirtyView
+         */
+        static View *firstDirtyView;
+        
     public:
         
         View();
@@ -114,10 +137,16 @@ namespace mono { namespace ui {
          *
          * @brief Schedule this view for repaint at next display refresh
          */
-        void scheduleRepaint()
-        {
-            
-        }
+        void scheduleRepaint();
+        
+        /**
+         * This class method will run through the scheduled re-paints queue and
+         * call the @ref repaint method on all of them.
+         *
+         * This method is called automatically be the display system, you do not
+         * need to call it yourself.
+         */
+        static void repaintScheduledViews();
         
     };
     

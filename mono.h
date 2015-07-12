@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 //#include <consoles.h>
-#include <application_interface.h>
+#include <application_controller_interface.h>
 #include <application_context.h>
 
 #include <point.h>

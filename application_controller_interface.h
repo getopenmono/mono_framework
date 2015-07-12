@@ -9,8 +9,6 @@
 #ifndef mono_application_interface_h
 #define mono_application_interface_h
 
-#include <display_controller_interface.h>
-
 namespace mono {
     
     /**
@@ -24,8 +22,6 @@ namespace mono {
     class IApplication
     {
     public:
-        
-        
         
         /**
          * Called when mono boot after having been power off or after a reset
