@@ -11,12 +11,20 @@
 
 #include <stdint.h>
 
-#include <consoles.h>
+//#include <consoles.h>
+#include <application_interface.h>
+#include <application_context.h>
 
-namespace mono {
-    
-    
-    
-}
+#include <point.h>
+#include <size.h>
+
+#include <color.h>
+#include <display_painter.h>
+
+#include <view.h>
+#include <console_view.h>
+
+
+namespace mono {}
 
 #endif

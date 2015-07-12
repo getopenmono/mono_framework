@@ -10,11 +10,14 @@
 #define __spiTest__consoles__
 
 #include <stdio.h>
+#ifndef emuno_emuno_h
 #include <mbed.h>
+#endif
 
 namespace mono {
     
     static mbed::Serial defaultSerial(USBTX,USBRX);
+    
     
     /** Print an error on screen or console */
     void error(const char *msg);

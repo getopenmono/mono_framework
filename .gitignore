@@ -1,0 +1,8 @@
+*.o
+*.xcodeproj
+*.hmap
+*.pbxproj
+*.xcworkspacedata
+*.xcuserstate
+build
+wayEngDisplayTest

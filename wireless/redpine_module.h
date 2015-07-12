@@ -85,8 +85,9 @@ namespace mono { namespace redpine {
         static Module* Instance();
         
         /**
-         * Send initialize the module and set the communication interface
-         * The interface will also be initialized by this method.
+         * Sends the inirialize command and waits for Card Ready from the module
+         * and set the communication interface for this object. After this method
+         * is called the module is ready to receive the OperMode command etc.
          *
          * @param commInterface The module communication interface to be used
          */
