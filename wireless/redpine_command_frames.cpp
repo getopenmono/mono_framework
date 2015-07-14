@@ -8,6 +8,7 @@
 
 #include "redpine_command_frames.h"
 #include "redpine_module.h"
+#include <consoles.h>
 
 using namespace mono::redpine;
 

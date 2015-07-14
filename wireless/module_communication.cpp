@@ -9,6 +9,7 @@
 #include "module_communication.h"
 #include <mono.h>
 #include <mbed.h>
+#include <consoles.h>
 
 using namespace mono::redpine;
 

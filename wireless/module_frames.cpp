@@ -8,7 +8,7 @@
 
 #include "module_frames.h"
 #include "redpine_module.h"
-
+#include <consoles.h>
 #include <mbed.h>
 
 using namespace mono::redpine;
