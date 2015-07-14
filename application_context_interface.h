@@ -10,9 +10,10 @@
 #define displaySimTest_application_context_h
 
 #include <display_controller_interface.h>
-#include <application_controller_interface.h>
 
 namespace mono {
+    
+    class IApplication; // forward declaretion of the IApplication interface
     
     /**
      * The Application context class is a singleton class that is automatically 
@@ -50,7 +51,7 @@ namespace mono {
          *
          * @brief Start the application run loop
          */
-        virtual void exec() = 0;
+        virtual int exec() = 0;
         
         
         /** Sets a pointer to the mono application object */
