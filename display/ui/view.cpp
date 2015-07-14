@@ -7,11 +7,11 @@
 //
 
 #include "view.h"
-#include <application_context.h>
+#include <application_context_interface.h>
 
 using namespace mono::ui;
 
-mono::display::DisplayPainter View::painter(mono::ApplicationContext::Instance->displayController);
+mono::display::DisplayPainter View::painter(mono::IApplicationContext::Instance->displayController);
 
 View *View::firstDirtyView = NULL;
 
