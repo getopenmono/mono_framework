@@ -34,12 +34,12 @@ Size& Size::operator=(const mono::geo::Size &s)
     return *this;
 }
 
-int Size::Width()
+int Size::Width() const
 {
     return this->width;
 }
 
-int Size::Height()
+int Size::Height() const
 {
     return this->height;
 }

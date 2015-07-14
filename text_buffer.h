@@ -42,6 +42,8 @@ namespace mono {
         {
             looped = false;
             linePtr = 0;
+            
+            memset(buffer, 0, LineCount()*LineLength());
         }
         
         void insertToCurrentLine(int index, char symbol)

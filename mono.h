@@ -13,7 +13,7 @@
 
 //#include <consoles.h>
 #include <application_controller_interface.h>
-#include <application_context.h>
+#include <application_context_interface.h>
 
 #include <point.h>
 #include <size.h>

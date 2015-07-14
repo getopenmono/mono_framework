@@ -16,7 +16,7 @@
 
 namespace mono {
     
-    static mbed::Serial defaultSerial(USBTX,USBRX);
+    //static mbed::Serial defaultSerial(USBTX,USBRX);
     
     
     /** Print an error on screen or console */
@@ -39,9 +39,9 @@ namespace mono {
         
     };
     
-    static Console Error(&defaultSerial);
-    static Console Warn(&defaultSerial);
-    static Console Debug(&defaultSerial);
+    //static Console Error(&defaultSerial);
+    //static Console Warn(&defaultSerial);
+    //static Console Debug(&defaultSerial);
     
 //    Console& operator<<(Console &console, const char *txt);
 //    Console& operator<<(Console &console, int integer);

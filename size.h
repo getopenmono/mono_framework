@@ -42,8 +42,8 @@ namespace mono { namespace geo {
         Size& operator=(const Size &s);
         
         //Getters
-        int Width();
-        int Height();
+        int Width() const;
+        int Height() const;
     };
     
 } }

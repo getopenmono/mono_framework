@@ -10,7 +10,7 @@
 #define displaySimTest_application_context_h
 
 #include <display_controller_interface.h>
-#include <application_interface.h>
+#include <application_controller_interface.h>
 
 namespace mono {
     
@@ -30,7 +30,7 @@ namespace mono {
      * actual device.
      *
      */
-    class ApplicationContext
+    class IApplicationContext
     {
     public:
         /**
@@ -57,7 +57,7 @@ namespace mono {
         virtual void setMonoApplication(mono::IApplication *app) = 0;
         
         /** Get a pointer to the global application context */
-        static ApplicationContext* Instance;
+        static IApplicationContext* Instance;
         
     };
 }
