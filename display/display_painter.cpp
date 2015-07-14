@@ -66,7 +66,7 @@ void DisplayPainter::drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t h
 void DisplayPainter::drawFillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool bg)
 {
     displayCtrl->setWindow(x, y, width, height);
-    displayCtrl->setCursor(x, y);
+    //displayCtrl->setCursor(x, y);
     
     for (int i=0; i<width*height; i++) {
         displayCtrl->write(bg ? backgroundColor : foregroundColor);
@@ -169,7 +169,7 @@ void DisplayPainter::drawVLine(uint16_t x, uint16_t y1, uint16_t y2, bool bg)
     if (y1 > y2)
         swap(y1, y2);
     
-    displayCtrl->setWindow(x, y1, x, y2);
+    displayCtrl->setWindow(x, y1, 1, y2-y1);
     for (int i=0; i<y2-y1; i++)
     {
         displayCtrl->write(bg ? backgroundColor : foregroundColor);
@@ -181,7 +181,7 @@ void DisplayPainter::drawHLine(uint16_t x1, uint16_t x2, uint16_t y, bool bg)
     if (x1 > x2)
         swap(x1, x2);
     
-    displayCtrl->setWindow(x1, y, x2, y);
+    displayCtrl->setWindow(x1, y, x2-x1, 1);
     for (int i=0; i<x2-x1; i++)
     {
         displayCtrl->write(bg ? backgroundColor : foregroundColor);

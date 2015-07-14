@@ -50,6 +50,7 @@ namespace mono { namespace ui {
             lineSpacing(2),
             softWrapIndent(5)
         {
+            View::painter.setTextSize(1);
             this->scrolls = false;
             this->curLineIndex = 0;
             this->size = geo::Size(W,H);
@@ -109,7 +110,7 @@ namespace mono { namespace ui {
         {
             View::painter.setForegroundColor(textColor);
             View::painter.setBackgroundColor(consoleColor);
-            geo::Point cursor(2,2);
+            geo::Point cursor(position.X()+2,position.Y()+2);
             for (int l=textBuffer.OldestLinePosition(); l<textBuffer.LineCount(); l++) {
                 //erase previous line
                 View::painter.drawFillRect(cursor.X(), cursor.Y(), size.Width()-4, characterPixelHeight(), true);

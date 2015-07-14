@@ -13,7 +13,9 @@
 #include <point.h>
 #include <size.h>
 
-namespace mono { namespace ui {
+namespace mono {
+    class IApplicationContext;
+    namespace ui {
     
     /**
      * Abstract View class/interface. All UI view/widgets that paint to the 
@@ -31,6 +33,7 @@ namespace mono { namespace ui {
      */
     class View
     {
+        friend mono::IApplicationContext;
     protected:
         
         /**
