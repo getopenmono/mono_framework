@@ -29,7 +29,7 @@ namespace mono {
         
         
         
-        void exec();
+        int exec();
         
         void setMonoApplication(IApplication *monoApp);
         

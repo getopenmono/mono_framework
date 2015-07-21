@@ -29,7 +29,7 @@ ApplicationContext::ApplicationContext() : dispController()
 }
 
 
-void ApplicationContext::exec()
+int ApplicationContext::exec()
 {
     
 }
