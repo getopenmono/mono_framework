@@ -4,7 +4,6 @@ extern "C" {
 }
 
 #include <hx8340.h>
-#include <mbed.h>
 
 using namespace mono::display;
 
@@ -72,11 +71,11 @@ void HX8340::init()
     TFT_Start();
     
 	LCD_Write_COM_DATA(0x26,0x0084); //PT=10,GON=0, DTE=0, D=0100
-    mbed::wait_ms(40);
+    CyDelay(40);
 	LCD_Write_COM_DATA(0x26,0x00B8); //PT=10,GON=1, DTE=1, D=1000
-	mbed::wait_ms(40);
+	CyDelay(40);
 	LCD_Write_COM_DATA(0x26,0x00BC); //PT=10,GON=1, DTE=1, D=1100
-	mbed::wait_ms(20);
+	CyDelay(20);
 	// LCD_Write_COM_DATA(0x0001,0x0000);     // PTL='1' Enter Partail mode
 
 	//Driving ability Setting
@@ -84,7 +83,7 @@ void HX8340::init()
 	LCD_Write_COM_DATA(0x61,0x0006);
 	LCD_Write_COM_DATA(0x62,0x0000);
 	LCD_Write_COM_DATA(0x63,0x00C8);
-	mbed::wait_ms(20);
+	CyDelay(20);
 
 	//Gamma Setting
 	LCD_Write_COM_DATA(0x73,0x0070);
@@ -106,7 +105,7 @@ void HX8340::init()
 	LCD_Write_COM_DATA(0x55,0x0007);
 	LCD_Write_COM_DATA(0x56,0x0003);
 	LCD_Write_COM_DATA(0x57,0x0049);
-	mbed::wait_ms(20);
+	CyDelay(20);
 
 	//Power Setting
 	LCD_Write_COM_DATA(0x1F,0x0003); //VRH=4.65V     VREG1?GAMMA? 00~1E  080421    
@@ -115,7 +114,7 @@ void HX8340::init()
 	LCD_Write_COM_DATA(0x25,0x0034); //VCOML(VCOM Low voltage -1.2V)    0034/4A    080421    29~3F 
 	//****VCOM offset**///
 	LCD_Write_COM_DATA(0x23,0x002F); //VMF(no offset)                            
-	mbed::wait_ms(20);
+	CyDelay(20);
 
 	//##################################################################
 	// Power Supply Setting
@@ -124,16 +123,16 @@ void HX8340::init()
 	LCD_Write_COM_DATA(0x01,0x0000); //SLP='0' out sleep
 	LCD_Write_COM_DATA(0x1C,0x0003); //AP=011
 	LCD_Write_COM_DATA(0x19,0x0006); // VOMG=1,PON=1, DK=0,
-	mbed::wait_ms(20);
+	CyDelay(20);
 
 	//##################################################################
 	// Display ON Setting
 	LCD_Write_COM_DATA(0x26,0x0084); //PT=10,GON=0, DTE=0, D=0100
-	mbed::wait_ms(40);
+	CyDelay(40);
 	LCD_Write_COM_DATA(0x26,0x00B8); //PT=10,GON=1, DTE=1, D=1000
-	mbed::wait_ms(40);
+	CyDelay(40);
 	LCD_Write_COM_DATA(0x26,0x00BC); //PT=10,GON=1, DTE=1, D=1100
-	mbed::wait_ms(20);
+	CyDelay(20);
 
 	//SET GRAM AREA
 	LCD_Write_COM_DATA(0x02,0x0000); 
@@ -144,7 +143,7 @@ void HX8340::init()
 	LCD_Write_COM_DATA(0x07,0x0000);
 	LCD_Write_COM_DATA(0x08,0x0000);
 	LCD_Write_COM_DATA(0x09,0x00DB);
-	mbed::wait_ms(20);
+	CyDelay(20);
 	LCD_Write_COM_DATA(0x16,0x0008);  //MV MX MY ML SET  0028
 	LCD_Write_COM_DATA(0x17,0x0005);//COLMOD Control Register (R17h)
 	LCD_Write_COM(0x21);
