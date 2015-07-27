@@ -11,7 +11,7 @@
 
 #include <stdint.h>
 
-//#include <consoles.h>
+#include <consoles.h>
 #include <application_controller_interface.h>
 #include <application_context_interface.h>
 
