@@ -54,7 +54,7 @@ namespace mono {
          */
         IApplication()
         {
-            IApplicationContext::Instance->setMonoApplication(this);
+            //IApplicationContext::Instance->setMonoApplication(this);
         }
         
         /**

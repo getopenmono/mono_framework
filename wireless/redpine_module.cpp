@@ -30,44 +30,50 @@ Module* Module::Instance()
 
 bool Module::initialize(ModuleCommunication *commInterface)
 {
+    
+    mono::defaultSerial.printf("init module func\n\r");
+    
     if (commInterface == NULL)
+    {
+        mono::defaultSerial.printf("Cannot init Redpine Module with comm. interface!\n\r");
         return false;
+    }
     
     // Assign interface to object
     Module* self = Module::Instance();
     self->comIntf = commInterface;
     
-    mono::Debug << "Initializing communication interface...\n";
+    mono::defaultSerial.printf("Initializing communication interface...\n\r");
     // initalize interface
     bool success = self->comIntf->initializeInterface();
     
     if (!success)
     {
-        mono::Error << "Initialize failed to init communication interface\n";
+        mono::defaultSerial.printf("Initialize failed to init communication interface\n\r");
         return false;
     }
     
     // we need to wait for board ready frame
-    mono::Debug << "Waiting for card ready to arrive on input...\n";
+    mono::defaultSerial.printf("Waiting for card ready to arrive on input...\n\r");
     while (!self->comIntf->pollInputQueue())
     {
         //wait a while
         mbed::wait_ms(200);
     }
     
-    mono::Debug << "Input pending, will read frame...\n";
+    mono::defaultSerial.printf("Input pending, will read frame...\n\r");
     ManagementFrame frame;
     self->comIntf->readManagementFrame(frame);
     
     if (frame.commandId == ModuleFrame::CardReady)
     {
-        mono::Debug << "Card ready received" << "\n";
+        mono::defaultSerial.printf("Card ready received\n\r");
         return true;
     }
     else
     {
-        mono::Error << "Initialization failed on receiving card ready\n";
-        mono::Debug << "Initialization got " << frame.commandId << " not card ready\n";
+        mono::defaultSerial.printf("Initialization failed on receiving card ready\n\r");
+        mono::defaultSerial.printf("Initialization got 0x%x, not card ready\n\r",frame.commandId);
         return false;
     }
     
@@ -77,28 +83,28 @@ bool Module::setupWifiOnly(const char *ssid, const char *passphrase, WifiSecurit
 {
     // send "set operating mode command"
     
-    mono::Debug << "Setting OperMode...\n";
+    mono::defaultSerial.printf("Setting OperMode...\n\r");
     SetOperatingModeFrame opermode(SetOperatingModeFrame::WIFI_CLIENT_MODE);
     opermode.setDefaultConfiguration();
     opermode.commit();
     
-    mono::Debug << "Setting band...\n";
+    mono::defaultSerial.printf("Setting band...\n\r");
     BandFrame band;
     band.commit();
     
-    mono::Debug << "Initialize module RF and baseband...\n";
+    mono::defaultSerial.printf("Initialize module RF and baseband...\n\r");
     InitFrame init;
     init.commit();
     
-    mono::Debug << "Scanning for networks...\n";
+    mono::defaultSerial.printf("Scanning for networks...\n\r");
     ScanFrame scan;
     scan.commit();
     
-    mono::Debug << "Connecting to " << ssid << "\n";
+    mono::defaultSerial.printf("Connecting to %s\n\r",ssid);
     JoinFrame join(ssid, passphrase, secMode);
     join.commit();
     
-    mono::Debug << "Getting IP address from DHCP...\n";
+    mono::defaultSerial.printf("Getting IP address from DHCP...\n\r");
     SetIpParametersFrame ipparam;
     ipparam.commit();
     

@@ -70,9 +70,13 @@ namespace mono { namespace redpine {
         SPIReceiveDataBuffer(frameDescriptorHeader &frmHead);
         
         /**
-         * Pipe data from SPI to the buffer
+         * @brief Pipe data from SPI to the buffer
          * The number of bytes read, is based on the property
          * bytesToRead.
+         *
+         * Remember to to set the chip select for the module *before* and *after*
+         * you read data using this method.
+         *
          * @param spi The interface to read from
          * @return A reference to itself, to enable chaining.
          */
@@ -195,6 +199,7 @@ namespace mono { namespace redpine {
         
     protected:
         mbed::SPI *spi;
+        PinName spiChipSelect;
         
         /**
          * Auxillary function to transfer C1 and C2 commands
@@ -260,15 +265,25 @@ namespace mono { namespace redpine {
          */
         int spiWrite(uint8_t *data, int byteLength, bool thirtyTwoBitFormat = false);
         
+        /**
+         * Sets the SPI chip select for the module. This must be called before 
+         * all SPI write og reads.
+         * This method automatically handles the value of the chip select pin.
+         *
+         * @param active Set this to `true` to activate the chip select, `false` otherwise.
+         */
+        void setChipSelect(bool active);
+        
     public:
         
         /** 
          * Create a communication class, and assign a SPI hardware interface
          * 
          * @param spi The initialized and ready SPI hardware module
+         * @param chipSelect The SPI CS pin, active low
          * @param interruptPin The pin where the modules interrupt signal is connected
          */
-        ModuleSPICommunication(mbed::SPI &spi, PinName interruptPin);
+        ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName interruptPin);
         
         bool initializeInterface();
         

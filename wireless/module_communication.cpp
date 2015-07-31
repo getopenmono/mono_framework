@@ -11,6 +11,11 @@
 #include <mbed.h>
 #include <consoles.h>
 
+extern "C"
+{
+#include <project.h>
+}
+
 using namespace mono::redpine;
 
 
@@ -85,9 +90,11 @@ SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
         free(this->buffer);
 }
 
-ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName interruptPin)
+ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName interruptPin)
 {
     this->spi = &spi;
+    this->spiChipSelect = chipSelect;
+    CyPins_SetPinDriveMode(chipSelect, CY_PINS_DM_STRONG);
 }
 
 // PROTECTED AUXILLARY METHODS
@@ -96,6 +103,8 @@ CommandStatus ModuleSPICommunication::sendC1C2(spiCommandC1 c1, spiCommandC2 c2)
 {
     int retval = BUSY_RESPONSE;
     int reTries = 0;
+    
+    setChipSelect(true);
     while (retval == BUSY_RESPONSE && reTries < 10) {
         
         retval = spi->write(c1);
@@ -109,6 +118,7 @@ CommandStatus ModuleSPICommunication::sendC1C2(spiCommandC1 c1, spiCommandC2 c2)
             mbed::wait_ms(100);
         reTries++;
     }
+    setChipSelect(false);
     
     return (CommandStatus) retval;
 }
@@ -126,6 +136,7 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
         spi->format(32);
     
     int retval = 0;
+    setChipSelect(true);
     while (retval != START_TOKEN)
     {
         retval = spi->write(0x00);
@@ -140,6 +151,7 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
         if (retval != START_TOKEN)
             mbed::wait_ms(50);
     }
+    setChipSelect(false);
     
     // set mode back to 8 bit
     if (thirtyTwoBitMode)
@@ -149,7 +161,7 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
     if (retval == START_TOKEN)
         return true;
     else
-        mono::error("Failed to receive start token");
+        mono::defaultSerial.printf("Failed to receive start token");
     
     return false;
 }
@@ -177,8 +189,10 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     spiCommandC3 c3 = 0x04; // read 4 bytes of frame
     spiCommandC4 c4 = 0x00;
     
+    setChipSelect(true);
     int retval = spi->write(c3);
     retval = spi->write(c4);
+    setChipSelect(false);
     
     retval = waitForStartToken();
     
@@ -197,7 +211,9 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
 //    readBuf[2] = spi->write(0);
 //    readBuf[3] = spi->write(0);
     
+    setChipSelect(true);
     *((int*)readBuf) = spi->write(0);
+    setChipSelect(false);
     
     spi->format(8);
     
@@ -233,21 +249,23 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     // send the commands to read a frame
     if (sendC1C2(c1,c2) != CMD_SUCCESS)
     {
-        mono::error("Failed to send frameRead body c1 and c2 command");
+        mono::defaultSerial.printf("Failed to send frameRead body c1 and c2 command");
         return false;
     }
     
     spiCommandC3 c3 = readLength & 0xFF; // lower byte
     spiCommandC4 c4 = (readLength & 0xFF00) >> 8; // upper byte
     
+    setChipSelect(true);
     // send read-length
     int status = spi->write(c3);
     status = spi->write(c4);
+    setChipSelect(false);
     
     // wait for module to respond
     if (waitForStartToken() != true)
     {
-        mono::error("Failed to recv START_TOKEN for frameRead body.");
+        mono::defaultSerial.printf("Failed to recv START_TOKEN for frameRead body.");
         return false;
     }
     
@@ -255,22 +273,27 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     // read and discard any dummy bytes
     // dummy bytes are not 32-bit aligned
     if (frameHeader.dummyBytes > 0) {
+        setChipSelect(true);
         for (int i=0; i<frameHeader.dummyBytes; i++) {
             spi->write(0);
         }
+        setChipSelect(false);
     }
     
     //raed the real data bytes
     if (buffer.length < readLength - frameHeader.dummyBytes)
     {
-        mono::error("Module frame read failed: Receive buffer too small!");
+        mono::defaultSerial.printf("Module frame read failed: Receive buffer too small!");
         return false;
     }
     
     spi->format(32);
     
     buffer.bytesToRead = readLength - frameHeader.dummyBytes;
+
+    setChipSelect(true);
     buffer << spi;
+    setChipSelect(false);
     
     spi->format(8);
     
@@ -288,6 +311,8 @@ int ModuleSPICommunication::spiWrite(uint8_t *data, int byteLength, bool thirtyT
     }
     
     int spiRead;
+    
+    setChipSelect(true);
     
     if (thirtyTwoBitMode)
     {
@@ -310,7 +335,19 @@ int ModuleSPICommunication::spiWrite(uint8_t *data, int byteLength, bool thirtyT
         spi->format(8);
     }
     
+    setChipSelect(false);
+    
     return spiRead;
+}
+
+
+void ModuleSPICommunication::setChipSelect(bool active)
+{
+    // TODO: Remove CY code, and use mbed
+    if (active)
+        CyPins_ClearPin(spiChipSelect);
+    else
+        CyPins_SetPin(spiChipSelect);
 }
 
 
@@ -332,18 +369,20 @@ bool ModuleSPICommunication::initializeInterface()
     // convert to command byte
     spiCommandC1 initCmd = cmd.exportByteCommand();
     
+    setChipSelect(true);
     int retval = spi->write(initCmd);
     retval = spi->write(0x00);
+    setChipSelect(false);
     
     if (retval == CMD_SUCCESS)
         return true;
     else if (retval == CMD_FAILURE)
     {
-        mono::error("Failed to init SPI interface, module returned failure.");
+        mono::defaultSerial.printf("Failed to init SPI interface, module returned failure.\n\r");
         return false;
     }
     
-    mono::error("Failed to init SPI interface, unknown module response!");
+    mono::defaultSerial.printf("Failed to init SPI interface, unknown module response: 0x%x!\n\r",retval);
     return false;
 }
 
@@ -366,7 +405,7 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
     
     if (retval != CMD_SUCCESS)
     {
-        mono::error("Failed to sent ReadRegister command to module!");
+        mono::defaultSerial.printf("Failed to sent ReadRegister command to module!");
         return 0;
     }
     
@@ -374,9 +413,13 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
     
     //  we receive start token?
     if (retval == true)
+    {
+        setChipSelect(true);
         retval =  spi->write(0x00);
+        setChipSelect(false);
+    }
     else
-        mono::error("Register read failed");
+        mono::defaultSerial.printf("Register read failed");
     
     return retval;
 }
@@ -400,7 +443,7 @@ bool ModuleSPICommunication::readManagementFrame(ManagementFrame &frame)
     
     if (!success)
     {
-        mono::error("Failed to read FrameDescriptor Header from input");
+        mono::defaultSerial.printf("Failed to read FrameDescriptor Header from input");
         return false;
     }
     
@@ -411,13 +454,13 @@ bool ModuleSPICommunication::readManagementFrame(ManagementFrame &frame)
     
     if (!success)
     {
-        mono::error("Failed to  read frame body from input");
+        mono::defaultSerial.printf("Failed to  read frame body from input");
         return false;
     }
     
     if (!bufferIsMgmtFrame(buffer))
     {
-        mono::error("Frame is not a management frame!");
+        mono::defaultSerial.printf("Frame is not a management frame!");
         return false;
     }
     
@@ -529,8 +572,10 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     spiCommandC4 c4 = 0; // upper byte
     
     // send write-length
+    setChipSelect(true);
     statusCode = spi->write(c3);
     statusCode = spi->write(c4);
+    setChipSelect(false);
     
     if (statusCode != CMD_SUCCESS)
     {
@@ -603,8 +648,10 @@ bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength
     spiCommandC4 c4 = (byteLength & 0xFF00) >> 8; // upper byte
     
     // send write-length
+    setChipSelect(true);
     statusCode = spi->write(c3);
     statusCode = spi->write(c4);
+    setChipSelect(false);
     
     if (statusCode != CMD_SUCCESS)
     {

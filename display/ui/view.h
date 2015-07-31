@@ -30,6 +30,8 @@ namespace mono {
      * references to object holding the actual state information.
      *
      * A TextLabel view
+     *
+     * @TODO Something on dependence of AppContext and Appctrl design pattern
      */
     class View
     {
