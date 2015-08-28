@@ -84,7 +84,7 @@ namespace mono { namespace redpine {
             ENABLE_DEAUTHENTICATION     = 0x020000, /**<  */
             ENABLE_AUTO_CONFIGURATION   = 0x100000, /**<  */
             ENABLE_PACKET_BUFFER_LIMIT  = 0x400000, /**<  */
-            ENABLE_HTTTP_AUTHENCICATION = 0x800000  /**<  */
+            ENABLE_HTTP_AUTHENCICATION  = 0x800000  /**<  */
         };
         
         /** The raw data struct */
@@ -115,6 +115,10 @@ namespace mono { namespace redpine {
          * Construct a SetOperMode frame with a given operation mode
          * This will not set any coex modes of additional feature settings.
          *
+         * Only the Wifi operation mode is set here. You must call the method
+         * @ref setDefaultConfiguration to initialize all the settings, before
+         * you send this frameto the module.
+         *
          * It initialize standard configurations refer to the static initializer
          * functions.
          *
@@ -123,8 +127,17 @@ namespace mono { namespace redpine {
         SetOperatingModeFrame(WifiOperModes mode);
         
         /**
-         * Set a standard Wifi only configuration.
+         * Set a standard Wifi only configuration. This means setting the
+         * radio Co-Existence to Wifi-only. this method also sets the module
+         * functions to these default settings:
+         *
+         * * Dont allow open wifi networks (network must have security)
+         * * Built-in HTTP client enabled
+         * * DHCPv4 client enabled (not IPv6 DHCP)
+         * * DNS client enabled
+         * * Module respond in ICMP (ping)
          * 
+         * No further features are enabled. (@ref CustomFeatures)
          */
         void setDefaultConfiguration();
         

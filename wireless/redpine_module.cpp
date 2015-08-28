@@ -31,11 +31,9 @@ Module* Module::Instance()
 bool Module::initialize(ModuleCommunication *commInterface)
 {
     
-    mono::defaultSerial.printf("init module func\n\r");
-    
     if (commInterface == NULL)
     {
-        mono::defaultSerial.printf("Cannot init Redpine Module with comm. interface!\n\r");
+        mono::defaultSerial.printf("Cannot init Redpine Module without comm. interface!\n\r");
         return false;
     }
     

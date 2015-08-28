@@ -16,6 +16,23 @@
 
 namespace mono { namespace redpine {
     
+    /**
+     * Redpine Wireless module Class. The module class controls the physical
+     * module, sending and receiving data from the device. It utilizes a
+     * communication interface (@ref ModuleCommunication) to send and receive
+     * data. This makes the class independent of the communication protocol.
+     *
+     * Because there is only one physical module, this class is a singleton 
+     * object. You access it by the static @ref Instance method. To setup the
+     * Redpine module you must call the static global methods:
+     * 
+     * 1. **@ref Initialize**: Initializes the communication interface
+     * 2. **@ref setupWifiOnly**: Join a wifi network with security and setup DHCP
+     *
+     * Only networking classes should access the module directly. Tcp socket, 
+     * DNS resolution etc, should be handled by dedicated classes, that uses 
+     * this class.
+     */
     class Module
     {
         friend ModuleFrame;

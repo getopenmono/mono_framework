@@ -42,7 +42,7 @@ SPIReceiveDataBuffer::SPIReceiveDataBuffer(int size) : DataReceiveBuffer()
     this->length = size;
     this->ownsMemory = true;
     
-    mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!");
+    mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
     this->buffer = (uint8_t*) malloc(size);
 }
 
@@ -51,7 +51,7 @@ SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead)
     this->length = (frmHead.totalBytes + 3) & (~3);
     this->ownsMemory = true;
     
-    mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!");
+    mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
     this->buffer = (uint8_t*) malloc(this->length);
     this->bytesToRead = this->length;
 }
@@ -60,7 +60,7 @@ SPIReceiveDataBuffer& SPIReceiveDataBuffer::operator<<(mbed::SPI *spi)
 {
     if (length < bytesToRead)
     {
-        mono::error("SPIReceiveDataBuffer read error, buffer is too small!");
+        mono::error("SPIReceiveDataBuffer read error, buffer is too small!\n\r");
         return *this;
     }
     
@@ -103,14 +103,14 @@ CommandStatus ModuleSPICommunication::sendC1C2(spiCommandC1 c1, spiCommandC2 c2)
 {
     int retval = BUSY_RESPONSE;
     int reTries = 0;
+    spi->format(8);
     
     setChipSelect(true);
     while (retval == BUSY_RESPONSE && reTries < 10) {
-        
         retval = spi->write(c1);
         
         if (retval != 0)
-            mono::warning("Unexpected response for C1 command, not zero!");
+            mono::defaultSerial.printf("Unexpected response for C1 command, not zero but 0x%x!\n\r",retval);
         
         retval = spi->write(c2);
         
@@ -203,17 +203,21 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     }
     
     //receive frame head 4-bytes
-    spi->format(32);
+    spi->format(8);
     
     uint8_t readBuf[4];
-//    readBuf[0] = spi->write(0);
-//    readBuf[1] = spi->write(0);
-//    readBuf[2] = spi->write(0);
-//    readBuf[3] = spi->write(0);
-    
     setChipSelect(true);
-    *((int*)readBuf) = spi->write(0);
+    readBuf[0] = spi->write(0);
+    readBuf[1] = spi->write(0);
+    readBuf[2] = spi->write(0);
+    readBuf[3] = spi->write(0);
     setChipSelect(false);
+    
+//    setChipSelect(true);
+//    *((int*)readBuf) = spi->write(0);
+//    setChipSelect(false);
+    
+    mono::defaultSerial.printf("0x%x 0x%x 0x%x 0x%x\n\r",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
     
     spi->format(8);
     
@@ -249,7 +253,7 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     // send the commands to read a frame
     if (sendC1C2(c1,c2) != CMD_SUCCESS)
     {
-        mono::defaultSerial.printf("Failed to send frameRead body c1 and c2 command");
+        mono::defaultSerial.printf("Failed to send frameRead body c1 and c2 command\n\r");
         return false;
     }
     
@@ -265,7 +269,7 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     // wait for module to respond
     if (waitForStartToken() != true)
     {
-        mono::defaultSerial.printf("Failed to recv START_TOKEN for frameRead body.");
+        mono::defaultSerial.printf("Failed to recv START_TOKEN for frameRead body.\n\r");
         return false;
     }
     
@@ -283,7 +287,7 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     //raed the real data bytes
     if (buffer.length < readLength - frameHeader.dummyBytes)
     {
-        mono::defaultSerial.printf("Module frame read failed: Receive buffer too small!");
+        mono::defaultSerial.printf("Module frame read failed: Receive buffer too small!\n\r");
         return false;
     }
     
@@ -443,9 +447,11 @@ bool ModuleSPICommunication::readManagementFrame(ManagementFrame &frame)
     
     if (!success)
     {
-        mono::defaultSerial.printf("Failed to read FrameDescriptor Header from input");
+        mono::defaultSerial.printf("Failed to read FrameDescriptor Header from input\n\r");
         return false;
     }
+    
+    mono::defaultSerial.printf("frm head: 0x%x dummy, 0x%x total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
     
     //alloc memory for incoming frame
     SPIReceiveDataBuffer buffer(frmHead);
@@ -454,13 +460,13 @@ bool ModuleSPICommunication::readManagementFrame(ManagementFrame &frame)
     
     if (!success)
     {
-        mono::defaultSerial.printf("Failed to  read frame body from input");
+        mono::defaultSerial.printf("Failed to read frame body from input\n\r");
         return false;
     }
     
     if (!bufferIsMgmtFrame(buffer))
     {
-        mono::defaultSerial.printf("Frame is not a management frame!");
+        mono::defaultSerial.printf("Frame is not a management frame!\n\r");
         return false;
     }
     
@@ -478,7 +484,7 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     if (!success)
     {
-        mono::error("Failed to read FrameDescriptor Header from input\n");
+        mono::error("Failed to read FrameDescriptor Header from input\n\r");
         return false;
     }
     
