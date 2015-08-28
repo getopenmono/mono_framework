@@ -428,6 +428,101 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
     return retval;
 }
 
+uint16 ModuleSPICommunication::readMemory(uint32_t memoryAddress)
+{
+    CommandC1 cmd1;
+    cmd1.CommandType = CommandC1::READ_WRITE;
+    cmd1.ReadWrite = false;
+    cmd1.RegisterMemoryAccess = true;
+    cmd1.MemoryFrameAccess = false; // ignored
+    cmd1.TransferLengthSelect = false;
+    cmd1.TransferLength = CommandC1::TWO_BYTES;
+    
+    CommandC2 cmd2;
+    cmd2.DataGranularity = CommandC2::EIGHT_BITMODE;
+    
+    int retval = sendC1C2(cmd1, cmd2);
+    
+    if (retval != CMD_SUCCESS)
+    {
+        mono::defaultSerial.printf("Failed to sent ReadMemory command to module!");
+        return 0;
+    }
+    
+    //write address
+    uint8_t *addr = (uint8_t*) &memoryAddress;
+    setChipSelect(true);
+    spi->write(addr[0]);
+    spi->write(addr[1]);
+    spi->write(addr[2]);
+    spi->write(addr[3]);
+    setChipSelect(false);
+    
+    retval = waitForStartToken();
+    
+    //  we receive start token?
+    if (retval == true)
+    {
+        uint8_t *retarr = (uint8_t*) &retval;
+        retval = 0;
+        setChipSelect(true);
+        retarr[0] =  spi->write(0x00);
+        retarr[1] =  spi->write(0x00);
+        setChipSelect(false);
+    }
+    else
+        mono::defaultSerial.printf("Memory read failed");
+    
+    return retval;
+}
+
+void ModuleSPICommunication::writeMemory(uint32_t memoryAddress, uint16_t value)
+{
+    CommandC1 cmd1;
+    cmd1.CommandType = CommandC1::READ_WRITE;
+    cmd1.ReadWrite = true;
+    cmd1.RegisterMemoryAccess = true;
+    cmd1.MemoryFrameAccess = false; // ignored
+    cmd1.TransferLengthSelect = false;
+    cmd1.TransferLength = CommandC1::TWO_BYTES;
+    
+    CommandC2 cmd2;
+    cmd2.DataGranularity = CommandC2::EIGHT_BITMODE;
+    
+    int retval = sendC1C2(cmd1, cmd2);
+    
+    if (retval != CMD_SUCCESS)
+    {
+        mono::defaultSerial.printf("Failed to sent WriteMemory command to module!");
+        return;
+    }
+    
+    //write address
+    uint8_t *addr = (uint8_t*) &memoryAddress;
+    setChipSelect(true);
+    spi->write(addr[0]);
+    spi->write(addr[1]);
+    spi->write(addr[2]);
+    retval = spi->write(addr[3]);
+    
+    if (retval != CMD_SUCCESS)
+    {
+        mono::defaultSerial.printf("Failed to WriteMemory address to module!\n\r");
+        setChipSelect(false);
+        return;
+    }
+    
+    uint8_t *retarr = (uint8_t*) &value;
+    // write data
+    spi->write(retarr[0]);
+    retval = spi->write(retarr[1]);
+    setChipSelect(false);
+    
+    if (retval != CMD_SUCCESS)
+        mono::defaultSerial.printf("Failed to WriteMemory value to module!\n\r");
+}
+
+
 bool ModuleSPICommunication::pollInputQueue()
 {
     uint8_t regval = readRegister(SPI_HOST_INTR);

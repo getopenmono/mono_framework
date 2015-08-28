@@ -70,6 +70,27 @@ namespace mono { namespace redpine {
             SEC_WPA_WPA2            /**< Either in WPA/WPA2 mode (Mixed mode) */
         };
         
+        /**
+         * Command messages that can be written to the Bootloaders host interface
+         * register.
+         */
+        enum BootloaderMessageCodes
+        {
+            HOST_INTERACT_REG_VALID = 0xAB00,
+            RSI_LOAD_IMAGE_I_FW = 0x0031,
+            RSI_ENABLE_BOOT_BYPASS = 0x0037
+        };
+        
+        /**
+         * Memory addresses of the registers related the Bootloader
+         *
+         */
+        enum BootloaderRegisters
+        {
+            HOST_INTF_REG_OUT = 0x4105003C,
+            HOST_INTF_REG_IN = 0x41050034
+        };
+        
     protected:
 
         /** The only instantiation of the module class */

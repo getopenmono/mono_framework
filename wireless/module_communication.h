@@ -155,6 +155,24 @@ namespace mono { namespace redpine {
         virtual bool readManagementFrameResponse(ManagementFrame &request) = 0;
         
         /**
+         * Internal function to read from a memory address. This is used when
+         * communicating with the Redpine Modules Bootloader.
+         *
+         * @param memoryAddress The address position to read from
+         * @return The 16-bit content of that address
+         */
+        virtual uint16 readMemory(uint32_t memoryAddress) = 0;
+        
+        /**
+         * Method to write to the module memory. This can be used when
+         * communicating with the bootloader of the module.
+         *
+         * @param memoryAddress The address to write to
+         * @param value The 16-bit value to write at the address
+         */
+        virtual void writeMemory(uint32_t memoryAddress, uint16_t value) = 0;
+        
+        /**
          * Send a frame to the module
          * @param frame A pointer to the frame to send
          * @return true on success, false otherwise
@@ -295,6 +313,10 @@ namespace mono { namespace redpine {
          * @return the content of the 8-bit register
          */
         uint8_t readRegister(SpiRegisters reg);
+        
+        
+        uint16 readMemory(uint32_t memoryAddress);
+        void writeMemory(uint32_t memoryAddress, uint16_t value);
         
         
         bool pollInputQueue();

@@ -51,6 +51,16 @@ bool Module::initialize(ModuleCommunication *commInterface)
         return false;
     }
     
+    mono::defaultSerial.printf("Checking bootloader state...\n\r");
+    uint16_t regval = self->comIntf->readMemory(HOST_INTF_REG_OUT);
+    mono::defaultSerial.printf("HOST_INTF_REG_OUT: 0x%x\n\r", regval);
+    
+    if ((regval & HOST_INTERACT_REG_VALID) == 0xAB00)
+    {
+        mono::defaultSerial.printf("Module is in bootloader, load Image-I...\n\r");
+        self->comIntf->writeMemory(HOST_INTF_REG_IN, HOST_INTERACT_REG_VALID | RSI_LOAD_IMAGE_I_FW);
+    }
+    
     // we need to wait for board ready frame
     mono::defaultSerial.printf("Waiting for card ready to arrive on input...\n\r");
     while (!self->comIntf->pollInputQueue())
