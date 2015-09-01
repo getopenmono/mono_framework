@@ -30,6 +30,8 @@ ApplicationContext::ApplicationContext() : dispController()
 
 int ApplicationContext::exec()
 {
+    runLoop.exec();
+    
     return 0;
 }
 

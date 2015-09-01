@@ -11,6 +11,7 @@
 
 #include <application_context_interface.h>
 #include <hx8340.h>
+#include <application_run_loop.h>
 
 namespace mono {
     
@@ -22,6 +23,7 @@ namespace mono {
         
         static ApplicationContext singleton;
         mono::display::HX8340 dispController;
+        AppRunLoop runLoop;
         
         ApplicationContext();
         
