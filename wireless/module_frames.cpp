@@ -51,7 +51,7 @@ bool ManagementFrame::commit()
 {
     if (this->direction != TX_FRAME)
     {
-        mono::Error << "You cannot send a RX frame to the module!";
+        mono::Error << "You cannot send a RX frame to the module!\n\r";
         return false;
     }
     
@@ -61,7 +61,7 @@ bool ManagementFrame::commit()
     
     if (!success)
     {
-        mono::Error << "Failed to send RX frame\n";
+        mono::Error << "Failed to send RX frame\n\r";
         return false;
     }
     
@@ -82,16 +82,16 @@ bool ManagementFrame::commit()
         // sum(50*x, x=1..20) = 10,5 secs timeout
         if (retries == 20)
         {
-            mono::Error << "Response interrupt for frame timed out!\n";
+            mono::Error << "Response interrupt for frame timed out!\n\r";
         }
         
-        mono::Debug << "Got frame response in " << retries << " retries\n";
+        mono::Debug << "Got frame response in " << retries << " retries\n\r";
         
         success = mod->comIntf->readManagementFrameResponse(*this);
         
         if (!success)
         {
-            mono::Error << "Failed to read response frame!\n";
+            mono::Error << "Failed to read response frame!\n\r";
             return false;
         }
         

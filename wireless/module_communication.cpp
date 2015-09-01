@@ -48,7 +48,7 @@ SPIReceiveDataBuffer::SPIReceiveDataBuffer(int size) : DataReceiveBuffer()
 
 SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead)
 {
-    this->length = (frmHead.totalBytes + 3) & (~3);
+    this->length = ((frmHead.totalBytes - 4) + 3) & (~3); // -4 needed for version 1.6
     this->ownsMemory = true;
     
     mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
@@ -217,13 +217,13 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
 //    *((int*)readBuf) = spi->write(0);
 //    setChipSelect(false);
     
-    mono::defaultSerial.printf("0x%x 0x%x 0x%x 0x%x\n\r",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
+//    mono::defaultSerial.printf("0x%x 0x%x 0x%x 0x%x\n\r",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
     
     spi->format(8);
     
     // convert number to the current architecture endian
     // (module send as little-endian)
-    buffer->dummyBytes = readBuf[1] | readBuf[0] << 8;
+    buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8) - 4; // version 1.6 needs this
     buffer->totalBytes = readBuf[3] | readBuf[2] << 8;
     
     return true;
@@ -232,7 +232,7 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
 bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, SPIReceiveDataBuffer &buffer)
 {
     // this is big-endian
-    uint32_t frameLength = frameHeader.dummyBytes + frameHeader.totalBytes;
+    uint32_t frameLength = frameHeader.dummyBytes + frameHeader.totalBytes - 4; // version 1.6 needs this
     
     //align 4-byte granularity, by AND with 0b111111100
     int readLength = (frameLength + 3) & (~3);
@@ -260,6 +260,8 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     spiCommandC3 c3 = readLength & 0xFF; // lower byte
     spiCommandC4 c4 = (readLength & 0xFF00) >> 8; // upper byte
     
+    //mono::defaultSerial.printf("Frm read, length: 0x%x\n\r",readLength);
+    
     setChipSelect(true);
     // send read-length
     int status = spi->write(c3);
@@ -277,11 +279,15 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     // read and discard any dummy bytes
     // dummy bytes are not 32-bit aligned
     if (frameHeader.dummyBytes > 0) {
+        //mono::defaultSerial.printf("reading dummy bytes: ");
         setChipSelect(true);
         for (int i=0; i<frameHeader.dummyBytes; i++) {
             spi->write(0);
+            //mono::defaultSerial.printf("0x%x ", spi->write(0) );
         }
         setChipSelect(false);
+        
+        //mono::defaultSerial.printf("\n\r");
     }
     
     //raed the real data bytes
@@ -300,6 +306,12 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     setChipSelect(false);
     
     spi->format(8);
+    
+//    mono::defaultSerial.printf("Raw frm body:\n\r");
+//    for (int i=0; i<buffer.length; i++) {
+//        mono::defaultSerial.printf("0x%x ",buffer.buffer[i]);
+//    }
+//    mono::defaultSerial.printf("\n\r");
     
     return true;
 }
@@ -590,39 +602,40 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     if (!success)
     {
-        mono::error("Failed to read frame body from input\n");
+        mono::error("Failed to read frame body from input\n\r");
         return false;
     }
     
     if (!bufferIsMgmtFrame(buffer))
     {
-        mono::error("Frame is not a management frame!\n");
+        mono::error("Frame is not a management frame!\n\r");
         return false;
     }
+    
     
     mgmtFrameRaw *rawFrame = (mgmtFrameRaw*) buffer.buffer;
     
     //check that the frame is a correct response to the request
     if (rawFrame->CommandId != request.commandId)
     {
-        mono::Error << "Read frame response. Wrong resp command Id. Was " << rawFrame->CommandId << " expected " << request.commandId << "\n";
+        mono::Error << "Read frame response. Wrong resp command Id. Was " << rawFrame->CommandId << " expected " << request.commandId << "\n\r";
         return false;
     }
     
     if (rawFrame->status != 0)
     {
-        mono::Warn << "Frame response for command " << rawFrame->CommandId << " wa not 0, but " << rawFrame->status << "\n";
+        mono::Warn << "Frame response for command " << rawFrame->CommandId << " wa not 0, but " << rawFrame->status << "\n\r";
     }
     
     // check for payload
     if (request.responsePayload && (rawFrame->LengthType & 0xFFF) > 0)
     {
-        mono::Debug << "Parsing response frame payload data...\n";
+        mono::Debug << "Parsing response frame payload data...\n\r";
         request.responsePayloadHandler(((uint8_t*)rawFrame)+16);
     }
     else if (request.responsePayload)
     {
-        mono::Error << "command frame request expected a response payload, but response is empty!\n";
+        mono::Error << "command frame request expected a response payload, but response is empty!\n\r";
         return false;
     }
     
