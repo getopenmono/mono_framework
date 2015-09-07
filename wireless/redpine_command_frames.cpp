@@ -102,7 +102,7 @@ void ScanFrame::dataPayload(uint8_t *dataBuffer)
 
 void ScanFrame::responsePayloadHandler(uint8_t *dataBuffer)
 {
-    scanResponse *resp = (scanResponse*) dataBuffer;
+    //scanResponse *resp = (scanResponse*) dataBuffer;
 }
 
 

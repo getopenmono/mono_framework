@@ -10,6 +10,7 @@
 #define displaySimTest_application_context_h
 
 #include <display_controller_interface.h>
+#include <application_run_loop.h>
 
 namespace mono {
     
@@ -53,9 +54,16 @@ namespace mono {
          */
         virtual int exec() = 0;
         
+        /**
+         * A reference to the main run loop of the application.
+         * This pointer must be instanciated be subclasses
+         */
+        AppRunLoop *RunLoop;
+        
         
         /** Sets a pointer to the mono application object */
         virtual void setMonoApplication(mono::IApplication *app) = 0;
+        
         
         /** Get a pointer to the global application context */
         static IApplicationContext* Instance;

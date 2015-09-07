@@ -9,8 +9,7 @@
 #ifndef __displaySimTest__application_run_loop__
 #define __displaySimTest__application_run_loop__
 
-#include <mono.h>
-
+#include <application_run_loop_task_interface.h>
 
 namespace mono {
     
@@ -44,6 +43,21 @@ namespace mono {
          */
         bool lastDtrValue;
         
+        /**
+         * A pointer to the head task of the dynamic task queue.
+         * If no task are in the queue, this is NULL
+         */
+        IRunLoopTask *taskQueueHead;
+        
+        
+        /**
+         * Execute all tasks in the dynamic task queue
+         * 
+         */
+        void processDynamicTaskQueue();
+        
+        /** Internal method to sow together neightbourghs in the linked list */
+        void removeTaskInQueue(IRunLoopTask *task);
         
     public:
         
@@ -63,7 +77,29 @@ namespace mono {
         
         AppRunLoop();
         
+        
+        /**
+         * Start executing the run loop.
+         * 
+         */
         void exec();
+        
+        /**
+         * Add a task to the dynamic task queue. This task is repeated over and
+         * over, until it reports that its should not be scheduled.
+         * 
+         * The task is added to a linked list, runtime is *n*.
+         * @return Always true at this point
+         */
+        bool addDynamicTask(IRunLoopTask *task);
+        
+        /**
+         * Remove a task from the dynamic task queue. This will search the queue
+         * for he pointer provided, and remove it.
+         * @param task A pointer to the object, that should be removed
+         * @return `true` if the object was found and removed, `false` otherwise. 
+         */
+        bool removeDynamicTask(IRunLoopTask *task);
     };
     
 }

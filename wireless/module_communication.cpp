@@ -264,8 +264,8 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     
     setChipSelect(true);
     // send read-length
-    int status = spi->write(c3);
-    status = spi->write(c4);
+    spi->write(c3);
+    spi->write(c4);
     setChipSelect(false);
     
     // wait for module to respond

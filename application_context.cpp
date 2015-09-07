@@ -9,6 +9,7 @@
 #include "application_context.h"
 #include "application_controller_interface.h"
 #include <display_painter.h>
+#include "consoles.h"
 
 extern "C" {
 #include <project.h>
@@ -26,6 +27,8 @@ ApplicationContext::ApplicationContext() : dispController()
 
     IApplicationContext::Instance = this;
     displayController = &dispController;
+    
+    RunLoop = &runLoop;
 }
 
 int ApplicationContext::exec()
