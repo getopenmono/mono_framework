@@ -11,6 +11,7 @@
 
 #include <display_controller_interface.h>
 #include <application_run_loop.h>
+#include "power_system_interface.h"
 
 namespace mono {
     
@@ -34,6 +35,19 @@ namespace mono {
      */
     class IApplicationContext
     {
+    protected:
+        
+        /**
+         * Subclasses should overirde this method to make the sysetm goto sleep
+         */
+        virtual void enterSleepMode() = 0;
+        
+        /**
+         * Subclasses should override this to enable sleep mode for a specefic
+         * interval only.
+         */
+        virtual void sleepForMs(uint32_t ms) = 0;
+        
     public:
         /**
          * Pointer to the displat interface controller object. The object itself
@@ -43,16 +57,15 @@ namespace mono {
         display::IDisplayController *displayController;
         
         /**
-         * This method starts the global run/event loop for the mono application.
-         * The method never returns, so a call to this function should be the 
-         * last line in your `main()` function.
+         * A pointer to the initialized power sub-system. This is initialize
+         * automatically and depends on compiled environment.
+         * The power system to used to control power supply to periphirals and
+         * to give interrupt on power related events.
          *
-         * The event loop automatically schedules the sub system, such as the 
-         * network, inputs and the display.
-         *
-         * @brief Start the application run loop
+         * **WARNING**: Use this class with extreme caution! Wrong power
+         * settings can fry the MCU and other peripherals!
          */
-        virtual int exec() = 0;
+        power::IPowerSystem *PowerSystem;
         
         /**
          * A reference to the main run loop of the application.
@@ -60,10 +73,56 @@ namespace mono {
          */
         AppRunLoop *RunLoop;
         
+        /**
+         * This method starts the global run/event loop for the mono application.
+         * The method never returns, so a call to this function should be the
+         * last line in your `main()` function.
+         *
+         * The event loop automatically schedules the sub system, such as the
+         * network, inputs and the display.
+         *
+         * @brief Start the application run loop
+         */
+        virtual int exec() = 0;
         
         /** Sets a pointer to the mono application object */
         virtual void setMonoApplication(mono::IApplication *app) = 0;
         
+        /**
+         * The mono application controller should call this to give the
+         * Application Context a reference to itself.
+         *
+         * This will ensure the Application Controllers methods gets called.
+         */
+//        static void SetMonoApplication(mono::IApplication &app)
+//        {
+//            IApplicationContext::Instance->setMonoApplication(&app);
+//        }
+        
+        /**
+         * Call this method to make mono goto sleep.
+         * 
+         * In sleep mode the CPU does not excute instruction and powers down into
+         * a low power state.
+         * The power system will turn off dynamically powered peripherals.
+         *
+         * *NOTE*: Before you call this method make sure that you configured a way
+         * to go out of sleep.
+         */
+        static void EnterSleepMode()
+        {
+            IApplicationContext::Instance->enterSleepMode();
+        }
+        
+        /**
+         * Enter MCU sleep mode for a short time only. Sets a wake-up timer us the
+         * preferred interval, and calls the @ref EnterSleepMode method.
+         * @param ms The number of milli-second to sleep
+         */
+        static void SleepForMs(uint32_t ms)
+        {
+            IApplicationContext::Instance->sleepForMs(ms);
+        }
         
         /** Get a pointer to the global application context */
         static IApplicationContext* Instance;
