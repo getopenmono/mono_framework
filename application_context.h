@@ -12,7 +12,7 @@
 #include <application_context_interface.h>
 #include <hx8340.h>
 #include <application_run_loop.h>
-#include "act8600_power_system.h"
+#include "mono_power_management.h"
 
 namespace mono {
     
@@ -24,7 +24,7 @@ namespace mono {
         
         static ApplicationContext singleton;
         mono::display::HX8340 dispController;
-        power::ACT8600PowerSystem pwrSystem;
+        power::MonoPowerManagement *pwrMgmt;
         AppRunLoop runLoop;
         
         ApplicationContext();

@@ -9,7 +9,7 @@
 #ifndef __i2c_power_test__act8600_power_system__
 #define __i2c_power_test__act8600_power_system__
 
-#include <power_system_interface.h>
+#include <power_subsystem_interface.h>
 #include <mbed.h>
 
 namespace mono { namespace power {
@@ -23,9 +23,9 @@ namespace mono { namespace power {
      * **This class has methods to raise the supply voltage for the Cypress MCU
      * up to 40V! This will fry the MCU and brick you system!**
      *
-     * **Use this class with extreme care!**
+     * **Use this class with extreme causion!**
      */
-    class ACT8600PowerSystem : public IPowerSystem
+    class ACT8600PowerSystem : public IPowerSubSystem
     {
     public:
         

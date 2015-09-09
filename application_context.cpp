@@ -28,7 +28,7 @@ ApplicationContext::ApplicationContext() : dispController()
     IApplicationContext::Instance = this;
     
     displayController = &dispController;
-    PowerSystem = &pwrSystem;
+    PowerManager = &pwrMgmt;
     RunLoop = &runLoop;
     
 }

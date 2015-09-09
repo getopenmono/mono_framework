@@ -6,8 +6,8 @@
 //  Copyright (c) 2015 Monolit ApS. All rights reserved.
 //
 
-#ifndef __i2c_power_test__power_system_interface__
-#define __i2c_power_test__power_system_interface__
+#ifndef __i2c_power_test__power_subsystem_interface__
+#define __i2c_power_test__power_subsystem_interface__
 
 namespace mono { namespace power {
     
@@ -15,13 +15,26 @@ namespace mono { namespace power {
      * Abstract interface for the power sub-system. It defines 3 basic methods
      * related to reset, enter sleep and exit sleep modes.
      *
-     * This interface is su-classed by impolementations of the different power
-     * IC's on mono or an emulator.
+     * This interface is sub-classed by implementations of the different power
+     * supply IC's on mono or an emulator.
      *
      * Subclasses of this interface should only conduct routines related to a
-     * power sub-system - not to any CPU specific operations!
+     * power sub-system - not to any CPU specific operations! This means setting
+     * up voltage levels and enabling power fencing to peripherals.
+     *
+     * This power supply sub-system interface also defines callbacks that are
+     * called then the battery events occur. These are:
+     *
+     * * Charging begins
+     * * Charging ends (battery full or plugged out)
+     * * Battery low warning
+     *
+     * You can listen to these events by supplying a callback handler function
+     *
+     * Power to MCU internal modules are controller by the abstract interface
+     * for power management @ref IPowerManagement
      */
-    class IPowerSystem
+    class IPowerSubSystem
     {
     public:
         

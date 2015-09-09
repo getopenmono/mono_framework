@@ -11,7 +11,7 @@
 
 #include <display_controller_interface.h>
 #include <application_run_loop.h>
-#include "power_system_interface.h"
+#include "power_management_interface.h"
 
 namespace mono {
     
@@ -56,16 +56,13 @@ namespace mono {
          */
         display::IDisplayController *displayController;
         
+        
         /**
-         * A pointer to the initialized power sub-system. This is initialize
-         * automatically and depends on compiled environment.
-         * The power system to used to control power supply to periphirals and
-         * to give interrupt on power related events.
+         * <# member description #>
          *
-         * **WARNING**: Use this class with extreme caution! Wrong power
-         * settings can fry the MCU and other peripherals!
+         * @brief <# brief desc #>
          */
-        power::IPowerSystem *PowerSystem;
+        power::IPowerManagement *PowerManager;
         
         /**
          * A reference to the main run loop of the application.
