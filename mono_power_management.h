@@ -17,6 +17,11 @@ namespace mono { namespace power {
     class MonoPowerManagement : public IPowerManagement
     {
         
+    public:
+        
+        void AppendToPowerAwareQueue(IPowerAware *object);
+        bool RemoceFromPowerAwareQueue(IPowerAware *object);
+        
     };
     
 } }

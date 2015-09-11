@@ -49,6 +49,16 @@ void DisplayPainter::setTextSize(uint8_t size)
     textSize = size;
 }
 
+uint16_t DisplayPainter::CanvasWidth() const
+{
+    return displayCtrl->ScreenWidth();
+}
+
+uint16_t DisplayPainter::CanvasHeight() const
+{
+    return displayCtrl->ScreenHeight();
+}
+
 void DisplayPainter::drawPixel(uint16_t x, uint16_t y, bool bg)
 {
     displayCtrl->setWindow(x, y, 1, 1);

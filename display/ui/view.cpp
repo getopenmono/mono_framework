@@ -30,6 +30,16 @@ void View::setSize(geo::Size siz)
     this->size = siz;
 }
 
+mono::geo::Point& View::Position()
+{
+    return position;
+}
+
+mono::geo::Size& View::Size()
+{
+    return size;
+}
+
 void View::scheduleRepaint()
 {
     if (View::firstDirtyView == NULL)

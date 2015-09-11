@@ -41,6 +41,7 @@ namespace mono { namespace geo {
         void appendY(int addY);
     };
     
+    bool operator==(Point &p1, Point &p2);
     
 } }
 

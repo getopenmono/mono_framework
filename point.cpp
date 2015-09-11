@@ -64,3 +64,8 @@ void Point::appendY(int addY)
 {
     this->y += addY;
 }
+
+bool mono::geo::operator==(mono::geo::Point &p1, mono::geo::Point &p2)
+{
+    return (p1.X() == p2.X() && p1.Y() == p2.Y());
+}

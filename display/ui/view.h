@@ -17,6 +17,8 @@ namespace mono {
     class IApplicationContext;
     namespace ui {
     
+        class Animator; // forward declaration
+        
     /**
      * Abstract View class/interface. All UI view/widgets that paint to the 
      * screen must inherit from this class. Views handle repaint queues, touch
@@ -36,6 +38,7 @@ namespace mono {
     class View
     {
         friend mono::IApplicationContext;
+        friend Animator;
     protected:
         
         /**
@@ -97,7 +100,7 @@ namespace mono {
          * @brief Change the views position on the screens coordinate system
          * @param pos The new position of the view
          */
-        void setPosition(geo::Point pos);
+        virtual void setPosition(geo::Point pos);
         
         /**
          * Changes the views dimensions. The affect of size changes might depend
@@ -111,7 +114,19 @@ namespace mono {
          * @brief Change the size (width, height) of the view.
          * @param siz The new size of the view
          */
-        void setSize(geo::Size siz);
+        virtual void setSize(geo::Size siz);
+        
+        /**
+         * @brief Get the current position of the views upper left corner
+         * @returns A reference to the current position
+         */
+        virtual geo::Point &Position();
+        
+        /**
+         * @brief Get the views current size rectangle
+         * @returns A reference to the views size rectangle
+         */
+        virtual geo::Size &Size();
         
         /**
          * Re-paint the view content. This method should be called then the view

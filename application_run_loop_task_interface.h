@@ -6,13 +6,12 @@
 //  Copyright (c) 2015 Monolit ApS. All rights reserved.
 //
 
-#ifndef buzzTest_application_run_loop_task_interface_h
-#define buzzTest_application_run_loop_task_interface_h
+#ifndef mono_application_run_loop_task_interface_h
+#define mono_application_run_loop_task_interface_h
 
-#include <application_run_loop.h>
 
 namespace mono {
-    
+    class AppRunLoop;
     /** 
      * THis interface defines tasks or functions that can be inserted into the 
      * @ref ApplicationRunLoop.

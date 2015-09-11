@@ -85,6 +85,21 @@ namespace mono { namespace display {
         uint8_t TextSize() const;
         void setTextSize(uint8_t size);
         
+        /**
+         * Get the canvas width in pixels. This is the display display width as
+         * well.
+         *
+         * @returns The canvas/display width in pixels
+         */
+        uint16_t CanvasWidth() const;
+        
+        /**
+         * Get the canvas height in pixels. This is the display display height as
+         * well.
+         *
+         * @returns The canvas/display height in pixels
+         */
+        uint16_t CanvasHeight() const;
         
         /**
          * Draw a single pixel on a specific position on the display.
@@ -189,6 +204,9 @@ namespace mono { namespace display {
          * @param background Optional: Set this to `true` to paint in active background color
          */
         void drawHLine(uint16_t x1, uint16_t x2, uint16_t y, bool background = false);
+        
+        
+        
     };
     
 } }

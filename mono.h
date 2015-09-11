@@ -24,6 +24,8 @@
 
 #include <view.h>
 #include <console_view.h>
+#include <display/ui/image.h>
+#include <display/ui/animator.h>
 
 
 namespace mono {}

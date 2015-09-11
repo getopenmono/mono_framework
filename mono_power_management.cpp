@@ -7,3 +7,15 @@
 //
 
 #include "mono_power_management.h"
+
+using namespace mono::power;
+
+void MonoPowerManagement::AppendToPowerAwareQueue(IPowerAware *object)
+{
+    
+}
+
+bool MonoPowerManagement::RemoceFromPowerAwareQueue(IPowerAware *object)
+{
+    return true;
+}
