@@ -43,10 +43,10 @@ int ApplicationContext::exec()
 void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
 {
     this->application = monoApp;
-    mono::IApplicationContext::Instance->displayController->init();
-
-    PowerSystem->onSystemPowerOnReset();
+    //PowerSystem->onSystemPowerOnReset();
     
+    //defaultSerial.printf("Display init deactivated\n\t");
+    mono::IApplicationContext::Instance->displayController->init();
     
     
     monoApp->monoWakeFromReset();
@@ -76,7 +76,7 @@ void ApplicationContext::enterSleepMode()
     CyILO_Start1K(); // make sure the 1K ILO Osc is running
     
     mono::defaultSerial.printf("Going to sleep...\n\r");
-    PowerSystem->onSystemEnterSleep();
+    //PowerSystem->onSystemEnterSleep();
     CyMasterClk_SetSource(CY_MASTER_SOURCE_IMO);
     CyPmSaveClocks();
     
@@ -87,7 +87,7 @@ void ApplicationContext::enterSleepMode()
     CyPmRestoreClocks();
     CyMasterClk_SetSource(CY_MASTER_SOURCE_PLL);
     
-    PowerSystem->onSystemWakeFromSleep();
+    //PowerSystem->onSystemWakeFromSleep();
     
     mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\n\r", status);
     

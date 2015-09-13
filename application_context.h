@@ -24,7 +24,7 @@ namespace mono {
         
         static ApplicationContext singleton;
         mono::display::HX8340 dispController;
-        power::MonoPowerManagement *pwrMgmt;
+        power::MonoPowerManagement pwrMgmt;
         AppRunLoop runLoop;
         
         ApplicationContext();

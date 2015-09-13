@@ -22,22 +22,22 @@ View::View()
 
 void View::setPosition(geo::Point pos)
 {
-    this->position = pos;
+    this->viewRect.setPoint(pos);
 }
 
 void View::setSize(geo::Size siz)
 {
-    this->size = siz;
+    this->viewRect.setSize(siz);
 }
 
 mono::geo::Point& View::Position()
 {
-    return position;
+    return viewRect.Point();
 }
 
 mono::geo::Size& View::Size()
 {
-    return size;
+    return viewRect.Size();
 }
 
 void View::scheduleRepaint()

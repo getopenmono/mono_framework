@@ -17,7 +17,7 @@ Animator::Animator(View *view)
     this->active = false;
     this->view = view;
     origin = view->Position();
-    destination = view->position;
+    destination = view->Position();
     
     //moveVector.setX(dest.X() - origin.X());
     //moveVector.setY(dest.Y() - origin.Y());
@@ -39,23 +39,23 @@ void Animator::taskHandler()
     if (!active)
         return;
     
-    int newX = view->position.X()+moveVector.X();
-    int newY = view->position.Y()+moveVector.Y();
+    int newX = view->viewRect.X()+moveVector.X();
+    int newY = view->viewRect.Y()+moveVector.Y();
     
-    if (view->position == destination)
+    if (view->viewRect == destination)
     {
         Pause();
         return;
     }
     
-    if (newX+view->size.Width() >= View::painter.CanvasWidth())
+    if (newX+view->viewRect.Width() >= View::painter.CanvasWidth())
     {
-        newX = View::painter.CanvasWidth() - view->size.Width();
+        newX = View::painter.CanvasWidth() - view->viewRect.Width();
     }
     
-    if (newY+view->size.Height() >= View::painter.CanvasHeight())
+    if (newY+view->viewRect.Height() >= View::painter.CanvasHeight())
     {
-        newY = View::painter.CanvasHeight() - view->size.Height();
+        newY = View::painter.CanvasHeight() - view->viewRect.Height();
     }
     
     if (newX < 0)
@@ -68,8 +68,8 @@ void Animator::taskHandler()
         newY = 0;
     }
     
-    view->position.setX(newX);
-    view->position.setY(newY);
+    view->viewRect.setX(newX);
+    view->viewRect.setY(newY);
     
     view->repaint();
     //view->scheduleRepaint();

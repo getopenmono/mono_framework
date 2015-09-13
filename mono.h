@@ -18,14 +18,18 @@
 
 #include <point.h>
 #include <size.h>
+#include "rect.h"
 
 #include <color.h>
 #include <display_painter.h>
 
 #include <view.h>
 #include <console_view.h>
-#include <display/ui/image.h>
+#include <display/ui/image_view.h>
 #include <display/ui/animator.h>
+
+#include "media/image.h"
+#include "media/bmp_image.h"
 
 
 namespace mono {}

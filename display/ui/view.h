@@ -10,8 +10,7 @@
 #define __displaySimTest__view__
 
 #include <display_painter.h>
-#include <point.h>
-#include <size.h>
+#include <rect.h>
 
 namespace mono {
     class IApplicationContext;
@@ -53,16 +52,13 @@ namespace mono {
          */
         static display::DisplayPainter painter;
         
-        /**
-         * The position of this view on the screen.
-         * This defines where the view rectangles upper left corner is situated.
-         */
-        geo::Point position;
         
         /**
-         * The view dimensions: width and height i pixels.
+         * The rect defines the position and size of this view on the screen.
+         * This defines where the view rectangles upper left corner is situated,
+         * and the width and height in pixels.
          */
-        geo::Size size;
+        geo::Rect viewRect;
         
         /**
          * @brief A pointer to the next view in the re-paint queue.

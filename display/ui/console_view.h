@@ -110,10 +110,10 @@ namespace mono { namespace ui {
         {
             View::painter.setForegroundColor(textColor);
             View::painter.setBackgroundColor(consoleColor);
-            geo::Point cursor(position.X()+2,position.Y()+2);
+            geo::Point cursor(viewRect.X()+2,viewRect.Y()+2);
             for (int l=textBuffer.OldestLinePosition(); l<textBuffer.LineCount(); l++) {
                 //erase previous line
-                View::painter.drawFillRect(cursor.X(), cursor.Y(), size.Width()-4, characterPixelHeight(), true);
+                View::painter.drawFillRect(cursor.X(), cursor.Y(), viewRect.Width()-4, characterPixelHeight(), true);
                 char *line = textBuffer.getLine(l);
                 while (*line != '\0' && *line != '\n') {
                     View::painter.drawChar(cursor.X(), cursor.Y(), *line);
@@ -132,7 +132,7 @@ namespace mono { namespace ui {
                 
             for (int l=0; l<=textBuffer.LinePosition(); l++) {
                 //erase previous line
-                View::painter.drawFillRect(cursor.X(), cursor.Y(), size.Width()-4, characterPixelHeight(), true);
+                View::painter.drawFillRect(cursor.X(), cursor.Y(), viewRect.Width()-4, characterPixelHeight(), true);
                 char *line = textBuffer.getLine(l);
                 while (*line != '\0' && *line != '\n') {
                     View::painter.drawChar(cursor.X(), cursor.Y(), *line);
