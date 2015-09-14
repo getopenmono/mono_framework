@@ -11,6 +11,7 @@
 #include <SPI.h>
 #include "spi_commands.h"
 #include "module_frames.h"
+#include <stdint.h>
 
 namespace mono { namespace redpine {
     
@@ -55,19 +56,24 @@ namespace mono { namespace redpine {
         /** Whould free memory buffer on dealloc */
         bool ownsMemory;
         
+        /** The protocol version used by the RP firmware */
+        uint16_t firmwareVersion;
+        
         /**
          * Create a new buffer with a fixed length.
          * This new buffer will allocate the memory on the heap
          * @param size The number og bytes to allocate on heap
+         * @param fwVer The RP comm protocol firmware version it use
          */
-        SPIReceiveDataBuffer(int size);
+        SPIReceiveDataBuffer(int size, uint16_t fwVer = 0xab16);
         
         /**
          * Create a new buffer with fixed, based on an existing Frame Descriptor
          * Header.
          * @param frmHead The frame desc header structure
+         * @param fwVer The RP comm protocol firmware version it use
          */
-        SPIReceiveDataBuffer(frameDescriptorHeader &frmHead);
+        SPIReceiveDataBuffer(frameDescriptorHeader &frmHead, uint16_t fwVer = 0xab16);
         
         /**
          * @brief Pipe data from SPI to the buffer
@@ -94,6 +100,19 @@ namespace mono { namespace redpine {
     class ModuleCommunication
     {
     public:
+        
+        /** 
+         * Defines the communication protocol version to use.
+         * Redpine change the way FrameDescriptor headers return frame length in
+         * bootloader version 1.6. Version 1.5 uses a slightly different procedure.
+         *
+         * The Module should write the communication protocol version here. So far
+         * we have only seen the values:
+         * 
+         * * Bootloader 1.5: `0xAB15`
+         * * Bootloader 1.6: `0xAB16`
+         */
+        uint16_t InterfaceVersion;
         
         /**
          * Send a interface initialization command to

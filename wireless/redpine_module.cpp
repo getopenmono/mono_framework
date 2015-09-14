@@ -58,6 +58,7 @@ bool Module::initialize(ModuleCommunication *commInterface)
     if ((regval & HOST_INTERACT_REG_VALID) == 0xAB00)
     {
         mono::defaultSerial.printf("Module is in bootloader, load Image-I...\n\r");
+        self->comIntf->InterfaceVersion = regval;
         self->comIntf->writeMemory(HOST_INTF_REG_IN, HOST_INTERACT_REG_VALID | RSI_LOAD_IMAGE_I_FW);
     }
     

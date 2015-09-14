@@ -213,7 +213,7 @@ void DnsResolutionFrame::responsePayloadHandler(uint8_t *databuffer)
 
 // HTTP GET Frame
 
-HttpGetFrame::HttpGetFrame(const char *host, char *ipaddrs, const char *url) : ManagementFrame(HttpGet)
+HttpGetFrame::HttpGetFrame(const char *host, char *ipaddrs, const char *url, FILE *destFile) : ManagementFrame(HttpGet)
 {
     this->hostname = host;
     this->ipaddress = ipaddrs;
@@ -221,6 +221,7 @@ HttpGetFrame::HttpGetFrame(const char *host, char *ipaddrs, const char *url) : M
     this->extraHeader = "";
     this->responsePayload = true;
     this->lastResponseParsed = false;
+    destinationFile = destFile;
 }
 
 void HttpGetFrame::dataPayload(uint8_t *data)
@@ -251,15 +252,21 @@ void HttpGetFrame::dataPayload(uint8_t *data)
 void HttpGetFrame::responsePayloadHandler(uint8_t *data)
 {
     HttpRsp *resp = (HttpRsp*) data;
+    mono::defaultSerial.printf("HttpGet Recv %i bytes\n\r",resp->data_len);
+    
+    if (destinationFile)
+        fwrite(&(resp->data), resp->data_len, 1, destinationFile);
+    else
+        mono::Debug << (char*) &(resp->data);
     
     // "more" is high when the data is transferred
     if (resp->more == 1)
     {
         lastResponseParsed = true;
+        if (destinationFile)
+            fclose(destinationFile);
+        mono::defaultSerial.printf("HttpGet ended\n\r");
     }
-    
-    mono::Debug << (char*) &(resp->data);
-    
 }
 
 int HttpGetFrame::payloadLength()

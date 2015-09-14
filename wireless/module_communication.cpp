@@ -37,18 +37,26 @@ bool ModuleCommunication::bufferIsDataFrame(DataReceiveBuffer &buffer)
 }
 
 
-SPIReceiveDataBuffer::SPIReceiveDataBuffer(int size) : DataReceiveBuffer()
+SPIReceiveDataBuffer::SPIReceiveDataBuffer(int size, uint16_t fwVer) : DataReceiveBuffer()
 {
     this->length = size;
     this->ownsMemory = true;
+    this->firmwareVersion = fwVer;
     
     mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
     this->buffer = (uint8_t*) malloc(size);
 }
 
-SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead)
+SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead, uint16_t fwVer)
 {
-    this->length = ((frmHead.totalBytes - 4) + 3) & (~3); // -4 needed for version 1.6
+    this->firmwareVersion = fwVer;
+    
+    if (firmwareVersion == 0xab15) {
+        this->length = (frmHead.totalBytes + 3) & (~3); // old protocol 1.5
+    }
+    else
+        this->length = ((frmHead.totalBytes - 4) + 3) & (~3); // -4 needed for version 1.6
+    
     this->ownsMemory = true;
     
     mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
@@ -95,6 +103,7 @@ ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelec
     this->spi = &spi;
     this->spiChipSelect = chipSelect;
     CyPins_SetPinDriveMode(chipSelect, CY_PINS_DM_STRONG);
+    this->InterfaceVersion = 0xAB16; // we expact this is the default version
 }
 
 // PROTECTED AUXILLARY METHODS
@@ -223,7 +232,11 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     
     // convert number to the current architecture endian
     // (module send as little-endian)
-    buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8) - 4; // version 1.6 needs this
+    if (InterfaceVersion == 0xab15)
+        buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8); // old version where protocol is different
+    else
+        buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8) - 4; // version 1.6 needs this
+    
     buffer->totalBytes = readBuf[3] | readBuf[2] << 8;
     
     return true;
@@ -232,7 +245,11 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
 bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, SPIReceiveDataBuffer &buffer)
 {
     // this is big-endian
-    uint32_t frameLength = frameHeader.dummyBytes + frameHeader.totalBytes - 4; // version 1.6 needs this
+    uint32_t frameLength;
+    if (this->InterfaceVersion == 0xab15)
+        frameLength = frameHeader.dummyBytes + frameHeader.totalBytes; // old firmware version
+    else
+        frameLength = frameHeader.dummyBytes + frameHeader.totalBytes - 4; // version 1.6 needs this
     
     //align 4-byte granularity, by AND with 0b111111100
     int readLength = (frameLength + 3) & (~3);
@@ -561,7 +578,7 @@ bool ModuleSPICommunication::readManagementFrame(ManagementFrame &frame)
     mono::defaultSerial.printf("frm head: 0x%x dummy, 0x%x total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
     
     //alloc memory for incoming frame
-    SPIReceiveDataBuffer buffer(frmHead);
+    SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
     
     success = readFrameBody(frmHead, buffer);
     
@@ -596,7 +613,7 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     }
     
     //alloc memory for incoming frame
-    SPIReceiveDataBuffer buffer(frmHead);
+    SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
     
     success = readFrameBody(frmHead, buffer);
     

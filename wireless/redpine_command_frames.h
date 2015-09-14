@@ -11,6 +11,7 @@
 
 #include <mono.h>
 #include "module_frames.h"
+#include <FileSystemLike.h>
 
 namespace mono { namespace redpine {
     
@@ -553,13 +554,19 @@ namespace mono { namespace redpine {
         const char *extraHeader;
         
         /**
+         * If this is set the HTTP Body is written to the file
+         * If this is NULL, then nothing is obviosly written :-)
+         */
+        FILE *destinationFile;
+        
+        /**
          * Construct a HTTP GET request frame
          *
          * @param hostname The hostname of the HTTP server (might be a virtual host)
          * @param serverIp The real IP address of the server, as string
          * @param Url The URL to call on the HTTP server
          */
-        HttpGetFrame(const char* hostname, char *serverIp, const char *Url);
+        HttpGetFrame(const char* hostname, char *serverIp, const char *Url, FILE *destFile);
         
         void dataPayload(uint8_t *data);
         
