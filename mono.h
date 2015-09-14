@@ -26,6 +26,7 @@
 #include <view.h>
 #include <console_view.h>
 #include <display/ui/image_view.h>
+#include <display/ui/text_label_view.h>
 #include <display/ui/animator.h>
 
 #include "media/image.h"

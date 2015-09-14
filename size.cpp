@@ -43,3 +43,13 @@ int Size::Height() const
 {
     return this->height;
 }
+
+void Size::setWidth(int w)
+{
+    this->width = w;
+}
+
+void Size::setHeight(int h)
+{
+    this->height = h;
+}

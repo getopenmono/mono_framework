@@ -7,6 +7,7 @@
 //
 
 #include "bmp_image.h"
+#include <consoles.h>
 #include <mbed.h>
 
 using namespace mono::media;
@@ -17,7 +18,20 @@ BMPImage::BMPImage(const char *path)
     fPointer = NULL;
     fileOpen = true;
     fPointer = fopen(filePath, "rb");
+    
+    if (fPointer == NULL)
+    {
+        mono::defaultSerial.printf("BMPImage: No such file: %s\n\r",path);
+        return;
+    }
+    
     readHeaderData();
+    
+    if (fileHeader.bfType != 0x4D42)
+    {
+        mono::defaultSerial.printf("BMPIMage: File %s is not a BMP image!\n\r", path);
+    }
+    
     Close();
 }
 
@@ -68,9 +82,9 @@ void BMPImage::SeekToHLine(int vertPos)
     }
     
     if (infoHeader.biHeight < 0)
-        fseek(fPointer, fileHeader.bfOffBits+(vertPos*widthMult4)*2, SEEK_SET);
+        fseek(fPointer, fileHeader.bfOffBits+(vertPos*widthMult4)*PixelByteSize(), SEEK_SET);
     else
-        fseek(fPointer, fileHeader.bfOffBits+((-infoHeader.biHeight-vertPos)*widthMult4)*2, SEEK_SET);
+        fseek(fPointer, fileHeader.bfOffBits+((Height()-vertPos)*widthMult4)*PixelByteSize(), SEEK_SET);
 }
 
 void BMPImage::readHeaderData()

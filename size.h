@@ -44,6 +44,10 @@ namespace mono { namespace geo {
         //Getters
         int Width() const;
         int Height() const;
+        
+        //Setters
+        void setWidth(int w);
+        void setHeight(int h);
     };
     
 } }

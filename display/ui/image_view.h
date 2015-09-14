@@ -10,7 +10,6 @@
 #define __sdcardTest__image__
 
 #include "view.h"
-#include <FileSystemLike.h>
 #include "../../media/image.h"
 
 namespace mono { namespace ui {
@@ -41,7 +40,7 @@ namespace mono { namespace ui {
          * Construct an UI image from an image file
          * 
          * At the moment only BMP images are supported!
-         * *Remember to initialize the SDFileSystem object before calling this
+         * *Remember to initialize the mbed class `SDFileSystem` object before calling this
          * consructor!*
          */
         ImageView(media::Image *img);

@@ -9,7 +9,7 @@
 #ifndef displaySimTest_image_h
 #define displaySimTest_image_h
 
-#include <mbed.h>
+#include <FileSystemLike.h>
 
 namespace mono { namespace media {
     
