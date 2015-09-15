@@ -38,6 +38,23 @@ namespace mono {
     {
         friend mono::IApplicationContext;
         friend Animator;
+    public:
+        
+        /**
+         * Define the 4 dirrerent orientations the of display. The display controller
+         * apply the orientation transformation to real display. For the UI Views
+         * the coordinate system remains the same, it just changes width and height.
+         * The orico is always the top left corner (defined relative to gravity),
+         * no matter the physical orientation of mono's display.
+         */
+        enum Orientation
+        {
+            PORTRAIT = 0,       /**< Expected standard orientation of mono, where the thick edge is at the bottom */
+            PORTRAIT_BOTTOMUP=1,/**< Upside-down of @ref PORTRAIT, where the thick edge is at the top */
+            LANDSCAPE_RIGHT = 2,/**< @ref PORTRAIT rotated 90 degrees clock-wise */
+            LANDSCAPE_LEFT = 3  /**< @ref PORTRAIT rotated 90 degrees counter clock-wise */
+        };
+        
     protected:
         
         /**
@@ -164,6 +181,23 @@ namespace mono {
          */
         static void repaintScheduledViews();
         
+        /**
+         * Returns the horizontal (X-axis) width of the display canvas, in pixels.
+         * The width is always defined as perpendicular to gravity
+         */
+        static uint16_t DisplayWidth();
+        
+        /**
+         * Returns the vertical (Y-axis) height of the display canvas, in pixels.
+         * The height axis is meant to be parallel to the gravitational axis.
+         */
+        static uint16_t DisplayHeight();
+        
+        /**
+         * Returns the current physical display orientation of the display
+         * The orientation is controlled by the @ref IDisplayController
+         */
+        static Orientation DisplayOrientation();
     };
     
     

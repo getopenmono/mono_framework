@@ -57,3 +57,19 @@ void View::scheduleRepaint()
         next->nextDirtyView = this;
     }
 }
+
+uint16_t View::DisplayWidth()
+{
+    return View::painter.CanvasWidth();
+}
+
+uint16_t View::DisplayHeight()
+{
+    return View::painter.CanvasHeight();
+}
+
+View::Orientation View::DisplayOrientation()
+{
+    //TODO: Implement display orientation!
+    return PORTRAIT;
+}
