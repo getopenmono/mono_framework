@@ -9,6 +9,7 @@
 #define __spiTest__module_communication__
 
 #include <SPI.h>
+#include <DigitalOut.h>
 #include "spi_commands.h"
 #include "module_frames.h"
 #include <stdint.h>
@@ -120,6 +121,16 @@ namespace mono { namespace redpine {
          */
         virtual bool initializeInterface() = 0;
         
+        /**
+         * Trigger the reset line to the module. A reset will put the module into
+         * bootloader, where a firmware image can be selected. Before calling 
+         * @ref initializeInterface, you must reset the module.
+         *
+         * The reset command has to wait while the module resets, this means the
+         * function will block for approx 3 ms.
+         *
+         */
+        virtual void resetModule() = 0;
         
         /**
          * Test the data inside a buffer to see if it is a management frame
@@ -236,7 +247,8 @@ namespace mono { namespace redpine {
         
     protected:
         mbed::SPI *spi;
-        PinName spiChipSelect;
+        //PinName spiChipSelect;
+        mbed::DigitalOut spiChipSelect, resetLine;
         
         /**
          * Auxillary function to transfer C1 and C2 commands
@@ -311,6 +323,7 @@ namespace mono { namespace redpine {
          */
         void setChipSelect(bool active);
         
+        
     public:
         
         /** 
@@ -318,9 +331,12 @@ namespace mono { namespace redpine {
          * 
          * @param spi The initialized and ready SPI hardware module
          * @param chipSelect The SPI CS pin, active low
+         * @param resetPin The GPIO pin connected to the module reset line (active low)
          * @param interruptPin The pin where the modules interrupt signal is connected
          */
-        ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName interruptPin);
+        ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin);
+        
+        void resetModule();
         
         bool initializeInterface();
         

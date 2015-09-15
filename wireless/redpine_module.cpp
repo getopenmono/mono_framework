@@ -41,6 +41,8 @@ bool Module::initialize(ModuleCommunication *commInterface)
     Module* self = Module::Instance();
     self->comIntf = commInterface;
     
+    self->comIntf->resetModule();
+    
     mono::defaultSerial.printf("Initializing communication interface...\n\r");
     // initalize interface
     bool success = self->comIntf->initializeInterface();
@@ -64,10 +66,17 @@ bool Module::initialize(ModuleCommunication *commInterface)
     
     // we need to wait for board ready frame
     mono::defaultSerial.printf("Waiting for card ready to arrive on input...\n\r");
-    while (!self->comIntf->pollInputQueue())
+    int timeout = 0;
+    while (!self->comIntf->pollInputQueue() && timeout++ < 50)
     {
         //wait a while
-        mbed::wait_ms(200);
+        mbed::wait_ms(2);
+    }
+    
+    if (timeout >= 50)
+    {
+        mono::defaultSerial.printf("Timeout: Did not receive Card ready!\n\r");
+        return false;
     }
     
     mono::defaultSerial.printf("Input pending, will read frame...\n\r");

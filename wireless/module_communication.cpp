@@ -98,11 +98,9 @@ SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
         free(this->buffer);
 }
 
-ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName interruptPin)
+ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) : spiChipSelect(chipSelect, 1), resetLine(resetPin, 1)
 {
     this->spi = &spi;
-    this->spiChipSelect = chipSelect;
-    CyPins_SetPinDriveMode(chipSelect, CY_PINS_DM_STRONG);
     this->InterfaceVersion = 0xAB16; // we expact this is the default version
 }
 
@@ -376,15 +374,19 @@ int ModuleSPICommunication::spiWrite(uint8_t *data, int byteLength, bool thirtyT
 
 void ModuleSPICommunication::setChipSelect(bool active)
 {
-    // TODO: Remove CY code, and use mbed
-    if (active)
-        CyPins_ClearPin(spiChipSelect);
-    else
-        CyPins_SetPin(spiChipSelect);
+    spiChipSelect = !active; // Chip select is active low!
 }
 
 
 // PUBLIC METHODS
+
+void ModuleSPICommunication::resetModule()
+{
+    resetLine = 0;
+    mbed::wait_ms(100);
+    resetLine = 1;
+    mbed::wait_ms(100);
+}
 
 bool ModuleSPICommunication::initializeInterface()
 {
@@ -641,7 +643,7 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     if (rawFrame->status != 0)
     {
-        mono::Warn << "Frame response for command " << rawFrame->CommandId << " wa not 0, but " << rawFrame->status << "\n\r";
+        mono::Warn << "Frame response status for command " << rawFrame->CommandId << " was not 0, but " << rawFrame->status << "\n\r";
     }
     
     // check for payload
