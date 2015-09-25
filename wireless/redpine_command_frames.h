@@ -576,6 +576,94 @@ namespace mono { namespace redpine {
     };
     
     
+    /**
+     * Command to set the module into one of 5 power saving modes. Some modes is
+     * used while connected to an AP, other are full sleep modes, where module is
+     * not connected.
+     *
+     * The module boots into *power save mode* disabled.
+     *
+     *
+     * #### The DTIM Parameter
+     * This parameter is valid only if BIT(1) is set in the `join_feature_bitmap`
+     * and valid listen interval is given in join command. If this parameter is set,
+     * the module computes the desired sleep duration based on listen interval
+     * (from join command) and its wakeup align with Beacon or DTIM Beacon
+     * (based on this parameter).
+     *
+     * The DTIM parameter controls if:
+     *
+     * 0. module wakes up before nearest Beacon that does not exceed the specified
+     *    listen interval time.
+     * 1. module wakes up before nearest DTIM Beacon that does not exceed the 
+     *    specified listen interval time.
+     */
+    class PowerModeFrame : public ManagementFrame
+    {
+    public:
+        
+        /**
+         * @brief The possible power save modes for the module
+         * The following modes can be used while the module is connected to an AP,
+         * after the JOIN command:
+         * * `RF_SLEEP_ONLY_CONNECTED`
+         * * `RF_SOC_SLEEP_GPIO_CONNECTED`
+         * * `RF_SOC_SLEEP_CONNECTED`
+         *
+         * The two remaining modes are for use after the INIT command before the JOIN
+         * command.
+         */
+        enum PowerSaveModes
+        {
+            DISABLED                    = 0, /**< No power save mode active, *default* */
+            RF_SLEEP_ONLY_CONNECTED     = 1, /**< Antenna off during AP DTIM intervals */
+            RF_SOC_SLEEP_GPIO_CONNECTED = 2, /**< Antenna and SoC off during DTIM, GPIO wake up. */
+            RF_SOC_SLEEP_CONNECTED      = 3, /**< Antenna and SoC off during DTIM, no async wake up */
+            SLEEP_MODE_GPIO             = 8, /**< Full system sleep mode, AP not connected. GPIO wake up */
+            SLEEP_MODE                  = 9  /**< Full system sleep, AP disconnected. Only timer wake up  */
+        };
+        
+        /**
+         * Power modes. The power save modes can be further controlled by choosing
+         * an ultro low power mode here.
+         */
+        enum UltraLowPowerModes
+        {
+            /** Normal low power mode */
+            LOW_POWER_MODE = 0,
+            /** Ultra low power mode, with RAM retension (only in save mode 2 - 9). */
+            ULTRA_LOW_POWER_MODE_KEEP_RAM = 1,
+            /** Ultra low power mode, without RAM retension (only save mode 8 & 9). */
+            ULTRA_LOW_POWER_MODE_LOOSE_RAM = 2
+        };
+        
+    protected:
+        
+        /** Redpine command struct for the powerMode frame */
+        typedef struct {
+            uint8_t powerVal;
+            uint8_t ulp_mode_enable;
+            uint32_t listen_interval_dtim;
+        } PowerFrameSnd;
+        
+        PowerFrameSnd frame;
+        
+        void dataPayload(uint8_t *data);
+        
+    public:
+        
+        /**
+         * Construct a PowerModeFrame that will set the module into a low power mode,
+         * or disabled any current low power mode set earlier.
+         * 
+         * @param saveMode One of the 5 power save modes. See @ref PowerSaveModes
+         * @param powMode Deide if power safe mode should be Ultra Low power or Low Power
+         * @param dtimBeacon Decide whether the DTIM or Beason is used af wake up interval.
+         */
+        PowerModeFrame(PowerSaveModes saveMode, UltraLowPowerModes powMode, bool dtimBeacon);
+    };
+    
+    
 }}
 
 #endif /* defined(__spiTest__redpine_command_frames__) */

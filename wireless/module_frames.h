@@ -67,7 +67,7 @@ namespace mono { namespace redpine {
             Init                = 0x12, /**<  */
             Scan                = 0x13, /**<  */
             Join                = 0x14, /**<  */
-            PowerSafeMode       = 0x15, /**<  */
+            PowerSaveMode       = 0x15, /**<  */
             SleepTimer          = 0x16, /**<  */
             SetMacAddress       = 0x17, /**<  */
             QueryNetworkParams  = 0x18, /**<  */

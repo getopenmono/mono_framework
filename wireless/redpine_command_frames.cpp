@@ -285,9 +285,21 @@ int HttpGetFrame::payloadLength()
 }
 
 
+// SET POWER MODE FRAME
 
+PowerModeFrame::PowerModeFrame(PowerModeFrame::PowerSaveModes saveMode, PowerModeFrame::UltraLowPowerModes powMode, bool dtimBeacon) : ManagementFrame(PowerSaveMode)
+{
+    frame.powerVal = saveMode;
+    frame.ulp_mode_enable = powMode;
+    frame.listen_interval_dtim = dtimBeacon;
+    
+    this->length = sizeof(PowerFrameSnd);
+}
 
-
+void PowerModeFrame::dataPayload(uint8_t *data)
+{
+    memcpy(data, &frame, sizeof(PowerFrameSnd));
+}
 
 
 

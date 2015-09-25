@@ -75,11 +75,11 @@ SPIReceiveDataBuffer& SPIReceiveDataBuffer::operator<<(mbed::SPI *spi)
     spi->format(32);
     
     uint32_t buf = 0;
-    int *writePtr = (int*) this->buffer;
+    uint32_t *writePtr = (uint32_t*) this->buffer;
+    
     while (this->bytesToRead > 0)
     {
         buf = spi->write(0);
-        
         //set LSByte on index 0, and MSByte on index 3
         *writePtr = (buf & 0xFF)<<24 | (buf & 0xFF00)<<8 | (buf & 0xFF0000)>>8 | (buf&0xFF000000)>>24;
         
@@ -143,8 +143,9 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
         spi->format(32);
     
     int retval = 0;
+    int timeout = 10, to = 0;
     setChipSelect(true);
-    while (retval != START_TOKEN)
+    while (retval != START_TOKEN && timeout > to)
     {
         retval = spi->write(0x00);
         
@@ -157,6 +158,8 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
         
         if (retval != START_TOKEN)
             wait_ms(50);
+        
+        to++;
     }
     setChipSelect(false);
     
@@ -224,7 +227,7 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
 //    *((int*)readBuf) = spi->write(0);
 //    setChipSelect(false);
     
-//    mono::defaultSerial.printf("0x%x 0x%x 0x%x 0x%x\n\r",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
+    mono::defaultSerial.printf("Header: 0x%x 0x%x 0x%x 0x%x\n\r",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
     
     spi->format(8);
     
