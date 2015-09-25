@@ -43,7 +43,7 @@ void AppRunLoop::exec()
         
         
         // what else todo
-        mbed::wait_ms(100);
+        wait_ms(1);
     }
     
     mono::defaultSerial.printf("run loop terminated!");

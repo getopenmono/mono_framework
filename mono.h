@@ -33,6 +33,7 @@
 #include "media/bmp_image.h"
 
 
-namespace mono {}
+namespace mono {
+}
 
 #endif

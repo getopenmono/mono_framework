@@ -53,7 +53,7 @@ namespace mono { namespace ui {
             View::painter.setTextSize(1);
             this->scrolls = false;
             this->curLineIndex = 0;
-            this->size = geo::Size(W,H);
+            this->setSize( geo::Size(W,H) );
         }
         
         // Console methods
@@ -150,6 +150,11 @@ namespace mono { namespace ui {
         void setCursor(geo::Point pos)
         {
             this->textCursor = pos;
+        }
+        
+        void setTextColor(display::Color c)
+        {
+            this->textColor = c;
         }
         
         uint8_t characterPixelWidth()

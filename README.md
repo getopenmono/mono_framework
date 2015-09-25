@@ -35,10 +35,20 @@ Work has begun on making a easy way of getting mono into and out of sleep mode. 
 ##Documentation ToDo's
 
 * Getting Started Tutorial
-* In-Depth: Mono Framework Startup / Boot procedures
 * Mono Framework: Architectural Overview
+* * Mono Layer
+* * mbed layer
+* * Cypress / MCU layer
+* Mono for Arduino Developers
+* Coding for bare metal! 
+* In-Depth: Mono Framework Startup / Boot procedures
+* In-Depth: Callbacks and interrupts
+* In-Depth: Display System and Touch input
+* In-Depth: Wifi and networking
+* In-Depth: Power, battery and sleep
+* * Interrupts during sleep
 
-
+[Remember this article](https://msdn.microsoft.com/en-us/magazine/gg309172.aspx)
 
 The software is released under the open source MIT License.
 

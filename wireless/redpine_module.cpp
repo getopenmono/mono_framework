@@ -70,7 +70,7 @@ bool Module::initialize(ModuleCommunication *commInterface)
     while (!self->comIntf->pollInputQueue() && timeout++ < 50)
     {
         //wait a while
-        mbed::wait_ms(2);
+        wait_ms(2);
     }
     
     if (timeout >= 50)

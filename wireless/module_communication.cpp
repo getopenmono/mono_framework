@@ -122,7 +122,7 @@ CommandStatus ModuleSPICommunication::sendC1C2(spiCommandC1 c1, spiCommandC2 c2)
         retval = spi->write(c2);
         
         if (retval == BUSY_RESPONSE)
-            mbed::wait_ms(100);
+            wait_ms(100);
         reTries++;
     }
     setChipSelect(false);
@@ -156,7 +156,7 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
         }
         
         if (retval != START_TOKEN)
-            mbed::wait_ms(50);
+            wait_ms(50);
     }
     setChipSelect(false);
     
@@ -383,9 +383,9 @@ void ModuleSPICommunication::setChipSelect(bool active)
 void ModuleSPICommunication::resetModule()
 {
     resetLine = 0;
-    mbed::wait_ms(100);
+    wait_ms(100);
     resetLine = 1;
-    mbed::wait_ms(100);
+    wait_ms(100);
 }
 
 bool ModuleSPICommunication::initializeInterface()

@@ -76,7 +76,7 @@ bool ManagementFrame::commit()
                 break;
             
             retries++;
-            mbed::wait_ms(50*retries);
+            wait_ms(50*retries);
         }
         
         // sum(50*x, x=1..20) = 10,5 secs timeout
