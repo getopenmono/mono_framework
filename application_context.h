@@ -10,7 +10,8 @@
 #define __usbtest__application_context__
 
 #include <application_context_interface.h>
-#include <hx8340.h>
+//#include <hx8340.h>
+#include "display/ili9225g/ili9225g.h"
 #include <application_run_loop.h>
 #include "mono_power_management.h"
 
@@ -23,7 +24,7 @@ namespace mono {
         IApplication *application;
         
         static ApplicationContext singleton;
-        mono::display::HX8340 dispController;
+        mono::display::ILI9225G dispController;
         power::MonoPowerManagement pwrMgmt;
         AppRunLoop runLoop;
         
