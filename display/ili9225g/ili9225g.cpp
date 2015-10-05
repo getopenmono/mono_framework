@@ -206,13 +206,22 @@ void ILI9225G::onSystemPowerOnReset()
 
 void ILI9225G::onSystemEnterSleep()
 {
+    PWM_Sleep();
     //CyPins_ClearPin(TFT_LED_PWR);
-    //PWM_Sleep();
+    writeCommand(0x07, 0x00);
+    wait_ms(50);
+    writeCommand(0x11, 0x07);
+    wait_ms(50);
+    writeCommand(0x10, 0x0A01); // put controller into standby
 }
 
 void ILI9225G::onSystemWakeFromSleep()
 {
-    //PWM_Wakeup();
+    writeCommand(0x10, 0x0A00);
+    wait_ms(50);
+    writeCommand(0x07, 0x1017);
+    
+    PWM_Wakeup();
 }
 
 void ILI9225G::OnSystemBatteryLow()

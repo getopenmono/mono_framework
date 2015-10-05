@@ -40,9 +40,9 @@ void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
 {
     this->application = monoApp;
     //PowerSystem->onSystemPowerOnReset();
-    //pwrMgmt.processResetAwarenessQueue();
+    pwrMgmt.processResetAwarenessQueue();
     
-    defaultSerial.printf("Display init deactivated\n\t");
+    //defaultSerial.printf("Display init deactivated\n\t");
     mono::IApplicationContext::Instance->DisplayController->init();
     
     monoApp->monoWakeFromReset();
