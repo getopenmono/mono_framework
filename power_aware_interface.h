@@ -9,6 +9,7 @@
 #ifndef mono_power_aware_interface_h
 #define mono_power_aware_interface_h
 
+
 namespace mono { namespace power {
     
     //forward declaration of PowerManagement interface
@@ -33,7 +34,7 @@ namespace mono { namespace power {
     class IPowerAware
     {
         friend class IPowerManagement;
-    private:
+    public:
         
         /**
          * Next pointer in the power awareness object queue.
@@ -47,7 +48,7 @@ namespace mono { namespace power {
          */
         IPowerAware *_pwrawr_previousPowerAware;
         
-    protected:
+    
         /**
          * You must override this method. It gets called right after the system
          * power on for the first time, or after a reset condition.

@@ -6,14 +6,15 @@
 //  Copyright (c) 2015 Monolit ApS. All rights reserved.
 //
 
-#ifndef i2c_power_test_power_management_interface_h
-#define i2c_power_test_power_management_interface_h
+#ifndef mono_power_management_interface_h
+#define mono_power_management_interface_h
 
 #include "power_subsystem_interface.h"
 #include "power_aware_interface.h"
 
+#include <stddef.h>
+
 namespace mono { namespace power {
-    
     /**
      * @brief Generic abstract interface for the power management system
      *
@@ -71,6 +72,103 @@ namespace mono { namespace power {
          */
         IPowerAware *powerAwarenessQueue;
         
+        /**
+         * Call all the power aware objects right after Power-On-Reset
+         * The singleton power management object must call this method on reset
+         */
+        virtual void processResetAwarenessQueue()
+        {
+            if (powerAwarenessQueue == NULL)
+                return;
+            
+            IPowerAware *task = powerAwarenessQueue;
+            while (task != NULL) {
+                
+                task->onSystemPowerOnReset();
+                task = task->_pwrawr_nextPowerAware;
+            }
+        }
+        
+        /**
+         *
+         * 
+         */
+        virtual void processSleepAwarenessQueue()
+        {
+            if (powerAwarenessQueue == NULL)
+                return;
+            
+            IPowerAware *task = powerAwarenessQueue;
+            while (task != NULL) {
+                
+                task->onSystemEnterSleep();
+                task = task->_pwrawr_nextPowerAware;
+            }
+        }
+        
+        /**
+         *
+         * 
+         */
+        virtual void processWakeAwarenessQueue()
+        {
+            if (powerAwarenessQueue == NULL)
+                return;
+            
+            IPowerAware *task = powerAwarenessQueue;
+            while (task != NULL) {
+                
+                task->onSystemWakeFromSleep();
+                task = task->_pwrawr_nextPowerAware;
+            }
+        }
+        
+        /**
+         *
+         * 
+         */
+        virtual void processBatteryLowAwarenessQueue()
+        {
+            if (powerAwarenessQueue == NULL)
+                return;
+            
+            IPowerAware *task = powerAwarenessQueue;
+            while (task != NULL) {
+                
+                task->OnSystemBatteryLow();
+                task = task->_pwrawr_nextPowerAware;
+            }
+        }
+        
+        
+        /**
+         *
+         *
+         */
+        virtual void setupMCUPeripherals() {};
+        
+        /**
+         *
+         * 
+         */
+        virtual void powerDownMCUPeripherals() {}
+        
+        /**
+         *
+         * 
+         */
+        virtual void powerUpMCUPeripherals() {}
+        
+        
+        virtual void removeObjectInPowerAwareQueue(IPowerAware *item)
+        {
+            if (item->_pwrawr_previousPowerAware != NULL)
+                item->_pwrawr_previousPowerAware->_pwrawr_nextPowerAware = item->_pwrawr_nextPowerAware;
+            
+            if (item->_pwrawr_nextPowerAware != NULL)
+                item->_pwrawr_nextPowerAware->_pwrawr_previousPowerAware = item->_pwrawr_previousPowerAware;
+        }
+        
     public:
         
         
@@ -85,6 +183,23 @@ namespace mono { namespace power {
          */
         IPowerSubSystem *PowerSystem;
         
+        
+        /**
+         * @brief Send Mono to sleep mode, and stop CPU execution.
+         * In sleep mode the CPU does not excute instruction and powers down into
+         * a low power state.
+         * The power system will turn off dynamically powered peripherals.
+         *
+         * Any power aware objects (@ref IPowerAware), that has registered itself 
+         * in the @ref powerAwarenessQueuemust have its @ref onSystemEnterSleep 
+         * method called.
+         *
+         * *NOTE: Before you call this method, make sure you have configured a way
+         * to go out of sleep.*
+         */
+        virtual void EnterSleep() = 0;
+        
+        
         /**
          * @grief Add a @ref IPowerAware object to the awareness queue
          *
@@ -93,7 +208,27 @@ namespace mono { namespace power {
          *
          * @param object A pointer to the object that is power aware
          */
-        virtual void AppendToPowerAwareQueue(IPowerAware *object) = 0;
+        virtual void AppendToPowerAwareQueue(IPowerAware *object)
+        {
+            if (powerAwarenessQueue == NULL)
+            {
+                powerAwarenessQueue = object;
+                object->_pwrawr_nextPowerAware = NULL;
+                object->_pwrawr_previousPowerAware = NULL;
+            }
+            else
+            {
+                IPowerAware *item = powerAwarenessQueue;
+                while (item->_pwrawr_nextPowerAware != NULL)
+                {
+                    item = item->_pwrawr_nextPowerAware;
+                }
+                
+                item->_pwrawr_nextPowerAware = object;
+                object->_pwrawr_previousPowerAware = item;
+                object->_pwrawr_nextPowerAware = NULL;
+            }
+        }
         
         /**
          * Searches the Power Awareness Queue for the object and removes it, if
@@ -104,7 +239,26 @@ namespace mono { namespace power {
          * @param object A pointer to the object that should be removed from the queue
          * @returns `true` if object was removed, `false` if the object was not in the queue
          */
-        virtual bool RemoceFromPowerAwareQueue(IPowerAware *object) = 0;
+        virtual bool RemoveFromPowerAwareQueue(IPowerAware *object)
+        {
+            if (powerAwarenessQueue == NULL)
+                return false;
+            
+            IPowerAware *item = powerAwarenessQueue;
+            
+            while (item != NULL)
+            {
+                if (item == object)
+                {
+                    removeObjectInPowerAwareQueue(item);
+                    return true;
+                }
+                
+                item = item->_pwrawr_nextPowerAware;
+            }
+            
+            return false;
+        }
         
     };
     

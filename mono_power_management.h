@@ -12,15 +12,36 @@
 #include "power_management_interface.h"
 #include "act8600_power_system.h"
 
+namespace mono {
+    class ApplicationContext; // forward decl.
+}
+
 namespace mono { namespace power {
     
     class MonoPowerManagement : public IPowerManagement
     {
+        friend mono::ApplicationContext;
+    protected:
+        
+        
+        //ACT8600PowerSystem powerSubsystem;
+        
+        
+        
+        void processResetAwarenessQueue();
+        
+        void setupMCUPeripherals();
+        void powerDownMCUPeripherals();
+        void powerUpMCUPeripherals();
+        
         
     public:
         
-        void AppendToPowerAwareQueue(IPowerAware *object);
-        bool RemoceFromPowerAwareQueue(IPowerAware *object);
+        MonoPowerManagement();
+        
+        
+        void EnterSleep();
+
         
     };
     
