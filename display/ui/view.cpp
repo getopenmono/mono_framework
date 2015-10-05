@@ -11,7 +11,7 @@
 
 using namespace mono::ui;
 
-mono::display::DisplayPainter View::painter(mono::IApplicationContext::Instance->displayController);
+mono::display::DisplayPainter View::painter(mono::IApplicationContext::Instance->DisplayController);
 
 View *View::firstDirtyView = NULL;
 
