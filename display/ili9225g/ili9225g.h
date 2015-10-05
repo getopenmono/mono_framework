@@ -11,13 +11,13 @@
 
 #include "../display_controller_interface.h"
 #include <rect.h>
-
+#include <power_aware_interface.h>
 #include <mbed.h>
 
 
 namespace mono { namespace display {
     
-    class ILI9225G : public IDisplayController
+    class ILI9225G : public IDisplayController, mono::power::IPowerAware
     {
     protected:
         
@@ -36,6 +36,18 @@ namespace mono { namespace display {
         void writeRegister(uint16_t regData);
         
         void writeCommand(uint16_t regData, uint16_t data);
+        
+        
+        /// Power awareness protocol
+        
+        void onSystemPowerOnReset();
+
+        void onSystemEnterSleep();
+
+        void onSystemWakeFromSleep();
+
+        void OnSystemBatteryLow();
+        
         
     public:
         

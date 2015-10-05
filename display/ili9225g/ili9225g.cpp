@@ -16,6 +16,7 @@ extern "C" {
 
 #include <ili9225g.h>
 #include <consoles.h>
+#include <application_context_interface.h>
 
 using namespace mono::display;
 
@@ -29,6 +30,7 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
     
     //CY_SET_REG8(CYREG_PRT12_SIO_CFG, CY_GET_REG8(CYREG_PRT12_SIO_CFG) | 0x01);
     //
+    IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
 }
 
 void ILI9225G::init()
@@ -36,7 +38,7 @@ void ILI9225G::init()
     //mono::defaultSerial.printf("In constructor:\n\rDR: 0x%x, DM0: 0x%x, DM1: 0x%x, DM2: 0x%x\n\r",dr,dm0,dm1,dm2);
     //mono::defaultSerial.printf("After\n\rDR: 0x%x, DM0: 0x%x, DM1: 0x%x, DM2: 0x%x\n\r",CY_GET_REG8(CYREG_PRT12_DR), CY_GET_REG8(CYREG_PRT12_DM0), CY_GET_REG8(CYREG_PRT12_DM1),CY_GET_REG8(CYREG_PRT12_DM2));
     
-    CyPins_SetPinDriveMode(TFT_TEARING_EFFECT, CY_PINS_DM_DIG_HIZ);
+    
     
     // setting pins agin since setting them in global constructor does not work YET!!
     // TODO: make pin assignment work (not get overwritten) in global constructors!
@@ -106,6 +108,8 @@ void ILI9225G::init()
     for (int i=0; i<176*220; i++) {
         this->write(BlackColor);
     }
+    
+    PWM_WriteCompare1(128);
 }
 
 void ILI9225G::setWindow(int x, int y, int width, int height)
@@ -187,4 +191,31 @@ void ILI9225G::writeCommand(uint16_t regData, uint16_t data)
 uint16_t ILI9225G::read()
 {
     return 0;
+}
+
+
+/// Power Aware protocol
+
+void ILI9225G::onSystemPowerOnReset()
+{
+    CyPins_SetPinDriveMode(TFT_TEARING_EFFECT, CY_PINS_DM_DIG_HIZ);
+    //PWM_Start();
+    
+    //PWM_WriteCompare1(0); // turn off display light
+}
+
+void ILI9225G::onSystemEnterSleep()
+{
+    //CyPins_ClearPin(TFT_LED_PWR);
+    //PWM_Sleep();
+}
+
+void ILI9225G::onSystemWakeFromSleep()
+{
+    //PWM_Wakeup();
+}
+
+void ILI9225G::OnSystemBatteryLow()
+{
+    
 }
