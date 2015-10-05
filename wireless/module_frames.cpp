@@ -85,7 +85,7 @@ bool ManagementFrame::commit()
             mono::Error << "Response interrupt for frame timed out!\n\r";
         }
         
-        mono::Debug << "Got frame response in " << retries << " retries\n\r";
+        //mono::Debug << "Got frame response in " << retries << " retries\n\r";
         
         success = mod->comIntf->readManagementFrameResponse(*this);
         

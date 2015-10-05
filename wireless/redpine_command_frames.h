@@ -644,6 +644,7 @@ namespace mono { namespace redpine {
             uint8_t powerVal;
             uint8_t ulp_mode_enable;
             uint32_t listen_interval_dtim;
+            uint8_t _alignment[2]; // struct must be 4-byte aligned
         } PowerFrameSnd;
         
         PowerFrameSnd frame;
@@ -661,6 +662,25 @@ namespace mono { namespace redpine {
          * @param dtimBeacon Decide whether the DTIM or Beason is used af wake up interval.
          */
         PowerModeFrame(PowerSaveModes saveMode, UltraLowPowerModes powMode, bool dtimBeacon);
+    };
+    
+    
+    class SetSleepTimerFrame : public ManagementFrame
+    {
+    protected:
+        
+        struct SleepTimerFrameSnd {
+            uint8_t TimeVal[2];
+            uint8_t _alignment[2]; // struct must be 4-byte aligned
+        };
+        
+        struct SleepTimerFrameSnd frame;
+        
+        void dataPayload(uint8_t *data);
+        
+    public:
+        
+        SetSleepTimerFrame(uint16_t sleepSecs);
     };
     
     

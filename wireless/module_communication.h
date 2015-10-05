@@ -10,9 +10,12 @@
 
 #include <SPI.h>
 #include <DigitalOut.h>
+#include <FunctionPointer.h>
 #include "spi_commands.h"
 #include "module_frames.h"
 #include <stdint.h>
+
+class AppController; // forward decl
 
 namespace mono { namespace redpine {
     
@@ -98,8 +101,17 @@ namespace mono { namespace redpine {
      * through a hardware interface.
      * Subclasses of this should utilize UART, USB or SPI communication.
      */
-    class ModuleCommunication
+    class ModuleCommunication : public mono::IRunLoopTask
     {
+    protected:
+        
+        /**
+         * Method that must be implemented, that will be called by the run loop
+         * It should only be scheduled by an hardware interrupt handler, and
+         * remove it self again from the run loop, after it has run.
+         */
+        virtual void taskHandler() = 0;
+        
     public:
         
         /** 
@@ -225,6 +237,13 @@ namespace mono { namespace redpine {
          * @return `true` upon success, `false` otherwise.
          */
         virtual bool writePayloadData(uint8_t *data, uint16_t byteLength) = 0;
+        
+        /**
+         * Interrupt callback function, called by the communication interface.
+         * The module provides the callback function, that gets called when ever
+         * the module triggers an interrupt.
+         */
+        mbed::FunctionPointer interruptCallback;
     };
     
     
@@ -236,6 +255,7 @@ namespace mono { namespace redpine {
      */
     class ModuleSPICommunication : public ModuleCommunication
     {
+        friend AppController;
     public:
         
         /** List of available SPI Registers on RS9113 */
@@ -249,6 +269,8 @@ namespace mono { namespace redpine {
         mbed::SPI *spi;
         //PinName spiChipSelect;
         mbed::DigitalOut spiChipSelect, resetLine;
+        
+        void taskHandler();
         
         /**
          * Auxillary function to transfer C1 and C2 commands
@@ -366,6 +388,5 @@ namespace mono { namespace redpine {
     };
     
 }}
-
 
 #endif /* defined(__spiTest__module_communication__) */

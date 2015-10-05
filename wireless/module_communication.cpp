@@ -10,10 +10,19 @@
 #include <mono.h>
 #include <mbed.h>
 #include <consoles.h>
+#include <application_context_interface.h>
 
 extern "C"
 {
 #include <project.h>
+
+    volatile bool mono_redpine_spi_comm_interrupt_schedule = false;
+    volatile void mono_redpine_spi_comm_interrupt_handler()
+    {
+        mono_redpine_spi_comm_interrupt_schedule = true;
+        SPI_ISR_ClearPending();
+    }
+    
 }
 
 using namespace mono::redpine;
@@ -100,11 +109,30 @@ SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
 
 ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) : spiChipSelect(chipSelect, 1), resetLine(resetPin, 1)
 {
+    CyPins_SetPinDriveMode(interruptPin, CY_PINS_DM_DIG_HIZ);
     this->spi = &spi;
     this->InterfaceVersion = 0xAB16; // we expact this is the default version
+    
+    // start the interrupt
+    SPI_ISR_StartEx((cyisraddress)&mono_redpine_spi_comm_interrupt_handler);
+    mono::IApplicationContext::Instance->RunLoop->addDynamicTask(this);
 }
 
 // PROTECTED AUXILLARY METHODS
+
+void ModuleSPICommunication::taskHandler()
+{
+    if (mono_redpine_spi_comm_interrupt_schedule)
+    {
+        mono_redpine_spi_comm_interrupt_schedule = false;
+        defaultSerial.printf("SPI ISR has occured!\n\r");
+        if (interruptCallback == true)
+        {
+            defaultSerial.printf("calling event handler!\n\r");
+            interruptCallback.call();
+        }
+    }
+}
 
 CommandStatus ModuleSPICommunication::sendC1C2(spiCommandC1 c1, spiCommandC2 c2)
 {
@@ -143,12 +171,11 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
         spi->format(32);
     
     int retval = 0;
-    int timeout = 10, to = 0;
+    int timeout = 50, to = 0;
     setChipSelect(true);
     while (retval != START_TOKEN && timeout > to)
     {
         retval = spi->write(0x00);
-        
         // 32-bit transfer command status code is big-endian
         // our target is little-endian, compensate for that!
         if (thirtyTwoBitMode && retval == START_TOKEN << 24)
@@ -171,7 +198,7 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
     if (retval == START_TOKEN)
         return true;
     else
-        mono::defaultSerial.printf("Failed to receive start token");
+        mono::defaultSerial.printf("Failed to receive start token\n\r");
     
     return false;
 }
@@ -227,7 +254,7 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
 //    *((int*)readBuf) = spi->write(0);
 //    setChipSelect(false);
     
-    mono::defaultSerial.printf("Header: 0x%x 0x%x 0x%x 0x%x\n\r",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
+    //mono::defaultSerial.printf("Header: 0x%x 0x%x 0x%x 0x%x\n\r",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
     
     spi->format(8);
     
@@ -443,7 +470,7 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
     
     if (retval != CMD_SUCCESS)
     {
-        mono::defaultSerial.printf("Failed to sent ReadRegister command to module!");
+        mono::defaultSerial.printf("Failed to sent ReadRegister command to module!\n\r");
         return 0;
     }
     
@@ -457,7 +484,7 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
         setChipSelect(false);
     }
     else
-        mono::defaultSerial.printf("Register read failed");
+        mono::defaultSerial.printf("Register read failed\n\r");
     
     return retval;
 }
@@ -646,7 +673,7 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     if (rawFrame->status != 0)
     {
-        mono::Warn << "Frame response status for command " << rawFrame->CommandId << " was not 0, but " << rawFrame->status << "\n\r";
+        mono::defaultSerial.printf("Error response for command: 0x%x. Error code: 0x%x\n\r",rawFrame->CommandId,rawFrame->status);
     }
     
     // check for payload

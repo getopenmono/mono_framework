@@ -43,6 +43,8 @@ bool Module::initialize(ModuleCommunication *commInterface)
     
     self->comIntf->resetModule();
     
+    self->CurrentPowerState = FULL_AWAKE;
+    
     mono::defaultSerial.printf("Initializing communication interface...\n\r");
     // initalize interface
     bool success = self->comIntf->initializeInterface();
@@ -82,6 +84,9 @@ bool Module::initialize(ModuleCommunication *commInterface)
     mono::defaultSerial.printf("Input pending, will read frame...\n\r");
     ManagementFrame frame;
     self->comIntf->readManagementFrame(frame);
+    
+    defaultSerial.printf("module setting event callback listener!\n\r");
+    self->comIntf->interruptCallback.attach<mono::redpine::Module>(self, &Module::moduleEventHandler);
     
     if (frame.commandId == ModuleFrame::CardReady)
     {
@@ -129,6 +134,47 @@ bool Module::setupWifiOnly(const char *ssid, const char *passphrase, WifiSecurit
     return true;
 }
 
+void Module::moduleEventHandler()
+{
+    if (CurrentPowerState & (LOW_SLEEP | ULTRA_LOW_SLEEP))
+        handleSleepWakeUp();
+}
+
+void Module::handleSleepWakeUp()
+{
+    
+    if (!(CurrentPowerState & (ULTRA_LOW_SLEEP | LOW_SLEEP)))
+    {
+        defaultSerial.printf("Module not in sleep!\n\r");
+        return;
+    }
+    
+    // if interface was initialized, we are out of sleep
+    if (comIntf->initializeInterface())
+        CurrentPowerState = FULL_AWAKE;
+    
+    if (comIntf->pollInputQueue())
+    {
+        ManagementFrame frame;
+        comIntf->readManagementFrame(frame);
+        
+        if (frame.commandId == ManagementFrame::WakeFromSleep)
+        {
+            defaultSerial.printf("putting to sleep again!\n\r");
+            ManagementFrame sleepAgain(ManagementFrame::PowerSaveACK);
+            sleepAgain.commit();
+            
+        }
+        else
+        {
+            defaultSerial.printf("Unkown commandID for handleSleepWakeUp: 0x%x\n\r",frame.commandId);
+        }
+    }
+    else
+    {
+        defaultSerial.printf("nothing in input poll queue\n\r");
+    }
+}
 
 
 

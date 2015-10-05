@@ -89,7 +89,9 @@ namespace mono { namespace redpine {
             SocketCreate        = 0x42, /**<  */
             SocketClose         = 0x43, /**<  */
             DnsResolution       = 0x44, /**< DNS Resolution lookup command */
-            HttpGet             = 0x51 /**< HTTP Client, GET request */
+            HttpGet             = 0x51, /**< HTTP Client, GET request */
+            WakeFromSleep       = 0xCD,
+            PowerSaveACK        = 0xDE
         };
         
         /** List of response command Id's */

@@ -303,3 +303,19 @@ void PowerModeFrame::dataPayload(uint8_t *data)
 
 
 
+// SET SLEEP TIMER FRAME
+
+SetSleepTimerFrame::SetSleepTimerFrame(uint16_t sleepSecs) : ManagementFrame(SleepTimer)
+{
+    frame.TimeVal[0] = SleepTimer & 0xFF;
+    frame.TimeVal[1] = (SleepTimer >> 8) & 0xFF;
+    
+    this->length = sizeof(struct SleepTimerFrameSnd);
+}
+
+void SetSleepTimerFrame::dataPayload(uint8_t *data)
+{
+    memcpy(data, &frame, sizeof(struct SleepTimerFrameSnd));
+}
+
+

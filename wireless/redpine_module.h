@@ -37,6 +37,7 @@ namespace mono { namespace redpine {
     {
         friend ModuleFrame;
         friend ManagementFrame;
+        friend AppController;
     public:
         
         /**
@@ -91,6 +92,15 @@ namespace mono { namespace redpine {
             HOST_INTF_REG_IN = 0x41050034
         };
         
+        
+        enum ModulePowerState
+        {
+            FULL_AWAKE      = 0x01,
+            ULTRA_LOW_SLEEP = 0x02,
+            LOW_SLEEP       = 0x04,
+            ACTIVE_SLEEP    = 0x08
+        };
+        
     protected:
 
         /** The only instantiation of the module class */
@@ -108,12 +118,27 @@ namespace mono { namespace redpine {
         /** This holds the module currently initalized operation mode */
         ModuleCoExistenceModes OperatingMode;
         
+        /** The current state of the module, is it awake or sleeping */
+        ModulePowerState CurrentPowerState;
+        
         /**
          * Protected class constructor
          * Can only be called by the Instance() method.
          *
          */
         Module();
+        
+        /**
+         * Handle the modules periodic wake ups
+         * Puts the module to sleep again, if no input is to be sent.
+         */
+        void handleSleepWakeUp();
+        
+        /**
+         * Callback function installed into the CommunicationInterface interrupt
+         * callback listener.
+         */
+        void moduleEventHandler();
         
     public:
         
