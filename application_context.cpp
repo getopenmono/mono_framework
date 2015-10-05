@@ -18,19 +18,15 @@ extern "C" {
 using namespace mono;
 
 ApplicationContext ApplicationContext::singleton;
-IApplicationContext *IApplicationContext::Instance = NULL;
+IApplicationContext *IApplicationContext::Instance = NULL; //&(ApplicationContext::singleton);
 
-ApplicationContext::ApplicationContext() : dispController()
+ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoop, &dispController), dispController()
 {
     PWM_Start();
+    PWM_WriteCompare1(0);
     PWM_WriteCompare2(0);
-
-    IApplicationContext::Instance = this;
     
-    displayController = &dispController;
-    PowerManager = &pwrMgmt;
-    RunLoop = &runLoop;
-    
+    //CyIntSetSysVector(<#uint8 number#>, <#cyisraddress address#>)
 }
 
 int ApplicationContext::exec()
@@ -44,12 +40,13 @@ void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
 {
     this->application = monoApp;
     //PowerSystem->onSystemPowerOnReset();
+    //pwrMgmt.processResetAwarenessQueue();
     
-    //defaultSerial.printf("Display init deactivated\n\t");
-    mono::IApplicationContext::Instance->displayController->init();
-    
+    defaultSerial.printf("Display init deactivated\n\t");
+    mono::IApplicationContext::Instance->DisplayController->init();
     
     monoApp->monoWakeFromReset();
+    
 }
 
 void ApplicationContext::sleepForMs(uint32_t ms)
@@ -70,30 +67,20 @@ void ApplicationContext::enterSleepMode()
 {
     this->application->monoWillGotoSleep();
     
-    
-    PWM_WriteCompare1(0);
-    
-    CyILO_Start1K(); // make sure the 1K ILO Osc is running
-    
-    mono::defaultSerial.printf("Going to sleep...\n\r");
-    //PowerSystem->onSystemEnterSleep();
-    CyMasterClk_SetSource(CY_MASTER_SOURCE_IMO);
-    CyPmSaveClocks();
-    
-    //CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_PICU);
-    CyPmHibernate();
-    
-    int status = CyPmReadStatus(CY_PM_FTW_INT | CY_PM_CTW_INT | CY_PM_ONEPPS_INT);
-    CyPmRestoreClocks();
-    CyMasterClk_SetSource(CY_MASTER_SOURCE_PLL);
-    
-    //PowerSystem->onSystemWakeFromSleep();
-    
-    mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\n\r", status);
-    
-    PWM_WriteCompare1(128);
-    
+    PowerManager->EnterSleep();
     
     this->application->monoWakeFromSleep();
     
+}
+
+
+void faultExceptionHandler()
+{
+    while(1)
+    {
+        PWM_WriteCompare1(0);
+        wait(0.5);
+        PWM_WriteCompare1(64);
+        wait(0.25);
+    }
 }

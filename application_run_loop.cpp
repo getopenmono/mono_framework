@@ -43,7 +43,7 @@ void AppRunLoop::exec()
         
         
         // what else todo
-        wait_ms(1);
+        wait_ms(10);
     }
     
     mono::defaultSerial.printf("run loop terminated!");

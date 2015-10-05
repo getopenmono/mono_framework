@@ -24,10 +24,14 @@ namespace mono {
         IApplication *application;
         
         static ApplicationContext singleton;
-        mono::display::ILI9225G dispController;
-        power::MonoPowerManagement pwrMgmt;
-        AppRunLoop runLoop;
         
+        AppRunLoop runLoop;
+        power::MonoPowerManagement pwrMgmt;
+        
+        //Depends on PowerMgmt
+        mono::display::ILI9225G dispController;
+        //mono::display::HX8340 dispController;
+		
         ApplicationContext();
         
         void enterSleepMode();

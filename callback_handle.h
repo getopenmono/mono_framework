@@ -50,6 +50,8 @@ namespace mono {
         
     public:
         
+        CallbackHandle() { _reqMemCaller = NULL; }
+        
         /** Check to see if a handler function is attached */
         char exists() {
             return _reqMemCaller != NULL ? true : false;

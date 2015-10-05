@@ -48,19 +48,28 @@ namespace mono {
          */
         virtual void sleepForMs(uint32_t ms) = 0;
         
-    public:
         /**
-         * Pointer to the displat interface controller object. The object itself
-         * should be initialized differntly depending on the ApplicationContext
+         * Protected constructor that must be called by the sub class. It sets up
+         * needed pointers for the required subsystems. This ensure the pointers
+         * are available when class members' constructors are executed.
          *
+         * If this contructor did not setup the pointers, the PowerManagement
+         * constructor would see the @ref Instance global equal `null`.
          */
-        display::IDisplayController *displayController;
+        IApplicationContext(power::IPowerManagement *pwr, AppRunLoop *runLp, display::IDisplayController *dispCtrl) : PowerManager(pwr), RunLoop(runLp), DisplayController(dispCtrl)
+        {
+            IApplicationContext::Instance = this;
+        }
+        
+    public:
         
         
         /**
-         * <# member description #>
+         * Pointer to the global power management object, that controls power
+         * related events and functions. Use this pointer to go into sleep mode'
+         * or get the current battery voltage level.
          *
-         * @brief <# brief desc #>
+         * @brief A pointer the power management system
          */
         power::IPowerManagement *PowerManager;
         
@@ -69,6 +78,13 @@ namespace mono {
          * This pointer must be instanciated be subclasses
          */
         AppRunLoop *RunLoop;
+        
+        /**
+         * Pointer to the displat interface controller object. The object itself
+         * should be initialized differntly depending on the ApplicationContext
+         *
+         */
+        display::IDisplayController *DisplayController;
         
         /**
          * This method starts the global run/event loop for the mono application.
