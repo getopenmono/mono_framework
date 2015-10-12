@@ -28,6 +28,7 @@ namespace mono { namespace ui {
         
         uint8_t textSize;
         display::Color textColor;
+        display::Color bgColor;
         TextAlignment alignment;
         
     public:
@@ -47,6 +48,7 @@ namespace mono { namespace ui {
         // Setters
         void setTextSize(uint8_t newSize);
         void setTextColor(display::Color col);
+        void setBackgroundColor(display::Color col);
         void setAlignment(TextAlignment align);
         
         void setText(char *text, bool resizeViewWidth = false);

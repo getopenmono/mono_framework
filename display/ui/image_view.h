@@ -36,6 +36,13 @@ namespace mono { namespace ui {
         geo::Rect crop;
         
     public:
+        
+        /**
+         * Construct an empty image view, where no image is displayed
+         * To display an image you need to call @ref setImage later.
+         */
+        ImageView();
+        
         /**
          * Construct an UI image from an image file
          * 
@@ -44,6 +51,12 @@ namespace mono { namespace ui {
          * consructor!*
          */
         ImageView(media::Image *img);
+        
+        /**
+         * Set a new image source object
+         * *Note: This method also resets the current cropping rectangle!*
+         */
+        void setImage(media::Image *img);
         
         void setCrop(geo::Rect crp);
         void setCrop(geo::Size crp);

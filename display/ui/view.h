@@ -130,6 +130,16 @@ namespace mono {
         virtual void setSize(geo::Size siz);
         
         /**
+         * Set the views position and size, by providing a rectangle object.
+         *
+         * *Note* that this method does not repaint the view, you must do that
+         * explicitly.
+         *
+         * @param rect The view rectangle, containing size and position
+         */
+        virtual void setRect(geo::Rect rect);
+        
+        /**
          * @brief Get the current position of the views upper left corner
          * @returns A reference to the current position
          */
@@ -192,6 +202,8 @@ namespace mono {
          * The height axis is meant to be parallel to the gravitational axis.
          */
         static uint16_t DisplayHeight();
+        
+        static geo::Size DisplaySize();
         
         /**
          * Returns the current physical display orientation of the display

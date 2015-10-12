@@ -12,11 +12,20 @@
 
 using namespace mono::media;
 
+BMPImage::BMPImage()
+{
+    filePath = NULL;
+    fPointer = NULL;
+    fileOpen = false;
+    imageValid = false;
+}
+
 BMPImage::BMPImage(const char *path)
 {
     filePath = path;
     fPointer = NULL;
     fileOpen = true;
+    imageValid = false;
     fPointer = fopen(filePath, "rb");
     
     if (fPointer == NULL)
@@ -29,7 +38,12 @@ BMPImage::BMPImage(const char *path)
     
     if (fileHeader.bfType != 0x4D42)
     {
+        imageValid = false;
         mono::defaultSerial.printf("BMPIMage: File %s is not a BMP image!\n\r", path);
+    }
+    else
+    {
+        imageValid = true;
     }
     
     Close();
@@ -37,6 +51,8 @@ BMPImage::BMPImage(const char *path)
 
 int BMPImage::ReadPixelData(void *target, int bytesToRead)
 {
+    if (filePath == NULL)
+        return -1;
     
     if (!fileOpen)
     {
@@ -49,6 +65,9 @@ int BMPImage::ReadPixelData(void *target, int bytesToRead)
 
 int BMPImage::SkipPixelData(int pixelsToSkip)
 {
+    if (filePath == NULL)
+        return -1;
+    
     if (!fileOpen)
     {
         fPointer = fopen(filePath, "rb");
@@ -74,6 +93,8 @@ int BMPImage::PixelByteSize()
 
 void BMPImage::SeekToHLine(int vertPos)
 {
+    if (filePath == NULL)
+        return;
     
     if (!fileOpen)
     {
@@ -82,14 +103,25 @@ void BMPImage::SeekToHLine(int vertPos)
     }
     
     if (infoHeader.biHeight < 0)
+    {
         fseek(fPointer, fileHeader.bfOffBits+(vertPos*widthMult4)*PixelByteSize(), SEEK_SET);
+    }
     else
         fseek(fPointer, fileHeader.bfOffBits+((Height()-vertPos)*widthMult4)*PixelByteSize(), SEEK_SET);
 }
 
 void BMPImage::readHeaderData()
 {
+    if (filePath == NULL || fPointer == NULL)
+        return;
+    
     fread(&fileHeader, sizeof(struct BMPImage::BmpFileHeader), 1, fPointer);
     fread(&infoHeader, sizeof(struct BMPImage::BmpInfoHeader), 1, fPointer);
     widthMult4 = infoHeader.biWidth + (infoHeader.biWidth%4);
+}
+
+BMPImage::~BMPImage()
+{
+    if (fPointer != NULL)
+        Close();
 }

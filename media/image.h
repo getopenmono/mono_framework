@@ -34,6 +34,8 @@ namespace mono { namespace media {
         const char *filePath;
         FILE *fPointer;
         bool fileOpen;
+        bool imageValid;
+        
     public:
         
         /**
@@ -84,6 +86,14 @@ namespace mono { namespace media {
          */
         virtual void SeekToHLine(int vertPos) = 0;
         
+        /**
+         * Returns `true` if image file is loaded correctly.
+         * @returns `true` if file is really an image, `false` otherwise
+         */
+        virtual bool IsValid()
+        {
+            return imageValid;
+        }
         
         /**
          * Close the file system object, to free resources. You should close the

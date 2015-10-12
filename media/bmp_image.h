@@ -49,8 +49,11 @@ namespace mono { namespace media {
         
     public:
         
+        BMPImage();
         
         BMPImage(const char *path);
+        
+        ~BMPImage();
         
         int ReadPixelData(void *target, int bytesToRead);
         int SkipPixelData(int pixelsToSkip);

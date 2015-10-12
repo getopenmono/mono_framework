@@ -11,7 +11,7 @@
 
 using namespace mono::ui;
 
-TextLabelView::TextLabelView(const char *txt) : textColor(display::WhiteColor)
+TextLabelView::TextLabelView(const char *txt) : textColor(display::WhiteColor), bgColor(display::BlackColor)
 {
     this->text = (char*)txt;
     this->setTextSize(1);
@@ -19,7 +19,7 @@ TextLabelView::TextLabelView(const char *txt) : textColor(display::WhiteColor)
     viewRect.setSize( geo::Size(TextPixelWidth(), TextPixelHeight()) );
 }
 
-TextLabelView::TextLabelView(const char *txt, geo::Rect rct) : textColor(display::WhiteColor)
+TextLabelView::TextLabelView(const char *txt, geo::Rect rct) : textColor(display::WhiteColor), bgColor(display::BlackColor)
 {
     this->text = (char*) txt;
     this->setTextSize(2);
@@ -49,7 +49,7 @@ uint16_t TextLabelView::TextPixelWidth() const
     if (text == NULL)
         return 0;
     
-    return strlen(text)*5*TextSize();
+    return strlen(text)*5*TextSize()+1;
 }
 
 uint16_t TextLabelView::TextPixelHeight() const
@@ -57,7 +57,7 @@ uint16_t TextLabelView::TextPixelHeight() const
     if (text == NULL)
         return 0;
     
-    return 7*TextSize();
+    return 7*TextSize()+1;
 }
 
 
@@ -70,6 +70,11 @@ void TextLabelView::setTextSize(uint8_t newSize)
 void TextLabelView::setTextColor(display::Color col)
 {
     textColor = col;
+}
+
+void TextLabelView::setBackgroundColor(display::Color col)
+{
+    bgColor = col;
 }
 
 void TextLabelView::setAlignment(TextAlignment align)
@@ -113,6 +118,9 @@ void TextLabelView::repaint()
     }
     
     View::painter.setTextSize(TextSize());
+    painter.setForegroundColor(TextColor());
+    painter.setBackgroundColor(bgColor);
+    
     while (c != '\0' && c != '\n' && offset.X()+TextSize()*5 < viewRect.Width()) {
         View::painter.drawChar(offset.X(), offset.Y(), c);
         offset.appendX(TextSize()*5+TextSize()-1);

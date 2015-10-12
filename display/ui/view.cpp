@@ -30,6 +30,11 @@ void View::setSize(geo::Size siz)
     this->viewRect.setSize(siz);
 }
 
+void View::setRect(geo::Rect rect)
+{
+    this->viewRect = rect;
+}
+
 mono::geo::Point& View::Position()
 {
     return viewRect.Point();
@@ -66,6 +71,11 @@ uint16_t View::DisplayWidth()
 uint16_t View::DisplayHeight()
 {
     return View::painter.CanvasHeight();
+}
+
+mono::geo::Size View::DisplaySize()
+{
+    return mono::geo::Size(DisplayWidth(), DisplayHeight());
 }
 
 View::Orientation View::DisplayOrientation()

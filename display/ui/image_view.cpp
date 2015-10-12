@@ -11,6 +11,11 @@
 
 using namespace mono::ui;
 
+ImageView::ImageView() : crop(0,0,0,0)
+{
+    image = NULL;
+}
+
 ImageView::ImageView(media::Image *img) : crop(0,0, img->Width(), img->Height())
 {
     image = img;
@@ -37,10 +42,29 @@ void ImageView::setCrop(geo::Point crp)
     crop.setPoint(crp);
 }
 
+void ImageView::setImage(media::Image *img)
+{
+    image = img;
+    setCrop(geo::Rect(0,0,img->Width(),img->Height()));
+}
+
 void ImageView::repaint()
 {
+    if (image == NULL)
+        return;
+    
     int h = viewRect.Height() < crop.Height() ? viewRect.Height() : crop.Height();
     int w = viewRect.Width() < crop.Width() ? viewRect.Width() : crop.Width();
+    
+    display::IDisplayController *ctrl = View::painter.DisplayController();
+    uint16_t pixels[176];
+    ctrl->setWindow(viewRect.X(), viewRect.Y(), w, h);
+    
+    //painter.setOrigin(viewRect.X(), viewRect.Y());
+    //painter.setRotation(90);
+    //float32_t *matrix = View::painter.CurrentMatrix();
+    int iy = 0;
+    
     for(int16_t y=crop.Y(); y<h; y++)
     {
         image->SeekToHLine(y);
@@ -48,12 +72,29 @@ void ImageView::repaint()
         if (crop.X() > 0)
             image->SkipPixelData(crop.X());
         
-        for (int16_t x=crop.X(); x<w; x++) {
+        image->ReadPixelData(pixels, w);
+        
+        for (int16_t x=0; x<w-crop.X(); x++) {
             
-            uint16_t pixel;
-            image->ReadPixelData(&pixel, 1);
-            View::painter.setForegroundColor(pixel);
-            View::painter.drawPixel(viewRect.X()+x, viewRect.Y()+y);
+            //int16_t x1 = x*matrix[0] + iy*matrix[1] + 1*matrix[2];
+            //int16_t y1 = x*matrix[3] + iy*matrix[4] + 1*matrix[5];
+            
+            //if (x1 == x && iy == y1)
+                ctrl->write(pixels[x]);
+//            else
+//            {
+//                painter.setForegroundColor(pixels[x]);
+//                painter.drawPixel(viewRect.X()+x, viewRect.Y()+iy);
+//            }
+            
+            //View::painter.setForegroundColor(pixel);
+            //View::painter.drawPixel(viewRect.X()+x, viewRect.Y()+y);
         }
+        
+        iy++;
     }
+    
+    image->Close();
+    // set to identity
+    //painter.ResetTransformation();
 }
