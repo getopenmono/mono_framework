@@ -102,6 +102,15 @@ namespace mono { namespace display {
         uint16_t CanvasHeight() const;
         
         /**
+         * Get a pointer to the painters current display controller
+         * You can use this method to obtain the display controller interface
+         * if you need to blit pixels directly to the display.
+         *
+         * @returns A pointer to an object implementing the @ref IDisplayController interface
+         */
+        IDisplayController* DisplayController() const;
+        
+        /**
          * Draw a single pixel on a specific position on the display.
          *
          * The pixel will be the active foreground color, unless you set the 

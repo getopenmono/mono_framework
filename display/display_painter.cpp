@@ -59,6 +59,10 @@ uint16_t DisplayPainter::CanvasHeight() const
     return displayCtrl->ScreenHeight();
 }
 
+IDisplayController* DisplayPainter::DisplayController() const
+{
+    return displayCtrl;
+}
 void DisplayPainter::drawPixel(uint16_t x, uint16_t y, bool bg)
 {
     displayCtrl->setWindow(x, y, 1, 1);
