@@ -5,6 +5,8 @@
 *.xcworkspacedata
 *.xcuserstate
 build
+include
+monolib.a
 wayEngDisplayTest
 display/ili9225g/drv_lcd_ili9225g.c.txt
 
