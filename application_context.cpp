@@ -16,11 +16,6 @@ extern "C" {
 #include <project.h>
 }
 
-void faultExceptionHandler()
-{
-    mbed_die();
-}
-
 
 using namespace mono;
 
@@ -46,13 +41,13 @@ void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
     this->application = monoApp;
     
     //CyIntSetSysVector(CY_INT_NMI_IRQN, &faultExceptionHandler);
-    CyIntSetSysVector(CY_INT_HARD_FAULT_IRQN, &faultExceptionHandler);
+    CyIntSetSysVector(CY_INT_HARD_FAULT_IRQN, &mbed_die);
     //CyIntSetSysVector(CY_INT_MEM_MANAGE_IRQN, &faultExceptionHandler);
     //CyIntSetSysVector(CY_INT_BUS_FAULT_IRQN, &faultExceptionHandler);
     //CyIntSetSysVector(CY_INT_USAGE_FAULT_IRQN, &faultExceptionHandler);
     
     //PowerSystem->onSystemPowerOnReset();
-    //pwrMgmt.processResetAwarenessQueue();
+    pwrMgmt.processResetAwarenessQueue();
     
     //defaultSerial.printf("Display init deactivated\n\t");
     mono::IApplicationContext::Instance->DisplayController->init();
