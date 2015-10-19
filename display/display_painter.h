@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <color.h>
 #include "display_controller_interface.h"
+//#include <arm_math.h>
+typedef float float32_t;
 
 namespace mono { namespace display {
     
@@ -60,6 +62,20 @@ namespace mono { namespace display {
         
         int16_t abs(int16_t a);
         
+        /**
+         * Current coordinate system transformation matrix, initialized to the
+         * the inditity matrix.
+         */
+        //arm_matrix_instance_f32 TransformationMatrix;
+        
+        float32_t currentMatrix[9];
+        
+//        const float32_t identityMatrix[9] = {
+//            1, 0, 0,
+//            0, 1, 0,
+//            0, 0, 1
+//        };
+        
     public:
         
         /**
@@ -85,6 +101,19 @@ namespace mono { namespace display {
         uint8_t TextSize() const;
         void setTextSize(uint8_t size);
         
+        float32_t* CurrentMatrix();
+        
+        /**
+         * Reset the transformation matrix to identity (no transformations)
+         */
+        void ResetTransformation();
+        
+        void setRotation(int degrees);
+        
+        void setOrigin(int16_t x, int16_t y);
+        
+        void setScaling(uint16_t percent);
+        
         /**
          * Get the canvas width in pixels. This is the display display width as
          * well.
@@ -100,6 +129,15 @@ namespace mono { namespace display {
          * @returns The canvas/display height in pixels
          */
         uint16_t CanvasHeight() const;
+        
+        /**
+         * Get a pointer to the painters current display controller
+         * You can use this method to obtain the display controller interface
+         * if you need to blit pixels directly to the display.
+         *
+         * @returns A pointer to an object implementing the @ref IDisplayController interface
+         */
+        IDisplayController* DisplayController() const;
         
         /**
          * Draw a single pixel on a specific position on the display.
@@ -204,8 +242,6 @@ namespace mono { namespace display {
          * @param background Optional: Set this to `true` to paint in active background color
          */
         void drawHLine(uint16_t x1, uint16_t x2, uint16_t y, bool background = false);
-        
-        
         
     };
     

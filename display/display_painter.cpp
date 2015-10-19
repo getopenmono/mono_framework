@@ -8,6 +8,7 @@
 
 #include "display_painter.h"
 #include "glcdfont.h"
+#include <math.h>
 
 using namespace mono::display;
 
@@ -17,6 +18,10 @@ DisplayPainter::DisplayPainter(IDisplayController *dispctrl) : foregroundColor(W
     
     lineWidth = 1;
     textSize = 1;
+    
+    //memcpy(currentMatrix, identityMatrix, sizeof(float32_t)*9);
+    
+    
 }
 
 void DisplayPainter::setForegroundColor(Color color)
@@ -59,18 +64,59 @@ uint16_t DisplayPainter::CanvasHeight() const
     return displayCtrl->ScreenHeight();
 }
 
+IDisplayController* DisplayPainter::DisplayController() const
+{
+    return displayCtrl;
+}
+
+float32_t* DisplayPainter::CurrentMatrix()
+{
+    return currentMatrix;
+}
+
+
+void DisplayPainter::ResetTransformation()
+{
+    //memcpy(currentMatrix, identityMatrix, sizeof(float32_t)*9);
+}
+
+void DisplayPainter::setRotation(int degrees)
+{
+    float32_t rads = degrees/360.0 * 2*3.1428;
+    currentMatrix[0] = cosf(rads);
+    currentMatrix[1] = -sinf(rads);
+    currentMatrix[3] = sinf(rads);
+    currentMatrix[4] = cosf(rads);
+}
+
+void DisplayPainter::setOrigin(int16_t x, int16_t y)
+{
+    currentMatrix[2] = x;
+    currentMatrix[5] = y;
+}
+
+void DisplayPainter::setScaling(uint16_t percent)
+{
+    
+}
+
+
 void DisplayPainter::drawPixel(uint16_t x, uint16_t y, bool bg)
 {
-    displayCtrl->setWindow(x, y, 1, 1);
+    //apply transformation matrix
+    int16_t x1 = x;//x*currentMatrix[0] + y*currentMatrix[1] + 1*currentMatrix[2];
+    int16_t y1 = y;//x*currentMatrix[3] + y*currentMatrix[4] + 1*currentMatrix[5];
+    
+    displayCtrl->setWindow(x1, y1, 1, 1);
     displayCtrl->write(bg ? backgroundColor : foregroundColor);
 }
 
 void DisplayPainter::drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool bg)
 {
-    drawVLine(x, y, y+height, bg);
-    drawVLine(x+width, y, y+height, bg);
-    drawHLine(x, x+width, y, bg);
-    drawHLine(x, x+width, y+height, bg);
+    drawLine(x, y, y+height, bg);
+    drawLine(x+width, y, y+height, bg);
+    drawLine(x, x+width, y, bg);
+    drawLine(x, x+width, y+height, bg);
 }
 
 void DisplayPainter::drawFillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool bg)
@@ -167,7 +213,10 @@ void DisplayPainter::drawChar(uint16_t x, uint16_t y, char character)
                 else {  // big size
                     drawFillRect(x+i*textSize, y+j*textSize, textSize, textSize, true);
                 }
+            } else {
+                //this->displayCtrl->setCursor(x+i, y+j+1);
             }
+            
             
             line >>= 1;
         }
