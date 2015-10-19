@@ -64,9 +64,6 @@ uint16_t HX8340::read()
 
 void HX8340::init()
 {
-    PWM_Start();
-    //PWM_WriteCompare2(0);
-    PWM_WriteCompare1(128);
     
     TFT_Start();
     
@@ -152,6 +149,10 @@ void HX8340::init()
     for (int i=0; i<176*220; i++) {
         this->write(BlackColor);
     }
+    
+    PWM_Start();
+    //PWM_WriteCompare2(0);
+    PWM_WriteCompare1(128);
 }
 
 void HX8340::LCD_Write_COM(uint16_t comm)

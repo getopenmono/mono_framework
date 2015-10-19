@@ -15,6 +15,7 @@
 #include <application_controller_interface.h>
 #include <application_context_interface.h>
 #include <application_run_loop_task_interface.h>
+#include <queue_interrupt.h>
 
 #include <point.h>
 #include <size.h>

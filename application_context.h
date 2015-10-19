@@ -10,10 +10,16 @@
 #define __usbtest__application_context__
 
 #include <application_context_interface.h>
-//#include <hx8340.h>
+
+#ifdef MONO_DISP_CTRL_HX8340
+#include "display/hx8340/hx8340.h"
+#else
 #include "display/ili9225g/ili9225g.h"
+#endif
+
 #include <application_run_loop.h>
 #include "mono_power_management.h"
+
 
 namespace mono {
     
@@ -29,8 +35,11 @@ namespace mono {
         power::MonoPowerManagement pwrMgmt;
         
         //Depends on PowerMgmt
+#ifdef MONO_DISP_CTRL_HX8340
+        mono::display::HX8340 dispController;
+#else
         mono::display::ILI9225G dispController;
-        //mono::display::HX8340 dispController;
+#endif
 		
         ApplicationContext();
         

@@ -21,7 +21,7 @@ extern "C" {
 using namespace mono::display;
 
 ILI9225G::ILI9225G() : IDisplayController(176,220),
-    spi(TFT_SPI_MOSI, TFT_SPI_MISO, TFT_SPI_CLK, NC),
+    spi(TFT_SPI_MOSI, TFT_SPI_MISO, TFT_SPI_CLK, TFT_SPI_CS),
     Reset(TFT_RESET, 0),
     RegisterSelect(TFT_REGISTER_SELECT, 1),
     IM0(TFT_IM0, 1),
@@ -51,6 +51,8 @@ void ILI9225G::init()
     wait_ms(15);
     Reset = 1; // active low
     wait_ms(50);
+    
+    defaultSerial.printf("display init routine!\n\r");
     
     //************* Start Initial Sequence **********//
     writeCommand(0x0011, 0x0000);
@@ -109,7 +111,7 @@ void ILI9225G::init()
         this->write(BlackColor);
     }
     
-    PWM_WriteCompare1(128);
+    PWM_WriteCompare1(64);
 }
 
 void ILI9225G::setWindow(int x, int y, int width, int height)
@@ -199,6 +201,9 @@ uint16_t ILI9225G::read()
 void ILI9225G::onSystemPowerOnReset()
 {
     CyPins_SetPinDriveMode(TFT_TEARING_EFFECT, CY_PINS_DM_DIG_HIZ);
+    CyPins_SetPinDriveMode(TFT_LED_PWR, CY_PINS_DM_RES_DWN);
+    CyPins_ClearPin(TFT_LED_PWR);
+    
     //PWM_Start();
     
     //PWM_WriteCompare1(0); // turn off display light
@@ -213,6 +218,7 @@ void ILI9225G::onSystemEnterSleep()
     writeCommand(0x11, 0x07);
     wait_ms(50);
     writeCommand(0x10, 0x0A01); // put controller into standby
+    
 }
 
 void ILI9225G::onSystemWakeFromSleep()

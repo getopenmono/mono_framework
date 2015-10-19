@@ -23,6 +23,7 @@ namespace mono { namespace power {
         friend mono::ApplicationContext;
     protected:
         
+        uint8_t DriveModeRegisters[3*9];
         
         //ACT8600PowerSystem powerSubsystem;
         
@@ -34,6 +35,10 @@ namespace mono { namespace power {
         void powerDownMCUPeripherals();
         void powerUpMCUPeripherals();
         
+        void saveDMRegisters();
+        void saveDMPort(uint32_t regAddrOffset, uint8_t *destOffset);
+        void restoreDMRegisters();
+        void restoreDMPort(uint32_t regAddrOffset, uint8_t *srcOffset);
         
     public:
         

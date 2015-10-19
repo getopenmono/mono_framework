@@ -10,10 +10,17 @@
 #include "application_controller_interface.h"
 #include <display_painter.h>
 #include "consoles.h"
+#include <mbed_interface.h>
 
 extern "C" {
 #include <project.h>
 }
+
+void faultExceptionHandler()
+{
+    mbed_die();
+}
+
 
 using namespace mono;
 
@@ -25,8 +32,6 @@ ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoo
     PWM_Start();
     PWM_WriteCompare1(0);
     PWM_WriteCompare2(0);
-    
-    //CyIntSetSysVector(<#uint8 number#>, <#cyisraddress address#>)
 }
 
 int ApplicationContext::exec()
@@ -39,8 +44,15 @@ int ApplicationContext::exec()
 void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
 {
     this->application = monoApp;
+    
+    //CyIntSetSysVector(CY_INT_NMI_IRQN, &faultExceptionHandler);
+    CyIntSetSysVector(CY_INT_HARD_FAULT_IRQN, &faultExceptionHandler);
+    //CyIntSetSysVector(CY_INT_MEM_MANAGE_IRQN, &faultExceptionHandler);
+    //CyIntSetSysVector(CY_INT_BUS_FAULT_IRQN, &faultExceptionHandler);
+    //CyIntSetSysVector(CY_INT_USAGE_FAULT_IRQN, &faultExceptionHandler);
+    
     //PowerSystem->onSystemPowerOnReset();
-    pwrMgmt.processResetAwarenessQueue();
+    //pwrMgmt.processResetAwarenessQueue();
     
     //defaultSerial.printf("Display init deactivated\n\t");
     mono::IApplicationContext::Instance->DisplayController->init();
@@ -71,16 +83,4 @@ void ApplicationContext::enterSleepMode()
     
     this->application->monoWakeFromSleep();
     
-}
-
-
-void faultExceptionHandler()
-{
-    while(1)
-    {
-        PWM_WriteCompare1(0);
-        wait(0.5);
-        PWM_WriteCompare1(64);
-        wait(0.25);
-    }
 }
