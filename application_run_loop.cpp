@@ -7,6 +7,7 @@
 //
 
 #include "application_run_loop.h"
+#include "application_context_interface.h"
 #include <mbed.h>
 #include <consoles.h>
 
@@ -17,12 +18,13 @@ AppRunLoop::AppRunLoop()
     runLoopActive = true;
     lastDtrValue = true;
     resetOnDTR = true;
+    resetOnUserButton = false;
     taskQueueHead = NULL;
 }
 
 void AppRunLoop::exec()
 {
-    mono::defaultSerial.printf("mono enter run loop!\n\r");
+    debug("mono enter run loop!\n\r");
     
     lastDtrValue = mono::defaultSerial.DTR();
     
@@ -33,10 +35,18 @@ void AppRunLoop::exec()
             bool dtr = mono::defaultSerial.DTR();
             if (resetOnDTR && (!dtr) && lastDtrValue)
             {
-                mono::defaultSerial.printf("mono reboot!\n\r");
-                CySoftwareReset();
+                debug("mono DTR reboot!\n\r");
+                IApplicationContext::SoftwareReset();
             }
             lastDtrValue = dtr;
+        }
+        
+        if (resetOnUserButton)
+        {
+            if (CyPins_ReadPin(SW_USER) == 0)
+            {
+                IApplicationContext::SoftwareReset();
+            }
         }
         
         processDynamicTaskQueue();
@@ -46,7 +56,7 @@ void AppRunLoop::exec()
         wait_ms(10);
     }
     
-    mono::defaultSerial.printf("run loop terminated!");
+    debug("run loop terminated!");
 }
 
 
@@ -122,4 +132,15 @@ void AppRunLoop::removeTaskInQueue(IRunLoopTask *item)
     
     if (item->nextTask != NULL)
         item->nextTask->previousTask = item->previousTask;
+}
+
+void AppRunLoop::setResetOnUserButton(bool roub)
+{
+    if (roub)
+    {
+        CyPins_SetPinDriveMode(SW_USER, CY_PINS_DM_RES_UP);
+        resetOnUserButton = true;
+    }
+    else
+        resetOnUserButton = false;
 }

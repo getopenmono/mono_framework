@@ -44,6 +44,13 @@ namespace mono {
         bool lastDtrValue;
         
         /**
+         * Set to `true` if you want the run loop to call software reset when 
+         * pressing the user button.
+         * Initial value is `false`
+         */
+        bool resetOnUserButton;
+        
+        /**
          * A pointer to the head task of the dynamic task queue.
          * If no task are in the queue, this is NULL
          */
@@ -100,6 +107,15 @@ namespace mono {
          * @return `true` if the object was found and removed, `false` otherwise. 
          */
         bool removeDynamicTask(IRunLoopTask *task);
+        
+        /**
+         * @brief Sets the *Reset on User Button* mode
+         * 
+         * If `true` the run loop will check the user button, and if pressed
+         * it will trigger a software reset.
+         * @param roub `true` will reset on user button, `false` is normal functionality.
+         */
+        void setResetOnUserButton(bool roub);
     };
     
 }

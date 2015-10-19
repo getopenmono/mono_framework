@@ -49,6 +49,25 @@ namespace mono {
         virtual void sleepForMs(uint32_t ms) = 0;
         
         /**
+         * Subclasses must implement this to enable the "Reset On User Button"
+         * behaviour. See @ref ResetOnUserButton
+         */
+        virtual void resetOnUserButton() = 0;
+        
+        /**
+         * Subclasses must implement this method to enable software resets.
+         * See @ref SoftwareReset
+         */
+        virtual void _softwareReset() = 0;
+        
+        
+        /**
+         * Subclasses must implement this method to allow *reset to bootloader*
+         * See @ref SoftwareResetToBootloader
+         */
+        virtual void _softwareResetToBootloader() = 0;
+        
+        /**
          * Protected constructor that must be called by the sub class. It sets up
          * needed pointers for the required subsystems. This ensure the pointers
          * are available when class members' constructors are executed.
@@ -128,6 +147,22 @@ namespace mono {
         }
         
         /**
+         * @brief Enable *Reset On User Button* mode, where user button resets mono.
+         * 
+         * If your application encounters unmet dependencies (missing SD Card) or
+         * gracefully handles any runtime errors, you can call this method.
+         * When called, the run loop will reset mono if the user button (USER_SW)
+         * is activated.
+         *
+         * This method allows you to reset mono using the user button, instead of
+         * the reset button.
+         */
+        static void ResetOnUserButton()
+        {
+            IApplicationContext::Instance->resetOnUserButton();
+        }
+        
+        /**
          * Enter MCU sleep mode for a short time only. Sets a wake-up timer us the
          * preferred interval, and calls the @ref EnterSleepMode method.
          * @param ms The number of milli-second to sleep
@@ -136,6 +171,25 @@ namespace mono {
         {
             IApplicationContext::Instance->sleepForMs(ms);
         }
+        
+        /**
+         * @brief Trigger a software reset of Mono's MCU
+         * 
+         * Calls the MCU's reset exception, which will reset the system. When reset
+         * the bootloader will run again, before entering the application.
+         */
+        static void SoftwareReset() __attribute__((noreturn)) { IApplicationContext::Instance->_softwareReset(); }
+        
+        /**
+         * @brief Trigger a software reset, and stay in bootloader.
+         * 
+         * Calls the MCU reset exception, which resets the system. This method
+         * sets bootloader parameters to stay in bootloader mode.
+         *
+         * **CAUTION: To get out of bootloader mode you must do a hard reset
+         * (by the reset button) or program mono using monoprog.**
+         */
+        static void SoftwareResetToBootloader() __attribute__((noreturn)) { IApplicationContext::Instance->_softwareResetToBootloader(); }
         
         /** Get a pointer to the global application context */
         static IApplicationContext* Instance;

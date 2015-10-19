@@ -84,3 +84,24 @@ void ApplicationContext::enterSleepMode()
     this->application->monoWakeFromSleep();
     
 }
+
+void ApplicationContext::_softwareReset()
+{
+    Bootloadable_SET_RUN_TYPE(Bootloadable_START_APP);
+    CySoftwareReset();
+    while(1); // silence compiler warning
+}
+
+void ApplicationContext::_softwareResetToBootloader()
+{
+    Bootloadable_SET_RUN_TYPE(Bootloadable_START_BTLDR);
+    CySoftwareReset();
+    while(1); // silence compiler warning
+}
+
+void ApplicationContext::resetOnUserButton()
+{
+    debug("Mono will reset on user button!\n\r");
+    this->runLoop.setResetOnUserButton(true);
+}
+

@@ -46,6 +46,11 @@ namespace mono {
         void enterSleepMode();
         void sleepForMs(uint32_t ms);
         
+        void resetOnUserButton();
+        
+        void _softwareReset() __attribute((noreturn));
+        void _softwareResetToBootloader() __attribute((noreturn));
+        
     public:
         
         
@@ -53,7 +58,6 @@ namespace mono {
         int exec();
         
         void setMonoApplication(IApplication *monoApp);
-        
     };
     
 }
