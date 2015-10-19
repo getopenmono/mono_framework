@@ -16,7 +16,8 @@ QueueInterrupt::QueueInterrupt(PinName pin, PinMode mode) : mbed::InterruptIn(pi
 {
     this->mode(mode);
     this->addedToRunLoop = false;
-    this->fallEvent = this->riseEvent = false;
+    this->fallEvent = this->riseEvent = deactivateUntilHandler = false;
+    this->isHandled = true;
 //    this->changeEvent = false;
 }
 
@@ -54,14 +55,22 @@ void QueueInterrupt::fall(void (*fptr)())
 
 void QueueInterrupt::_irq_rise_handler()
 {
+    if (deactivateUntilHandler && !isHandled)
+        return;
+    
     this->riseEvent = true;
     this->riseTimeStamp = us_ticker_read();
+    this->isHandled = false;
 }
 
 void QueueInterrupt::_irq_fall_handler()
 {
+    if (deactivateUntilHandler && !isHandled)
+        return;
+    
     this->fallEvent = true;
     this->fallTimeStamp = us_ticker_read();
+    this->isHandled = false;
 }
 
 //void QueueInterrupt::_irq_change_handler()
@@ -75,17 +84,30 @@ void QueueInterrupt::taskHandler()
     if (riseEvent) {
         riseEvent = false;
         _queue_rise.call();
+        isHandled = true;
     }
     if (fallEvent)
     {
         fallEvent = false;
         _queue_fall.call();
+        isHandled = true;
     }
 //    if (changeEvent)
 //    {
 //        changeEvent = false;
 //        _change.call();
 //    }
+}
+
+void QueueInterrupt::DeactivateUntilHandled(bool deactive)
+{
+    deactivateUntilHandler = deactive;
+    isHandled = true;
+}
+
+bool QueueInterrupt::IsInterruptsWhilePendingActive() const
+{
+    return this->deactivateUntilHandler;
 }
 
 uint32_t QueueInterrupt::FallTimeStamp()

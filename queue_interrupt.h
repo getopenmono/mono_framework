@@ -47,7 +47,7 @@ namespace mono {
     {
     protected:
         
-        bool addedToRunLoop, fallEvent, riseEvent, snapShot;
+        bool addedToRunLoop, fallEvent, riseEvent, snapShot, deactivateUntilHandler, isHandled;
 //        bool changeEvent;
         uint32_t riseTimeStamp, fallTimeStamp;
         
@@ -55,8 +55,8 @@ namespace mono {
         mbed::FunctionPointer _queue_rise, _queue_fall;
         
         void taskHandler();
-        inline void activateQueueTaskHandler();
-        inline void deactivateQueueTaskHandler();
+        void activateQueueTaskHandler();
+        void deactivateQueueTaskHandler();
         
         void _irq_rise_handler();
         void _irq_fall_handler();
@@ -71,6 +71,27 @@ namespace mono {
          */
         QueueInterrupt(PinName inputPinName, PinMode mode = PullNone);
         ~QueueInterrupt();
+        
+        /**
+         * Set this property to `true`, to turn off incoming interrupts while
+         * waiting for the run loop to finish process a pending interrupt.
+         * 
+         * If you want to do heavy calculations or loading in your interrupt
+         * function, you might want to not queue up new interrupts while you
+         * process a previous one.
+         * @param OPTIONAL: Set this to false, to *not* disable interrupts while processing. Default is `true`
+         */
+        void DeactivateUntilHandled(bool deactive = true);
+        
+        /**
+         * Get the state of the @ref DeactivateUntilHandled property. If `true`
+         * the hardware interrupt is deactivated until the handler has run.
+         * If `false` (the default when constructing the object), all interrupt 
+         * are intercepted, and will be handled. This means the handler can be
+         * executed two times in row.
+         * @returns `true` if incomming interrupt are displaed, until previous is handled.
+         */
+        bool IsInterruptsWhilePendingActive() const;
         
         /** Attach a function to call when a rising edge occurs on the input
          *
@@ -110,8 +131,22 @@ namespace mono {
             gpio_irq_set(&gpio_irq, IRQ_FALL, 1);
         }
         
+        /**
+         * On fall interrupts, this is the µSec. ticker timestamp for the 
+         * falling edge inetrrupt.
+         * You can use this to calculate the time passed from the interrupt
+         * occured, to the time you process it in the application run loop.
+         * @returns The ticker time of the falling edge in micro seconds
+         */
         uint32_t FallTimeStamp();
         
+        /**
+         * On rise interrupts, this is the µSec. ticker timestamp for the
+         * rising edge inetrrupt.
+         * You can use this to calculate the time passed from the interrupt
+         * occured, to the time you process it in the application run loop.
+         * @returns The ticker time of the rising edge in micro seconds
+         */
         uint32_t RiseTimeStamp();
         
         /**
