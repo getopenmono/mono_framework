@@ -61,6 +61,15 @@ uint16_t HX8340::read()
     return 0;
 }
 
+void HX8340::setBrightness(uint8_t value)
+{
+    PWM_WriteCompare1(value);
+}
+
+uint8_t HX8340::Brightness() const
+{
+    return PWM_ReadCompare1();
+}
 
 void HX8340::init()
 {
@@ -152,7 +161,7 @@ void HX8340::init()
     
     PWM_Start();
     //PWM_WriteCompare2(0);
-    PWM_WriteCompare1(128);
+    setBrightness(128);
 }
 
 void HX8340::LCD_Write_COM(uint16_t comm)

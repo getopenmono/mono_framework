@@ -38,6 +38,9 @@ namespace mono { namespace display {
         
         uint16_t read();
         
+        void setBrightness(uint8_t value);
+        uint8_t Brightness() const;
+        
         
 //        void writeChar(char c);
 //        void writeString(const char *str);

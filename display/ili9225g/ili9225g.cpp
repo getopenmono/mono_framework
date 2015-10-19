@@ -195,6 +195,16 @@ uint16_t ILI9225G::read()
     return 0;
 }
 
+void ILI9225G::setBrightness(uint8_t value)
+{
+    PWM_WriteCompare1(value);
+}
+
+uint8_t ILI9225G::Brightness() const
+{
+    return PWM_ReadCompare1();
+}
+
 
 /// Power Aware protocol
 
@@ -232,5 +242,5 @@ void ILI9225G::onSystemWakeFromSleep()
 
 void ILI9225G::OnSystemBatteryLow()
 {
-    
+    PWM_WriteCompare1(32);
 }

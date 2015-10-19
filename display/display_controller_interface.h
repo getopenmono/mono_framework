@@ -128,6 +128,33 @@ namespace mono { namespace display
         virtual void write(Color pixelColor) = 0;
         
         
+        /**
+         * Set the display backlight brightness. Higher values means more 
+         * brightness. The display controller implementation might use a PWM
+         * to switch backlight LED's.
+         *
+         * @param value The brightness 0: off, 255: max brightness
+         */
+        virtual void setBrightness(uint8_t value) = 0;
+        
+        /**
+         * Set the display backlight brightness. Higher values means more
+         * brightness. The display controller implementation might use a PWM
+         * to switch backlight LED's.
+         *
+         * @param percent The brightness percentage, 0.00: off, 1.00: max brightness
+         */
+        virtual void setBrightness(float percent) { setBrightness(percent * 255); }
+        
+        /**
+         * @brief Gets the current LES backlight brightness
+         * The display controller implementation might use a PWM to dim the display,
+         * this method returns the PWM duty cycle.
+         * @returns The current brightness level in 8-bit format: 0: off, 255: max brightness
+         */
+        virtual uint8_t Brightness() const = 0;
+        
+        
         
         
         virtual uint16_t read() = 0;
