@@ -35,6 +35,8 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
 
 void ILI9225G::init()
 {
+    setBrightness(0);
+    
     //mono::defaultSerial.printf("In constructor:\n\rDR: 0x%x, DM0: 0x%x, DM1: 0x%x, DM2: 0x%x\n\r",dr,dm0,dm1,dm2);
     //mono::defaultSerial.printf("After\n\rDR: 0x%x, DM0: 0x%x, DM1: 0x%x, DM2: 0x%x\n\r",CY_GET_REG8(CYREG_PRT12_DR), CY_GET_REG8(CYREG_PRT12_DM0), CY_GET_REG8(CYREG_PRT12_DM1),CY_GET_REG8(CYREG_PRT12_DM2));
     
@@ -111,7 +113,7 @@ void ILI9225G::init()
         this->write(BlackColor);
     }
     
-    PWM_WriteCompare1(64);
+    setBrightness(64);
 }
 
 void ILI9225G::setWindow(int x, int y, int width, int height)
@@ -214,9 +216,8 @@ void ILI9225G::onSystemPowerOnReset()
     CyPins_SetPinDriveMode(TFT_LED_PWR, CY_PINS_DM_RES_DWN);
     CyPins_ClearPin(TFT_LED_PWR);
     
-    //PWM_Start();
-    
-    //PWM_WriteCompare1(0); // turn off display light
+    PWM_Start();
+    setBrightness(0);
 }
 
 void ILI9225G::onSystemEnterSleep()
@@ -242,5 +243,5 @@ void ILI9225G::onSystemWakeFromSleep()
 
 void ILI9225G::OnSystemBatteryLow()
 {
-    PWM_WriteCompare1(32);
+    setBrightness(32);
 }

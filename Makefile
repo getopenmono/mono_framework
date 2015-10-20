@@ -104,8 +104,7 @@ $(BUILD_DIR):
 
 monolib.a: $(MONO_OBJECTS)
 	@echo "Linking Mono Framework..."
-	@$(AR) rcs $@ $(addprefix $(BUILD_DIR)/, $(notdir $^)) $(MBED_LIB)
-	@$(COPY) $@ $(BUILD_DIR)/$@
+	@$(AR) rcs $@ $(addprefix $(BUILD_DIR)/, $(notdir $^))
 	@echo "Copying linker and header files to include dir"
 	@$(MKDIR) -p include
 	@$(COPY) $(MONO_INCLUDE_FILES) include/.
@@ -120,7 +119,7 @@ includeFiles:
 	@echo $(INCS)
 
 clean:
-	$(RM) $(addprefix $(BUILD_DIR)/, $(notdir $(OBJECTS))) $(addprefix $(BUILD_DIR)/, $(notdir $(SYS_OBJECTS))) $(TARGET).elf $(TARGET).bin
+	$(RM) $(addprefix $(BUILD_DIR)/, $(notdir $(MONO_OBJECTS))) include/*.h monolib.a
 
 	
 

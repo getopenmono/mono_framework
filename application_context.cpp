@@ -24,9 +24,7 @@ IApplicationContext *IApplicationContext::Instance = NULL; //&(ApplicationContex
 
 ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoop, &dispController), dispController()
 {
-    PWM_Start();
-    PWM_WriteCompare1(0);
-    PWM_WriteCompare2(0);
+
 }
 
 int ApplicationContext::exec()
