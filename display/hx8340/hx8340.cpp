@@ -4,6 +4,7 @@ extern "C" {
 }
 
 #include <hx8340.h>
+#include <stdio.h>
 
 using namespace mono::display;
 
@@ -75,6 +76,7 @@ void HX8340::init()
 {
     
     TFT_Start();
+    printf("init display HX8340\n\r");
     
 	LCD_Write_COM_DATA(0x26,0x0084); //PT=10,GON=0, DTE=0, D=0100
     CyDelay(40);
@@ -160,7 +162,6 @@ void HX8340::init()
     }
     
     PWM_Start();
-    //PWM_WriteCompare2(0);
     setBrightness(128);
 }
 

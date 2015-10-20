@@ -54,7 +54,7 @@ void ILI9225G::init()
     Reset = 1; // active low
     wait_ms(50);
     
-    defaultSerial.printf("display init routine!\n\r");
+    printf("Display init ILI9225G!\n\r");
     
     //************* Start Initial Sequence **********//
     writeCommand(0x0011, 0x0000);

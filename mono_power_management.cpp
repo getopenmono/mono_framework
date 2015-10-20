@@ -125,7 +125,9 @@ void MonoPowerManagement::powerDownMCUPeripherals()
     
     I2C_Sleep();
 #ifndef MONO_NO_USB
-    USBUART_Stop();
+    USBUART_SaveConfig();
+    USBUART_Suspend();
+    //USBUART_Stop();
 #endif
     CyPins_ClearPin(CYREG_PRT4_PC7);
     
@@ -138,9 +140,12 @@ void MonoPowerManagement::powerUpMCUPeripherals()
     restoreDMRegisters();
     
     CyPins_SetPin(CYREG_PRT4_PC7);
-//#ifndef MONO_NO_USB
-//    USBUART_Start(0, USBUART_DWR_VDDD_OPERATION);
-//#endif
+    
+#ifndef MONO_NO_USB
+    USBUART_Resume();
+    USBUART_RestoreConfig();
+    //USBUART_Start(0, USBUART_DWR_VDDD_OPERATION);
+#endif
     PWM_Wakeup();
     I2C_Wakeup();
     SPI0_Wakeup();
