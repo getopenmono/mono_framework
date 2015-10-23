@@ -30,7 +30,7 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
     
     //CY_SET_REG8(CYREG_PRT12_SIO_CFG, CY_GET_REG8(CYREG_PRT12_SIO_CFG) | 0x01);
     //
-    IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
+    //IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
 }
 
 void ILI9225G::init()
@@ -44,14 +44,17 @@ void ILI9225G::init()
     
     // setting pins agin since setting them in global constructor does not work YET!!
     // TODO: make pin assignment work (not get overwritten) in global constructors!
+
     Reset = mbed::DigitalOut(TFT_RESET, 1);
+    CyPins_SetPinDriveMode(TFT_RESET, CY_PINS_DM_STRONG);
     RegisterSelect = mbed::DigitalOut(TFT_REGISTER_SELECT, 1);
     IM0 = mbed::DigitalOut(TFT_IM0, 1);
     spi.format(0);
-    
     Reset = 0;
+    CyPins_ClearPin(TFT_RESET);
     wait_ms(15);
     Reset = 1; // active low
+    CyPins_SetPin(TFT_RESET);
     wait_ms(50);
     
     printf("Display init ILI9225G!\n\r");
@@ -113,7 +116,8 @@ void ILI9225G::init()
         this->write(BlackColor);
     }
     
-    setBrightness(64);
+    PWM_Start();
+    setBrightness(128);
 }
 
 void ILI9225G::setWindow(int x, int y, int width, int height)
@@ -183,7 +187,7 @@ void ILI9225G::writeData(uint16_t data)
 void ILI9225G::writeRegister(uint16_t regData)
 {
     RegisterSelect = 0;
-    spi.write(regData & 0xFF);
+    SPI1_WriteTxData(regData & 0xFF);
 }
 
 void ILI9225G::writeCommand(uint16_t regData, uint16_t data)
@@ -213,11 +217,11 @@ uint8_t ILI9225G::Brightness() const
 void ILI9225G::onSystemPowerOnReset()
 {
     CyPins_SetPinDriveMode(TFT_TEARING_EFFECT, CY_PINS_DM_DIG_HIZ);
-    CyPins_SetPinDriveMode(TFT_LED_PWR, CY_PINS_DM_RES_DWN);
-    CyPins_ClearPin(TFT_LED_PWR);
+//    CyPins_SetPinDriveMode(TFT_LED_PWR, CY_PINS_DM_RES_DWN);
+//    CyPins_ClearPin(TFT_LED_PWR);
     
-    PWM_Start();
-    setBrightness(0);
+//    PWM_Start();
+//    setBrightness(0);
 }
 
 void ILI9225G::onSystemEnterSleep()

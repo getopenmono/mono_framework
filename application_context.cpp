@@ -26,6 +26,7 @@ ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoo
 {
     PWM_Start();
     PWM_WriteCompare2(0);
+    PWM_WriteCompare1(0);
 }
 
 int ApplicationContext::exec()
@@ -81,7 +82,7 @@ void ApplicationContext::enterSleepMode()
 
 void ApplicationContext::_softwareReset()
 {
-    Bootloadable_SET_RUN_TYPE(0); // force bootloader to run for 2 secs
+    Bootloadable_SET_RUN_TYPE(Bootloadable_START_APP); // force bootloader not to run
     CySoftwareReset();
     while(1); // silence compiler warning
 }

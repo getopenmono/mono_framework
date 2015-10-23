@@ -139,6 +139,7 @@ void AppRunLoop::setResetOnUserButton(bool roub)
     if (roub)
     {
         CyPins_SetPinDriveMode(SW_USER, CY_PINS_DM_RES_UP);
+        wait_us(10); // wait for pull up resistor
         resetOnUserButton = true;
     }
     else
