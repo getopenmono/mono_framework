@@ -11,9 +11,9 @@ INCLUDE_DIR=../mono_buildsystem/include
 BUILD_DIR=build
 MONO_FRAMEWORK_PATH=.
 MBED_PATH=../mbedcomp
-#COMP_LIB=../mono_buildsystem/lib/CyComponentLibrary.a
-#CYPRESS_LIB=../mono_buildsystem/lib/monoCyLib.a
-#MBED_LIB=../mbedcomp/mbedlib.a
+COMP_LIB=../mono_buildsystem/lib/CyComponentLibrary.a
+CYPRESS_LIB=../mono_buildsystem/lib/monoCyLib.a
+MBED_LIB=../mbedcomp/mbedlib.a
 
 # OBJECTS =		$(patsubst %.c,%.o,$(wildcard *.c)) \
 # 				$(patsubst %.cpp,%.o,$(wildcard *.cpp))
@@ -23,10 +23,12 @@ MBED_PATH=../mbedcomp
 # 				$(patsubst %.cpp,%.o,$(wildcard $(MBED_PATH)/common/*.cpp)) \
 # 				$(patsubst %.c,%.o,$(wildcard $(MBED_PATH)/target_cypress/*.c))
 #
-MBED_INCLUDES =	$(MBED_PATH) \
-				$(MBED_PATH)/api \
-				$(MBED_PATH)/hal \
-				$(MBED_PATH)/target_cypress
+MBED_INCLUDES_REL =	. \
+					api \
+					hal \
+					target_cypress
+
+MBED_INCLUDES = $(foreach PATH, $(MBED_INCLUDES_REL), $(MBED_PATH)/$(PATH))
 
 MONO_OBJECTS =	$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/display/*.cpp)) \
@@ -35,16 +37,25 @@ MONO_OBJECTS =	$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/wireless/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/media/*.cpp))
 
-MONO_INCLUDES =	$(MONO_FRAMEWORK_PATH) \
-				$(MONO_FRAMEWORK_PATH)/display \
-				$(MONO_FRAMEWORK_PATH)/display/ili9225g \
-				$(MONO_FRAMEWORK_PATH)/display/ui \
-				$(MONO_FRAMEWORK_PATH)/wireless \
-				$(MONO_FRAMEWORK_PATH)/media
+MONO_INCLUDES_REL = . \
+					display \
+					display/ili9225g \
+					display/ui \
+					wireless \
+					media
+
+MONO_INCLUDES =	$(foreach PATH, $(MONO_INCLUDES_REL), $(MONO_FRAMEWORK_PATH)/$(PATH))
 
 MONO_TARGET_OBJECTS = $(addprefix ./$(BUILD_DIR)/, $(MONO_OBJECTS))
 
 MONO_INCLUDE_FILES = $(foreach FILE,$(MONO_INCLUDES),$(wildcard $(FILE)/*.h))
+
+MBED_INCLUDE_FILES  = $(foreach FILE,$(MBED_PATH)/api,$(wildcard $(FILE)/*.h))
+MBED_INCLUDE_FILES += $(foreach FILE,$(MBED_PATH)/hal,$(wildcard $(FILE)/*.h))
+MBED_INCLUDE_FILES += $(foreach FILE,$(MBED_PATH)/target_cypress,$(wildcard $(FILE)/*.h))
+MBED_INCLUDE_FILES += $(foreach FILE,$(MBED_PATH),$(wildcard $(FILE)/*.h))
+CYLIB_INCLUDE_FILES  = $(foreach FILE,$(INCLUDE_DIR),$(wildcard $(FILE)/*.h))
+CYLIB_INCLUDE_FILES += $(foreach FILE,$(INCLUDE_DIR),$(wildcard $(FILE)/*.ld))
 
 # SYS_OBJECTS = 	$(patsubst %.c,%.o,$(wildcard $(CYPRESS_DIR)/*.c)) \
 # 				$(patsubst %.s,%.o,$(wildcard $(CYPRESS_DIR)/*Gnu.s))
@@ -77,7 +88,14 @@ LD_SYS_LIBS = -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 #   -mfix-cortex-m3-ldrd -u _printf_float -u _scanf_float
 COPY_FLAGS = -j .text -j .eh_frame -j .rodata -j .ramvectors -j .noinit -j .data -j .bss -j .stack -j .heap -j .cyloadablemeta
 
+define \n
+
+
+endef
+
 all: monolib.a
+
+release: mono_framework.a
 
 #parallel: hx8340 monolib.a
 
@@ -106,7 +124,24 @@ monolib.a: $(MONO_TARGET_OBJECTS)
 	@echo "Copying linker and header files to include dir"
 	@$(MKDIR) -p include
 	@$(COPY) $(MONO_INCLUDE_FILES) include/.
-	
+
+mono_framework.a: $(MONO_TARGET_OBJECTS)	
+	@echo "Linking Mono Framework Release..."
+	$(AR) rcs $@ $^
+	@echo "Copying linker and header files to include dir"
+	@$(MKDIR) -p include/mbed/cypress
+	@$(foreach PATH, $(MONO_INCLUDES_REL), $(MKDIR) -p include/$(PATH)$(\n))
+	@$(foreach PATH, $(MONO_INCLUDES_REL), $(COPY) -r $(MONO_FRAMEWORK_PATH)/$(PATH)/*.h include/$(PATH)$(\n))
+	@$(foreach PATH, $(MBED_INCLUDES_REL), $(MKDIR) -p include/mbed/$(PATH)$(\n))
+	@$(foreach PATH, $(MBED_INCLUDES_REL), $(COPY) -r $(MBED_PATH)/$(PATH)/*.h include/mbed/$(PATH)$(\n))
+	@$(COPY) $(CYLIB_INCLUDE_FILES) include/mbed/target_cypress
+	@echo "Copying to project_template folder..."
+	@$(MKDIR) -p ../project_template/mono/include
+	@$(COPY) mono_framework.a ../project_template/mono
+	@$(COPY) $(COMP_LIB) ../project_template/mono
+	@$(COPY) $(CYPRESS_LIB) ../project_template/mono
+	@$(COPY) $(MBED_LIB) ../project_template/mono
+	@$(COPY) -r include/. ../project_template/mono/include
 
 monolib2.a: $(MONO_OBJECTS)
 	@echo "Linking Mono Framework..."
@@ -125,7 +160,7 @@ includeFiles:
 	@echo $(INCS)
 
 clean:
-	$(RM) $(addprefix $(BUILD_DIR)/, $(MONO_OBJECTS)) include/*.h monolib.a
+	$(RM) -r $(addprefix $(BUILD_DIR)/, $(MONO_OBJECTS)) include/* monolib.a mono_framework.a
 
 	
 

@@ -82,7 +82,7 @@ void ApplicationContext::enterSleepMode()
 
 void ApplicationContext::_softwareReset()
 {
-    Bootloadable_SET_RUN_TYPE(Bootloadable_START_APP); // force bootloader not to run
+    Bootloadable_SET_RUN_TYPE(0); // force bootloader to run for 2 secs
     CySoftwareReset();
     while(1); // silence compiler warning
 }
