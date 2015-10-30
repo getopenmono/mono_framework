@@ -144,7 +144,7 @@ namespace mono { namespace display
          *
          * @param percent The brightness percentage, 0.00: off, 1.00: max brightness
          */
-        virtual void setBrightness(float percent) { setBrightness(percent * 255); }
+        virtual void setBrightnessPercent(float percent) { setBrightness(percent * 255); }
         
         /**
          * @brief Gets the current LES backlight brightness
