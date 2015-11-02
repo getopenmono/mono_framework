@@ -28,8 +28,6 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
     curWindow(0,0,ScreenWidth(), ScreenHeight())
 {
     
-    //CY_SET_REG8(CYREG_PRT12_SIO_CFG, CY_GET_REG8(CYREG_PRT12_SIO_CFG) | 0x01);
-    //
     IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
 }
 
@@ -47,9 +45,11 @@ void ILI9225G::init()
 
     Reset = mbed::DigitalOut(TFT_RESET, 1);
     CyPins_SetPinDriveMode(TFT_RESET, CY_PINS_DM_STRONG);
+    
     RegisterSelect = mbed::DigitalOut(TFT_REGISTER_SELECT, 1);
+    CyPins_SetPinDriveMode(TFT_REGISTER_SELECT, CY_PINS_DM_RES_UPDWN);
+    
     IM0 = mbed::DigitalOut(TFT_IM0, 1);
-    spi.format(0);
     Reset = 0;
     CyPins_ClearPin(TFT_RESET);
     wait_ms(15);
@@ -172,15 +172,14 @@ int ILI9225G::getCursorY()
 
 void ILI9225G::write(Color pixelColor)
 {
-    SPI1_WriteTxData(pixelColor.value >> 8);
+    SPI1_WriteTxData(*(((uint8_t*)&pixelColor)+1));
     SPI1_WriteTxData(pixelColor.value);
-    //spi.write(pixelColor.value);
 }
 
 void ILI9225G::writeData(uint16_t data)
 {
     RegisterSelect = 1;
-    SPI1_WriteTxData(data >> 8);
+    SPI1_WriteTxData(*(((uint8_t*)&data)+1));
     SPI1_WriteTxData(data);
 }
 
@@ -243,6 +242,8 @@ void ILI9225G::onSystemWakeFromSleep()
 //    writeCommand(0x07, 0x1017);
 //    
     PWM_Wakeup();
+    
+    init();
 }
 
 void ILI9225G::OnSystemBatteryLow()

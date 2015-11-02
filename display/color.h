@@ -11,6 +11,8 @@
 
 #include <stdint.h>
 
+
+
 namespace mono { namespace display {
     
     class Color
@@ -18,9 +20,13 @@ namespace mono { namespace display {
     public:
         uint16_t value;
         
+        uint8_t* BytePointer();
+        
         Color(const int col);
         
         Color(const Color &color);
+        
+        Color(uint8_t R, uint8_t G, uint8_t B);
         
         uint16_t operator=(Color col);
         
@@ -29,12 +35,12 @@ namespace mono { namespace display {
         bool operator!=(const Color &col);
     };
     
-    static const Color BlackColor = 0x0821; // the value 0x0000 is transparent
-    static const Color TransparentColor = 0x0000;
-    static const Color RedColor = 0xF800;
-    static const Color GreenColor = 0x07E0;
-    static const Color BlueColor = 0x001F;
-    static const Color WhiteColor = 0xFFFF;
+    static const Color BlackColor = Color(1, 1, 1); // the value 0x0000 is transparent
+    static const Color TransparentColor = Color(0,0,0);
+    static const Color RedColor = Color(0xFF,0,0);
+    static const Color GreenColor = Color(0,0xFF,0);
+    static const Color BlueColor = Color(0,0,0xFF);
+    static const Color WhiteColor = Color(0xFF,0xFF,0xFF);
     
     
 } }
