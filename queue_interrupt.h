@@ -69,7 +69,7 @@ namespace mono {
          * @param inputPinName The actual pin to listen on (must be PORT0 - PORT12)
          * @param mode OPTIONAL: The pin mode, default is Hi-Impedance input.
          */
-        QueueInterrupt(PinName inputPinName, PinMode mode = PullNone);
+        QueueInterrupt(PinName inputPinName = NC, PinMode mode = PullNone);
         ~QueueInterrupt();
         
         /**

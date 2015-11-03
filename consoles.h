@@ -18,10 +18,10 @@ namespace mono {
     
     
     /** Print an error on screen or console */
-    void error(const char *msg);
+    //void error(const char *msg);
     
     /** Print a warning on screen or console */
-    void warning(const char *msg);
+    //void warning(const char *msg);
     
     class Console
     {

@@ -43,8 +43,11 @@ void AppRunLoop::exec()
         
         if (resetOnUserButton)
         {
+            //TODO: remove cypress reference here!
             if (CyPins_ReadPin(SW_USER) == 0)
             {
+                defaultSerial.printf("Will reset on user button!\n\r");
+                wait_ms(500);
                 IApplicationContext::SoftwareReset();
             }
         }
@@ -138,7 +141,9 @@ void AppRunLoop::setResetOnUserButton(bool roub)
 {
     if (roub)
     {
+        //TODO: remove cypress reference here!
         CyPins_SetPinDriveMode(SW_USER, CY_PINS_DM_RES_UP);
+        CyPins_SetPin(SW_USER);
         wait_us(10); // wait for pull up resistor
         resetOnUserButton = true;
     }
