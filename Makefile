@@ -125,9 +125,9 @@ monolib.a: $(MONO_TARGET_OBJECTS)
 	@$(MKDIR) -p include
 	@$(COPY) $(MONO_INCLUDE_FILES) include/.
 
-mono_framework.a: $(MONO_TARGET_OBJECTS)	
+mono_framework.a: cypressLib mbedLib $(MONO_TARGET_OBJECTS)
 	@echo "Linking Mono Framework Release..."
-	$(AR) rcs $@ $^
+	@$(AR) rcs $@ $(MONO_TARGET_OBJECTS) #$^
 	@echo "Copying linker and header files to include dir"
 	@$(MKDIR) -p include/mbed/cypress
 	@$(foreach PATH, $(MONO_INCLUDES_REL), $(MKDIR) -p include/$(PATH)$(\n))
@@ -142,6 +142,14 @@ mono_framework.a: $(MONO_TARGET_OBJECTS)
 	@$(COPY) $(CYPRESS_LIB) ../project_template/mono
 	@$(COPY) $(MBED_LIB) ../project_template/mono
 	@$(COPY) -r include/. ../project_template/mono/include
+
+cypressLib:
+	@echo "Building Cypress library..."
+	@make -C ../mono_buildsystem library
+
+mbedLib:
+	@echo "Building mbed library..."
+	@make -C ../mbedcomp mbed
 
 monolib2.a: $(MONO_OBJECTS)
 	@echo "Linking Mono Framework..."
