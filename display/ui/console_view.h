@@ -12,6 +12,8 @@
 #include <view.h>
 #include <display_painter.h>
 #include <text_buffer.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 namespace mono { namespace ui {
     
@@ -57,6 +59,18 @@ namespace mono { namespace ui {
         }
         
         // Console methods
+        
+        int printf(const char* format, ...)
+        {
+            char buffer[100];
+            va_list args;
+            va_start(args, format);
+            int retval = vsnprintf(buffer, 100, format, args);
+            va_end(args);
+            
+            Write(buffer);
+            return retval;
+        }
         
         /**
          * @brief Write a string to the console, and append a new line.
