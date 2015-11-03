@@ -58,7 +58,8 @@ namespace mono { namespace power {
             REG8_EXT= 0x81, /**<  */
             REG910  = 0x91, /**<  */
             APCH    = 0xA1, /**<  */
-            APCH_EXT= 0xA8  /**<  */
+            APCH_2  = 0xA8, /**<  */
+            APCH_4  = 0xAA  /**<  */
         };
         
         /**
@@ -87,12 +88,21 @@ namespace mono { namespace power {
         };
         
         
+        enum ChargeState
+        {
+            PRECONDITION = 3,
+            FAST_CHARGE = 2,
+            END_OF_CHARGE = 1,
+            SUSPENDED = 0
+        };
+        
+        mbed::I2C i2c;
         
     protected:
         
         static const char ACT8600I2CAddress = 0x5A;
         
-        mbed::I2C i2c;
+        
         
         /**
          * Read a register from the ACT8600 chip
@@ -113,6 +123,10 @@ namespace mono { namespace power {
     public:
         
         ACT8600PowerSystem();
+        
+        
+        uint8_t SystemStatus();
+        ChargeState ChargeStatus();
         
         void onSystemPowerOnReset();
         void onSystemEnterSleep();

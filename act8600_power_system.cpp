@@ -8,6 +8,7 @@
 
 #include "act8600_power_system.h"
 #include <mono.h>
+#include <mbed_error.h>
 
 using namespace mono::power;
 
@@ -16,57 +17,30 @@ ACT8600PowerSystem::ACT8600PowerSystem() : i2c(NC, NC)
     
 }
 
+uint8_t ACT8600PowerSystem::SystemStatus()
+{
+    int8_t data;
+    if (!readRegister(SYS, &data))
+        error("Could not get SystemStatus, I2C failed\n\r");
+    
+    return data;
+}
+
+ACT8600PowerSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
+{
+    int8_t data;
+    if (!readRegister(APCH_4, &data))
+        error("Failed to read APCH 4 register, I2C failed\n\r");
+    
+    return (ChargeState) ((data >> 4) & 0x03);
+}
+
 /// POWER SYSTEM METHODS
 
 void ACT8600PowerSystem::onSystemPowerOnReset()
 {
     //Set output voltage on OUT5 to 3.3V - to power MCU input supply the same as VSYS
-    writeRegister(REG5, VOLTAGE_SELECTION & V3_3);
-    
-//    *((reg8*)CYREG_PRT0_DM0) = 0;
-//    *((reg8*)CYREG_PRT0_DM1) = 1;
-//    *((reg8*)CYREG_PRT0_DM2) = 1;
-//    *((reg8*)CYREG_PRT0_DR) = 0;
-//    
-//    *((reg8*)CYREG_PRT1_DM0) = 0;
-//    *((reg8*)CYREG_PRT1_DM1) = 1;
-//    *((reg8*)CYREG_PRT1_DM2) = 1;
-//    *((reg8*)CYREG_PRT1_DR) = 0;
-//    
-//    *((reg8*)CYREG_PRT2_DM0) = 0;
-//    *((reg8*)CYREG_PRT2_DM1) = 1;
-//    *((reg8*)CYREG_PRT2_DM2) = 1;
-//    *((reg8*)CYREG_PRT2_DR) = 0;
-//    
-//    *((reg8*)CYREG_PRT3_DM0) = 0;
-//    *((reg8*)CYREG_PRT3_DM1) = 1;
-//    *((reg8*)CYREG_PRT3_DM2) = 1;
-//    *((reg8*)CYREG_PRT3_DR) = 0;
-//    
-//    *((reg8*)CYREG_PRT4_DM0) = 0;
-//    *((reg8*)CYREG_PRT4_DM1) = 1;
-//    *((reg8*)CYREG_PRT4_DM2) = 1;
-//    *((reg8*)CYREG_PRT4_DR) = 0;
-//    
-//    *((reg8*)CYREG_PRT5_DM0) = 0;
-//    *((reg8*)CYREG_PRT5_DM1) = 1;
-//    *((reg8*)CYREG_PRT5_DM2) = 1;
-//    *((reg8*)CYREG_PRT5_DR) = 0;
-//    
-//    *((reg8*)CYREG_PRT6_DM0) = 0;
-//    *((reg8*)CYREG_PRT6_DM1) = 1;
-//    *((reg8*)CYREG_PRT6_DM2) = 1;
-//    *((reg8*)CYREG_PRT6_DR) = 0;
-//    
-//    *((reg8*)CYREG_PRT12_DM0) = 0;
-//    *((reg8*)CYREG_PRT12_DM1) = 1;
-//    *((reg8*)CYREG_PRT12_DM2) = 1;
-//    *((reg8*)CYREG_PRT12_DR) = 0;
-//    
-//    *((reg8*)CYREG_PRT15_DM0) = 0;
-//    *((reg8*)CYREG_PRT15_DM1) = 1;
-//    *((reg8*)CYREG_PRT15_DM2) = 1;
-//    *((reg8*)CYREG_PRT15_DR) = 0;
+    //writeRegister(REG5, VOLTAGE_SELECTION & V3_3);
 }
 
 void ACT8600PowerSystem::onSystemEnterSleep()
