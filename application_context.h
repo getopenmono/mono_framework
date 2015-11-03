@@ -41,6 +41,8 @@ namespace mono {
         mono::display::ILI9225G dispController;
 #endif
 		
+        QueueInterrupt UserButton;
+        
         ApplicationContext();
         
         void enterSleepMode();

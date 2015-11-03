@@ -22,11 +22,12 @@ using namespace mono;
 ApplicationContext ApplicationContext::singleton;
 IApplicationContext *IApplicationContext::Instance = NULL; //&(ApplicationContext::singleton);
 
-ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoop, &dispController), dispController()
+ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoop, &dispController, &UserButton), dispController(), UserButton(SW_USER, PullUp)
 {
     PWM_Start();
     PWM_WriteCompare2(0);
     PWM_WriteCompare1(0);
+    
 }
 
 int ApplicationContext::exec()
@@ -40,17 +41,21 @@ void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
 {
     this->application = monoApp;
     
-    //CyIntSetSysVector(CY_INT_NMI_IRQN, &faultExceptionHandler);
+    CyIntSetSysVector(CY_INT_NMI_IRQN, &mbed_die);
     CyIntSetSysVector(CY_INT_HARD_FAULT_IRQN, &mbed_die);
-    //CyIntSetSysVector(CY_INT_MEM_MANAGE_IRQN, &faultExceptionHandler);
-    //CyIntSetSysVector(CY_INT_BUS_FAULT_IRQN, &faultExceptionHandler);
-    //CyIntSetSysVector(CY_INT_USAGE_FAULT_IRQN, &faultExceptionHandler);
+    CyIntSetSysVector(CY_INT_MEM_MANAGE_IRQN, &mbed_die);
+    CyIntSetSysVector(CY_INT_BUS_FAULT_IRQN, &mbed_die);
+    CyIntSetSysVector(CY_INT_USAGE_FAULT_IRQN, &mbed_die);
     
     //PowerSystem->onSystemPowerOnReset();
     pwrMgmt.processResetAwarenessQueue();
     
     //defaultSerial.printf("Display init deactivated\n\t");
     mono::IApplicationContext::Instance->DisplayController->init();
+    
+    //setup default user button handler
+    UserButton.DeactivateUntilHandled(); // debounce
+    UserButton.fall<ApplicationContext>(this, &ApplicationContext::enterSleepMode);
     
     monoApp->monoWakeFromReset();
     

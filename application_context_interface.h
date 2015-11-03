@@ -12,6 +12,7 @@
 #include <display_controller_interface.h>
 #include <application_run_loop.h>
 #include "power_management_interface.h"
+#include "queue_interrupt.h"
 
 namespace mono {
     
@@ -75,7 +76,7 @@ namespace mono {
          * If this contructor did not setup the pointers, the PowerManagement
          * constructor would see the @ref Instance global equal `null`.
          */
-        IApplicationContext(power::IPowerManagement *pwr, AppRunLoop *runLp, display::IDisplayController *dispCtrl) : PowerManager(pwr), RunLoop(runLp), DisplayController(dispCtrl)
+        IApplicationContext(power::IPowerManagement *pwr, AppRunLoop *runLp, display::IDisplayController *dispCtrl, QueueInterrupt *userBtn) : PowerManager(pwr), RunLoop(runLp), DisplayController(dispCtrl), UserButton(userBtn)
         {
             IApplicationContext::Instance = this;
         }
@@ -104,6 +105,38 @@ namespace mono {
          *
          */
         display::IDisplayController *DisplayController;
+        
+        /**
+         * @brief The User Button queued interrupt handler.
+         *
+         * Here you add your application handler function for mono user button. 
+         * To handle button presses you can set a callback function for the button
+         * push.
+         *
+         * The callback function is handled in the @ref AppRunLoop, see the
+         * @ref QueueInterrupt documentation for more information.
+         * 
+         * **Note** that the default initialized callback handler will toggle
+         * sleep mode. This means that if you do not set your own handler, the
+         * user button will put mono into sleep mode.
+         * The default callback is set on the `.fall(...)` handler.
+         *
+         * Example for replacing the user button handler, with a reset handler:
+         * @code
+         *
+         * void MyApp::handlerMethod()
+         * {
+         *    IApplicationContext::SoftwareReset();
+         * }
+         *
+         * void MyApp::monoWakeFromReset()
+         * {
+         *    IApplicationContext::Instance->UserButton->fall<MyApp>(this, &MyApp::handlerMethod);
+         * }
+         *
+         * @endcode
+         */
+        QueueInterrupt *UserButton;
         
         /**
          * This method starts the global run/event loop for the mono application.
