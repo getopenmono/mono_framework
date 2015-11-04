@@ -13,10 +13,10 @@
 using namespace mono;
 
 
-void mono::error(const char *msg)
-{
-    defaultSerial.printf("%s\n", msg);
-}
+//void mono::error(const char *msg)
+//{
+//    defaultSerial.printf("%s\n", msg);
+//}
 
 void mono::warning(const char *msg)
 {

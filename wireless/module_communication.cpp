@@ -77,7 +77,7 @@ SPIReceiveDataBuffer& SPIReceiveDataBuffer::operator<<(mbed::SPI *spi)
 {
     if (length < bytesToRead)
     {
-        mono::error("SPIReceiveDataBuffer read error, buffer is too small!\n\r");
+        error("SPIReceiveDataBuffer read error, buffer is too small!\n\r");
         return *this;
     }
     
@@ -219,7 +219,7 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     
     if (sendC1C2(cmd1, cmd2) != CMD_SUCCESS)
     {
-        mono::error("Failed to fetch frame length header!");
+        error("Failed to fetch frame length header!");
         return false;
     }
     
@@ -235,7 +235,7 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     
     if (retval != true)
     {
-        mono::error("Failed to fetch frame length header");
+        error("Failed to fetch frame length header");
         return false;
     }
     
@@ -640,7 +640,7 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     if (!success)
     {
-        mono::error("Failed to read FrameDescriptor Header from input\n\r");
+        error("Failed to read FrameDescriptor Header from input\n\r");
         return false;
     }
     
@@ -651,13 +651,13 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     if (!success)
     {
-        mono::error("Failed to read frame body from input\n\r");
+        error("Failed to read frame body from input\n\r");
         return false;
     }
     
     if (!bufferIsMgmtFrame(buffer))
     {
-        mono::error("Frame is not a management frame!\n\r");
+        error("Frame is not a management frame!\n\r");
         return false;
     }
     

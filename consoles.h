@@ -21,7 +21,7 @@ namespace mono {
     //void error(const char *msg);
     
     /** Print a warning on screen or console */
-    //void warning(const char *msg);
+    void warning(const char *msg);
     
     class Console
     {
