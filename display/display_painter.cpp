@@ -15,8 +15,17 @@ DisplayPainter::DisplayPainter(IDisplayController *dispctrl) : foregroundColor(W
 {
     displayCtrl = dispctrl;
     
+//    if (displayCtrl != NULL)
+//        displayCtrl->AddRefreshCallback(&displayRefreshHandler);
+    
     lineWidth = 1;
     textSize = 1;
+}
+
+DisplayPainter::~DisplayPainter()
+{
+//    if (displayCtrl != NULL)
+//        displayCtrl->RemoveRefreshCallback(&displayRefreshHandler);
 }
 
 void DisplayPainter::setForegroundColor(Color color)

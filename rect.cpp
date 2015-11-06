@@ -40,6 +40,17 @@ Rect& Rect::operator=(Rect &r)
     return *this;
 }
 
+int Rect::X2() const
+{
+    return this->X() + this->Width();
+}
+
+int Rect::Y2() const
+{
+    return this->Y() + this->Height();
+}
+
+
 Point& Rect::Point()
 {
     return *this;
@@ -65,4 +76,9 @@ void Rect::setSize(geo::Size s)
 int Rect::Area()
 {
     return Width() * Height();
+}
+
+bool Rect::contains(geo::Point &p) const
+{
+    return (p.X() >= this->x && p.X() <= this->X2() && p.Y() >= this->y && p.Y() <= this->Y2());
 }

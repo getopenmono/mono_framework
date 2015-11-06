@@ -60,6 +60,15 @@ namespace mono { namespace display {
         
         int16_t abs(int16_t a);
         
+        /**
+         * Handler for the DisplayControllers action queue, that gets triggered
+         * when the display refreshes.
+         *
+         * This handler is normally used by the first @ref View that gets 
+         * contructed, to enable the re-paint queue.
+         */
+        mbed::FunctionPointer displayRefreshHandler;
+        
     public:
         
         /**
@@ -73,6 +82,27 @@ namespace mono { namespace display {
          */
         DisplayPainter(IDisplayController *displayController);
         
+        ~DisplayPainter();
+        
+        /**
+         * Set the Painters display refresh callback handler. The display refreshes
+         * the screen at a regular interval. To avoid graphical artifacts, you
+         * should restrict your paint calls to right after this callback gets 
+         * triggered.
+         *
+         * The default View painter already has a callback installed, that triggers
+         * the View's re-paint queue. If you create you own painter object you can
+         * safely overwrite this callback.
+         *
+         * @brief Set/Overwrite the display tearing effect / refresh callback
+         * @param obj The `this` pointer for the object who shoould have its member function called
+         * @param memPtr A pointer the the class' member function.
+         */
+        template <typename Owner>
+        void setRefreshCallback(Owner *obj, void(Owner::*memPtr)(void))
+        {
+            this->displayRefreshHandler.attach<Owner>(obj, memPtr);
+        }
         
         void setForegroundColor(Color color);
         

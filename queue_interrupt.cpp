@@ -18,6 +18,7 @@ QueueInterrupt::QueueInterrupt(PinName pin, PinMode mode) : mbed::InterruptIn(pi
     this->addedToRunLoop = false;
     this->fallEvent = this->riseEvent = deactivateUntilHandler = false;
     this->isHandled = true;
+    
 //    this->changeEvent = false;
 }
 

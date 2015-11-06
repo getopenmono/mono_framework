@@ -8,6 +8,7 @@
 
 #include "point.h"
 
+#include <math.h>
 
 using namespace mono::geo;
 
@@ -35,12 +36,12 @@ Point& Point::operator=(const Point &p)
     return *this;
 }
 
-int Point::X()
+int Point::X() const
 {
     return this->x;
 }
 
-int Point::Y()
+int Point::Y() const
 {
     return this->y;
 }
@@ -65,7 +66,22 @@ void Point::appendY(int addY)
     this->y += addY;
 }
 
+uint32_t Point::Abs()
+{
+    return sqrtf(powf(this->x, 2)+powf(this->y, 2));
+}
+
 bool mono::geo::operator==(mono::geo::Point &p1, mono::geo::Point &p2)
 {
     return (p1.X() == p2.X() && p1.Y() == p2.Y());
+}
+
+bool mono::geo::operator!=(mono::geo::Point &p1, mono::geo::Point &p2)
+{
+    return (p1.X() != p2.X() || p1.Y() != p2.Y());
+}
+
+Point mono::geo::operator-(mono::geo::Point &p1, mono::geo::Point &p2)
+{
+    return geo::Point(p1.X() - p2.X(), p1.Y() - p2.Y());
 }

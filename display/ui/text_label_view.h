@@ -35,7 +35,7 @@ namespace mono { namespace ui {
         
         TextLabelView(const char *txt = "");
         
-        TextLabelView(const char *txt, geo::Rect rct);
+        TextLabelView(geo::Rect rct, const char *txt);
         
         // Getters
         uint8_t TextSize() const;

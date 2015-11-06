@@ -26,16 +26,21 @@ void AppRunLoop::exec()
 {
     debug("mono enter run loop!\n\r");
     
-    lastDtrValue = mono::defaultSerial.DTR();
+    if (mono::defaultSerial.IsReady())
+        lastDtrValue = mono::defaultSerial.DTR();
+    else
+        lastDtrValue = false;
     
     while (runLoopActive) {
         
         if (mono::defaultSerial.IsReady())
         {
+            
             bool dtr = mono::defaultSerial.DTR();
             if (resetOnDTR && (!dtr) && lastDtrValue)
             {
                 debug("mono DTR reboot!\n\r");
+                wait_ms(50);
                 IApplicationContext::SoftwareReset();
             }
             lastDtrValue = dtr;
@@ -46,8 +51,8 @@ void AppRunLoop::exec()
             //TODO: remove cypress reference here!
             if (CyPins_ReadPin(SW_USER) == 0)
             {
-                defaultSerial.printf("Will reset on user button!\n\r");
-                wait_ms(500);
+                debug("Will reset on user button!\n\r");
+                wait_ms(100);
                 IApplicationContext::SoftwareReset();
             }
         }
@@ -66,15 +71,21 @@ void AppRunLoop::exec()
 void AppRunLoop::processDynamicTaskQueue()
 {
     if (taskQueueHead == NULL)
+    {
         return;
+    }
+    
     
     IRunLoopTask *task = taskQueueHead;
     while (task != NULL) {
-        
         task->taskHandler();
         
         if (task->singleShot)
+        {
+            debug("Removing task from dynamic queue!");
             removeTaskInQueue(task);
+        }
+        
         
         // we can still use the tasks next pointer,
         //  even if its not in the list anymore

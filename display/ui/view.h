@@ -11,6 +11,7 @@
 
 #include <display_painter.h>
 #include <rect.h>
+#include "touch_system_interface.h"
 
 namespace mono {
     class IApplicationContext;
@@ -93,6 +94,8 @@ namespace mono {
          */
         View *nextDirtyView;
         
+        bool isDirty;
+        
         /**
          * The top of the scheduled repaint queue.
          * See the describing of the repaint queue implementation in 
@@ -100,9 +103,14 @@ namespace mono {
          */
         static View *firstDirtyView;
         
+        
     public:
         
         View();
+        
+        View(geo::Rect rect);
+        
+        ~View();
         
         /**
          * Changes the views position on the screen.

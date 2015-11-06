@@ -33,10 +33,19 @@ namespace mono { namespace geo {
         
         Size& Size();
         
+        int X2() const;
+        
+        int Y2() const;
+        
         void setPoint(class Point p);
         
         void setSize(class Size s);
         
+        /**
+         * Check whether or not a Point is inside this rectangle.
+         *
+         */
+        bool contains(class Point &p) const;
         
         int Area();
     };

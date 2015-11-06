@@ -11,6 +11,7 @@
 
 #include "../display_controller_interface.h"
 #include <rect.h>
+#include "queue_interrupt.h"
 #include <power_aware_interface.h>
 #include <mbed.h>
 
@@ -25,7 +26,7 @@ namespace mono { namespace display {
         mbed::DigitalOut Reset;
         mbed::DigitalOut RegisterSelect;
         mbed::DigitalOut IM0;
-        //mbed::InterruptIn TearingOutput;
+        QueueInterrupt tearingEffect;
         
         uint8_t dr, dm0,dm1,dm2;
         
@@ -48,6 +49,7 @@ namespace mono { namespace display {
 
         void OnSystemBatteryLow();
         
+        void tearingEffectHandler();
         
     public:
         

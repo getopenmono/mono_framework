@@ -9,6 +9,8 @@
 #ifndef __displaySimTest__point__
 #define __displaySimTest__point__
 
+#include <stdint.h>
+
 namespace mono { namespace geo {
     
     /**
@@ -31,8 +33,10 @@ namespace mono { namespace geo {
         Point &operator=(const Point &p);
         
         //Getters
-        int X();
-        int Y();
+        int X() const;
+        int Y() const;
+        
+        uint32_t Abs();
         
         //Setters
         void setX(int newX);
@@ -42,6 +46,9 @@ namespace mono { namespace geo {
     };
     
     bool operator==(Point &p1, Point &p2);
+    bool operator!=(Point &p1, Point &p2);
+    
+    Point operator-(Point &p1, Point &p2);
     
 } }
 

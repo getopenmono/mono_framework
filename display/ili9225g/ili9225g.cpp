@@ -25,9 +25,9 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
     Reset(TFT_RESET, 0),
     RegisterSelect(TFT_REGISTER_SELECT, 1),
     IM0(TFT_IM0, 1),
+    tearingEffect(TFT_TEARING_EFFECT, PullUp),
     curWindow(0,0,ScreenWidth(), ScreenHeight())
 {
-    
     IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
 }
 
@@ -118,6 +118,9 @@ void ILI9225G::init()
     
     PWM_Start();
     setBrightness(128);
+    
+    tearingEffect.DeactivateUntilHandled();
+    tearingEffect.fall<ILI9225G>(this, &ILI9225G::tearingEffectHandler);
 }
 
 void ILI9225G::setWindow(int x, int y, int width, int height)
@@ -141,6 +144,12 @@ void ILI9225G::setWindow(int x, int y, int width, int height)
     writeCommand(0x21, y);
     writeRegister(0x22);
     RegisterSelect = 1;
+}
+
+void ILI9225G::tearingEffectHandler()
+{
+    mono::defaultSerial.printf("tearing!\n\r");
+    //pointer.call();
 }
 
 uint16_t ILI9225G::ScreenWidth() const

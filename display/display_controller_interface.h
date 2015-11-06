@@ -10,7 +10,8 @@
 #define displaySimTest_display_controller_interface_h
 
 #include <stdint.h>
-#include <callback_handle.h>
+#include <FunctionPointer.h>
+#include "ActionQueue.h"
 #include "color.h"
 
 namespace mono { namespace display
@@ -32,7 +33,8 @@ namespace mono { namespace display
     class IDisplayController
     {
     protected:
-        CallbackHandle<void*> refreshCallback;
+        //ActionQueue<10> tearingQueue;
+        mbed::FunctionPointer pointer;
     public:
         
         /**
@@ -96,8 +98,18 @@ namespace mono { namespace display
         template <typename Owner>
         void setRefreshCallback(Owner *obj, void(Owner::*memPtr)(void))
         {
-            refreshCallback.attach<Owner>(obj, memPtr);
+            pointer.attach<Owner>(obj, memPtr);
         }
+        
+//        bool AddRefreshCallback(mbed::FunctionPointer *fPointer)
+//        {
+//            return this->tearingQueue.AddHandler(fPointer);
+//        }
+//        
+//        bool RemoveRefreshCallback(mbed::FunctionPointer *fPointer)
+//        {
+//            return this->tearingQueue.RemoveHandler(fPointer);
+//        }
         
         /**
          * Sets the current drawing cursor to a new position (must be within the

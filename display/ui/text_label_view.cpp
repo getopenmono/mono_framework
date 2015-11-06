@@ -8,6 +8,7 @@
 
 #include "text_label_view.h"
 #include <string.h>
+#include "consoles.h"
 
 using namespace mono::ui;
 
@@ -19,13 +20,14 @@ TextLabelView::TextLabelView(const char *txt) : textColor(display::WhiteColor), 
     viewRect.setSize( geo::Size(TextPixelWidth(), TextPixelHeight()) );
 }
 
-TextLabelView::TextLabelView(const char *txt, geo::Rect rct) : textColor(display::WhiteColor), bgColor(display::BlackColor)
+TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
+    View(rct),
+    textColor(display::WhiteColor),
+    bgColor(display::BlackColor)
 {
     this->text = (char*) txt;
     this->setTextSize(2);
     this->setTextColor(display::WhiteColor);
-    
-    viewRect = rct;
 }
 
 // Getters
@@ -49,7 +51,7 @@ uint16_t TextLabelView::TextPixelWidth() const
     if (text == NULL)
         return 0;
     
-    return strlen(text)*5*TextSize()+1;
+    return strlen(text)*5*TextSize()+TextSize()-1;
 }
 
 uint16_t TextLabelView::TextPixelHeight() const
@@ -103,14 +105,16 @@ void TextLabelView::repaint()
     
     int cnt = 0;
     char c = text[cnt];
-    mono::geo::Point offset = this->viewRect;
+    mono::geo::Point offset = this->viewRect.Point();
     
     switch (alignment) {
         case ALIGN_RIGHT:
-            offset.setX(viewRect.Width() - TextPixelWidth());
+            offset.setX(viewRect.X() + viewRect.Width() - TextPixelWidth());
             break;
         case ALIGN_CENTER:
-            offset.setX( (viewRect.Width()>>2) - (TextPixelWidth()>>2) );
+            if (TextPixelWidth() > viewRect.Width())
+                break;
+            offset.setX( viewRect.X() + ((viewRect.Width() / 2) - (TextPixelWidth() / 2)) );
             break;
         case ALIGN_LEFT:
         default:
@@ -121,7 +125,7 @@ void TextLabelView::repaint()
     painter.setForegroundColor(TextColor());
     painter.setBackgroundColor(bgColor);
     
-    while (c != '\0' && c != '\n' && offset.X()+TextSize()*5 < viewRect.Width()) {
+    while (c != '\0' && c != '\n' && offset.X()+TextSize()*5 < viewRect.X2()) {
         View::painter.drawChar(offset.X(), offset.Y(), c);
         offset.appendX(TextSize()*5+TextSize()-1);
         c = text[++cnt];
