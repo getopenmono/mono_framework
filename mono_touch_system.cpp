@@ -126,13 +126,13 @@ uint16_t MonoTouchSystem::sampleY()
 
 int MonoTouchSystem::ToScreenCoordsX(int touchPos, uint16_t screenWidth)
 {
-    const uint16_t factor (1000*screenWidth/(CalMaxX-CalMinX));
+    const uint16_t factor (1024*screenWidth/(CalMaxX-CalMinX));
     return ((touchPos-CalMinX) * factor) >> 10;
 }
 
 int MonoTouchSystem::ToScreenCoordsY(int touchPos, uint16_t screenHeight)
 {
-    const uint16_t factor (1000*screenHeight/(CalMaxY-CalMinY));
+    const uint16_t factor (1024*screenHeight/(CalMaxY-CalMinY));
     return ((touchPos-CalMinY) * factor) >> 10;
 }
 
