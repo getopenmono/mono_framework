@@ -14,6 +14,8 @@
 #include "touch_responder.h"
 #include "touch_event.h"
 
+#include "rect.h"
+
 #include <us_ticker_api.h>
 
 #include <stdio.h>
@@ -27,33 +29,23 @@ namespace mono {
      */
     class ITouchSystem
     {
+    public:
+        
+        /** 
+         * A calibration given for a touch system. It defines origin offsets,
+         * and the scales of the mapping between screen coords and touch input
+         * values.
+         *
+         * A calibration should enable a touch controller to accuratly translate
+         * its touch into screen coords.
+         */
+        typedef geo::Rect Calibration;
+        
     protected:
         
         TouchEvent lastTouchBegin;
         geo::Point lastTouchPosition;
         bool touchInProgress;
-        
-    public:
-        
-        /**
-         * <# description #>
-         *
-         * @brief Initialize the touch system controller
-         */
-        virtual void init() = 0;
-        
-        /**
-         * <# description #>
-         *
-         * @brief <# brief desc #>
-         */
-        virtual void processTouchInput() = 0;
-        
-        
-        virtual int ToScreenCoordsX(int touchPos, uint16_t screenWidth) = 0;
-        
-        
-        virtual int ToScreenCoordsY(int touchPos, uint16_t screenHeight) = 0;
         
         /**
          * <# description #>
@@ -92,6 +84,31 @@ namespace mono {
             event.TouchBeginEvent = &lastTouchBegin;
             TouchResponder::RunResponderChainTouchEnd(event);
         }
+        
+    public:
+        
+        /**
+         * <# description #>
+         *
+         * @brief Initialize the touch system controller
+         */
+        virtual void init() = 0;
+        
+        /**
+         * <# description #>
+         *
+         * @brief <# brief desc #>
+         */
+        virtual void processTouchInput() = 0;
+        
+        
+        virtual int ToScreenCoordsX(int touchPos, uint16_t screenWidth) = 0;
+        
+        
+        virtual int ToScreenCoordsY(int touchPos, uint16_t screenHeight) = 0;
+        
+        
+        virtual void setCalibration(Calibration &cal) = 0;
     };
 
 }

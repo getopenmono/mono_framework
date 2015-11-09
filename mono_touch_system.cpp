@@ -7,6 +7,8 @@
 //
 
 #include "mono_touch_system.h"
+#include "application_context_interface.h"
+
 #include <wait_api.h>
 #include "consoles.h"
 
@@ -18,24 +20,28 @@ MonoTouchSystem::MonoTouchSystem() : CalMinX(620), CalMinY(490), CalMaxX(2900),C
 
 void MonoTouchSystem::init()
 {
+    
     touchInProgress = false;
     
     CY_SET_REG8(CYREG_PRT6_AMUX, 0x00);
     
     ADC_SAR_1_Start();
+    
+    IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
 }
 
 
 void MonoTouchSystem::processTouchInput()
 {
-    int32_t X,Y;
+    
+    int32_t X, Y;
+    X = Y = 0;
     for (int i=0; i<16; i++) {
         X += sampleX();
         Y += sampleY();
     }
     X = X / 16;
     Y = Y / 16;
-    
     
     if (X < CalMinX || Y < CalMinY)
     {
@@ -128,6 +134,14 @@ int MonoTouchSystem::ToScreenCoordsY(int touchPos, uint16_t screenHeight)
 {
     const uint16_t factor (1000*screenHeight/(CalMaxY-CalMinY));
     return ((touchPos-CalMinY) * factor) >> 10;
+}
+
+void MonoTouchSystem::setCalibration(ITouchSystem::Calibration &cal)
+{
+    CalMinX = cal.X();
+    CalMaxX = cal.X2();
+    CalMinY = cal.Y();
+    CalMaxY = cal.Y2();
 }
 
 void MonoTouchSystem::onSystemPowerOnReset()

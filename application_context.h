@@ -15,6 +15,7 @@
 #include "display/hx8340/hx8340.h"
 #else
 #include "display/ili9225g/ili9225g.h"
+#include "mono_touch_system.h"
 #endif
 
 #include <application_run_loop.h>
@@ -39,6 +40,7 @@ namespace mono {
         mono::display::HX8340 dispController;
 #else
         mono::display::ILI9225G dispController;
+        MonoTouchSystem touchSys;
 #endif
 		
         QueueInterrupt UserButton;

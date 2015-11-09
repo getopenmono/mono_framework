@@ -12,6 +12,7 @@
 #include <display_controller_interface.h>
 #include <application_run_loop.h>
 #include "power_management_interface.h"
+#include "touch_system_interface.h"
 #include "queue_interrupt.h"
 
 namespace mono {
@@ -76,7 +77,7 @@ namespace mono {
          * If this contructor did not setup the pointers, the PowerManagement
          * constructor would see the @ref Instance global equal `null`.
          */
-        IApplicationContext(power::IPowerManagement *pwr, AppRunLoop *runLp, display::IDisplayController *dispCtrl, QueueInterrupt *userBtn) : PowerManager(pwr), RunLoop(runLp), DisplayController(dispCtrl), UserButton(userBtn)
+        IApplicationContext(power::IPowerManagement *pwr, AppRunLoop *runLp, display::IDisplayController *dispCtrl, ITouchSystem *tchSys, QueueInterrupt *userBtn) : PowerManager(pwr), RunLoop(runLp), DisplayController(dispCtrl), TouchSystem(tchSys), UserButton(userBtn)
         {
             IApplicationContext::Instance = this;
         }
@@ -100,11 +101,27 @@ namespace mono {
         AppRunLoop *RunLoop;
         
         /**
-         * Pointer to the displat interface controller object. The object itself
+         * Pointer to the display interface controller object. The object itself
          * should be initialized differntly depending on the ApplicationContext
          *
          */
         display::IDisplayController *DisplayController;
+        
+        /**
+         * @brief Pointer to the touch system controller object.
+         * 
+         * The touch system handles touch input from the display or other input
+         * device. It must be initialized by an ApplicationContext implementation.
+         *
+         * The touch system is the source of @ref TouchEvent and delegate these
+         * to the @ref TouchResponder classes.
+         * It is the @ref ITouchSystem holds the current touch calibration. To
+         * re-calibrate the touch system, you can use this reference.
+         *
+         * @see ITouchSystem
+         */
+        ITouchSystem *TouchSystem;
+        
         
         /**
          * @brief The User Button queued interrupt handler.

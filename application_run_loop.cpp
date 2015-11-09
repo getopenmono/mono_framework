@@ -57,6 +57,12 @@ void AppRunLoop::exec()
             }
         }
         
+        //handle touch inputs
+        if (IApplicationContext::Instance->TouchSystem != NULL)
+            IApplicationContext::Instance->TouchSystem->processTouchInput();
+        
+        
+        //run scheduled tasks
         processDynamicTaskQueue();
         
         

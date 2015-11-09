@@ -24,12 +24,16 @@
 #include <color.h>
 #include <display_painter.h>
 
-#include <view.h>
-#include <console_view.h>
+#include <touch_system_interface.h>
+
+#include <display/ui/view.h>
+#include <display/ui/responder_view.h>
+#include <display/ui/console_view.h>
 #include <display/ui/image_view.h>
 #include <display/ui/text_label_view.h>
 #include <display/ui/button_view.h>
 #include <display/ui/animator.h>
+#include <display/ui/touch_calibrator.h>
 
 #include <touch_system_interface.h>
 

@@ -22,7 +22,7 @@ using namespace mono;
 ApplicationContext ApplicationContext::singleton;
 IApplicationContext *IApplicationContext::Instance = NULL; //&(ApplicationContext::singleton);
 
-ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoop, &dispController, &UserButton), dispController(), UserButton(SW_USER, PullUp)
+ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoop, &dispController, &touchSys, &UserButton), dispController(), UserButton(SW_USER, PullUp)
 {
     PWM_Start();
     PWM_WriteCompare2(0);
@@ -52,6 +52,12 @@ void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
     
     //defaultSerial.printf("Display init deactivated\n\t");
     mono::IApplicationContext::Instance->DisplayController->init();
+    
+#ifndef MONO_DISP_CTRL_HX8340
+    touchSys.init();
+#else
+#warning "No touch system on HX8340 display!"
+#endif
     
     //setup default user button handler
     UserButton.DeactivateUntilHandled(); // debounce

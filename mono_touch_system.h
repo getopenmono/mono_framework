@@ -23,10 +23,10 @@ namespace mono {
     protected:
         
         /** Calibration minimum touch input */
-        const uint16_t CalMinX, CalMinY;
+        uint16_t CalMinX, CalMinY;
         
         /** Calibration maximum touch input */
-        const uint16_t CalMaxX, CalMaxY;
+        uint16_t CalMaxX, CalMaxY;
         
         uint16_t sampleX();
         uint16_t sampleY();
@@ -43,6 +43,8 @@ namespace mono {
         void init();
         
         void processTouchInput();
+        
+        void setCalibration(ITouchSystem::Calibration &cal);
         
         int ToScreenCoordsX(int touchPos, uint16_t screenWidth);
         int ToScreenCoordsY(int touchPos, uint16_t screenHeight);

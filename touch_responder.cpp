@@ -72,6 +72,7 @@ void TouchResponder::Deactivate()
 
 void TouchResponder::RunResponderChainTouchBegin(mono::TouchEvent &event)
 {
+    
     if (TouchResponder::FirstResponder == NULL)
     {
         defaultSerial.printf("No first touch responder!\n\r");
