@@ -31,7 +31,7 @@ Rect::Rect(const Rect &r)
     this->height = r.height;
 }
 
-Rect& Rect::operator=(Rect &r)
+Rect& Rect::operator=(Rect r)
 {
     this->x = r.x;
     this->y = r.y;

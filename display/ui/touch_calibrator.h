@@ -26,12 +26,14 @@ namespace mono { namespace ui {
         
         ITouchSystem::Calibration currentCal;
         
-        uint8_t blockSize;
+        uint8_t blockSize, blockMargin;
         TextLabelView textLbl, textHeader;
         display::Color blockColor;
         
         geo::Point cals[4];
         int calStep;
+        
+        void drawTouchBlock(geo::Rect &rect, geo::Rect &prevRect);
         
         void calDone();
         

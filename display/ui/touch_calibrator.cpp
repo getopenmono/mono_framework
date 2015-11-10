@@ -20,6 +20,7 @@ TouchCalibrateView::TouchCalibrateView() : ResponderView(geo::Rect(0,0,View::Dis
     textHeader.setRect(viewRect);
     textLbl.setRect(viewRect);
     blockSize = 10;
+    blockMargin = 15;
     calStep = 0;
     
     textHeader.setTextSize(2);
@@ -47,6 +48,7 @@ TouchCalibrateView::TouchCalibrateView(geo::Rect rct) : ResponderView(rct), text
     textHeader.setRect(viewRect);
     textLbl.setRect(viewRect);
     blockSize = 10;
+    blockMargin = 15;
     calStep = 0;
     
     textHeader.setTextSize(2);
@@ -75,29 +77,46 @@ void TouchCalibrateView::repaint()
     textHeader.repaint();
     textLbl.repaint();
     
+    geo::Rect prevRect(0,0,0,0);
+    geo::Rect newRect;
+    
     painter.setForegroundColor(blockColor);
     switch (calStep) {
         case 0:
             IApplicationContext::Instance->TouchSystem->setCalibration(zeroCal);
-            this->painter.drawFillRect(viewRect.X(), viewRect.Y(), blockSize, blockSize);
+            newRect = geo::Rect(viewRect.X()+blockMargin, viewRect.Y()+blockMargin, blockSize, blockSize);
+            drawTouchBlock(newRect, prevRect);
             break;
         case 1:
-            painter.drawFillRect(viewRect.X(), viewRect.Y(), blockSize, blockSize, true);
-            painter.drawFillRect(viewRect.X2()-blockSize, viewRect.Y(), blockSize, blockSize);
+            prevRect = geo::Rect(viewRect.X()+blockMargin, viewRect.Y()+blockMargin, blockSize, blockSize);
+            newRect = geo::Rect(viewRect.X2()-blockSize-blockMargin, viewRect.Y()+blockMargin, blockSize, blockSize);
+            drawTouchBlock(newRect, prevRect);
             break;
         case 2:
-            painter.drawFillRect(viewRect.X2()-blockSize, viewRect.Y(), blockSize, blockSize, true);
-            painter.drawFillRect(viewRect.X2()-blockSize, viewRect.Y2()-blockSize, blockSize, blockSize);
+            prevRect = geo::Rect(viewRect.X2()-blockSize-blockMargin, viewRect.Y()+blockMargin, blockSize, blockSize);
+            newRect = geo::Rect(viewRect.X2()-blockSize-blockMargin, viewRect.Y2()-blockSize-blockMargin, blockSize, blockSize);
+            drawTouchBlock(newRect, prevRect);
             break;
         case 3:
-            painter.drawFillRect(viewRect.X2()-blockSize, viewRect.Y2()-blockSize, blockSize, blockSize, true);
-            painter.drawFillRect(viewRect.X(), viewRect.Y2()-blockSize, blockSize, blockSize);
+            prevRect = geo::Rect(viewRect.X2()-blockSize-blockMargin, viewRect.Y2()-blockSize-blockMargin, blockSize, blockSize);
+            newRect = geo::Rect(viewRect.X()+blockMargin, viewRect.Y2()-blockSize-blockMargin, blockSize, blockSize);
+            drawTouchBlock(newRect, prevRect);
             break;
         default:
             // paint whole screen
             painter.drawFillRect(viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
             break;
     }
+}
+                                       
+void TouchCalibrateView::drawTouchBlock(geo::Rect &rect, geo::Rect &prevRect)
+{
+    painter.setForegroundColor(blockColor);
+    painter.drawFillRect(prevRect.X(), prevRect.Y(), prevRect.Width(), prevRect.Height(), true);
+    painter.drawFillRect(rect.X(), rect.Y(), rect.Width(), rect.Height());
+    
+    painter.setForegroundColor(display::WhiteColor);
+    painter.drawPixel(rect.X()+rect.Width()/2, rect.Y()+rect.Height()/2);
 }
 
 void TouchCalibrateView::RespondTouchBegin(TouchEvent &event)
@@ -111,14 +130,15 @@ void TouchCalibrateView::RespondTouchBegin(TouchEvent &event)
         
         event.handled = true;
     }
-    else if (calStep == 4)
+    
+    if (calStep == 4)
     {
         Deactivate();
         calDone();
         return;
     }
-    
-    wait(1.0);
+    else
+        wait(1.0);
 }
 
 void TouchCalibrateView::makeFirstResponder()
@@ -137,21 +157,37 @@ void TouchCalibrateView::calDone()
 {
     ITouchSystem::Calibration cal;
     
-    int yAvg = (cals[0].Y() + cals[1].Y()) / 2;
-    cal.setY(yAvg);
+    int yAvg1 = (cals[0].Y() + cals[1].Y()) / 2;
+    int yAvg2 = (cals[2].Y() + cals[3].Y()) / 2;
     
-    yAvg = (cals[2].Y() + cals[3].Y()) / 2;
-    cal.setHeight(yAvg - cal.Y());
+    int deltaYpx = viewRect.Height() - 2*blockMargin - blockSize; // blockSize = 2 * blockSize/2;
+    int deltaYt  = yAvg2 - yAvg1;
     
-    int xAvg = (cals[0].X() + cals[3].X()) / 2;
-    cal.setX(xAvg);
+    int milliScale = (1024*deltaYt)/deltaYpx;
     
-    xAvg = (cals[1].X() + cals[2].X()) /2;
-    cal.setWidth(xAvg - cal.X());
+    // set minimum touch value for Y axis
+    int PXoffset = blockMargin + blockSize/2;
+    cal.setY( yAvg1 - (milliScale*PXoffset)/1024 );
+    
+    // set maximum touch value for Y axis
+    cal.setHeight( yAvg2 + (milliScale*PXoffset)/1024 - cal.Y());
+    
+    
+    int xAvg1 = (cals[0].X() + cals[3].X()) / 2;
+    int xAvg2 = (cals[1].X() + cals[2].X()) /2;
+    
+    int deltaXpx = viewRect.Width() - 2*blockMargin - blockSize;
+    int deltaXt  = xAvg2 - xAvg1;
+    milliScale = (1024*deltaXt)/deltaXpx;
+    
+    cal.setX(xAvg1 - (milliScale*PXoffset)/1024);
+    
+    cal.setWidth( xAvg2 + (milliScale*PXoffset)/1024 - cal.X());
     
     if (IApplicationContext::Instance->TouchSystem == NULL)
         debug("Calibrator needs a touch system implementation!");
     
+    debug("Calibration is: (%i, %i, %i, %i)\n\r", cal.X(), cal.Y(), cal.X2(), cal.Y2());
     IApplicationContext::Instance->TouchSystem->setCalibration(cal);
     
     doneCallback.call();

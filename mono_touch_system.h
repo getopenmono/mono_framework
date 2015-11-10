@@ -28,6 +28,8 @@ namespace mono {
         /** Calibration maximum touch input */
         uint16_t CalMaxX, CalMaxY;
         
+        geo::Point lastLastPosition;
+        
         uint16_t sampleX();
         uint16_t sampleY();
         

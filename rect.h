@@ -26,8 +26,7 @@ namespace mono { namespace geo {
         
         Rect(const Rect &r);
         
-        Rect& operator=(Rect &r);
-        
+        Rect& operator=(Rect r);
         
         Point& Point();
         
@@ -48,6 +47,7 @@ namespace mono { namespace geo {
         bool contains(class Point &p) const;
         
         int Area();
+
     };
     
 } }

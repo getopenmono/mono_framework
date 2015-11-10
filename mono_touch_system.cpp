@@ -34,21 +34,15 @@ void MonoTouchSystem::init()
 void MonoTouchSystem::processTouchInput()
 {
     
-    int32_t X, Y;
-    X = Y = 0;
-    for (int i=0; i<16; i++) {
-        X += sampleX();
-        Y += sampleY();
-    }
-    X = X / 16;
-    Y = Y / 16;
+    uint16_t X = sampleX();
+    uint16_t Y = sampleY();
     
     if (X < CalMinX || Y < CalMinY)
     {
         if (touchInProgress)
         {
             touchInProgress = false;
-            runTouchEnd(lastTouchPosition); // use last move position,
+            runTouchEnd(lastLastPosition); // use last move position,
             // since touch input now is outside screen
         }
     }
@@ -60,13 +54,22 @@ void MonoTouchSystem::processTouchInput()
         
         if (sqLength > 2304) //approx 3 pixels move
         {
+            lastLastPosition = lastTouchPosition;
             lastTouchPosition = newPos;
-            runTouchMove(lastTouchPosition);
+            
+            // wait to pipeline is full
+            if (lastLastPosition != lastTouchPosition)
+                runTouchMove(lastLastPosition);
         }
     }
     else if (!touchInProgress)
     {
+        wait_ms(10);
+        X = sampleX(); Y = sampleY();
+        
         lastTouchPosition = geo::Point(X,Y);
+        lastLastPosition = lastTouchPosition;
+        
         touchInProgress = true;
         runTouchBegin(lastTouchPosition);
     }
@@ -86,16 +89,19 @@ uint16_t MonoTouchSystem::sampleX()
     
     CY_SET_REG8(CYREG_PRT6_AMUX, 0x01);
     
-    wait_us(10);
-    
-    ADC_SAR_1_StartConvert();
-    ADC_SAR_1_IsEndConversion(ADC_SAR_1_WAIT_FOR_RESULT);
-    
-    uint16_t sample = ADC_SAR_1_GetResult16();
+    uint16_t samples = 0;
+    for (int i=0; i<8; i++) {
+        wait_us(10);
+        
+        ADC_SAR_1_StartConvert();
+        ADC_SAR_1_IsEndConversion(ADC_SAR_1_WAIT_FOR_RESULT);
+        
+        samples += ADC_SAR_1_GetResult16();
+    }
     
     CyPins_ClearPin(TFT_TOUCH_X2);
     
-    return sample;
+    return samples / 8;
 }
 
 uint16_t MonoTouchSystem::sampleY()
@@ -112,27 +118,30 @@ uint16_t MonoTouchSystem::sampleY()
     
     CY_SET_REG8(CYREG_PRT6_AMUX, 0x02);
     
-    wait_us(10);
-    
-    ADC_SAR_1_StartConvert();
-    ADC_SAR_1_IsEndConversion(ADC_SAR_1_WAIT_FOR_RESULT);
-    
-    uint16_t sample = ADC_SAR_1_GetResult16();
+    uint16_t samples = 0;
+    for (int i=0; i<8; i++) {
+        wait_us(10);
+        
+        ADC_SAR_1_StartConvert();
+        ADC_SAR_1_IsEndConversion(ADC_SAR_1_WAIT_FOR_RESULT);
+        
+        samples += ADC_SAR_1_GetResult16();
+    }
     
     CyPins_ClearPin(TFT_TOUCH_Y2);
     
-    return sample;
+    return samples / 8;
 }
 
 int MonoTouchSystem::ToScreenCoordsX(int touchPos, uint16_t screenWidth)
 {
-    const uint16_t factor (1024*screenWidth/(CalMaxX-CalMinX));
+    const uint16_t factor = (1024*screenWidth/(CalMaxX-CalMinX));
     return ((touchPos-CalMinX) * factor) >> 10;
 }
 
 int MonoTouchSystem::ToScreenCoordsY(int touchPos, uint16_t screenHeight)
 {
-    const uint16_t factor (1024*screenHeight/(CalMaxY-CalMinY));
+    const uint16_t factor = (1024*screenHeight/(CalMaxY-CalMinY));
     return ((touchPos-CalMinY) * factor) >> 10;
 }
 
