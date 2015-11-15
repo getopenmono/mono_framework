@@ -57,17 +57,19 @@ void AppRunLoop::exec()
             }
         }
         
+        uint32_t start = us_ticker_read();
         //handle touch inputs
         if (IApplicationContext::Instance->TouchSystem != NULL)
             IApplicationContext::Instance->TouchSystem->processTouchInput();
-        
+        uint32_t tEnd = us_ticker_read();
         
         //run scheduled tasks
         processDynamicTaskQueue();
         
+        uint32_t end = us_ticker_read();
         
-        // what else todo
-        wait_ms(10);
+        TouchSystemTime = tEnd - start;
+        DynamicTaskQueueTime = end - tEnd;
     }
     
     debug("run loop terminated!");

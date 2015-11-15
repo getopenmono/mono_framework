@@ -12,20 +12,40 @@
 
 using namespace mono::ui;
 
-TextLabelView::TextLabelView(const char *txt) : textColor(display::WhiteColor), bgColor(display::BlackColor)
+TextLabelView::TextLabelView(String txt) : textColor(display::WhiteColor), bgColor(display::BlackColor)
 {
-    this->text = (char*)txt;
+    this->text = txt;
     this->setTextSize(1);
     
     viewRect.setSize( geo::Size(TextPixelWidth(), TextPixelHeight()) );
 }
 
-TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
+TextLabelView::TextLabelView(const char *txt) :
+    textColor(display::WhiteColor),
+    bgColor(display::BlackColor)
+{
+    this->text = txt;
+    this->setTextSize(1);
+    
+    viewRect.setSize( geo::Size(TextPixelWidth(), TextPixelHeight()) );
+}
+
+TextLabelView::TextLabelView(geo::Rect rct, String txt) :
     View(rct),
     textColor(display::WhiteColor),
     bgColor(display::BlackColor)
 {
-    this->text = (char*) txt;
+    this->text = txt;
+    this->setTextSize(2);
+    this->setTextColor(display::WhiteColor);
+}
+
+TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
+View(rct),
+textColor(display::WhiteColor),
+bgColor(display::BlackColor)
+{
+    this->text = txt;
     this->setTextSize(2);
     this->setTextColor(display::WhiteColor);
 }
@@ -48,17 +68,11 @@ TextLabelView::TextAlignment TextLabelView::Alignment() const
 
 uint16_t TextLabelView::TextPixelWidth() const
 {
-    if (text == NULL)
-        return 0;
-    
-    return strlen(text)*5*TextSize()+TextSize()-1;
+    return text.Length()*5*TextSize()+TextSize()-1;
 }
 
 uint16_t TextLabelView::TextPixelHeight() const
 {
-    if (text == NULL)
-        return 0;
-    
     return 7*TextSize()+1;
 }
 
@@ -86,21 +100,27 @@ void TextLabelView::setAlignment(TextAlignment align)
 
 void TextLabelView::setText(char *text, bool resizeViewWidth)
 {
-    this->text = text;
+    this->setText(String(text), resizeViewWidth);
+}
+
+void TextLabelView::setText(const char *txt, bool resizeViewWidth)
+{
+    this->setText(String(txt), resizeViewWidth);
+}
+
+void TextLabelView::setText(mono::String text, bool resizeViewWidth)
+{
+    this->text = String(text);
     if (resizeViewWidth)
     {
         viewRect.setWidth(TextPixelWidth());
     }
 }
 
-void TextLabelView::setText(const char *txt, bool resizeViewWidth)
-{
-    setText((char*) txt, resizeViewWidth);
-}
-
 
 void TextLabelView::repaint()
 {
+    
     View::painter.drawFillRect(this->viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
     
     int cnt = 0;

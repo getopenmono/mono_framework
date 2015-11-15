@@ -10,18 +10,18 @@
 #define touch_responder_h
 
 #include "touch_event.h"
+#include "queue.h"
 
 class ITouchSystem; //forwd decl
 
 namespace mono {
     
-    class TouchResponder
+    class TouchResponder : IQueueItem
     {
         friend ITouchSystem;
     protected:
-        static TouchResponder *FirstResponder;
-        
-        TouchResponder *nextResponder;
+        static GenericQueue<TouchResponder> ResponderChain;
+        static TouchResponder* FirstResponder();
         
     public:
         

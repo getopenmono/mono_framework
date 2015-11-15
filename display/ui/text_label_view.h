@@ -10,6 +10,7 @@
 #define __mono__text_label_view__
 
 #include "view.h"
+#include "mn_string.h"
 
 namespace mono { namespace ui {
     
@@ -24,7 +25,7 @@ namespace mono { namespace ui {
         };
         
     protected:
-        char *text;
+        String text;
         
         uint8_t textSize;
         display::Color textColor;
@@ -33,8 +34,9 @@ namespace mono { namespace ui {
         
     public:
         
-        TextLabelView(const char *txt = "");
-        
+        TextLabelView(String txt = String());
+        TextLabelView(const char *txt);
+        TextLabelView(geo::Rect rct, String txt);
         TextLabelView(geo::Rect rct, const char *txt);
         
         // Getters
@@ -53,6 +55,7 @@ namespace mono { namespace ui {
         
         void setText(char *text, bool resizeViewWidth = false);
         void setText(const char *txt, bool resizeViewWidth = false);
+        void setText(String text, bool resizeViewWidth = false);
         
         void repaint();
     };

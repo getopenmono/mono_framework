@@ -32,3 +32,29 @@ TouchEvent::TouchEvent(TouchEventType type, geo::Point &pos, ITouchSystem *ctrlR
     EventType = type;
     TouchController = ctrlRef;
 }
+
+TouchEvent::TouchEvent(const TouchEvent &event)
+{
+    this->EventTimestamp = event.EventTimestamp;
+    this->TouchBeginEvent = event.TouchBeginEvent;
+    this->handled = event.handled;
+    this->IsScreenCoords = event.IsScreenCoords;
+    
+    this->Position = event.Position;
+    this->EventType = event.EventType;
+    this->TouchController = event.TouchController;
+}
+
+TouchEvent& TouchEvent::operator=(const TouchEvent &event)
+{
+    this->EventTimestamp = event.EventTimestamp;
+    this->TouchBeginEvent = event.TouchBeginEvent;
+    this->handled = event.handled;
+    this->IsScreenCoords = event.IsScreenCoords;
+    
+    this->Position = event.Position;
+    this->EventType = event.EventType;
+    this->TouchController = event.TouchController;
+    
+    return *this;
+}

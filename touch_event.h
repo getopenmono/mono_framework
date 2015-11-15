@@ -33,6 +33,10 @@ namespace mono {
         
         TouchEvent(TouchEventType type, geo::Point &pos, ITouchSystem *ctrlRef);
         
+        TouchEvent(const TouchEvent &event);
+        
+        TouchEvent& operator=(const TouchEvent &event);
+        
         geo::Point Position;
         TouchEventType EventType;
         uint32_t EventTimestamp;

@@ -10,13 +10,14 @@
 #include <stdio.h>
 #include "consoles.h"
 
+#include <mbed_debug.h>
+
 using namespace mono;
 
-TouchResponder *TouchResponder::FirstResponder = NULL;
+GenericQueue<TouchResponder> TouchResponder::ResponderChain;
 
 TouchResponder::TouchResponder()
 {
-    nextResponder = NULL;
     Activate();
 }
 
@@ -34,52 +35,23 @@ void TouchResponder::RespondTouchEnd(mono::TouchEvent &event)
 
 void TouchResponder::Activate()
 {
-    if (FirstResponder == NULL)
-        FirstResponder = this;
-    else
-    {
-        TouchResponder *res = FirstResponder;
-        
-        while (res->nextResponder != NULL) {
-            res = res->nextResponder;
-        }
-        
-        res->nextResponder = this;
-    }
+    ResponderChain.Enqueue(this);
 }
 
 void TouchResponder::Deactivate()
 {
-    if (FirstResponder == this)
-    {
-        FirstResponder = this->nextResponder;
-    }
-    else if (FirstResponder != NULL)
-    {
-        TouchResponder *res = FirstResponder;
-        
-        while (res->nextResponder != this && res->nextResponder != NULL) {
-            res = res->nextResponder;
-        }
-        
-        if (res->nextResponder == NULL)
-            return; // Im not in responder chain
-        
-        
-        res->nextResponder = this->nextResponder;
-    }
+    ResponderChain.Remove(this);
 }
 
 void TouchResponder::RunResponderChainTouchBegin(mono::TouchEvent &event)
 {
-    
-    if (TouchResponder::FirstResponder == NULL)
+    if (ResponderChain.Peek() == NULL)
     {
         defaultSerial.printf("No first touch responder!\n\r");
         return;
     }
     
-    TouchResponder *res = TouchResponder::FirstResponder;
+    TouchResponder *res = ResponderChain.Peek();
     
     while (res != NULL) {
         res->RespondTouchBegin(event);
@@ -87,18 +59,18 @@ void TouchResponder::RunResponderChainTouchBegin(mono::TouchEvent &event)
         if (event.handled)
             return;
         
-        res = res->nextResponder;
+        res = ResponderChain.Next(res);
     }
 }
 
 void TouchResponder::RunResponderChainTouchEnd(mono::TouchEvent &event)
 {
-    if (TouchResponder::FirstResponder == NULL)
+    if (ResponderChain.Peek() == NULL)
     {
         return;
     }
     
-    TouchResponder *res = TouchResponder::FirstResponder;
+    TouchResponder *res = ResponderChain.Peek();
     
     while (res != NULL) {
         
@@ -107,23 +79,28 @@ void TouchResponder::RunResponderChainTouchEnd(mono::TouchEvent &event)
         if (event.handled)
             return;
         
-        res = res->nextResponder;
+        res = ResponderChain.Next(res);
     }
 }
 
 void TouchResponder::RunResponderChainTouchMove(mono::TouchEvent &event)
 {
-    if (TouchResponder::FirstResponder == NULL)
+    if (ResponderChain.Peek() == NULL)
     {
         return;
     }
     
-    TouchResponder *res = TouchResponder::FirstResponder;
+    TouchResponder *res = ResponderChain.Peek();
     
     while (res != NULL) {
         
         res->RespondTouchMove(event);
         
-        res = res->nextResponder;
+        res = ResponderChain.Next(res);
     }
+}
+
+TouchResponder* TouchResponder::FirstResponder()
+{
+    return ResponderChain.Peek();
 }

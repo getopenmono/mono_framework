@@ -37,7 +37,7 @@ namespace mono { namespace ui {
         ButtonView();
         
         
-        ButtonView(geo::Rect rect, const char *text);
+        ButtonView(geo::Rect rect, String text);
         
         
         template <typename Owner>

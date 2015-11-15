@@ -17,7 +17,7 @@ DisplayPainter::DisplayPainter(IDisplayController *dispctrl) : foregroundColor(W
     
 //    if (displayCtrl != NULL)
 //        displayCtrl->AddRefreshCallback(&displayRefreshHandler);
-    
+    displayCtrl->setRefreshHandler(&displayRefreshHandler);
     lineWidth = 1;
     textSize = 1;
 }

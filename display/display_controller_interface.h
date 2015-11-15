@@ -34,7 +34,7 @@ namespace mono { namespace display
     {
     protected:
         //ActionQueue<10> tearingQueue;
-        mbed::FunctionPointer pointer;
+        mbed::FunctionPointer *refreshHandler;
     public:
         
         /**
@@ -49,7 +49,7 @@ namespace mono { namespace display
          * @param height The display height (vertical) in pixels
          * @returns The display controller instance.
          */
-        IDisplayController(int width, int height) {}
+        IDisplayController(int width, int height) : refreshHandler(NULL) {}
         
         /**
          * Initalizing the hardware display controller means setting up the
@@ -95,10 +95,9 @@ namespace mono { namespace display
          * @param obj The owner object of the callback method (the `this` context)
          * @param memPtr A pointer to the owner objects callback member function
          */
-        template <typename Owner>
-        void setRefreshCallback(Owner *obj, void(Owner::*memPtr)(void))
+        void setRefreshHandler(mbed::FunctionPointer *handler)
         {
-            pointer.attach<Owner>(obj, memPtr);
+            this->refreshHandler = handler;
         }
         
 //        bool AddRefreshCallback(mbed::FunctionPointer *fPointer)

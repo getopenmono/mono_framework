@@ -22,6 +22,7 @@ TouchCalibrateView::TouchCalibrateView() : ResponderView(geo::Rect(0,0,View::Dis
     blockSize = 10;
     blockMargin = 15;
     calStep = 0;
+    activateTouchOnRepaint = false;
     
     textHeader.setTextSize(2);
     textHeader.setTextColor(display::WhiteColor);
@@ -50,6 +51,7 @@ TouchCalibrateView::TouchCalibrateView(geo::Rect rct) : ResponderView(rct), text
     blockSize = 10;
     blockMargin = 15;
     calStep = 0;
+    activateTouchOnRepaint = false;
     
     textHeader.setTextSize(2);
     textHeader.setTextColor(display::WhiteColor);
@@ -73,9 +75,16 @@ TouchCalibrateView::TouchCalibrateView(geo::Rect rct) : ResponderView(rct), text
 
 void TouchCalibrateView::repaint()
 {
-    ITouchSystem::Calibration zeroCal(450,400,0,0);
+    if (activateTouchOnRepaint)
+    {
+        makeFirstResponder();
+        activateTouchOnRepaint = false;
+    }
+    
     textHeader.repaint();
     textLbl.repaint();
+    
+    ITouchSystem::Calibration zeroCal(450,400,0,0);
     
     geo::Rect prevRect(0,0,0,0);
     geo::Rect newRect;
@@ -107,8 +116,9 @@ void TouchCalibrateView::repaint()
             painter.drawFillRect(viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
             break;
     }
+    
 }
-                                       
+
 void TouchCalibrateView::drawTouchBlock(geo::Rect &rect, geo::Rect &prevRect)
 {
     painter.setForegroundColor(blockColor);
@@ -121,33 +131,45 @@ void TouchCalibrateView::drawTouchBlock(geo::Rect &rect, geo::Rect &prevRect)
 
 void TouchCalibrateView::RespondTouchBegin(TouchEvent &event)
 {
+    if (event.IsScreenCoords)
+    {
+        textHeader.setText("Error");
+        textLbl.setText("Calibration must be FirstResponder!");
+        textHeader.scheduleRepaint();
+        textLbl.scheduleRepaint();
+        return;
+    }
+    
     if (calStep < 4)
     {
         cals[calStep] = event.Position;
         calStep++;
-        //scheduleRepaint();
-        repaint();
+        
+        //deactive touch input, since we must allow the user du lift her finger
+        // from the screen. (Touch de-bouncing)
+        Deactivate();
+        activateTouchOnRepaint = true;
+        scheduleRepaint();
         
         event.handled = true;
     }
     
     if (calStep == 4)
     {
+        activateTouchOnRepaint = false;
         Deactivate();
         calDone();
         return;
     }
-    else
-        wait(1.0);
 }
 
 void TouchCalibrateView::makeFirstResponder()
 {
-    if (FirstResponder != NULL && FirstResponder != this)
+    if (FirstResponder() != NULL && FirstResponder() != this)
     {
-        TouchResponder *oldFirst = FirstResponder;
+        TouchResponder *oldFirst = FirstResponder();
         Deactivate(); // remove myself from responder chain
-        FirstResponder = NULL;
+        ResponderChain.Dequeue(); // removes first responder!
         Activate(); // put myself as first responder
         oldFirst->Activate(); // insert old first responder into chain
     }

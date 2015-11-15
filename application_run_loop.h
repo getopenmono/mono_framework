@@ -8,6 +8,7 @@
 
 #ifndef __displaySimTest__application_run_loop__
 #define __displaySimTest__application_run_loop__
+#include <stdint.h>
 
 #include <application_run_loop_task_interface.h>
 
@@ -81,6 +82,37 @@ namespace mono {
          *
          */
         bool resetOnDTR;
+        
+        
+        /**
+         * @brief The CPU time used on proccessing touch input.
+         * This includes:
+         * 
+         * * ADC sampling (approx 16 samples)
+         * * Touch value evaluation, and possible convertion into events
+         * * Traversing the responder chain
+         * * Handling TouchBegin, TouchEnd & TouchMove, and any function they call
+         *
+         * This time includes the execution of your code if you have any button
+         * handlers or touch based event callbacks.
+         */
+        uint32_t TouchSystemTime;
+        
+        /**
+         * @brief The CPU time used on processing the dynamic task queue
+         * The time spend here include all queued tasks and callbacks.
+         * these could be:
+         *
+         * * Timer callback
+         * * Any @ref QueueInterrupt you might have in use
+         * * All display painting routines (repainting of views subclasses)
+         * * Any custom active @ref IRunLoopTask you might use
+         *
+         * Nearly all callbacks are executed with origin inside the dynamic task
+         * queue. Expect that the majority of your code are executed here.
+         */
+        uint32_t DynamicTaskQueueTime;
+        
         
         AppRunLoop();
         

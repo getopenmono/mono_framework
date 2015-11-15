@@ -103,6 +103,10 @@ namespace mono { namespace display {
         {
             this->displayRefreshHandler.attach<Owner>(obj, memPtr);
         }
+        void setRefreshCallback(void (*function)())
+        {
+            this->displayRefreshHandler.attach(function);
+        }
         
         void setForegroundColor(Color color);
         

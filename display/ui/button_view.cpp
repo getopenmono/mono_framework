@@ -16,7 +16,7 @@ ButtonView::ButtonView() : borderColor(display::WhiteColor), borderColorPressed(
     isPressedDown = false;
 }
 
-ButtonView::ButtonView(geo::Rect rect, const char *text) :
+ButtonView::ButtonView(geo::Rect rect, String text) :
     ResponderView(rect),
     textLabel(geo::Rect(rect), text),
     borderColor(display::WhiteColor),
@@ -40,8 +40,7 @@ ButtonView::ButtonView(geo::Rect rect, const char *text) :
 void ButtonView::TouchBegin(mono::TouchEvent &event)
 {
     isPressedDown = true;
-    repaint();
-    //this->scheduleRepaint();
+    this->scheduleRepaint();
 }
 
 void ButtonView::TouchMove(mono::TouchEvent &event)
@@ -50,17 +49,19 @@ void ButtonView::TouchMove(mono::TouchEvent &event)
     
     if (isPressedDown && !inRect) {
         isPressedDown = false;
-        repaint();
+        scheduleRepaint();
     }
     else if (!isPressedDown && inRect)
     {
         isPressedDown = true;
-        repaint();;
+        scheduleRepaint();
     }
 }
 
 void ButtonView::TouchEnd(mono::TouchEvent &event)
 {
+    bool shouldRepaint = isPressedDown;
+    
     isPressedDown = false;
     
     // touch is stil within button area,
@@ -69,8 +70,8 @@ void ButtonView::TouchEnd(mono::TouchEvent &event)
         clickHandler.call();
     }
     
-    //scheduleRepaint();
-    repaint();
+    if (shouldRepaint)
+        scheduleRepaint();
 }
 
 void ButtonView::repaint()

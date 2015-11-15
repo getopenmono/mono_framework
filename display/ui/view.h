@@ -12,6 +12,7 @@
 #include <display_painter.h>
 #include <rect.h>
 #include "touch_system_interface.h"
+#include "queue.h"
 
 namespace mono {
     class IApplicationContext;
@@ -35,7 +36,7 @@ namespace mono {
      *
      * @TODO Something on dependence of AppContext and Appctrl design pattern
      */
-    class View
+        class View : public IQueueItem
     {
         friend mono::IApplicationContext;
         friend Animator;
@@ -79,37 +80,65 @@ namespace mono {
         geo::Rect viewRect;
         
         /**
-         * @brief A pointer to the next view in the re-paint queue.
+         * @brief Indicate is this view should be repainted on next display 
+         * refresh.
          * 
-         * Then you call the @ref scheduleRepaint method, views use a chain of
-         * `nextDirtyView` pointers to realize a queue. This eliminates the need
-         * for a heap based variable length linked list, that implements a queue
-         * structure.
-         *
-         * The static member @ref firstDiryView is the top of the queue, and all
-         * views in the queue use this member to point to the next dirty view.
-         *
-         * The queue can be traversed by starting with @ref firstDirtyView and
-         * then following the `nextDirtyView` pointer, until a `NULL` is encountered.
          */
-        View *nextDirtyView;
-        
         bool isDirty;
         
         /**
-         * The top of the scheduled repaint queue.
-         * See the describing of the repaint queue implementation in 
-         * @ref nextDirtyView
+         * @brief The global re-paint queue.
+         *
+         * When you call the @ref scheduleRepaint method, your views is added to
+         * the re-paint queue.
          */
-        static View *firstDirtyView;
+        static GenericQueue<View> dirtyQueue;
+        
+        /**
+         * This class method will run through the scheduled re-paints queue and
+         * call the @ref repaint method on all of them.
+         *
+         * This method is called automatically be the display system, you do not
+         * need to call it yourself.
+         */
+        static void repaintScheduledViews();
+        
+        /**
+         * @brief A member method to call the static method @ref repaintScheduledViews
+         * 
+         * @see repaintScheduledViews
+         */
+        void callRepaintScheduledViews();
         
         
     public:
         
+        
+        /**
+         * @brief The CPU time used to repaint the latest set of dirty views.
+         * This measure includes both the painting algorithms and the transfer
+         * time used to comminicate with the disdplay hardware.
+         */
+        static uint32_t RepaintScheduledViewsTime;
+        
+        
+        /**
+         *
+         * 
+         */
         View();
         
+        
+        /**
+         *
+         * 
+         */
         View(geo::Rect rect);
         
+        /**
+         *
+         * 
+         */
         ~View();
         
         /**
@@ -190,14 +219,6 @@ namespace mono {
          */
         void scheduleRepaint();
         
-        /**
-         * This class method will run through the scheduled re-paints queue and
-         * call the @ref repaint method on all of them.
-         *
-         * This method is called automatically be the display system, you do not
-         * need to call it yourself.
-         */
-        static void repaintScheduledViews();
         
         /**
          * Returns the horizontal (X-axis) width of the display canvas, in pixels.

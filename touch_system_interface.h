@@ -13,6 +13,7 @@
 #include "point.h"
 #include "touch_responder.h"
 #include "touch_event.h"
+#include "consoles.h"
 
 #include "rect.h"
 

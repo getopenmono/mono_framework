@@ -10,83 +10,65 @@
 #include <application_context_interface.h>
 #include "consoles.h"
 
+#include <mbed_debug.h>
+
 using namespace mono::ui;
 
-//mono::ui::View mono::ui::View::firstDirtyView = NULL;
 mono::display::DisplayPainter View::painter(mono::IApplicationContext::Instance->DisplayController);
 
-View *View::firstDirtyView = NULL;
+mono::GenericQueue<View> View::dirtyQueue;
+
+uint32_t View::RepaintScheduledViewsTime = 0;
 
 void View::repaintScheduledViews()
 {
-    if (View::firstDirtyView != NULL)
-    {
-        View *view = View::firstDirtyView;
+    
+    //early exit if queue is empty
+    if (View::dirtyQueue.Peek() == NULL)
+        return;
+    
+    uint32_t start = us_ticker_read();
+    View *view = View::dirtyQueue.Dequeue();
+    while (view != NULL) {
         
-        while (view != NULL) {
-            
-            if (view->isDirty)
-            {
-                view->repaint();
-                view->isDirty = false;
-            }
-            
-            view = view->nextDirtyView;
+        if (view->isDirty)
+        {
+            view->repaint();
+            view->isDirty = false;
         }
+        
+        
+        view = View::dirtyQueue.Dequeue();
     }
+    uint32_t end = us_ticker_read();
+    
+    RepaintScheduledViewsTime = end - start;
+    
+    debug("repaint time: %u\n\r",RepaintScheduledViewsTime);
 }
 
 
 View::View()
 {
-//    if (View::firstDirtyView == NULL)
-//    {
-//        View::firstDirtyView = this;
-//    }
-//    else
-//    {
-//        //insert ourselves in the re-paint queue
-//        View *v = View::firstDirtyView;
-//        
-//        while (v->nextDirtyView != NULL) {
-//            v = v->nextDirtyView;
-//        }
-//        
-//        v->nextDirtyView = this;
-//    }
-    
     isDirty = false;
-    nextDirtyView = NULL;
+    painter.setRefreshCallback<View>(this, &View::callRepaintScheduledViews);
 }
 
 View::View(geo::Rect rect) : viewRect(rect)
 {
-    
+    isDirty = false;
+    painter.setRefreshCallback<View>(this, &View::callRepaintScheduledViews);
 }
 
 View::~View()
 {
-    //remove ourselves from the queue
-//    if (View::firstDirtyView == NULL)
-//        return;
-//    
-//    View *item = firstDirtyView;
-//    View *previous = NULL;
-//    
-//    while (item != NULL)
-//    {
-//        if (item == this)
-//        {
-//            if (previous != NULL)
-//                previous->nextDirtyView = item->nextDirtyView;
-//            
-//            return;
-//        }
-//        
-//        previous = item;
-//        item = item->nextDirtyView;
-//    }
-    
+    //remove me from the dirty queue, if I are present there
+    dirtyQueue.Remove(this);
+}
+
+void View::callRepaintScheduledViews()
+{
+    View::repaintScheduledViews();
 }
 
 void View::setPosition(geo::Point pos)
@@ -116,7 +98,11 @@ mono::geo::Size& View::Size()
 
 void View::scheduleRepaint()
 {
+    if (isDirty)
+        return;
+    
     isDirty = true;
+    dirtyQueue.Enqueue((View*) this);
 }
 
 uint16_t View::DisplayWidth()

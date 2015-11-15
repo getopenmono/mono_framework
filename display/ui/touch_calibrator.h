@@ -18,7 +18,7 @@
 namespace mono { namespace ui {
     
     
-    class TouchCalibrateView : protected ResponderView
+    class TouchCalibrateView : public ResponderView
     {
     protected:
         
@@ -32,6 +32,8 @@ namespace mono { namespace ui {
         
         geo::Point cals[4];
         int calStep;
+        
+        bool activateTouchOnRepaint;
         
         void drawTouchBlock(geo::Rect &rect, geo::Rect &prevRect);
         

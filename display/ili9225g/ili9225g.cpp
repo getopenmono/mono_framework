@@ -148,8 +148,9 @@ void ILI9225G::setWindow(int x, int y, int width, int height)
 
 void ILI9225G::tearingEffectHandler()
 {
-    mono::defaultSerial.printf("tearing!\n\r");
-    //pointer.call();
+    //mono::defaultSerial.printf("tearing!\n\r");
+    if (refreshHandler != NULL)
+        refreshHandler->call();
 }
 
 uint16_t ILI9225G::ScreenWidth() const
