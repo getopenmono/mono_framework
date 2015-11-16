@@ -32,12 +32,15 @@ namespace mono { namespace ui {
         display::Color borderColor;
         display::Color borderColorPressed;
         
+        void initButton();
+        
     public:
         
         ButtonView();
         
         
         ButtonView(geo::Rect rect, String text);
+        ButtonView(geo::Rect rect, const char *text);
         
         
         template <typename Owner>

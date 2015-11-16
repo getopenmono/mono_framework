@@ -41,13 +41,15 @@ namespace mono { namespace ui {
         
         void makeFirstResponder();
         
+        void repaint();
+        
     public:
         
         TouchCalibrateView();
         
         TouchCalibrateView(geo::Rect viewRct);
         
-        void repaint();
+        void StartNewCalibration();
         
         void RespondTouchBegin(TouchEvent &event);
         

@@ -14,7 +14,7 @@
 
 namespace mono { namespace ui {
     
-    class ResponderView : public View, protected mono::TouchResponder
+    class ResponderView : public View, public mono::TouchResponder
     {
         
     protected:
@@ -39,6 +39,24 @@ namespace mono { namespace ui {
         virtual void TouchMove(TouchEvent &event);
         
         virtual void ToScreenCoords(TouchEvent *event);
+        
+    public:
+        
+        /**
+         * 
+         *
+         * @brief Shows (repaints) the view and insert into the responder chain
+         * @see View::show
+         */
+        virtual void show();
+        
+        /**
+         * 
+         *
+         * @brief hides the view, and remove from the responder chain
+         * @see View::hide
+         */
+        virtual void hide();
     };
     
 } }

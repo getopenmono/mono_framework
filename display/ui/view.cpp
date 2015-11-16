@@ -51,11 +51,13 @@ void View::repaintScheduledViews()
 View::View()
 {
     isDirty = false;
+    visible = false;
     painter.setRefreshCallback<View>(this, &View::callRepaintScheduledViews);
 }
 
 View::View(geo::Rect rect) : viewRect(rect)
 {
+    visible = false;
     isDirty = false;
     painter.setRefreshCallback<View>(this, &View::callRepaintScheduledViews);
 }
@@ -98,12 +100,31 @@ mono::geo::Size& View::Size()
 
 void View::scheduleRepaint()
 {
-    if (isDirty)
+    if (isDirty || !visible)
         return;
     
     isDirty = true;
     dirtyQueue.Enqueue((View*) this);
 }
+
+bool View::Visible() const
+{
+    return visible;
+}
+
+void View::show()
+{
+    visible = true;
+    scheduleRepaint();
+}
+
+void View::hide()
+{
+    visible = false;
+    dirtyQueue.Remove(this);
+}
+
+//// Static methods
 
 uint16_t View::DisplayWidth()
 {

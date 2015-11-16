@@ -77,8 +77,15 @@ void TouchCalibrateView::repaint()
 {
     if (activateTouchOnRepaint)
     {
+        defaultSerial.printf("making first resonder...\n\r");
         makeFirstResponder();
         activateTouchOnRepaint = false;
+        
+        if (calStep == 0)
+        {
+            //begin new calibration, paint screen black first
+            painter.drawFillRect(viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height());
+        }
     }
     
     textHeader.repaint();
@@ -140,22 +147,24 @@ void TouchCalibrateView::RespondTouchBegin(TouchEvent &event)
         return;
     }
     
+    touchActive = true;
+    event.handled = true;
+    
     if (calStep < 4)
     {
         cals[calStep] = event.Position;
         calStep++;
         
-        //deactive touch input, since we must allow the user du lift her finger
+        //deactive touch input, since we must allow the user to lift her finger
         // from the screen. (Touch de-bouncing)
         Deactivate();
         activateTouchOnRepaint = true;
         scheduleRepaint();
-        
-        event.handled = true;
     }
     
     if (calStep == 4)
     {
+        defaultSerial.printf("calibration done!\n\r");
         activateTouchOnRepaint = false;
         Deactivate();
         calDone();
@@ -165,14 +174,24 @@ void TouchCalibrateView::RespondTouchBegin(TouchEvent &event)
 
 void TouchCalibrateView::makeFirstResponder()
 {
-    if (FirstResponder() != NULL && FirstResponder() != this)
+    if (FirstResponder() != this)
     {
         TouchResponder *oldFirst = FirstResponder();
         Deactivate(); // remove myself from responder chain
         ResponderChain.Dequeue(); // removes first responder!
         Activate(); // put myself as first responder
-        oldFirst->Activate(); // insert old first responder into chain
+        
+        if (oldFirst != NULL)
+            oldFirst->Activate(); // insert old first responder into chain
     }
+}
+
+void TouchCalibrateView::StartNewCalibration()
+{
+    calStep = 0;
+    activateTouchOnRepaint = true;
+    
+    scheduleRepaint();
 }
 
 void TouchCalibrateView::calDone()

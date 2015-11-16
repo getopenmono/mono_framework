@@ -11,16 +11,7 @@
 
 using namespace mono::ui;
 
-ButtonView::ButtonView() : borderColor(display::WhiteColor), borderColorPressed(display::BlueColor)
-{
-    isPressedDown = false;
-}
-
-ButtonView::ButtonView(geo::Rect rect, String text) :
-    ResponderView(rect),
-    textLabel(geo::Rect(rect), text),
-    borderColor(display::WhiteColor),
-    borderColorPressed(display::BlueColor)
+void ButtonView::initButton()
 {
     textLabel.setAlignment(TextLabelView::ALIGN_CENTER);
     
@@ -35,6 +26,32 @@ ButtonView::ButtonView(geo::Rect rect, String text) :
     }
     
     isPressedDown = false;
+}
+
+ButtonView::ButtonView() :
+    ResponderView(),
+    borderColor(display::WhiteColor),
+    borderColorPressed(display::BlueColor)
+{
+    initButton();
+}
+
+ButtonView::ButtonView(geo::Rect rect, String text) :
+    ResponderView(rect),
+    textLabel(geo::Rect(rect), text),
+    borderColor(display::WhiteColor),
+    borderColorPressed(display::BlueColor)
+{
+    initButton();
+}
+
+ButtonView::ButtonView(geo::Rect rect, const char *text) :
+ResponderView(rect),
+textLabel(geo::Rect(rect), String(text)),
+borderColor(display::WhiteColor),
+borderColorPressed(display::BlueColor)
+{
+    initButton();
 }
 
 void ButtonView::TouchBegin(mono::TouchEvent &event)

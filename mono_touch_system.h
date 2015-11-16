@@ -22,6 +22,9 @@ namespace mono {
     {
     protected:
         
+        /** We try not to sample with more than 100 Hz */
+        uint32_t lastTouchProcess;
+        
         /** Calibration minimum touch input */
         uint16_t CalMinX, CalMinY;
         

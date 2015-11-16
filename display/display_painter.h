@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <color.h>
 #include "display_controller_interface.h"
+#include "point.h"
+#include "rect.h"
 
 namespace mono { namespace display {
     
@@ -155,6 +157,7 @@ namespace mono { namespace display {
          * @param background Optional: Set to true to paint with active background color.
          */
         void drawPixel(uint16_t x, uint16_t y, bool background = false);
+        void drawPixel(geo::Point &pos, bool background = false);
         
         /**
          * Paints a filled rectangle in the actuive foreground color. Coordinates
@@ -169,6 +172,7 @@ namespace mono { namespace display {
          * @param background Optional: Set to `true` to paint in active background color
          */
         void drawFillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool background = false);
+        void drawFillRect(geo::Rect &rct, bool background = false);
         
         /**
          * Draw a line on the display. The line is defined by its two end points.
@@ -188,6 +192,7 @@ namespace mono { namespace display {
          * @param background Optional: Set this to `true` to paint in active background color
          */
         void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, bool background = false);
+        void drawLine(geo::Point &from, geo::Point &to, bool background = false);
         
         /**
          * Draw an outlined rectangle with the current line width and the active
@@ -201,6 +206,7 @@ namespace mono { namespace display {
          * @param background Optional: Set this to `true` to paint in active background color
          */
         void drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool background = false);
+        void drawRect(geo::Rect &rct, bool background = false);
         
         /**
          * Paint a single ASCII character on the display. Characters are always 

@@ -72,10 +72,16 @@ IDisplayController* DisplayPainter::DisplayController() const
 {
     return displayCtrl;
 }
+
 void DisplayPainter::drawPixel(uint16_t x, uint16_t y, bool bg)
 {
     displayCtrl->setWindow(x, y, 1, 1);
     displayCtrl->write(bg ? backgroundColor : foregroundColor);
+}
+
+void DisplayPainter::drawPixel(geo::Point &pos, bool background)
+{
+    drawPixel(pos.X(), pos.Y(), background);
 }
 
 void DisplayPainter::drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool bg)
@@ -86,6 +92,11 @@ void DisplayPainter::drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t h
     drawHLine(x, x+width, y+height, bg);
 }
 
+void DisplayPainter::drawRect(geo::Rect &rct, bool background)
+{
+    drawRect(rct.X(), rct.Y(), rct.Width(), rct.Height(), background);
+}
+
 void DisplayPainter::drawFillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool bg)
 {
     displayCtrl->setWindow(x, y, width, height);
@@ -94,6 +105,11 @@ void DisplayPainter::drawFillRect(uint16_t x, uint16_t y, uint16_t width, uint16
     for (int i=0; i<width*height; i++) {
         displayCtrl->write(bg ? backgroundColor : foregroundColor);
     }
+}
+
+void DisplayPainter::drawFillRect(geo::Rect &rct, bool background)
+{
+    drawFillRect(rct.X(), rct.Y(), rct.Width(), rct.Height(), background);
 }
 
 void DisplayPainter::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, bool bg)
@@ -141,6 +157,11 @@ void DisplayPainter::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1
             err += dx;
         }
     }
+}
+
+void DisplayPainter::drawLine(geo::Point &from, geo::Point &to, bool background)
+{
+    drawLine(from.X(), from.Y(), to.X(), to.Y(), background);
 }
 
 

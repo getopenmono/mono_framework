@@ -13,11 +13,13 @@ using namespace mono::ui;
 
 ResponderView::ResponderView()
 {
+    Deactivate(); // view starts hidden, do not handle touch
     touchActive = false;
 }
 
 ResponderView::ResponderView(geo::Rect rect) : View(rect)
 {
+    Deactivate(); // view starts hidden, do not handle touch
     touchActive = false;
 }
 
@@ -89,4 +91,16 @@ void ResponderView::ToScreenCoords(mono::TouchEvent *event)
     event->Position.setY(y);
     
     event->IsScreenCoords = true;
+}
+
+void ResponderView::show()
+{
+    View::show();
+    Activate();
+}
+
+void ResponderView::hide()
+{
+    Deactivate();
+    View::hide();
 }

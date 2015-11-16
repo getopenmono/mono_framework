@@ -27,6 +27,8 @@ void MonoTouchSystem::init()
     
     ADC_SAR_1_Start();
     
+    lastTouchProcess = 0;
+    
     IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
 }
 
@@ -34,8 +36,14 @@ void MonoTouchSystem::init()
 void MonoTouchSystem::processTouchInput()
 {
     
+    if ((us_ticker_read() - lastTouchProcess) <= 10000)
+        return;
+    
     uint16_t X = sampleX();
     uint16_t Y = sampleY();
+    
+    // record time before we handle any touch events
+    lastTouchProcess = us_ticker_read();
     
     if (X < CalMinX || Y < CalMinY)
     {
@@ -64,7 +72,7 @@ void MonoTouchSystem::processTouchInput()
     }
     else if (!touchInProgress)
     {
-        wait_ms(10);
+        wait_ms(5);
         X = sampleX(); Y = sampleY();
         
         lastTouchPosition = geo::Point(X,Y);
@@ -73,6 +81,7 @@ void MonoTouchSystem::processTouchInput()
         touchInProgress = true;
         runTouchBegin(lastTouchPosition);
     }
+    
 }
 
 
