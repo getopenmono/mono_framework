@@ -10,6 +10,11 @@
 
 using namespace mono::display;
 
+Color::Color()
+{
+    value = 0x0821; // black color
+}
+
 Color::Color(const int col)
 {
     value = (uint16_t) col;

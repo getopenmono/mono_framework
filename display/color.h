@@ -22,6 +22,8 @@ namespace mono { namespace display {
         
         uint8_t* BytePointer();
         
+        Color();
+        
         Color(const int col);
         
         Color(const Color &color);

@@ -68,7 +68,7 @@ TextLabelView::TextAlignment TextLabelView::Alignment() const
 
 uint16_t TextLabelView::TextPixelWidth() const
 {
-    return text.Length()*5*TextSize()+TextSize()-1;
+    return text.Length()*5*TextSize()+TextSize()+1;
 }
 
 uint16_t TextLabelView::TextPixelHeight() const

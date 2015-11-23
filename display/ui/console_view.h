@@ -14,6 +14,7 @@
 #include <text_buffer.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include "mn_string.h"
 
 namespace mono { namespace ui {
     
@@ -68,7 +69,7 @@ namespace mono { namespace ui {
             int retval = vsnprintf(buffer, 100, format, args);
             va_end(args);
             
-            Write(buffer);
+            Write(String(buffer));
             return retval;
         }
         
@@ -76,21 +77,26 @@ namespace mono { namespace ui {
          * @brief Write a string to the console, and append a new line.
          * @param txt The string to write to the console
          */
-        void WriteLine(const char *txt)
+        void WriteLine(String txt)
         {
             this->Write(txt, true);
             this->Write("\n");
         }
         
-        void Write(const char *txt, bool noRepaint = false)
+        void WriteLine(const char *txt)
+        {
+            this->WriteLine(String(txt));
+        }
+        
+        void Write(String txt, bool noRepaint = false)
         {
             if (curLineIndex > 0)
                 curLineIndex--; // overwrite the last string terminator, to concat strings
             
-            char *sym = (char*) txt;
+            uint32_t symPos = 0;
             while (curLineIndex < lineLength()) {
                 
-                textBuffer.insertToCurrentLine(curLineIndex, *sym);
+                textBuffer.insertToCurrentLine(curLineIndex, txt[symPos]);
                 curLineIndex++;
                 
                 //soft wrap
@@ -103,21 +109,21 @@ namespace mono { namespace ui {
                     textBuffer.insertToCurrentLine(2,' ');
                 }
                 
-                if (*sym == '\n')
+                if (txt[symPos] == '\n')
                 {
                     textBuffer.incrementLine();
                     curLineIndex = 0;
                 }
-                else if (*sym == '\0')
+                else if (txt[symPos] == '\0')
                 {
                     break;
                 }
                 
-                sym++;
+                symPos++;
             }
             
             if (!noRepaint)
-                repaint();
+                scheduleRepaint();
         }
         
         void repaint()

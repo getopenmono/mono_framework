@@ -14,6 +14,7 @@ using namespace mono;
 
 QueueInterrupt::QueueInterrupt(PinName pin, PinMode mode) : mbed::InterruptIn(pin)
 {
+    this->singleShot = false;
     this->mode(mode);
     this->addedToRunLoop = false;
     this->fallEvent = this->riseEvent = deactivateUntilHandler = false;
@@ -56,6 +57,7 @@ void QueueInterrupt::fall(void (*fptr)())
 
 void QueueInterrupt::_irq_rise_handler()
 {
+    printf("#");
     if (deactivateUntilHandler && !isHandled)
         return;
     

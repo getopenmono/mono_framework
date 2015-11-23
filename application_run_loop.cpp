@@ -90,7 +90,7 @@ void AppRunLoop::processDynamicTaskQueue()
         
         if (task->singleShot)
         {
-            debug("Removing task from dynamic queue!");
+            debug("Removing task from dynamic queue!\n\r");
             removeTaskInQueue(task);
         }
         
