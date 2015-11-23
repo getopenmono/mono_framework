@@ -58,7 +58,16 @@ String::String(char *str)
     stringData = (char*) malloc(strLen+sizeof(uint32_t));
     memset(stringData, 0, strLen+sizeof(uint32_t));
     strcpy(stringData, str);
-    refCount = (uint32_t*) stringData+strLen;
+    refCount = (uint32_t*) (stringData+strLen);
+    *refCount = 1;
+}
+
+String::String(char *str, uint32_t length)
+{
+    malloced = true;
+    stringData = (char*) malloc(length+sizeof(uint32_t));
+    memcpy(stringData, str, length);
+    refCount = (uint32_t*) (stringData+length);
     *refCount = 1;
 }
 
@@ -87,7 +96,10 @@ String::String(const String &str)
 
 uint32_t String::Length() const
 {
-    return strlen(stringData);
+    if (stringData != NULL)
+        return strlen(stringData);
+    else
+        return 0;
 }
 
 String& String::operator=(const char *str)
@@ -154,6 +166,6 @@ void String::preAllocbytes(uint32_t count)
     malloced = true;
     stringData = (char*) malloc(count+sizeof(uint32_t));
     memset(stringData, 0, count+sizeof(uint32_t));
-    refCount = (uint32_t*) stringData+count;
+    refCount = (uint32_t*) (stringData+count);
     *refCount = 1;
 }

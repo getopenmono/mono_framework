@@ -72,6 +72,8 @@ namespace mono {
         
         String(char *str);
         
+        String(char *str, uint32_t length);
+        
         String(const char *str);
         
         String(const String &str);
