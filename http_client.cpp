@@ -105,7 +105,7 @@ void HttpClient::dnsComplete(INetworkRequest::CompletionEvent *evnt)
 void HttpClient::httpData(redpine::HttpGetFrame::CallbackData *data)
 {
     respData.bodyChunk = String((char*)(data->data), data->dataLength);
-    respData.finished = data->context->lastResponseParsed;
+    respData.Finished = data->context->lastResponseParsed;
     
     debug("got data call data ready async\n\r");
     debug("-> %s\n\r",respData.bodyChunk());
@@ -117,7 +117,7 @@ void HttpClient::triggerDataReady()
 {
     dataHandler.call(respData);
     
-    if (respData.finished)
+    if (respData.Finished)
     {
         debug("comp handlr\n\r");
         triggerCompletionHandler();

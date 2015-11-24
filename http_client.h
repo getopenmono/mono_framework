@@ -27,13 +27,13 @@ namespace mono { namespace network {
             HttpClient *Context;
             String HttpHeaderRaw;
             String bodyChunk;
-            bool finished;
+            bool Finished;
             
             HttpResponseData(HttpClient *cnxt) :
                 Context(cnxt),
                 HttpHeaderRaw(String()),
                 bodyChunk(String()),
-                finished(false)
+                Finished(false)
             {}
             
             HttpResponseData &operator=(const HttpResponseData &other)
@@ -41,7 +41,7 @@ namespace mono { namespace network {
                 Context = other.Context;
                 HttpHeaderRaw = other.HttpHeaderRaw;
                 bodyChunk = other.bodyChunk;
-                finished = other.finished;
+                Finished = other.Finished;
                 return *this;
             }
         };
