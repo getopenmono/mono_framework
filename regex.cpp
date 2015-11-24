@@ -38,7 +38,20 @@ bool Regex::Match(mono::String matchStr, Capture *captureArray, uint32_t capArra
 
 String Regex::Value(Capture &cap)
 {
-    return String((char*)cap.ptr, cap.len);
+    if (cap.len <= 0)
+        return  String();
+    else if (cap.ptr[cap.len] == '\0')
+    {
+        return String((char*)cap.ptr, cap.len);
+    }
+    else
+    {
+        String capture((char*)cap.ptr, cap.len+1); // add terminator
+        char *txt = capture();
+        txt[cap.len] = '\0';
+        
+        return capture;
+    }
 }
 
 //bool Regex::NextMatch(CaptureGroup &match, String matchStr)
