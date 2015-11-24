@@ -11,6 +11,7 @@ INCLUDE_DIR=../mono_buildsystem/include
 BUILD_DIR=build
 MONO_FRAMEWORK_PATH=.
 MBED_PATH=../mbedcomp
+MBED_FS_PATH=../mbed/libraries/fs
 COMP_LIB=../mono_buildsystem/lib/CyComponentLibrary.a
 CYPRESS_LIB=../mono_buildsystem/lib/monoCyLib.a
 MBED_LIB=../mbedcomp/mbedlib.a
@@ -26,7 +27,10 @@ MBED_LIB=../mbedcomp/mbedlib.a
 MBED_INCLUDES_REL =	. \
 					api \
 					hal \
-					target_cypress
+					target_cypress \
+					$(MBED_FS_PATH)/fat \
+					$(MBED_FS_PATH)/fat/ChaN \
+					$(MBED_FS_PATH)/sd
 
 MBED_INCLUDES = $(foreach PATH, $(MBED_INCLUDES_REL), $(MBED_PATH)/$(PATH))
 
@@ -50,10 +54,6 @@ MONO_TARGET_OBJECTS = $(addprefix ./$(BUILD_DIR)/, $(MONO_OBJECTS))
 
 MONO_INCLUDE_FILES = $(foreach FILE,$(MONO_INCLUDES),$(wildcard $(FILE)/*.h))
 
-MBED_INCLUDE_FILES  = $(foreach FILE,$(MBED_PATH)/api,$(wildcard $(FILE)/*.h))
-MBED_INCLUDE_FILES += $(foreach FILE,$(MBED_PATH)/hal,$(wildcard $(FILE)/*.h))
-MBED_INCLUDE_FILES += $(foreach FILE,$(MBED_PATH)/target_cypress,$(wildcard $(FILE)/*.h))
-MBED_INCLUDE_FILES += $(foreach FILE,$(MBED_PATH),$(wildcard $(FILE)/*.h))
 CYLIB_INCLUDE_FILES  = $(foreach FILE,$(INCLUDE_DIR),$(wildcard $(FILE)/*.h))
 CYLIB_INCLUDE_FILES += $(foreach FILE,$(INCLUDE_DIR),$(wildcard $(FILE)/*.ld))
 
@@ -73,7 +73,7 @@ COPY=cp
 MKDIR=mkdir
 MONOPROG=monoprog
 ELFTOOL='C:\Program Files (x86)\Cypress\PSoC Creator\3.1\PSoC Creator\bin\cyelftool.exe'
-INCS = -I . -I$(INCLUDE_DIR) $(addprefix -I, $(MBED_INCLUDES) $(MONO_INCLUDES))
+INCS = -I . $(addprefix -I, $(MONO_INCLUDES) $(MBED_INCLUDES) $(INCLUDE_DIR)) 
 CDEFS= #-DMONO_DISP_CTRL_HX8340
 ASDEFS=
 AS_FLAGS = -c -g -Wall -mcpu=cortex-m3 -mthumb -mthumb-interwork -march=armv7-m
@@ -129,7 +129,6 @@ mono_framework.a: cypressLib mbedLib $(MONO_TARGET_OBJECTS)
 	@echo "Linking Mono Framework Release..."
 	@$(AR) rcs $@ $(MONO_TARGET_OBJECTS) #$^
 	@echo "Copying linker and header files to include dir"
-	@$(MKDIR) -p include/mbed/cypress
 	@$(foreach PATH, $(MONO_INCLUDES_REL), $(MKDIR) -p include/$(PATH)$(\n))
 	@$(foreach PATH, $(MONO_INCLUDES_REL), $(COPY) -r $(MONO_FRAMEWORK_PATH)/$(PATH)/*.h include/$(PATH)$(\n))
 	@$(foreach PATH, $(MBED_INCLUDES_REL), $(MKDIR) -p include/mbed/$(PATH)$(\n))
