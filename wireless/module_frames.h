@@ -10,7 +10,7 @@
 #define __mono_redpine__module_frames__
 
 #include <mono.h>
-
+#include <mbed.h>
 
 namespace mono { namespace redpine {
     
@@ -48,7 +48,7 @@ namespace mono { namespace redpine {
      * A generic frame that is used to communicate which the module
      * Subclasses of this will represent data or management frames.
      */
-    class ModuleFrame
+    class ModuleFrame : public IQueueItem
     {
     public:
         /** List of frame direction, sent og received */
@@ -113,11 +113,20 @@ namespace mono { namespace redpine {
         /** The size of frame in raw format */
         static const uint8_t size = sizeof(mgmtFrameRaw);
         
+        ///** If this object sits in a queue, this is the pointer the next in the queue */
+        //ModuleFrame *queueNextPointer;
+        
         /**
          * Construct an empty frame with no properties set.
          * The frame will not represent any data or any command
          */
         ModuleFrame();
+        
+        /**
+         * Dealloc the frame if its subclass contains resources that should
+         * be removed gracefully.
+         */
+        virtual ~ModuleFrame();
         
     };
     
@@ -125,6 +134,22 @@ namespace mono { namespace redpine {
     class ManagementFrame : public ModuleFrame
     {
     public:
+        
+        /**
+         * The datastructure provided by the Management Frames async completion
+         * handler.
+         *
+         * You should use the member variable `Context` to reference any frame
+         * response data. You should expect the frame to be deallocated right after
+         * you callback handler functions returns.
+         *
+         * **Note**: You type safety you can check the frames `CommandId` before
+         * downcasting the `Context` pointer to a specific frame subclass.
+         */
+        typedef struct {
+            bool Success;               /**< See if the request was successfull */
+            ManagementFrame *Context;   /**< A pointer to the request frame object */
+        } FrameCompletionData;
         
         /** Management response status */
         uint16_t status;
@@ -144,6 +169,7 @@ namespace mono { namespace redpine {
          * overload the method (@ref responsePayloadHandler).
          *
          * The default value for this property is `false`
+         * @default `false`
          */
         bool responsePayload;
         
@@ -171,6 +197,24 @@ namespace mono { namespace redpine {
          */
         bool lastResponseParsed;
         
+        
+        /**
+         * The module handle class (@ref Module) should dealloc this object when
+         * it has parsed the last chunk of response data.
+         */
+        bool autoReleaseWhenParsed;
+        
+        /**
+         * @brief The handler called when @ref commit finishes
+         * 
+         * To handle frame request and responses asynchronously, this handler
+         * is triggered when the frame is committed.
+         */
+        mbed::FunctionPointerArg1<void, FrameCompletionData*> completionHandler;
+        
+        /** A reference to the completion handler context object */
+        void *handlerContextObject;
+        
         /**
          * Construct an empty (uninitialized) management frame
          * This is used when you need to allocate memory on the stack for a
@@ -196,6 +240,10 @@ namespace mono { namespace redpine {
          */
         ManagementFrame(RxTxCommandIds commandId);
         
+        ManagementFrame(const ManagementFrame &other);
+        
+        ManagementFrame &operator=(const ManagementFrame &other);
+        
         /**
          * If this frame is of type TX_FRAME this method will sent it to the
          * module.
@@ -211,9 +259,50 @@ namespace mono { namespace redpine {
          * When the method returns, the frame response (with payload data) is
          * expected to be present.
          *
-         * @return `true` on successm false otherwise
+         * @return `true` on success, false otherwise
          */
         virtual bool commit();
+        
+        /**
+         * @brief Send a TX_FRAME to the module asynchronous
+         * 
+         * Same as @ref commit, but but asynchronous and return immediately. You
+         * should set the completion callback handler (@ref setCompletionCallback)
+         * before calling this method.
+         *
+         *
+         *
+         * @see commit
+         * @see setCompletionCallback
+         */
+        virtual void commitAsync();
+        
+        /**
+         * If the frame is pending, it is aborted and removed from the to-be-sent
+         * request queue.
+         * If the frame has already been sent to the module, the abort is ignored.
+         *
+         * Still the completion callback handler if removed, to avoid calling
+         * freed objects.
+         *
+         * @brief Abort the execution (commit) of the frame
+         */
+        virtual void abort();
+        
+        /**
+         * Internal method used by @ref commitAsync method to send the frame to
+         * the module, inside the async function handler.
+         *
+         * You should not call this directly.
+         */
+        virtual bool writeFrame();
+        
+        /**
+         * Internal method to trigger the completion handler callback - if any
+         * This method should only be used by the @ref Module member method
+         * `moduleEventHandler`.
+         */
+        virtual void triggerCompletionHandler();
         
         /**
          * Gets the frames raw data format for transfer via the communication
@@ -264,6 +353,28 @@ namespace mono { namespace redpine {
          * @param payloadBuffer A pointer to the raw payload data buffer
          */
         virtual void responsePayloadHandler(uint8_t *payloadBuffer);
+        
+        /**
+         * @brief Set the frame completion callback handler
+         * 
+         * The member function you provide is called when the frame is successfully
+         * committed. This means it has been sent to the module, and a response has
+         * been received.
+         *
+         * The callback function must accept an input parameter:
+         * @code
+         * void functionName(ManagementFrame::FrameCompletionData *);
+         * @endcode
+         *
+         * @param obj The member functions context pointer (the `this` pointer)
+         * @param memPtr A pointer to the member function on the class
+         */
+        template <typename Owner>
+        void setCompletionCallback(Owner *obj, void(Owner::*memPtr)(FrameCompletionData*))
+        {
+            completionHandler.attach<Owner>(obj, memPtr);
+            handlerContextObject = obj;
+        }
     };
     
 }}

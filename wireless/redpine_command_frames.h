@@ -348,15 +348,15 @@ namespace mono { namespace redpine {
             uint8_t alignment[2];   /**< Needed for 4-byte alignment */
         } joinFrameSnd;
         
-        const char *ssid;
-        const char *passphrase;
+        String ssid;
+        String passphrase;
         int securityMode;
         
         /**
          *
          * 
          */
-        JoinFrame(const char *ssid, const char *passphrase, int secMode = 6);
+        JoinFrame(String ssid, String passphrase, int secMode = 6);
         
         void dataPayload(uint8_t *dataBuffer);
     };
@@ -432,6 +432,9 @@ namespace mono { namespace redpine {
         /** Byte array with the default gateway, used only in STATIC_IP mode */
         uint8_t gateway[4];
         
+        /** The mac address receive from the frame response */
+        uint8_t macAddress[6];
+        
         /**
          * Construct a the command as dynamic ip (DHCP enabled) with hostname
          * "mono".
@@ -441,6 +444,7 @@ namespace mono { namespace redpine {
         void dataPayload(uint8_t *dataBuffer);
         
         void responsePayloadHandler(uint8_t *databuffer);
+        
     };
     
     
@@ -478,7 +482,7 @@ namespace mono { namespace redpine {
         } TCP_EVT_DNS_Query_Resp;
         
         /** The domain to lookup */
-        const char *domain;
+        String domain;
         
         /**  Is `true` if DNS resolution is completed and successful. `false` otherwise. */
         bool respSuccess;
@@ -486,13 +490,16 @@ namespace mono { namespace redpine {
         /** Either the IPc4 or IPv6 ip address, after dns resolution finised */
         uint8_t resIpAddress[16];
         
+        /** The IP version returned from resolution. Either 4 or 6 */
+        uint8_t ipVersion;
+        
         /** 
          * Construct a new DNS query command.
          * Use the @ref commit() method to execute the resolution.
          *
          * @param domainName The domain name string to resolve
          */
-        DnsResolutionFrame(const char *domainName);
+        DnsResolutionFrame(String domainName);
         
         void dataPayload(uint8_t *dataBuffer);
         
@@ -510,6 +517,14 @@ namespace mono { namespace redpine {
     class HttpGetFrame : public ManagementFrame
     {
     public:
+        
+        /** Data struct used in the DataReady callback function */
+        typedef struct
+        {
+            uint16_t dataLength;    /**< The number of data bytes */
+            uint8_t *data;          /**< A pointer to the data returned */
+            HttpGetFrame *context;  /**< A pointer to the HttpGetFrame that triggered the callback */
+        } CallbackData;
         
         /** The maximum length of the TTP Request Buffer blob */
         static const int maxHttpBufferLength = 1200;
@@ -542,22 +557,25 @@ namespace mono { namespace redpine {
         } HttpRsp;
         
         /** The HTTP servers hostname (for virtual hosts) */
-        const char *hostname;
+        String hostname;
         
         /** The server ip address as a string, ex: `192.168.1.10` */
-        char *ipaddress;
+        String ipaddress;
         
         /** The URL to call, ex: `/index.html` */
-        const char *url;
+        String url;
         
         /** Extra HTTP headers to sent along with the GET request. */
-        const char *extraHeader;
+        String extraHeader;
         
         /**
          * If this is set the HTTP Body is written to the file
          * If this is NULL, then nothing is obviosly written :-)
          */
         FILE *destinationFile;
+        
+        /** Callback handler, used when no file pointer is given */
+        mbed::FunctionPointerArg1<void, CallbackData*> dataReadyHandler;
         
         /**
          * Construct a HTTP GET request frame
@@ -566,14 +584,38 @@ namespace mono { namespace redpine {
          * @param serverIp The real IP address of the server, as string
          * @param Url The URL to call on the HTTP server
          */
-        HttpGetFrame(const char* hostname, char *serverIp, const char *Url, FILE *destFile);
+        HttpGetFrame(String hostname, String serverIp, String Url, FILE *destFile);
+        
+        ~HttpGetFrame();
         
         void dataPayload(uint8_t *data);
         
         void responsePayloadHandler(uint8_t *data);
         
         int payloadLength();
+        
+        /**
+         * @brief Set the DataReady callback function
+         * 
+         * When you do not supply a `FILE` pointer, the HTTP body is returned
+         * through a DataReady callback function. The function must take one parameter
+         * that is of the type @ref HttpGetFrame::CallbackData .
+         * 
+         * @param obj A pointer to the callback functions member context (the this pointer)
+         * @param memPtr A point to the member function itself.
+         */
+        template <typename Owner>
+        void setDataReadyCallback(Owner *obj, void(Owner::*memPtr)(CallbackData*))
+        {
+            this->dataReadyHandler.attach<Owner>(obj, memPtr);
+        }
     };
+    
+    
+//    class HttpPostFrame : public HttpGetFrame
+//    {
+//        HttpPostFrame(String hostname, String serverIp, String path, );
+//    };
     
     
     /**

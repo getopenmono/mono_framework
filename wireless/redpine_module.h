@@ -13,6 +13,8 @@
 #include "spi_commands.h"
 #include "module_communication.h"
 #include "redpine_command_frames.h"
+#include <power_aware_interface.h>
+#include <queue.h>
 
 namespace mono { namespace redpine {
     
@@ -33,7 +35,7 @@ namespace mono { namespace redpine {
      * DNS resolution etc, should be handled by dedicated classes, that uses 
      * this class.
      */
-    class Module
+    class Module : power::IPowerAware
     {
         friend ModuleFrame;
         friend ManagementFrame;
@@ -121,6 +123,20 @@ namespace mono { namespace redpine {
         /** The current state of the module, is it awake or sleeping */
         ModulePowerState CurrentPowerState;
         
+        /** A queue over the pending requests to-be-send to the module */
+        GenericQueue<ManagementFrame> requestFrameQueue;
+        
+        /** A queue over the pending requests sent / pending to the module */
+        GenericQueue<ManagementFrame> responseFrameQueue;
+        
+        /** User can install a network ready event callback in this handler */
+        mbed::FunctionPointer networkReadyHandler;
+        
+        uint8_t ipAddress[4], netmask[4], gateway[4], macAddress[6];
+        String hostname;
+        
+        bool dhcpEnabled;
+        
         /**
          * Protected class constructor
          * Can only be called by the Instance() method.
@@ -134,13 +150,25 @@ namespace mono { namespace redpine {
          */
         void handleSleepWakeUp();
         
+        /** Callback for the DHCP Mgmt frame response, that indicate the network is ready */
+        void onNetworkReady(ManagementFrame::FrameCompletionData *data);
+        
+        
+        void onSystemPowerOnReset();
+        
+        void onSystemEnterSleep();
+
+        void onSystemWakeFromSleep();
+        
+        void OnSystemBatteryLow();
+        
+    public:
+        
         /**
          * Callback function installed into the CommunicationInterface interrupt
          * callback listener.
          */
         void moduleEventHandler();
-        
-    public:
         
         /**
          * Obtain a reference to the singleton module object
@@ -168,6 +196,23 @@ namespace mono { namespace redpine {
          * @param secMode The access points security setting, default is WPA/WPA2
          */
         static bool setupWifiOnly(const char *ssid, const char *passphrase, WifiSecurityModes secMode = SEC_WPA_WPA2);
+        
+        /**
+         * Check to see if the module has a ready network stack with initialized
+         * IP configuration. A ready network stack is ready to fetch or send data
+         * to and from the internet.
+         *
+         * @brief See id the network is ready and running
+         * @returns `true` if the network is ready, `false` otherwise
+         */
+        static bool IsNetworkReady();
+        
+        
+        template <typename Owner>
+        static void setNetworkReadyCallback(Owner *obj, void (Owner::*memPtr)(void))
+        {
+            Module::Instance()->networkReadyHandler.attach<Owner>(obj, memPtr);
+        }
     };
     
     

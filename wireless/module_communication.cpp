@@ -15,14 +15,6 @@
 extern "C"
 {
 #include <project.h>
-
-    volatile bool mono_redpine_spi_comm_interrupt_schedule = false;
-    volatile void mono_redpine_spi_comm_interrupt_handler()
-    {
-        mono_redpine_spi_comm_interrupt_schedule = true;
-        SPI_ISR_ClearPending();
-    }
-    
 }
 
 using namespace mono::redpine;
@@ -52,7 +44,7 @@ SPIReceiveDataBuffer::SPIReceiveDataBuffer(int size, uint16_t fwVer) : DataRecei
     this->ownsMemory = true;
     this->firmwareVersion = fwVer;
     
-    mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
+    //mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
     this->buffer = (uint8_t*) malloc(size);
 }
 
@@ -68,7 +60,7 @@ SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead, uint1
     
     this->ownsMemory = true;
     
-    mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
+    //mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
     this->buffer = (uint8_t*) malloc(this->length);
     this->bytesToRead = this->length;
 }
@@ -107,30 +99,38 @@ SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
         free(this->buffer);
 }
 
-ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) : spiChipSelect(chipSelect, 1), resetLine(resetPin, 1)
+ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) :
+    spiChipSelect(chipSelect, 1),
+    resetLine(resetPin, 1),
+    spiInterrupt(interruptPin),
+    fakeISRTimer(50)
 {
-    CyPins_SetPinDriveMode(interruptPin, CY_PINS_DM_DIG_HIZ);
     this->spi = &spi;
-    this->InterfaceVersion = 0xAB16; // we expact this is the default version
+    this->InterfaceVersion = 0xAB16; // we expect this is the default version
     
-    // start the interrupt
-    SPI_ISR_StartEx((cyisraddress)&mono_redpine_spi_comm_interrupt_handler);
-    mono::IApplicationContext::Instance->RunLoop->addDynamicTask(this);
+    spiInterrupt.DeactivateUntilHandled();
+    spiInterrupt.rise<ModuleSPICommunication>(this, &ModuleSPICommunication::interruptHandler);
+    
+    defaultSerial.printf("starting fake IRQ timer!\n\r");
+    fakeISRTimer.setCallback<ModuleSPICommunication>(this, &ModuleSPICommunication::fakeISRHandler);
+    fakeISRTimer.Start();
 }
 
 // PROTECTED AUXILLARY METHODS
 
-void ModuleSPICommunication::taskHandler()
+void ModuleSPICommunication::fakeISRHandler()
 {
-    if (mono_redpine_spi_comm_interrupt_schedule)
+    if (pollInputQueue())
+        interruptHandler();
+}
+
+void ModuleSPICommunication::interruptHandler()
+{
+    //defaultSerial.printf("SPI ISR has occured!\n\r");
+    if (interruptCallback == true)
     {
-        mono_redpine_spi_comm_interrupt_schedule = false;
-        defaultSerial.printf("SPI ISR has occured!\n\r");
-        if (interruptCallback == true)
-        {
-            defaultSerial.printf("calling event handler!\n\r");
-            interruptCallback.call();
-        }
+        //defaultSerial.printf("calling event handler!\n\r");
+        interruptCallback.call();
     }
 }
 
@@ -586,13 +586,22 @@ void ModuleSPICommunication::writeMemory(uint32_t memoryAddress, uint16_t value)
 
 bool ModuleSPICommunication::pollInputQueue()
 {
+    bool dataReady = spiInterrupt.read();
     uint8_t regval = readRegister(SPI_HOST_INTR);
     if ((regval & 0x08) == 0x08)
     {
+//        if (!dataReady)
+//            debug("input data ready, but interrupt is low!\n\r");
+        
         return true;
     }
     else
+    {
+//        if (dataReady)
+//            debug("no input data ready, but interrupt is high!\n\r");
+        
         return false;
+    }
 }
 
 bool ModuleSPICommunication::readManagementFrame(ManagementFrame &frame)
@@ -667,7 +676,7 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     //check that the frame is a correct response to the request
     if (rawFrame->CommandId != request.commandId)
     {
-        mono::Error << "Read frame response. Wrong resp command Id. Was " << rawFrame->CommandId << " expected " << request.commandId << "\n\r";
+        debug("Read frame response. Wrong resp command Id. Was 0x%x expected 0x%x\n\r",rawFrame->CommandId,request.commandId);
         return false;
     }
     
@@ -675,9 +684,8 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     {
         mono::defaultSerial.printf("Error response for command: 0x%x. Error code: 0x%x\n\r",rawFrame->CommandId,rawFrame->status);
     }
-    
     // check for payload
-    if (request.responsePayload && (rawFrame->LengthType & 0xFFF) > 0)
+    else if (request.responsePayload && (rawFrame->LengthType & 0xFFF) > 0)
     {
         mono::Debug << "Parsing response frame payload data...\n\r";
         request.responsePayloadHandler(((uint8_t*)rawFrame)+16);
@@ -690,8 +698,9 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     request.length = rawFrame->LengthType & 0xFFF;
     request.direction = ModuleFrame::RX_FRAME;
+    request.status = rawFrame->status;
     
-    return true;
+    return rawFrame->status == 0;
 }
 
 bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)

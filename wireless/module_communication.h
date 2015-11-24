@@ -101,16 +101,16 @@ namespace mono { namespace redpine {
      * through a hardware interface.
      * Subclasses of this should utilize UART, USB or SPI communication.
      */
-    class ModuleCommunication : public mono::IRunLoopTask
+    class ModuleCommunication /*: public mono::IRunLoopTask */
     {
     protected:
         
-        /**
-         * Method that must be implemented, that will be called by the run loop
-         * It should only be scheduled by an hardware interrupt handler, and
-         * remove it self again from the run loop, after it has run.
-         */
-        virtual void taskHandler() = 0;
+//        /**
+//         * Method that must be implemented, that will be called by the run loop
+//         * It should only be scheduled by an hardware interrupt handler, and
+//         * remove it self again from the run loop, after it has run.
+//         */
+//        virtual void taskHandler() = 0;
         
     public:
         
@@ -269,8 +269,11 @@ namespace mono { namespace redpine {
         mbed::SPI *spi;
         //PinName spiChipSelect;
         mbed::DigitalOut spiChipSelect, resetLine;
+        QueueInterrupt spiInterrupt;
+        Timer fakeISRTimer;
         
-        void taskHandler();
+        void fakeISRHandler();
+        void interruptHandler();
         
         /**
          * Auxillary function to transfer C1 and C2 commands

@@ -15,8 +15,25 @@ using namespace mono::redpine;
 
 ModuleFrame::ModuleFrame()
 {
+    this->_queueNextPointer = NULL;
     this->length = 0;
     this->commandId = 0;
+    //this->queueNextPointer = NULL;
+}
+
+ModuleFrame::~ModuleFrame()
+{
+    // if this object exists in a queue - remove it
+    if (_queueNextPointer != NULL)
+    {
+        debug("freeing frame: 0x%x from queues...\n\r",commandId);
+        Module *mod = Module::Instance();
+        mod->requestFrameQueue.Remove(this);
+        if (mod->responseFrameQueue.Remove(this))
+        {
+            warning("A Redpine response queue frame was freed! The communication will be out of sync!\n\r");
+        }
+    }
 }
 
 ManagementFrame::ManagementFrame() : ModuleFrame()
@@ -25,6 +42,8 @@ ManagementFrame::ManagementFrame() : ModuleFrame()
     this->responsePayload = false;
     this->lastResponseParsed = true;
     this->status = 0;
+    this->autoReleaseWhenParsed = true;
+    this->handlerContextObject = NULL;
 }
 
 ManagementFrame::ManagementFrame(mgmtFrameRaw *frame)
@@ -35,6 +54,8 @@ ManagementFrame::ManagementFrame(mgmtFrameRaw *frame)
     this->status = frame->status;
     this->responsePayload = false;
     this->lastResponseParsed = true;
+    this->autoReleaseWhenParsed = true;
+    this->handlerContextObject = NULL;
 }
 
 ManagementFrame::ManagementFrame(RxTxCommandIds commId)
@@ -45,6 +66,40 @@ ManagementFrame::ManagementFrame(RxTxCommandIds commId)
     this->lastResponseParsed = true;
     this->length = 0;
     this->status = 0;
+    this->autoReleaseWhenParsed = true;
+    this->handlerContextObject = NULL;
+}
+
+ManagementFrame::ManagementFrame(const ManagementFrame &other)
+{
+    direction = other.direction;
+    commandId = other.commandId;
+    responsePayload = other.responsePayload;
+    lastResponseParsed = other.lastResponseParsed;
+    length = other.length;
+    status = other.status;
+    autoReleaseWhenParsed = other.autoReleaseWhenParsed;
+    handlerContextObject = other.handlerContextObject;
+    
+    completionHandler = other.completionHandler;
+}
+
+ManagementFrame &ManagementFrame::operator=(const mono::redpine::ManagementFrame &other)
+{
+    debug("mgmt frame assign\n\r");
+    
+    direction = other.direction;
+    commandId = other.commandId;
+    responsePayload = other.responsePayload;
+    lastResponseParsed = other.lastResponseParsed;
+    length = other.length;
+    status = other.status;
+    autoReleaseWhenParsed = other.autoReleaseWhenParsed;
+    handlerContextObject = other.handlerContextObject;
+    
+    completionHandler = other.completionHandler;
+    
+    return *this;
 }
 
 bool ManagementFrame::commit()
@@ -91,15 +146,61 @@ bool ManagementFrame::commit()
         
         if (!success)
         {
-            mono::Error << "Failed to read response frame!\n\r";
+            warning("Failed to read response frame!\n\r");
             return false;
         }
         
     } while (!this->lastResponseParsed);
     
-        
+    
     return true;
 }
+
+void ManagementFrame::commitAsync()
+{
+    if (this->direction != TX_FRAME)
+    {
+        error("You cannot send a RX frame to the module!\n\r");
+        return;
+    }
+    
+    Module *module = Module::Instance();
+    
+    module->requestFrameQueue.Enqueue(this);
+    
+    
+    Timer::callOnce<Module>(0, module, &Module::moduleEventHandler);
+}
+
+void ManagementFrame::abort()
+{
+    debug("Aborting MGMT Frame: 0x%x\n\r",commandId);
+    
+    Module *mod = Module::Instance();
+    mod->requestFrameQueue.Remove(this);
+    
+    this->completionHandler.attach<ManagementFrame>(NULL, NULL);
+}
+
+bool ManagementFrame::writeFrame()
+{
+    Module *module = Module::Instance();
+    
+    return module->comIntf->writeFrame(this);
+}
+
+void ManagementFrame::triggerCompletionHandler()
+{
+    //if (completionHandler == true)
+    {
+        FrameCompletionData data;
+        data.Success = status == 0 ? true : false;
+        data.Context = this;
+        completionHandler.call(&data);
+    }
+    
+}
+
 
 void ManagementFrame::rawFrameFormat(mgmtFrameRaw *data)
 {

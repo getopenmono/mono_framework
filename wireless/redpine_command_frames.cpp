@@ -10,6 +10,8 @@
 #include "redpine_module.h"
 #include <consoles.h>
 
+#include <stdio.h>
+
 using namespace mono::redpine;
 
 SetOperatingModeFrame::SetOperatingModeFrame(WifiOperModes mode) : ManagementFrame(ModuleFrame::SetOperatingMode)
@@ -115,7 +117,7 @@ void ScanFrame::responsePayloadHandler(uint8_t *dataBuffer)
 
 // JOIN FRAME
 
-JoinFrame::JoinFrame(const char *ssid, const char *pass, int secMode) : ManagementFrame(Join)
+JoinFrame::JoinFrame(String ssid, String pass, int secMode) : ManagementFrame(Join)
 {
     this->length = sizeof(joinFrameSnd);
     this->responsePayload = false;
@@ -133,9 +135,9 @@ void JoinFrame::dataPayload(uint8_t *dataBuffer)
     raw->Security_mode = securityMode;
     raw->dataRate = 0; // auto
     raw->powerLevel = 0; // low signal power
-    memcpy(raw->psk, passphrase, strlen(passphrase));
-    memcpy(raw->ssid, ssid, strlen(ssid));
-    raw->ssid_len = strlen(ssid);
+    memcpy(raw->psk, passphrase(), passphrase.Length());
+    memcpy(raw->ssid, ssid(), ssid.Length());
+    raw->ssid_len = ssid.Length();
 }
 
 
@@ -175,12 +177,16 @@ void SetIpParametersFrame::dataPayload(uint8_t *dataBuffer)
 void SetIpParametersFrame::responsePayloadHandler(uint8_t *databuffer)
 {
     ipparamFrameResp *resp = (ipparamFrameResp*) databuffer;
-    mono::Debug << "Got IP: " << resp->ipaddr[0] << "." << resp->ipaddr[1] << "." << resp->ipaddr[2] << "." << resp->ipaddr[3] << "\n";
+    
+    memcpy(this->ipAddress, resp->ipaddr, 4);
+    memcpy(this->gateway, resp->gateway, 4);
+    memcpy(this->netmask, resp->netmask, 4);
+    memcpy(this->macAddress, resp->macAddr, 6);
 }
 
 // DNS RESOLUTE FRAME
 
-DnsResolutionFrame::DnsResolutionFrame(const char *domainName) : ManagementFrame(DnsResolution)
+DnsResolutionFrame::DnsResolutionFrame(String domainName) : ManagementFrame(DnsResolution)
 {
     this->length = sizeof(dnsQryFrameSnd);
     this->responsePayload = true;
@@ -193,17 +199,23 @@ void DnsResolutionFrame::dataPayload(uint8_t *dataBuffer)
 {
     memset(dataBuffer, 0, sizeof(dnsQryFrameSnd));
     dnsQryFrameSnd *frm = (dnsQryFrameSnd*) dataBuffer;
-    memcpy(frm->aDomainName, domain, strlen(domain)<maxDomainNameLength ? strlen(domain) : maxDomainNameLength);
+    memcpy(frm->aDomainName, domain(), (domain.Length()+1)<maxDomainNameLength ? (domain.Length()+1) : maxDomainNameLength);
     frm->ip_version = 4; // use IPv4
 }
 
 void DnsResolutionFrame::responsePayloadHandler(uint8_t *databuffer)
 {
+    if (this->status != 0)
+    {
+        respSuccess = false;
+        return;
+    }
+    
     TCP_EVT_DNS_Query_Resp *resp = (TCP_EVT_DNS_Query_Resp*) databuffer;
     respSuccess = true;
     if (resp->uIPCount == 0)
     {
-        mono::Debug << "No IP address resolved from " << this->domain;
+        mono::Debug << "No IP address resolved from " << this->domain();
         respSuccess = false;
     }
     else if (resp->ip_version == 4)
@@ -215,12 +227,15 @@ void DnsResolutionFrame::responsePayloadHandler(uint8_t *databuffer)
         mono::Warn << "Unsupported IP version: " << resp->ip_version << "\n";
         respSuccess = false;
     }
+    
+    ipVersion = resp->ip_version;
 }
 
 
 // HTTP GET Frame
 
-HttpGetFrame::HttpGetFrame(const char *host, char *ipaddrs, const char *url, FILE *destFile) : ManagementFrame(HttpGet)
+HttpGetFrame::HttpGetFrame(String host, String ipaddrs, String url, FILE *destFile) :
+    ManagementFrame(HttpGet)
 {
     this->hostname = host;
     this->ipaddress = ipaddrs;
@@ -244,16 +259,18 @@ void HttpGetFrame::dataPayload(uint8_t *data)
     memcpy(strPnt++, "", 1); // username param
     memcpy(strPnt++, "", 1); // username param
     
-    memcpy(strPnt, hostname, strlen(hostname));
-    strPnt += strlen(hostname)+1;
+    debug("sizeof struct: %i, hstnm: %i, ipaddr: %i, url: %i, extHdr: %i\n\r",sizeof(HttpReqFrameSnd),hostname.Length(),ipaddress.Length(),url.Length(),extraHeader.Length());
     
-    memcpy(strPnt, ipaddress, strlen(ipaddress));
-    strPnt += strlen(ipaddress)+1;
+    memcpy(strPnt, hostname(), hostname.Length());
+    strPnt += hostname.Length()+1;
     
-    memcpy(strPnt, url, strlen(url));
-    strPnt += strlen(url)+1;
+    memcpy(strPnt, ipaddress(), ipaddress.Length());
+    strPnt += ipaddress.Length()+1;
     
-    memcpy(strPnt, extraHeader, strlen(extraHeader));
+    memcpy(strPnt, url(), url.Length());
+    strPnt += url.Length()+1;
+    
+    memcpy(strPnt, extraHeader(), extraHeader.Length());
 }
 
 void HttpGetFrame::responsePayloadHandler(uint8_t *data)
@@ -264,7 +281,13 @@ void HttpGetFrame::responsePayloadHandler(uint8_t *data)
     if (destinationFile)
         fwrite(&(resp->data), resp->data_len, 1, destinationFile);
     else
-        mono::Debug << (char*) &(resp->data);
+    {
+        CallbackData cbData;
+        cbData.dataLength = resp->data_len;
+        cbData.data = &(resp->data);
+        cbData.context = this;
+        dataReadyHandler.call(&cbData);
+    }
     
     // "more" is high when the data is transferred
     if (resp->more == 1)
@@ -279,11 +302,15 @@ void HttpGetFrame::responsePayloadHandler(uint8_t *data)
 int HttpGetFrame::payloadLength()
 {
     int size = sizeof(HttpReqFrameSnd);
-    size += 1 + 1 + strlen(hostname) + 1 + strlen(ipaddress) + 1 + strlen(url) + 1 + strlen(extraHeader) + 1;
+    size += 1 + 1 + hostname.Length() + 1 + ipaddress.Length() + 1 + url.Length() + 1 + extraHeader.Length() + 1;
     
     return (size+3) & ~3;
 }
 
+HttpGetFrame::~HttpGetFrame()
+{
+    debug("dealloc HttpGetFrame\n\r");
+}
 
 // SET POWER MODE FRAME
 
