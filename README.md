@@ -1,7 +1,24 @@
 # Mono Framework
-This is the embedded Mono framework, for interacting with Wifi display etc.
+This is the Mono framework, for developing mono applications. It is simple and easy to use, and provide methods for the most common tasks.
 
-We are currently developing the framework, so nothing is static. Interfaces and APIs are very likely to change.
+# Overview
+The framework consists of highlevel classes and interfaces to inteact with hardware or to process data. The classes can be divided into these main categories:
+
+ * **Display UI Widgets** (TextLabels, Buttons, Progressbars or draw shapes)
+ * **Touch Input** (Responders chain, raw touch events)
+ * **Accelerometer** Interface API
+ * **Thermometer** Interface API
+ * **Power Management** Battery low notifcation and sleep / wake notifications
+ * **Wifi** Access Point setup
+ * **HTTP Client** Fetch content from web servers
+ * **Regular Expressions** lightweight regex with capture groups
+ * **File I/O** Posix like filesystem I/O (`fprintf`, `fread` & `fwrite`)
+ * **Geometry Calculus** Classes to manipalte geometric shapes
+ * **Interrupts & Timers** Receive callback notifications on H/W interrupts or timers
+ * **USB Serial Console** Use *`printf` and `scanf` via the USB UART
+ * **Image Decoding** Read images from SD Card
+ 
+Are you looking for low level I/O like I<sup>2</sup>C, SPI, GPIO etc? We use [mbed](https://developer.mbed.org/handbook/Homepage#using-mbed-libraries) as the foundation, and you also have access to mbed. The mbed API's are included in the mono framework.
 
 ## Application Structure
 The framework basic application structure consists of 3 classes:
