@@ -14,6 +14,8 @@
 #include "power_management_interface.h"
 #include "touch_system_interface.h"
 #include "queue_interrupt.h"
+#include "temperature_interface.h"
+#include "accelerometer_interface.h"
 
 namespace mono {
     
@@ -77,7 +79,7 @@ namespace mono {
          * If this contructor did not setup the pointers, the PowerManagement
          * constructor would see the @ref Instance global equal `null`.
          */
-        IApplicationContext(power::IPowerManagement *pwr, AppRunLoop *runLp, display::IDisplayController *dispCtrl, ITouchSystem *tchSys, QueueInterrupt *userBtn) : PowerManager(pwr), RunLoop(runLp), DisplayController(dispCtrl), TouchSystem(tchSys), UserButton(userBtn)
+        IApplicationContext(power::IPowerManagement *pwr, AppRunLoop *runLp, display::IDisplayController *dispCtrl, ITouchSystem *tchSys, QueueInterrupt *userBtn) : PowerManager(pwr), RunLoop(runLp), DisplayController(dispCtrl), TouchSystem(tchSys), UserButton(userBtn), Accelerometer(NULL), Temperature(NULL)
         {
             IApplicationContext::Instance = this;
         }
@@ -154,6 +156,19 @@ namespace mono {
          * @endcode
          */
         QueueInterrupt *UserButton;
+        
+        
+        /**
+         *
+         * 
+         */
+        sensor::IAccelerometer *Accelerometer;
+        
+        /**
+         *
+         * 
+         */
+        sensor::ITemperature *Temperature;
         
         /**
          * This method starts the global run/event loop for the mono application.

@@ -8,6 +8,8 @@
 
 #include "pct2075_temperature.h"
 
+#include "application_context_interface.h"
+
 extern "C" {
 #include <project.h>
 }
@@ -17,6 +19,8 @@ using namespace mono::sensor;
 PCT2075Temperature::PCT2075Temperature()
 {
     currentPointerRegister = 0xFF;
+    
+    IApplicationContext::Instance->Temperature = this;
 }
 
 int PCT2075Temperature::Read()
