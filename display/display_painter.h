@@ -14,6 +14,7 @@
 #include "display_controller_interface.h"
 #include "point.h"
 #include "rect.h"
+#include "circle.h"
 
 namespace mono { namespace display {
     
@@ -255,7 +256,17 @@ namespace mono { namespace display {
         void drawHLine(uint16_t x1, uint16_t x2, uint16_t y, bool background = false);
         
         
+        /**
+         * @brief Paint an outlined circle
+         * 
+         */
+        void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, bool background = false);
+        void drawCircle(geo::Circle &circle, bool background = false);
         
+        void drawFillCircle(uint16_t x0, uint16_t y0, uint16_t r, bool background = false);
+        void drawFillCircle(geo::Circle &circle, bool background = false);
+        
+        void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, bool background = false);
     };
     
 } }

@@ -36,6 +36,8 @@ namespace mono { namespace geo {
         
         int Y2() const;
         
+        class Point Center() const;
+        
         void setPoint(class Point p);
         
         void setSize(class Size s);

@@ -232,6 +232,86 @@ void DisplayPainter::drawHLine(uint16_t x1, uint16_t x2, uint16_t y, bool bg)
     }
 }
 
+void DisplayPainter::drawCircle(uint16_t x0, uint16_t y0, uint16_t r, bool color)
+{
+    int16_t f = 1 - r;
+    int16_t ddF_x = 1;
+    int16_t ddF_y = -2 * r;
+    int16_t x = 0;
+    int16_t y = r;
+    
+    drawPixel(x0  , y0+r, color);
+    drawPixel(x0  , y0-r, color);
+    drawPixel(x0+r, y0  , color);
+    drawPixel(x0-r, y0  , color);
+    
+    while (x<y) {
+        if (f >= 0) {
+            y--;
+            ddF_y += 2;
+            f += ddF_y;
+        }
+        x++;
+        ddF_x += 2;
+        f += ddF_x;
+        
+        drawPixel(x0 + x, y0 + y, color);
+        drawPixel(x0 - x, y0 + y, color);
+        drawPixel(x0 + x, y0 - y, color);
+        drawPixel(x0 - x, y0 - y, color);
+        drawPixel(x0 + y, y0 + x, color);
+        drawPixel(x0 - y, y0 + x, color);
+        drawPixel(x0 + y, y0 - x, color);
+        drawPixel(x0 - y, y0 - x, color);
+    }
+}
+
+void DisplayPainter::drawCircle(geo::Circle &circle, bool bg)
+{
+    drawCircle(circle.X(), circle.Y(), circle.Radius(), bg);
+}
+
+void DisplayPainter::drawFillCircle(uint16_t x0, uint16_t y0, uint16_t r, bool color)
+{
+    drawVLine(x0, y0-r, y0-r+2*r+1, color);
+    fillCircleHelper(x0, y0, r, 3, 0, color);
+}
+
+void DisplayPainter::drawFillCircle(geo::Circle &circle, bool bg)
+{
+    drawFillCircle(circle.X(), circle.Y(), circle.Radius(), bg);
+}
+
+void DisplayPainter::fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, bool color)
+{
+    int16_t f     = 1 - r;
+    int16_t ddF_x = 1;
+    int16_t ddF_y = -2 * r;
+    int16_t x     = 0;
+    int16_t y     = r;
+    
+    while (x<y) {
+        if (f >= 0) {
+            y--;
+            ddF_y += 2;
+            f     += ddF_y;
+        }
+        x++;
+        ddF_x += 2;
+        f     += ddF_x;
+        
+        if (cornername & 0x1) {
+            drawVLine(x0+x, y0-y, y0-y+2*y+1+delta, color);
+            drawVLine(x0+y, y0-x, y0-x+2*x+1+delta, color);
+        }
+        if (cornername & 0x2) {
+            drawVLine(x0-x, y0-y, y0-y+2*y+1+delta, color);
+            drawVLine(x0-y, y0-x, y0-x+2*x+1+delta, color);
+        }
+    }
+}
+
+
 void DisplayPainter::swap(uint16_t &a, uint16_t &b)
 {
     uint16_t t = a;

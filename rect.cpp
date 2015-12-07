@@ -50,6 +50,10 @@ int Rect::Y2() const
     return this->Y() + this->Height();
 }
 
+class Point Rect::Center() const
+{
+    return geo::Point( X() + Width()/2, Y() + Height()/2 );
+}
 
 Point& Rect::Point()
 {

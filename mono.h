@@ -25,6 +25,7 @@
 #include "point.h"
 #include "size.h"
 #include "rect.h"
+#include "circle.h"
 
 #include <color.h>
 #include <display_painter.h>
@@ -40,6 +41,7 @@
 #include <display/ui/animator.h>
 #include <display/ui/touch_calibrator.h>
 #include "display/ui/progress_bar_view.h"
+#include "display/ui/status_indicator_view.h"
 
 #include "media/image.h"
 #include "media/bmp_image.h"

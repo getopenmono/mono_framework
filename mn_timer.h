@@ -149,6 +149,11 @@ namespace mono {
         }
         
         
+        void setCallback(void(*cFunction)(void))
+        {
+            handler.attach(cFunction);
+        }
+        
         /**
          * @brief Create a single shot timer with a delay and callback function
          * 

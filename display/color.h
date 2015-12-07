@@ -53,6 +53,7 @@ namespace mono { namespace display {
     static const Color MidnightBlueColor(44,62,80);
     static const Color     AlizarinColor(231,76,60);
     static const Color    TurquoiseColor(26,188,156);
+    static const Color      EmeraldColor(0x2e,0xcc,0x71);
     
 } }
 
