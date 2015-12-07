@@ -27,9 +27,9 @@ Color::Color(const Color &color)
 
 Color::Color(uint8_t R, uint8_t G, uint8_t B)
 {
-    value = ((R << 11) & 0xF800) |
-            ((G << 5)  & 0x07E0) |
-            (B & 0x1F);
+    value = ((R << 8) & 0xF800) |
+            ((G << 3)  & 0x07E0) |
+            ((B >> 3) & 0x1F);
 }
 
 uint16_t Color::operator=(Color col)

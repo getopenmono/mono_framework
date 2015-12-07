@@ -11,7 +11,7 @@
 
 using namespace mono::display;
 
-DisplayPainter::DisplayPainter(IDisplayController *dispctrl) : foregroundColor(WhiteColor), backgroundColor(BlackColor)
+DisplayPainter::DisplayPainter(IDisplayController *dispctrl) : foregroundColor(WetAsphaltColor), backgroundColor(CloudsColor)
 {
     displayCtrl = dispctrl;
     

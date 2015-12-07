@@ -12,7 +12,7 @@
 
 using namespace mono::ui;
 
-TextLabelView::TextLabelView(String txt) : textColor(display::WhiteColor), bgColor(display::BlackColor)
+TextLabelView::TextLabelView(String txt) : textColor(display::WetAsphaltColor), bgColor(display::CloudsColor)
 {
     this->text = txt;
     this->setTextSize(1);
@@ -21,8 +21,8 @@ TextLabelView::TextLabelView(String txt) : textColor(display::WhiteColor), bgCol
 }
 
 TextLabelView::TextLabelView(const char *txt) :
-    textColor(display::WhiteColor),
-    bgColor(display::BlackColor)
+    textColor(display::WetAsphaltColor),
+    bgColor(display::CloudsColor)
 {
     this->text = txt;
     this->setTextSize(1);
@@ -32,22 +32,20 @@ TextLabelView::TextLabelView(const char *txt) :
 
 TextLabelView::TextLabelView(geo::Rect rct, String txt) :
     View(rct),
-    textColor(display::WhiteColor),
-    bgColor(display::BlackColor)
+    textColor(display::WetAsphaltColor),
+    bgColor(display::CloudsColor)
 {
     this->text = txt;
     this->setTextSize(2);
-    this->setTextColor(display::WhiteColor);
 }
 
 TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
 View(rct),
-textColor(display::WhiteColor),
-bgColor(display::BlackColor)
+textColor(display::WetAsphaltColor),
+bgColor(display::CloudsColor)
 {
     this->text = txt;
     this->setTextSize(2);
-    this->setTextColor(display::WhiteColor);
 }
 
 // Getters
@@ -115,12 +113,14 @@ void TextLabelView::setText(mono::String text, bool resizeViewWidth)
     {
         viewRect.setWidth(TextPixelWidth());
     }
+    
+    scheduleRepaint();
 }
 
 
 void TextLabelView::repaint()
 {
-    
+    painter.setBackgroundColor(bgColor);
     View::painter.drawFillRect(this->viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
     
     int cnt = 0;
@@ -143,7 +143,6 @@ void TextLabelView::repaint()
     
     View::painter.setTextSize(TextSize());
     painter.setForegroundColor(TextColor());
-    painter.setBackgroundColor(bgColor);
     
     while (c != '\0' && c != '\n' && offset.X()+TextSize()*5 < viewRect.X2()) {
         View::painter.drawChar(offset.X(), offset.Y(), c);

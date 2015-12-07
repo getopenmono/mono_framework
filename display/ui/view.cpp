@@ -64,7 +64,7 @@ View::View(geo::Rect rect) : viewRect(rect)
 
 View::~View()
 {
-    //remove me from the dirty queue, if I are present there
+    //remove me from the dirty queue, if I am present there
     dirtyQueue.Remove(this);
 }
 

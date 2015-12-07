@@ -113,7 +113,7 @@ void ILI9225G::init()
     RegisterSelect = 1;
     
     for (int i=0; i<176*220; i++) {
-        this->write(BlackColor);
+        this->write(CloudsColor);
     }
     
     PWM_Start();
