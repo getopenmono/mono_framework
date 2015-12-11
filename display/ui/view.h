@@ -57,6 +57,11 @@ namespace mono {
             LANDSCAPE_LEFT = 3  /**< @ref PORTRAIT rotated 90 degrees counter clock-wise */
         };
         
+        static display::Color StandardTextColor;
+        static display::Color StandardBackgroundColor;
+        static display::Color StandardBorderColor;
+        
+        
     protected:
         
         /**

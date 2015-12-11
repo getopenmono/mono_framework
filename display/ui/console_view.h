@@ -48,8 +48,8 @@ namespace mono { namespace ui {
          *
          */
         ConsoleView() : View(),
-            textColor(display::WhiteColor),
-            consoleColor(display::BlackColor),
+            textColor(StandardTextColor),
+            consoleColor(StandardBackgroundColor),
             lineSpacing(2),
             softWrapIndent(5)
         {

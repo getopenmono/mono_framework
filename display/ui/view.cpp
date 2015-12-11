@@ -18,6 +18,10 @@ mono::display::DisplayPainter View::painter(mono::IApplicationContext::Instance-
 
 mono::GenericQueue<View> View::dirtyQueue;
 
+mono::display::Color View::StandardTextColor = display::WetAsphaltColor;
+mono::display::Color View::StandardBackgroundColor = display::CloudsColor;
+mono::display::Color View::StandardBorderColor = display::AsbestosColor;
+
 uint32_t View::RepaintScheduledViewsTime = 0;
 
 void View::repaintScheduledViews()

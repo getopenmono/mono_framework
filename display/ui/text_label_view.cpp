@@ -12,7 +12,9 @@
 
 using namespace mono::ui;
 
-TextLabelView::TextLabelView(String txt) : textColor(display::WetAsphaltColor), bgColor(display::CloudsColor)
+TextLabelView::TextLabelView(String txt) :
+    textColor(StandardTextColor),
+    bgColor(StandardBackgroundColor)
 {
     this->text = txt;
     this->setTextSize(1);
@@ -21,8 +23,8 @@ TextLabelView::TextLabelView(String txt) : textColor(display::WetAsphaltColor), 
 }
 
 TextLabelView::TextLabelView(const char *txt) :
-    textColor(display::WetAsphaltColor),
-    bgColor(display::CloudsColor)
+    textColor(StandardTextColor),
+    bgColor(StandardBackgroundColor)
 {
     this->text = txt;
     this->setTextSize(1);
@@ -32,17 +34,17 @@ TextLabelView::TextLabelView(const char *txt) :
 
 TextLabelView::TextLabelView(geo::Rect rct, String txt) :
     View(rct),
-    textColor(display::WetAsphaltColor),
-    bgColor(display::CloudsColor)
+    textColor(StandardTextColor),
+    bgColor(StandardBackgroundColor)
 {
     this->text = txt;
     this->setTextSize(2);
 }
 
 TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
-View(rct),
-textColor(display::WetAsphaltColor),
-bgColor(display::CloudsColor)
+    View(rct),
+    textColor(StandardTextColor),
+    bgColor(StandardBackgroundColor)
 {
     this->text = txt;
     this->setTextSize(2);
