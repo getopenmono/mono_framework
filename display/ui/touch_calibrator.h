@@ -28,12 +28,14 @@ namespace mono { namespace ui {
         
         uint8_t blockSize, blockMargin;
         TextLabelView textLbl, textHeader;
-        display::Color blockColor;
+        display::Color blockColor, backgroundColor;
         
         geo::Point cals[4];
         int calStep;
         
         bool activateTouchOnRepaint;
+        
+        bool calibrationDone;
         
         void drawTouchBlock(geo::Rect &rect, geo::Rect &prevRect);
         
@@ -42,6 +44,8 @@ namespace mono { namespace ui {
         void makeFirstResponder();
         
         void repaint();
+        
+        void initialize();
         
     public:
         

@@ -39,6 +39,9 @@ void MonoTouchSystem::processTouchInput()
     if ((us_ticker_read() - lastTouchProcess) <= 10000)
         return;
     
+    // connect ADC to right AMUXBUS
+    CY_SET_REG8(CYREG_BUS_SW3, 0x01);
+    
     uint16_t X = sampleX();
     uint16_t Y = sampleY();
     
@@ -82,6 +85,8 @@ void MonoTouchSystem::processTouchInput()
         runTouchBegin(lastTouchPosition);
     }
     
+    //disconnect ADC from right AMUXBUS
+    CY_SET_REG8(CYREG_BUS_SW3, 0x00);
 }
 
 

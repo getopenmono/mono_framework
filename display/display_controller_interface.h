@@ -38,6 +38,22 @@ namespace mono { namespace display
     public:
         
         /**
+         * @brief The last tearning effect interrupt time (`us_ticker_read()`)
+         * 
+         * To calculate the time since the last tearning effect interrupt 
+         * (display refresh), you can use this member variable. On each interrupt
+         * this value is updated.
+         *
+         * If too much time has passed between the interrupt occured and you handle
+         * the painting, you might want to skip the painting. THis is to avoid 
+         * artifacts, when drawing on a refreshing display.
+         *
+         * Any implementation of the `IDisplayController` must update this value
+         * in its tearning effect interrupt handler.
+         */
+        uint32_t LastTearningEffectTime;
+        
+        /**
          * Setup the display controller object, init vaiables and the screen 
          * size. The width is the horizontal measure, when mono is held in 
          * portrait mode.

@@ -148,7 +148,8 @@ void ILI9225G::setWindow(int x, int y, int width, int height)
 
 void ILI9225G::tearingEffectHandler()
 {
-    //mono::defaultSerial.printf("tearing!\n\r");
+    LastTearningEffectTime = us_ticker_read();
+    
     if (refreshHandler != NULL)
         refreshHandler->call();
 }

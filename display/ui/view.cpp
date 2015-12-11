@@ -48,7 +48,7 @@ void View::repaintScheduledViews()
     
     RepaintScheduledViewsTime = end - start;
     
-    debug("repaint time: %u\n\r",RepaintScheduledViewsTime);
+    debug("repaint time: %u, TE Offset: %i\n\r",RepaintScheduledViewsTime,start-painter.DisplayController()->LastTearningEffectTime);
 }
 
 

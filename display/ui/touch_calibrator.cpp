@@ -15,8 +15,9 @@
 
 using namespace mono::ui;
 
-TouchCalibrateView::TouchCalibrateView() : ResponderView(geo::Rect(0,0,View::DisplayWidth(),View::DisplayHeight())), textLbl("Touch the center of the cubes..."), textHeader("Calibration"), blockColor(display::BlueColor)
+void TouchCalibrateView::initialize()
 {
+    calibrationDone = false;
     textHeader.setRect(viewRect);
     textLbl.setRect(viewRect);
     blockSize = 10;
@@ -24,11 +25,15 @@ TouchCalibrateView::TouchCalibrateView() : ResponderView(geo::Rect(0,0,View::Dis
     calStep = 0;
     activateTouchOnRepaint = false;
     
+    textHeader.setTextColor(display::SilverColor);
     textHeader.setTextSize(2);
-    textHeader.setTextColor(display::WhiteColor);
     textHeader.setAlignment(TextLabelView::ALIGN_CENTER);
-    textLbl.setTextColor(display::WhiteColor);
+    textHeader.setBackgroundColor(backgroundColor);
+    
     textLbl.setAlignment(TextLabelView::ALIGN_CENTER);
+    textLbl.setTextSize(1);
+    textLbl.setTextColor(display::SilverColor);
+    textLbl.setBackgroundColor(backgroundColor);
     
     //align text horizontal center
     uint16_t textHeight = textHeader.TextPixelHeight();
@@ -44,48 +49,37 @@ TouchCalibrateView::TouchCalibrateView() : ResponderView(geo::Rect(0,0,View::Dis
     makeFirstResponder();
 }
 
-TouchCalibrateView::TouchCalibrateView(geo::Rect rct) : ResponderView(rct), textLbl(rct,"Touch the center of the cubes..."), textHeader("Calibration"), blockColor(display::BlueColor)
+TouchCalibrateView::TouchCalibrateView() : ResponderView(geo::Rect(0,0,View::DisplayWidth(),View::DisplayHeight())), textLbl("Touch the center of the cubes..."), textHeader("Calibration"), blockColor(display::EmeraldColor), backgroundColor(display::MidnightBlueColor)
 {
-    textHeader.setRect(viewRect);
-    textLbl.setRect(viewRect);
-    blockSize = 10;
-    blockMargin = 15;
-    calStep = 0;
-    activateTouchOnRepaint = false;
-    
-    textHeader.setTextSize(2);
-    textHeader.setTextColor(display::WhiteColor);
-    textHeader.setAlignment(TextLabelView::ALIGN_CENTER);
-    textLbl.setTextColor(display::WhiteColor);
-    textLbl.setAlignment(TextLabelView::ALIGN_CENTER);
-    
-    //align text horizontal center
-    uint16_t textHeight = textHeader.TextPixelHeight();
-    int hSpacing = viewRect.Height() - textHeight;
-    
-    if (hSpacing > 0)
-    {
-        textHeader.Position().setY(viewRect.Y() + hSpacing/2 );
-        textHeader.Size().setHeight(viewRect.Height() - hSpacing);
-    }
-    textLbl.Position().setY(textHeader.Position().Y()+textHeader.TextPixelHeight()+2);
-    
-    makeFirstResponder();
+    initialize();
+}
+
+TouchCalibrateView::TouchCalibrateView(geo::Rect rct) : ResponderView(rct), textLbl(rct,"Touch the center of the cubes..."), textHeader("Calibration"), blockColor(display::EmeraldColor)
+{
+    initialize();
 }
 
 void TouchCalibrateView::repaint()
 {
+    if (calibrationDone)
+    {
+        painter.setBackgroundColor(View::StandardBackgroundColor);
+        painter.drawFillRect(viewRect, true);
+        return;
+    }
+    
     if (activateTouchOnRepaint)
     {
         defaultSerial.printf("making first resonder...\n\r");
         makeFirstResponder();
         activateTouchOnRepaint = false;
-        
-        if (calStep == 0)
-        {
-            //begin new calibration, paint screen black first
-            painter.drawFillRect(viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height());
-        }
+    }
+    
+    if (calStep == 0)
+    {
+        //begin new calibration, paint screen black first
+        painter.setForegroundColor(backgroundColor);
+        painter.drawFillRect(viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height());
     }
     
     textHeader.repaint();
@@ -132,7 +126,7 @@ void TouchCalibrateView::drawTouchBlock(geo::Rect &rect, geo::Rect &prevRect)
     painter.drawFillRect(prevRect.X(), prevRect.Y(), prevRect.Width(), prevRect.Height(), true);
     painter.drawFillRect(rect.X(), rect.Y(), rect.Width(), rect.Height());
     
-    painter.setForegroundColor(display::WhiteColor);
+    painter.setForegroundColor(backgroundColor);
     painter.drawPixel(rect.X()+rect.Width()/2, rect.Y()+rect.Height()/2);
 }
 
@@ -164,9 +158,10 @@ void TouchCalibrateView::RespondTouchBegin(TouchEvent &event)
     
     if (calStep == 4)
     {
-        defaultSerial.printf("calibration done!\n\r");
         activateTouchOnRepaint = false;
         Deactivate();
+        calibrationDone = true;
+        scheduleRepaint();
         calDone();
         return;
     }
@@ -190,7 +185,7 @@ void TouchCalibrateView::StartNewCalibration()
 {
     calStep = 0;
     activateTouchOnRepaint = true;
-    
+    calibrationDone = false;
     scheduleRepaint();
 }
 
@@ -226,7 +221,10 @@ void TouchCalibrateView::calDone()
     cal.setWidth( xAvg2 + (milliScale*PXoffset)/1024 - cal.X());
     
     if (IApplicationContext::Instance->TouchSystem == NULL)
+    {
         debug("Calibrator needs a touch system implementation!");
+        return;
+    }
     
     debug("Calibration is: (%i, %i, %i, %i)\n\r", cal.X(), cal.Y(), cal.X2(), cal.Y2());
     IApplicationContext::Instance->TouchSystem->setCalibration(cal);
