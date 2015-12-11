@@ -9,10 +9,13 @@
 #define __spiTest__module_communication__
 
 #include <SPI.h>
-#include <DigitalOut.h>
 #include <FunctionPointer.h>
+#include <mn_digital_out.h>
+
 #include "spi_commands.h"
 #include "module_frames.h"
+
+
 #include <stdint.h>
 
 class AppController; // forward decl
@@ -268,7 +271,7 @@ namespace mono { namespace redpine {
     protected:
         mbed::SPI *spi;
         //PinName spiChipSelect;
-        mbed::DigitalOut spiChipSelect, resetLine;
+        mono::io::DigitalOut spiChipSelect, resetLine;
         QueueInterrupt spiInterrupt;
         Timer fakeISRTimer;
         

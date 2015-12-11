@@ -24,6 +24,10 @@ IApplicationContext *IApplicationContext::Instance = NULL; //&(ApplicationContex
 
 ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoop, &dispController, &touchSys, &UserButton), dispController(), UserButton(SW_USER, PullUp)
 {
+    //enable SWD / JTAG debug, by turning on VTARG voltage in expansion connector
+    CyPins_SetPinDriveMode(EXPANSION_PWR_ENABLE, CY_PINS_DM_STRONG);
+    CyPins_SetPin(EXPANSION_PWR_ENABLE);
+    
     PWM_Start();
     PWM_WriteCompare2(0);
     PWM_WriteCompare1(0);

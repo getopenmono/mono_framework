@@ -58,7 +58,6 @@ void MonoPowerManagement::EnterSleep()
 void MonoPowerManagement::processResetAwarenessQueue()
 {
     //setupMCUPeripherals();
-    CyPins_SetPinDriveMode(CYREG_PRT4_PC7, CY_PINS_DM_RES_UPDWN);
     
     IPowerManagement::processResetAwarenessQueue();
 }
@@ -88,7 +87,7 @@ void MonoPowerManagement::setupMCUPeripherals()
     
     // set all PORT 4 (exp. conn to res pull down)
     CY_SET_REG8(CYREG_PRT4_DM0, 0x00);
-    CY_SET_REG8(CYREG_PRT4_DM1, 0x40); // SW USER must be weak pull up in sleep!
+    CY_SET_REG8(CYREG_PRT4_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT4_DM2, 0x00);
     
     // set all PORT 5 (switches and inputs, to res pull down)
@@ -112,6 +111,8 @@ void MonoPowerManagement::setupMCUPeripherals()
     CY_SET_REG8(CYREG_PRT15_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT15_DM2, 0x00);
     
+    // SW USER must be weak pull up in sleep!
+    CyPins_SetPinDriveMode(SW_USER, CY_PINS_DM_RES_UP);
 }
 
 void MonoPowerManagement::powerDownMCUPeripherals()
@@ -129,7 +130,6 @@ void MonoPowerManagement::powerDownMCUPeripherals()
     USBUART_Suspend();
     //USBUART_Stop();
 #endif
-    CyPins_ClearPin(CYREG_PRT4_PC7);
     
     saveDMRegisters();
     setupMCUPeripherals();
@@ -138,8 +138,6 @@ void MonoPowerManagement::powerDownMCUPeripherals()
 void MonoPowerManagement::powerUpMCUPeripherals()
 {
     restoreDMRegisters();
-    
-    CyPins_SetPin(CYREG_PRT4_PC7);
     
 #ifndef MONO_NO_USB
     USBUART_Resume();

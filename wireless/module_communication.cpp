@@ -101,10 +101,14 @@ SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
 
 ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) :
     spiChipSelect(chipSelect, 1),
-    resetLine(resetPin, 1),
+    resetLine(resetPin, 0, OpenDrain),
     spiInterrupt(interruptPin),
     fakeISRTimer(50)
 {
+    // now the pin is OpenDrain - we stop driving low
+    resetLine.setMode(OpenDrain);
+    resetLine.write(1);
+    
     this->spi = &spi;
     this->InterfaceVersion = 0xAB16; // we expect this is the default version
     

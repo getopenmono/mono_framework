@@ -23,7 +23,7 @@ void MonoTouchSystem::init()
     
     touchInProgress = false;
     
-    CY_SET_REG8(CYREG_PRT6_AMUX, 0x00);
+    CY_SET_REG8(CYREG_PRT1_AMUX, 0x00);
     
     ADC_SAR_1_Start();
     
@@ -96,7 +96,7 @@ uint16_t MonoTouchSystem::sampleX()
     CyPins_ClearPin(TFT_TOUCH_X1);
     CyPins_SetPin(TFT_TOUCH_X2);
     
-    CY_SET_REG8(CYREG_PRT6_AMUX, 0x01);
+    CY_SET_REG8(CYREG_PRT1_AMUX, 0x80); // PC7
     
     uint16_t samples = 0;
     for (int i=0; i<8; i++) {
@@ -125,7 +125,7 @@ uint16_t MonoTouchSystem::sampleY()
     CyPins_ClearPin(TFT_TOUCH_Y1);
     CyPins_SetPin(TFT_TOUCH_Y2);
     
-    CY_SET_REG8(CYREG_PRT6_AMUX, 0x02);
+    CY_SET_REG8(CYREG_PRT1_AMUX, 0x40); // PC4
     
     uint16_t samples = 0;
     for (int i=0; i<8; i++) {
