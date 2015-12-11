@@ -286,6 +286,7 @@ void HttpGetFrame::responsePayloadHandler(uint8_t *data)
         cbData.dataLength = resp->data_len;
         cbData.data = &(resp->data);
         cbData.context = this;
+        lastResponseParsed = resp->more == 1 ? true : false;
         dataReadyHandler.call(&cbData);
     }
     

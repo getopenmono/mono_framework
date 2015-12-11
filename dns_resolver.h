@@ -9,9 +9,8 @@
 #ifndef dns_resolver_h
 #define dns_resolver_h
 
-#include "mono.h"
 #include "network_request.h"
-#include "wireless/redpine_module.h"
+#include <wireless/redpine_module.h>
 
 namespace mono { namespace network {
     

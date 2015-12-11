@@ -9,7 +9,7 @@
 #ifndef network_request_h
 #define network_request_h
 
-#include "mono.h"
+#include "mn_timer.h"
 #include <FunctionPointer.h>
 
 namespace mono { namespace network {

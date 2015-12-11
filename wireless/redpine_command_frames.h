@@ -9,8 +9,9 @@
 #ifndef __spiTest__redpine_command_frames__
 #define __spiTest__redpine_command_frames__
 
-#include <mono.h>
 #include "module_frames.h"
+
+#include <mn_string.h>
 #include <FileSystemLike.h>
 
 namespace mono { namespace redpine {

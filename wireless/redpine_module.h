@@ -195,7 +195,7 @@ namespace mono { namespace redpine {
          * @param passphrase The passphrase of the access point to join
          * @param secMode The access points security setting, default is WPA/WPA2
          */
-        static bool setupWifiOnly(const char *ssid, const char *passphrase, WifiSecurityModes secMode = SEC_WPA_WPA2);
+        static bool setupWifiOnly(String ssid, String passphrase, WifiSecurityModes secMode = SEC_WPA_WPA2);
         
         /**
          * Check to see if the module has a ready network stack with initialized

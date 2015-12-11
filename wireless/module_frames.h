@@ -9,8 +9,8 @@
 #ifndef __mono_redpine__module_frames__
 #define __mono_redpine__module_frames__
 
-#include <mono.h>
 #include <mbed.h>
+#include <queue.h>
 
 namespace mono { namespace redpine {
     

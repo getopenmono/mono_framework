@@ -375,7 +375,7 @@ int ModuleSPICommunication::spiWrite(uint8_t *data, int byteLength, bool thirtyT
             mono::Warn << "SPI Write: the data buffer is not 4-byte aligned, but transfer mode is 32-bit!";
     }
     
-    int spiRead;
+    int spiRead = 0;
     
     setChipSelect(true);
     

@@ -9,11 +9,11 @@
 #ifndef http_client_h
 #define http_client_h
 
-#include <mono.h>
 #include <mbed.h>
 
 #include "network_request.h"
 #include "dns_resolver.h"
+#include "wireless/redpine_command_frames.h"
 
 namespace mono { namespace network {
     

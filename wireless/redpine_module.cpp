@@ -10,6 +10,8 @@
 #include <consoles.h>
 #include <mbed.h>
 
+#include <application_context_interface.h>
+
 using namespace mono::redpine;
 
 /** Construct the module */
@@ -19,7 +21,6 @@ Module::Module()
 {
     communicationInitialized = false;
     networkInitialized = false;
-    mono::IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
 }
 
 // STATIC PUBLIC METHODS
@@ -55,6 +56,8 @@ bool Module::initialize(ModuleCommunication *commInterface)
         error("Initialize failed to init communication interface\n\r");
         return false;
     }
+    
+    mono::IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(self);
     
     debug("Checking bootloader state...\n\r");
     uint16_t regval = self->comIntf->readMemory(HOST_INTF_REG_OUT);
@@ -101,7 +104,7 @@ bool Module::initialize(ModuleCommunication *commInterface)
     
 }
 
-bool Module::setupWifiOnly(const char *ssid, const char *passphrase, WifiSecurityModes secMode)
+bool Module::setupWifiOnly(String ssid, String passphrase, WifiSecurityModes secMode)
 {
     // send "set operating mode command"
     

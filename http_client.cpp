@@ -107,8 +107,8 @@ void HttpClient::httpData(redpine::HttpGetFrame::CallbackData *data)
     respData.bodyChunk = String((char*)(data->data), data->dataLength);
     respData.Finished = data->context->lastResponseParsed;
     
-    debug("got data call data ready async\n\r");
-    debug("-> %s\n\r",respData.bodyChunk());
+    //debug("got data call data ready async\n\r");
+    //debug("-> %s\n\r",respData.bodyChunk());
     // call data ready async, to release mem. objs on stack
     Timer::callOnce<HttpClient>(0, this, &HttpClient::triggerDataReady);
 }
