@@ -15,29 +15,47 @@ HttpClient::HttpClient() : INetworkRequest(), respData(this), getFrame(NULL) {}
 
 HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFrame(NULL)
 {
-    mono::Regex reg("(http://)([^\\s/'\\\"<>\\?]+)(/?[^\\s'\\\"<>]*)");
+    mono::Regex ipreg("(http://)(\\d+\\.\\d+\\.\\d+\\.\\d)(/?[^\\s'\\\"<>]*)");
     
-    mono::Regex::Capture caps[3];
-    bool success = reg.Match(anUrl, caps, 3);
-    
-    if (!success) {
-        debug("url parse err");
-        lastErrorCode = URL_PARSE_ERROR;
-        triggerQueuedErrorHandler();
-        return;
+    mono::Regex::Capture ipCaps[3];
+    bool success = ipreg.Match(anUrl, ipCaps, 3);
+    if (success)
+    {
+        String ip = ipreg.Value(ipCaps[1]);
+        path = ipreg.Value(ipCaps[2]);
+        
+        debug("no domain, ip addr: %s, path: %s\n\r", ip(),path());
+        
+        getFrame = new redpine::HttpGetFrame(ip, ip, path, NULL);
+        getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
+        getFrame->commitAsync();
+    }
+    else
+    {
+        mono::Regex reg("(http://)([^\\s/'\\\"<>\\?]+)(/?[^\\s'\\\"<>]*)");
+        
+        mono::Regex::Capture caps[3];
+        success = reg.Match(anUrl, caps, 3);
+        
+        if (!success) {
+            debug("url parse err");
+            lastErrorCode = URL_PARSE_ERROR;
+            triggerQueuedErrorHandler();
+            return;
+        }
+        
+        domain = reg.Value(caps[1]);
+        path = reg.Value(caps[2]);
+        
+        debug("domain: %s, path: %s\n\r",domain(),path());
+        
+        dns = DnsResolver(domain);
+        dns.setCompletionCallback<HttpClient>(this, &HttpClient::dnsComplete);
+        dns.setErrorCallback<HttpClient>(this, &HttpClient::dnsResolutionError);
+        getFrame = NULL;
     }
     
-    domain = reg.Value(caps[1]);
-    path = reg.Value(caps[2]);
-    
-    debug("domain: %s, path: %s\n\r",domain(),path());
-    
-    dns = DnsResolver(domain);
-    dns.setCompletionCallback<HttpClient>(this, &HttpClient::dnsComplete);
-    dns.setErrorCallback<HttpClient>(this, &HttpClient::dnsResolutionError);
-    
     setState(IN_PROGRESS_STATE);
-    getFrame = NULL;
 }
 
 
