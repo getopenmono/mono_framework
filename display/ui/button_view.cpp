@@ -30,8 +30,8 @@ void ButtonView::initButton()
 
 ButtonView::ButtonView() :
     ResponderView(),
-    borderColor(display::WhiteColor),
-    borderColorPressed(display::BlueColor)
+borderColor(View::StandardBorderColor),
+    borderColorPressed(StandardHighlightColor)
 {
     initButton();
 }
@@ -39,8 +39,8 @@ ButtonView::ButtonView() :
 ButtonView::ButtonView(geo::Rect rect, String text) :
     ResponderView(rect),
     textLabel(geo::Rect(rect), text),
-    borderColor(display::WhiteColor),
-    borderColorPressed(display::BlueColor)
+    borderColor(StandardBorderColor),
+    borderColorPressed(StandardHighlightColor)
 {
     initButton();
 }
@@ -48,8 +48,8 @@ ButtonView::ButtonView(geo::Rect rect, String text) :
 ButtonView::ButtonView(geo::Rect rect, const char *text) :
 ResponderView(rect),
 textLabel(geo::Rect(rect), String(text)),
-borderColor(display::WhiteColor),
-borderColorPressed(display::BlueColor)
+borderColor(StandardBorderColor),
+borderColorPressed(StandardHighlightColor)
 {
     initButton();
 }
@@ -89,6 +89,12 @@ void ButtonView::TouchEnd(mono::TouchEvent &event)
     
     if (shouldRepaint)
         scheduleRepaint();
+}
+
+void ButtonView::setText(mono::String txt)
+{
+    textLabel.setText(txt);
+    textLabel.scheduleRepaint();
 }
 
 void ButtonView::repaint()

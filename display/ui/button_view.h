@@ -43,6 +43,9 @@ namespace mono { namespace ui {
         ButtonView(geo::Rect rect, const char *text);
         
         
+        void setText(String txt);
+        
+        
         template <typename Owner>
         void setClickCallback(Owner *obj, void(Owner::*memPtr)(void))
         {

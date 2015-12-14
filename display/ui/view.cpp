@@ -21,6 +21,7 @@ mono::GenericQueue<View> View::dirtyQueue;
 mono::display::Color View::StandardTextColor = display::WetAsphaltColor;
 mono::display::Color View::StandardBackgroundColor = display::CloudsColor;
 mono::display::Color View::StandardBorderColor = display::AsbestosColor;
+mono::display::Color View::StandardHighlightColor = display::EmeraldColor;
 
 uint32_t View::RepaintScheduledViewsTime = 0;
 

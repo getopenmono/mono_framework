@@ -60,7 +60,7 @@ namespace mono {
         static display::Color StandardTextColor;
         static display::Color StandardBackgroundColor;
         static display::Color StandardBorderColor;
-        
+        static display::Color StandardHighlightColor;
         
     protected:
         
