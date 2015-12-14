@@ -86,7 +86,12 @@ bool Module::initialize(ModuleCommunication *commInterface)
     }
     
     ManagementFrame frame;
-    self->comIntf->readManagementFrame(frame);
+    success = self->comIntf->readManagementFrame(frame);
+    
+    if (!success)
+    {
+        error("failed to read card ready!");
+    }
     
     self->comIntf->interruptCallback.attach<mono::redpine::Module>(self, &Module::moduleEventHandler);
     
@@ -107,6 +112,7 @@ bool Module::initialize(ModuleCommunication *commInterface)
 bool Module::setupWifiOnly(String ssid, String passphrase, WifiSecurityModes secMode)
 {
     // send "set operating mode command"
+    Module *self = Module::Instance();
     
     //debug("Setting OperMode...\n\r");
     SetOperatingModeFrame *opermode = new SetOperatingModeFrame(SetOperatingModeFrame::WIFI_CLIENT_MODE);
@@ -131,6 +137,16 @@ bool Module::setupWifiOnly(String ssid, String passphrase, WifiSecurityModes sec
 
     //debug("Getting IP address from DHCP...\n\r");
     SetIpParametersFrame *ipparam = new SetIpParametersFrame();
+    if (self->staticIPHandler)
+    {
+        ipparam->dhcpMode = SetIpParametersFrame::STATIC_IP;
+        StaticIPParams params;
+        self->staticIPHandler.call(&params);
+        memcpy(ipparam->ipAddress, params.ipAddress, 4);
+        memcpy(ipparam->netmask, params.netmask, 4);
+        memcpy(ipparam->gateway, params.gateway, 4);
+    }
+    
     ipparam->setCompletionCallback<Module>(Module::Instance(), &Module::onNetworkReady);
     
     ipparam->commitAsync();
@@ -154,7 +170,7 @@ void Module::moduleEventHandler()
     else
     {
         
-        if (comIntf->pollInputQueue())
+        if (comIntf->interruptActive())
         {
             //handle a response for any pending request
             ManagementFrame *respFrame = responseFrameQueue.Peek();
@@ -165,7 +181,7 @@ void Module::moduleEventHandler()
                 comIntf->readManagementFrame(frame);
             }
             
-            debug("resp frame cmd id: 0x%x\n\r",respFrame->commandId);
+            //debug("resp frame cmd id: 0x%x\n\r",respFrame->commandId);
             //memdump(reqFrame, sizeof(mono::redpine::HttpGetFrame));
             
             bool success = this->comIntf->readManagementFrameResponse(*respFrame);
@@ -215,9 +231,7 @@ void Module::moduleEventHandler()
             
             responseFrameQueue.Enqueue(request);
         }
-        
     }
-    
 }
 
 void Module::onNetworkReady(ManagementFrame::FrameCompletionData *data)

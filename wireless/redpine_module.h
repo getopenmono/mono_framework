@@ -103,6 +103,14 @@ namespace mono { namespace redpine {
             ACTIVE_SLEEP    = 0x08
         };
         
+        /** Object to configure static IP */
+        typedef struct
+        {
+            uint8_t ipAddress[4];   /**< IPv4 client address */
+            uint8_t netmask[4];     /**< IPv4 netmask */
+            uint8_t gateway[4];     /**< IPv4 Gateway */
+        } StaticIPParams;
+        
     protected:
 
         /** The only instantiation of the module class */
@@ -132,6 +140,8 @@ namespace mono { namespace redpine {
         /** User can install a network ready event callback in this handler */
         mbed::FunctionPointer networkReadyHandler;
         
+        mbed::FunctionPointerArg1<void, StaticIPParams*> staticIPHandler;
+        
         uint8_t ipAddress[4], netmask[4], gateway[4], macAddress[6];
         String hostname;
         
@@ -152,7 +162,6 @@ namespace mono { namespace redpine {
         
         /** Callback for the DHCP Mgmt frame response, that indicate the network is ready */
         void onNetworkReady(ManagementFrame::FrameCompletionData *data);
-        
         
         void onSystemPowerOnReset();
         
@@ -212,6 +221,12 @@ namespace mono { namespace redpine {
         static void setNetworkReadyCallback(Owner *obj, void (Owner::*memPtr)(void))
         {
             Module::Instance()->networkReadyHandler.attach<Owner>(obj, memPtr);
+        }
+        
+        template <typename Owner>
+        static void setStaticIPCallback(Owner *obj, void (Owner::*memPtr)(StaticIPParams*))
+        {
+            Module::Instance()->staticIPHandler.attach<Owner>(obj, memPtr);
         }
     };
     

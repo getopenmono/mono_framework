@@ -46,6 +46,10 @@ SPIReceiveDataBuffer::SPIReceiveDataBuffer(int size, uint16_t fwVer) : DataRecei
     
     //mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
     this->buffer = (uint8_t*) malloc(size);
+    if (buffer == NULL)
+    {
+        error("HEAP overflow!\n\r");
+    }
 }
 
 SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead, uint16_t fwVer)
@@ -62,6 +66,11 @@ SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead, uint1
     
     //mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
     this->buffer = (uint8_t*) malloc(this->length);
+    if (buffer == NULL)
+    {
+        error("HEAP overflow! Could not alloc: %i bytes\n\r",this->length);
+    }
+    
     this->bytesToRead = this->length;
 }
 
@@ -96,7 +105,10 @@ SPIReceiveDataBuffer& SPIReceiveDataBuffer::operator<<(mbed::SPI *spi)
 SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
 {
     if (ownsMemory)
+    {
         free(this->buffer);
+    }
+    
 }
 
 ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) :
@@ -112,12 +124,12 @@ ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelec
     this->spi = &spi;
     this->InterfaceVersion = 0xAB16; // we expect this is the default version
     
-    spiInterrupt.DeactivateUntilHandled();
+    //spiInterrupt.DeactivateUntilHandled();
     spiInterrupt.rise<ModuleSPICommunication>(this, &ModuleSPICommunication::interruptHandler);
     
     defaultSerial.printf("starting fake IRQ timer!\n\r");
-    fakeISRTimer.setCallback<ModuleSPICommunication>(this, &ModuleSPICommunication::fakeISRHandler);
-    fakeISRTimer.Start();
+    //fakeISRTimer.setCallback<ModuleSPICommunication>(this, &ModuleSPICommunication::fakeISRHandler);
+    //fakeISRTimer.Start();
 }
 
 // PROTECTED AUXILLARY METHODS
@@ -175,7 +187,7 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
         spi->format(32);
     
     int retval = 0;
-    int timeout = 50, to = 0;
+    int timeout = 500, to = 0;
     setChipSelect(true);
     while (retval != START_TOKEN && timeout > to)
     {
@@ -188,7 +200,7 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
         }
         
         if (retval != START_TOKEN)
-            wait_ms(50);
+            wait_us(100);
         
         to++;
     }
@@ -408,7 +420,7 @@ int ModuleSPICommunication::spiWrite(uint8_t *data, int byteLength, bool thirtyT
 
 void ModuleSPICommunication::setChipSelect(bool active)
 {
-    spiChipSelect = !active; // Chip select is active low!
+    //spiChipSelect = !active; // Chip select is active low!
 }
 
 
@@ -608,6 +620,11 @@ bool ModuleSPICommunication::pollInputQueue()
     }
 }
 
+bool ModuleSPICommunication::interruptActive()
+{
+    return spiInterrupt.read();
+}
+
 bool ModuleSPICommunication::readManagementFrame(ManagementFrame &frame)
 {
     // get the size of the incoming frame
@@ -670,6 +687,7 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     if (!bufferIsMgmtFrame(buffer))
     {
+        memdump(buffer.buffer, buffer.length);
         error("Frame is not a management frame!\n\r");
         return false;
     }

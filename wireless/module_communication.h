@@ -178,6 +178,14 @@ namespace mono { namespace redpine {
         virtual bool pollInputQueue() = 0;
         
         /**
+         * @brief Return true if interrupt is active
+         *
+         * The module will keep the interrupt pin high until no more input is
+         * present.
+         */
+        virtual bool interruptActive() = 0;
+        
+        /**
          * Read the first available frame from the modules input queue
          * This function should be called when you are sure there is data pending
          *
@@ -389,6 +397,8 @@ namespace mono { namespace redpine {
         
         
         bool pollInputQueue();
+        
+        bool interruptActive();
         
         bool readManagementFrame(ManagementFrame &frame);
         

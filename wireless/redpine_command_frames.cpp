@@ -279,7 +279,10 @@ void HttpGetFrame::responsePayloadHandler(uint8_t *data)
     mono::defaultSerial.printf("HttpGet Recv %i bytes\n\r",resp->data_len);
     
     if (destinationFile)
+    {
         fwrite(&(resp->data), resp->data_len, 1, destinationFile);
+        fflush(destinationFile);
+    }
     else
     {
         CallbackData cbData;
