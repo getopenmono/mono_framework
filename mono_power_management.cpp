@@ -118,7 +118,7 @@ void MonoPowerManagement::setupMCUPeripherals()
 void MonoPowerManagement::powerDownMCUPeripherals()
 {
     PWM_Sleep();
-    SPI0_Sleep();
+    SPI1_Sleep();
     
 #ifndef MONO_DISP_CTRL_HX8340
     SPI1_Sleep();
@@ -146,7 +146,7 @@ void MonoPowerManagement::powerUpMCUPeripherals()
 #endif
     PWM_Wakeup();
     I2C_Wakeup();
-    SPI0_Wakeup();
+    SPI1_Wakeup();
     
 #ifndef MONO_DISP_CTRL_HX8340
     SPI1_Wakeup();

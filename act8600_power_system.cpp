@@ -45,7 +45,7 @@ void ACT8600PowerSystem::onSystemPowerOnReset()
 
 void ACT8600PowerSystem::onSystemEnterSleep()
 {
-    SPI0_Sleep();
+    //SPI0_Sleep();
     I2C_Sleep();
     //TFT_Sleep();
     USBUART_Suspend();
@@ -56,7 +56,7 @@ void ACT8600PowerSystem::onSystemWakeFromSleep()
     USBUART_Resume();
     I2C_Wakeup();
     //TFT_Wakeup();
-    SPI0_Wakeup();
+    //SPI0_Wakeup();
 }
 
 /// READ / WRITE REGISTERS
