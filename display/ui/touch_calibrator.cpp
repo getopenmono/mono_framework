@@ -70,7 +70,6 @@ void TouchCalibrateView::repaint()
     
     if (activateTouchOnRepaint)
     {
-        defaultSerial.printf("making first resonder...\n\r");
         makeFirstResponder();
         activateTouchOnRepaint = false;
     }
@@ -79,7 +78,7 @@ void TouchCalibrateView::repaint()
     {
         //begin new calibration, paint screen black first
         painter.setForegroundColor(backgroundColor);
-        painter.drawFillRect(viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height());
+        painter.drawFillRect(viewRect);
     }
     
     textHeader.repaint();

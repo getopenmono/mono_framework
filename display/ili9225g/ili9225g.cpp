@@ -57,8 +57,6 @@ void ILI9225G::init()
     CyPins_SetPin(TFT_RESET);
     wait_ms(50);
     
-    printf("Display init ILI9225G!\n\r");
-    
     //************* Start Initial Sequence **********//
     writeCommand(0x0011, 0x0000);
     writeCommand(0x0012, 0x0000);
