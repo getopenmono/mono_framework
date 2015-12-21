@@ -17,7 +17,8 @@ void ProgressBarView::init()
     maxValue = 100;
     currentValue = 0;
     barPixelLength = 0;
-    borderColor = barColor = display::WhiteColor;
+    borderColor = StandardBorderColor;
+    barColor = StandardTextColor;
 }
 
 ProgressBarView::ProgressBarView() : View()
@@ -101,6 +102,10 @@ int ProgressBarView::CurrentValue() const
 
 void ProgressBarView::repaint()
 {
+    //paint bg
+    painter.setBackgroundColor(StandardBackgroundColor);
+    painter.drawFillRect(viewRect, true);
+    
     //paint border
     geo::Size borderSize(viewRect.Width(), 6);
     geo::Rect border(viewRect, borderSize);

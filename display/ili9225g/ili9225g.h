@@ -13,6 +13,7 @@
 #include <rect.h>
 #include "queue_interrupt.h"
 #include <power_aware_interface.h>
+#include "mn_digital_out.h"
 #include <mbed.h>
 
 
@@ -23,7 +24,7 @@ namespace mono { namespace display {
     protected:
         
         mbed::SPI spi;
-        mbed::DigitalOut Reset;
+        mono::io::DigitalOut Reset;
         mbed::DigitalOut RegisterSelect;
         mbed::DigitalOut IM0;
         QueueInterrupt tearingEffect;

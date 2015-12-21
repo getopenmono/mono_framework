@@ -46,6 +46,7 @@ void ImageView::setImage(media::Image *img)
 {
     image = img;
     setCrop(geo::Rect(0,0,img->Width(),img->Height()));
+    scheduleRepaint();
 }
 
 void ImageView::repaint()

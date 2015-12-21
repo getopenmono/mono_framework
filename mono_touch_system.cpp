@@ -113,6 +113,7 @@ uint16_t MonoTouchSystem::sampleX()
         samples += ADC_SAR_1_GetResult16();
     }
     
+    CY_SET_REG8(CYREG_PRT1_AMUX, 0x00); // no conn.
     CyPins_ClearPin(TFT_TOUCH_X2);
     
     return samples / 8;
@@ -122,7 +123,6 @@ uint16_t MonoTouchSystem::sampleY()
 {
     CyPins_SetPinDriveMode(TFT_TOUCH_X1, CY_PINS_DM_ALG_HIZ);
     CyPins_SetPinDriveMode(TFT_TOUCH_X2, CY_PINS_DM_RES_DWN);
-    
     
     CyPins_SetPinDriveMode(TFT_TOUCH_Y1, CY_PINS_DM_STRONG);
     CyPins_SetPinDriveMode(TFT_TOUCH_Y2, CY_PINS_DM_STRONG);
@@ -142,6 +142,7 @@ uint16_t MonoTouchSystem::sampleY()
         samples += ADC_SAR_1_GetResult16();
     }
     
+    CY_SET_REG8(CYREG_PRT1_AMUX, 0x00); // no conn.
     CyPins_ClearPin(TFT_TOUCH_Y2);
     
     return samples / 8;

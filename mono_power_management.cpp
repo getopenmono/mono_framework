@@ -16,8 +16,6 @@ MonoPowerManagement::MonoPowerManagement()
     powerAwarenessQueue = NULL;
     
     
-    //
-    
 }
 
 void MonoPowerManagement::EnterSleep()
@@ -48,7 +46,6 @@ void MonoPowerManagement::EnterSleep()
     //PowerSystem->onSystemWakeFromSleep();
     
     mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\n\r", status);
-    
     
     processWakeAwarenessQueue();
 }
@@ -119,6 +116,7 @@ void MonoPowerManagement::powerDownMCUPeripherals()
 {
     PWM_Sleep();
     SPI1_Sleep();
+    ADC_SAR_1_Sleep();
     
 #ifndef MONO_DISP_CTRL_HX8340
     SPI1_Sleep();
@@ -147,6 +145,7 @@ void MonoPowerManagement::powerUpMCUPeripherals()
     PWM_Wakeup();
     I2C_Wakeup();
     SPI1_Wakeup();
+    ADC_SAR_1_Wakeup();
     
 #ifndef MONO_DISP_CTRL_HX8340
     SPI1_Wakeup();

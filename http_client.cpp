@@ -28,6 +28,8 @@ HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFra
         
         getFrame = new redpine::HttpGetFrame(ip, ip, path, NULL);
         getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
+        getFrame->setCompletionCallback<HttpClient>(this, &HttpClient::httpCompletion);
+        
         getFrame->commitAsync();
     }
     else
@@ -74,6 +76,7 @@ HttpClient::HttpClient(const HttpClient &other) :
     if (getFrame != NULL)
     {
         getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
+        getFrame->setCompletionCallback<HttpClient>(this, &HttpClient::httpCompletion);
     }
 }
 
@@ -92,11 +95,24 @@ HttpClient &HttpClient::operator=(const mono::network::HttpClient &other)
     if (getFrame != NULL)
     {
         getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
+        getFrame->setCompletionCallback<HttpClient>(this, &HttpClient::httpCompletion);
     }
     
     return *this;
 }
 
+void HttpClient::httpCompletion(redpine::ManagementFrame::FrameCompletionData *data)
+{
+    if (!data->Success)
+    {
+        lastErrorCode = COMMUNICATION_ERROR;
+        triggerDirectErrorHandler();
+    }
+    else
+    {
+        
+    }
+}
 
 void HttpClient::dnsResolutionError(INetworkRequest::ErrorEvent *evnt)
 {
@@ -117,6 +133,7 @@ void HttpClient::dnsComplete(INetworkRequest::CompletionEvent *evnt)
     debug("dns complete, call http get");
     getFrame = new redpine::HttpGetFrame(domain, dns.IpAddress(), path, NULL);
     getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
+    getFrame->setCompletionCallback<HttpClient>(this, &HttpClient::httpCompletion);
     getFrame->commitAsync();
 }
 

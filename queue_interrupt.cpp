@@ -57,7 +57,6 @@ void QueueInterrupt::fall(void (*fptr)())
 
 void QueueInterrupt::_irq_rise_handler()
 {
-    printf("#");
     if (deactivateUntilHandler && !isHandled)
         return;
     

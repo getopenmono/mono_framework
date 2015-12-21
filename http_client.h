@@ -64,6 +64,9 @@ namespace mono { namespace network {
         
         void httpData(redpine::HttpGetFrame::CallbackData *data);
         
+        /** when the HTTP GET frame completes, check for error */
+        void httpCompletion(redpine::ManagementFrame::FrameCompletionData *data);
+        
         void triggerDataReady();
     public:
         

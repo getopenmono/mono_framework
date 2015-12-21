@@ -190,7 +190,7 @@ void Module::moduleEventHandler()
                 responseFrameQueue.Remove(respFrame);
                 respFrame->triggerCompletionHandler();
                 
-                error("failed to handle incoming response for resp queue head\n\r");
+                debug("failed to handle incoming response for resp queue head\n\r");
             }
             else if (respFrame->lastResponseParsed)
             {

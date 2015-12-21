@@ -22,7 +22,7 @@ using namespace mono::display;
 
 ILI9225G::ILI9225G() : IDisplayController(176,220),
     spi(TFT_SPI_MOSI, TFT_SPI_MISO, TFT_SPI_CLK, TFT_SPI_CS),
-    Reset(TFT_RESET, 0),
+    Reset(TFT_RESET, 1, PullUp),
     RegisterSelect(TFT_REGISTER_SELECT, 1),
     IM0(TFT_IM0, 1),
     tearingEffect(TFT_TEARING_EFFECT, PullUp),
@@ -43,17 +43,17 @@ void ILI9225G::init()
     // setting pins agin since setting them in global constructor does not work YET!!
     // TODO: make pin assignment work (not get overwritten) in global constructors!
 
-    Reset = mbed::DigitalOut(TFT_RESET, 1);
-    CyPins_SetPinDriveMode(TFT_RESET, CY_PINS_DM_STRONG);
+    Reset = mono::io::DigitalOut(TFT_RESET, 1, PullUp);
+    CyPins_SetPinDriveMode(TFT_RESET, CY_PINS_DM_RES_UP);
     
     RegisterSelect = mbed::DigitalOut(TFT_REGISTER_SELECT, 1);
-    CyPins_SetPinDriveMode(TFT_REGISTER_SELECT, CY_PINS_DM_RES_UPDWN);
+    CyPins_SetPinDriveMode(TFT_REGISTER_SELECT, CY_PINS_DM_STRONG);
     
     IM0 = mbed::DigitalOut(TFT_IM0, 1);
-    Reset = 0;
+    //Reset = 0;
     CyPins_ClearPin(TFT_RESET);
-    wait_ms(15);
-    Reset = 1; // active low
+    wait_ms(50);
+    //Reset = 1; // active low
     CyPins_SetPin(TFT_RESET);
     wait_ms(50);
     
@@ -230,11 +230,14 @@ void ILI9225G::onSystemPowerOnReset()
     
 //    PWM_Start();
 //    setBrightness(0);
+    SPI1_Start();
 }
 
 void ILI9225G::onSystemEnterSleep()
 {
     PWM_Sleep();
+    SPI1_Stop();
+    SPI1_Sleep();
     //CyPins_ClearPin(TFT_LED_PWR);
 //    writeCommand(0x07, 0x00);
 //    wait_ms(50);
@@ -249,7 +252,9 @@ void ILI9225G::onSystemWakeFromSleep()
 //    writeCommand(0x10, 0x0A00);
 //    wait_ms(50);
 //    writeCommand(0x07, 0x1017);
-//    
+//
+    SPI1_Wakeup();
+    SPI1_Start();
     PWM_Wakeup();
     
     init();
