@@ -59,7 +59,9 @@ namespace mono { namespace power {
             REG910  = 0x91, /**<  */
             APCH    = 0xA1, /**<  */
             APCH_2  = 0xA8, /**<  */
-            APCH_4  = 0xAA  /**<  */
+            APCH_4  = 0xAA, /**<  */
+            OTG     = 0xB0, /**< USB OTG Power control */
+            OTG_EXT = 0xB2  /**<  */
         };
         
         /**
@@ -74,6 +76,13 @@ namespace mono { namespace power {
             OUTPUT_DISCHARGE_CONTROL = 0x04, /**< Some regulators has a discharge control bit */
             FAULT_MASK_CONTROL = 0x02, /**< Select the fulat mask bit */
             POWER_OK_STATUS = 0x01 /**< Select the Power-OK status bit */
+        };
+        
+        
+        enum OTGBitmask
+        {
+            ONQ1 = 0x80,    /**< Turn on/off Q1 switch */
+            Q1OK = 0x10     /**< Check that Q1 is turned on and OK */
         };
         
         /**
@@ -127,6 +136,13 @@ namespace mono { namespace power {
         
         uint8_t SystemStatus();
         ChargeState ChargeStatus();
+        bool setUSBOTGPower(bool on);
+        bool USBOTGPower();
+        
+        uint8_t USBOTG();
+        
+        void setPowerFencePeripherals(bool off);
+        bool PowerFencePeriperals();
         
         void onSystemPowerOnReset();
         void onSystemEnterSleep();
