@@ -22,10 +22,10 @@ using namespace mono::display;
 
 ILI9225G::ILI9225G() : IDisplayController(176,220),
     spi(TFT_SPI_MOSI, TFT_SPI_MISO, TFT_SPI_CLK, TFT_SPI_CS),
-    Reset(TFT_RESET, 1, PullUp),
+    Reset(TFT_RESET, 0),
     RegisterSelect(TFT_REGISTER_SELECT, 1),
     IM0(TFT_IM0, 1),
-    tearingEffect(TFT_TEARING_EFFECT, PullUp),
+    tearingEffect(TFT_TEARING_EFFECT, PullNone),
     curWindow(0,0,ScreenWidth(), ScreenHeight())
 {
     IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
@@ -35,83 +35,66 @@ void ILI9225G::init()
 {
     setBrightness(0);
     
-    //mono::defaultSerial.printf("In constructor:\n\rDR: 0x%x, DM0: 0x%x, DM1: 0x%x, DM2: 0x%x\n\r",dr,dm0,dm1,dm2);
-    //mono::defaultSerial.printf("After\n\rDR: 0x%x, DM0: 0x%x, DM1: 0x%x, DM2: 0x%x\n\r",CY_GET_REG8(CYREG_PRT12_DR), CY_GET_REG8(CYREG_PRT12_DM0), CY_GET_REG8(CYREG_PRT12_DM1),CY_GET_REG8(CYREG_PRT12_DM2));
-    
-    
-    
-    // setting pins agin since setting them in global constructor does not work YET!!
-    // TODO: make pin assignment work (not get overwritten) in global constructors!
-
-    Reset = mono::io::DigitalOut(TFT_RESET, 1, PullUp);
-    CyPins_SetPinDriveMode(TFT_RESET, CY_PINS_DM_RES_UP);
-    
-    RegisterSelect = mbed::DigitalOut(TFT_REGISTER_SELECT, 1);
-    CyPins_SetPinDriveMode(TFT_REGISTER_SELECT, CY_PINS_DM_STRONG);
-    
-    IM0 = mbed::DigitalOut(TFT_IM0, 1);
-    //Reset = 0;
-    CyPins_ClearPin(TFT_RESET);
-    wait_ms(50);
-    //Reset = 1; // active low
-    CyPins_SetPin(TFT_RESET);
-    wait_ms(50);
-    
-    //************* Start Initial Sequence **********//
-    writeCommand(0x0011, 0x0000);
-    writeCommand(0x0012, 0x0000);
-    writeCommand(0x0013, 0x0000);
-    writeCommand(0x0014, 0x0000);
-    writeCommand(0x0011, 0x0041);
-    writeCommand(0x0012, 0x5011);
-    writeCommand(0x0013, 0x0062);
-    writeCommand(0x0014, 0x4959);
-    writeCommand(0x00C7, 0x0303);
-    
-    writeCommand(0x0010, 0x0200);
-    writeCommand(0x0011, 0x1041);
-    writeCommand(0x0001, 0x011C);
-    writeCommand(0x0002, 0x0100);
-    writeCommand(0x0003, 0x1030);
-    writeCommand(0x0033, 0x1030);
-    writeCommand(0x0007, 0x0000);
-    writeCommand(0x0008, 0x0808);
-    writeCommand(0x000B, 0x3100);
-    writeCommand(0x000C, 0x0000);
-    
-    writeCommand(0x0030, 0x0000);
-    writeCommand(0x0031, 0x00DB);
-    writeCommand(0x0032, 0x0000);
-    writeCommand(0x0033, 0x0000);
-    writeCommand(0x0034, 0x00DB);
-    writeCommand(0x0035, 0x0000);
-    writeCommand(0x0036, 0x00AF);
-    writeCommand(0x0037, 0x0000);
-    writeCommand(0x0038, 0x00DB);
-    writeCommand(0x0039, 0x0000);
-    
-    writeCommand(0x0050, 0x0001);
-    writeCommand(0x0051, 0x030A);
-    writeCommand(0x0052, 0x0C04);
-    writeCommand(0x0053, 0x0804);
-    writeCommand(0x0054, 0x040C);
-    writeCommand(0x0055, 0x0A03);
-    writeCommand(0x0056, 0x0100);
-    writeCommand(0x0057, 0x0408);
-    writeCommand(0x0058, 0x0000);
-    writeCommand(0x0059, 0x0000);
-    
-    writeCommand(0x000F, 0x0701);
-    writeCommand(0x0007, 0x1017);
-    writeCommand(0x0020, 0x0000);
-    writeCommand(0x0021, 0x0000);
+    Reset = 0;
     
     wait_ms(50);
-    writeRegister(0x0022);
+    Reset = 1; // active low
+    wait_ms(50);
+    
+    writeCommand(0xd0, 0x0003);
+    writeCommand(0xeb, 0x0b00);
+    writeCommand(0xec, 0x000f);
+    writeCommand(0xc7, 0x030f);
+    writeCommand(0x01, 0x011C);
+    writeCommand(0x02, 0x0100);
+    writeCommand(0x03, 0x1030);
+    writeCommand(0x07, 0x0000);
+    writeCommand(0x08, 0x0808);
+    writeCommand(0x0F, 0x0601);
+    
+    writeCommand(0x10, 0x0A00);
+    writeCommand(0x11, 0x1B41);
+    
+    wait_ms(50);
+    
+    writeCommand(0x12, 0x200E);
+    writeCommand(0x13, 0x0020);
+    writeCommand(0x14, 0x4A5F);
+    
+    writeCommand(0x30, 0x0000);
+    writeCommand(0x31, 0x00DB);
+    writeCommand(0x32, 0x0000);
+    writeCommand(0x33, 0x0000);
+    writeCommand(0x34, 0x00DB);
+    writeCommand(0x35, 0x0000);
+    writeCommand(0x36, 0x00AF);
+    writeCommand(0x37, 0x0000);
+    writeCommand(0x38, 0x00DB);
+    writeCommand(0x39, 0x0000);
+    
+    writeCommand(0x50, 0x0000);
+    writeCommand(0x51, 0x0803);
+    writeCommand(0x52, 0x0C07);
+    writeCommand(0x53, 0x0501);
+    writeCommand(0x54, 0x070C);
+    writeCommand(0x55, 0x0308);
+    writeCommand(0x56, 0x0000);
+    writeCommand(0x57, 0x0105);
+    writeCommand(0x58, 0x1100);
+    writeCommand(0x59, 0x0011);
+    
+    writeCommand(0x20, 0x0000); 
+    writeCommand(0x21, 0x0000); 
+    
+    wait_ms(50);
+    
+    writeCommand(0x07, 0x1017);
+    writeRegister(0x22);
+    
     RegisterSelect = 1;
     
-    for (int i=0; i<176*220; i++) {
-        this->write(CloudsColor);
+    for (int i=0; i<176*110; i++) {
+        this->write(RedColor);
     }
     
     PWM_Start();
@@ -224,7 +207,7 @@ uint8_t ILI9225G::Brightness() const
 
 void ILI9225G::onSystemPowerOnReset()
 {
-    CyPins_SetPinDriveMode(TFT_TEARING_EFFECT, CY_PINS_DM_DIG_HIZ);
+//    CyPins_SetPinDriveMode(TFT_TEARING_EFFECT, CY_PINS_DM_DIG_HIZ);
 //    CyPins_SetPinDriveMode(TFT_LED_PWR, CY_PINS_DM_RES_DWN);
 //    CyPins_ClearPin(TFT_LED_PWR);
     
