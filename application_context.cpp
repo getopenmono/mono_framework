@@ -62,7 +62,8 @@ void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
     touchSys.init();
     
     //setup default user button handler
-    UserButton.DeactivateUntilHandled(); // debounce
+    UserButton.DeactivateUntilHandled(); // dont queue up pushes
+    UserButton.setDebouncing(true);
     UserButton.fall<ApplicationContext>(this, &ApplicationContext::enterSleepMode);
     
     monoApp->monoWakeFromReset();

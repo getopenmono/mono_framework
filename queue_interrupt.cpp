@@ -19,7 +19,8 @@ QueueInterrupt::QueueInterrupt(PinName pin, PinMode mode) : mbed::InterruptIn(pi
     this->addedToRunLoop = false;
     this->fallEvent = this->riseEvent = deactivateUntilHandler = false;
     this->isHandled = true;
-    
+    this->debounce = false;
+    this->debounceTimeoutUs = 30000;
 //    this->changeEvent = false;
 }
 
@@ -60,9 +61,18 @@ void QueueInterrupt::_irq_rise_handler()
     if (deactivateUntilHandler && !isHandled)
         return;
     
-    this->riseEvent = true;
     this->riseTimeStamp = us_ticker_read();
-    this->isHandled = false;
+    
+    if (debounce)
+    {
+        debounceRiseTimer.attach_us<QueueInterrupt>(this, &QueueInterrupt::debounceRiseHandler, debounceTimeoutUs);
+    }
+    else
+    {
+        this->riseEvent = true;
+        this->isHandled = false;
+    }
+    
 }
 
 void QueueInterrupt::_irq_fall_handler()
@@ -70,9 +80,18 @@ void QueueInterrupt::_irq_fall_handler()
     if (deactivateUntilHandler && !isHandled)
         return;
     
-    this->fallEvent = true;
     this->fallTimeStamp = us_ticker_read();
-    this->isHandled = false;
+    
+    if (debounce)
+    {
+        debounceFallTimer.attach_us<QueueInterrupt>(this, &QueueInterrupt::debounceFallHandler, debounceTimeoutUs);
+    }
+    else
+    {
+        this->fallEvent = true;
+        this->isHandled = false;
+    }
+    
 }
 
 //void QueueInterrupt::_irq_change_handler()
@@ -80,6 +99,24 @@ void QueueInterrupt::_irq_fall_handler()
 //    changeEvent = true;
 //    if (CY_GET_REG8(this->gpio_irq.snapShotAddr))
 //}
+
+void QueueInterrupt::debounceRiseHandler()
+{
+    if (this->read())
+    {
+        this->riseEvent = true;
+        this->isHandled = false;
+    }
+}
+
+void QueueInterrupt::debounceFallHandler()
+{
+    if (!this->read())
+    {
+        this->fallEvent = true;
+        this->isHandled = false;
+    }
+}
 
 void QueueInterrupt::taskHandler()
 {
@@ -110,6 +147,16 @@ void QueueInterrupt::DeactivateUntilHandled(bool deactive)
 bool QueueInterrupt::IsInterruptsWhilePendingActive() const
 {
     return this->deactivateUntilHandler;
+}
+
+void QueueInterrupt::setDebouncing(bool active)
+{
+    this->debounce = active;
+}
+
+void QueueInterrupt::setDebounceTimeout(int timeUs)
+{
+    this->debounceTimeoutUs = timeUs;
 }
 
 uint32_t QueueInterrupt::FallTimeStamp()

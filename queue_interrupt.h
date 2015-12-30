@@ -10,6 +10,7 @@
 #define queue_interrupt_h
 
 #include <InterruptIn.h>
+#include <Timeout.h>
 #include "application_run_loop_task_interface.h"
 
 namespace mono {
@@ -48,6 +49,10 @@ namespace mono {
     protected:
         
         bool addedToRunLoop, fallEvent, riseEvent, snapShot, deactivateUntilHandler, isHandled;
+        bool debounce, debounceRiseRunning, debounceFallRunning;
+        int debounceTimeoutUs;
+        mbed::Timeout debounceRiseTimer, debounceFallTimer;
+        
 //        bool changeEvent;
         uint32_t riseTimeStamp, fallTimeStamp;
         
@@ -62,11 +67,14 @@ namespace mono {
         void _irq_fall_handler();
 //        void _irq_change_handler();
         
+        void debounceRiseHandler();
+        void debounceFallHandler();
+        
     public:
         
         /**
          * Assign a queued inetrrupt handler to a physical pin
-         * @param inputPinName The actual pin to listen on (must be PORT0 - PORT12)
+         * @param inputPinName The actual pin to listen on (must be PORT0 - PORT15)
          * @param mode OPTIONAL: The pin mode, default is Hi-Impedance input.
          */
         QueueInterrupt(PinName inputPinName = NC, PinMode mode = PullNone);
@@ -92,6 +100,22 @@ namespace mono {
          * @returns `true` if incomming interrupt are displaed, until previous is handled.
          */
         bool IsInterruptsWhilePendingActive() const;
+        
+        /**
+         * @brief Enable/Disable interrupt de-bounce
+         * 
+         * Switches state change might cause multiple interrupts to fire, or
+         * electrostatic discharges might cause nano seconds changes to I/O lines.
+         * The debounce ensures the interrupt will only be triggered, on sane button
+         * presses.
+         */
+        void setDebouncing(bool active);
+        
+        /**
+         * @brief Change the timeout for the debounce mechanism
+         * @param timeUs The time from interrupt to the signal is considered stable, in micro-seconds
+         */
+        void setDebounceTimeout(int timeUs);
         
         /** Attach a function to call when a rising edge occurs on the input
          *

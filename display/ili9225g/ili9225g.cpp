@@ -207,12 +207,6 @@ uint8_t ILI9225G::Brightness() const
 
 void ILI9225G::onSystemPowerOnReset()
 {
-//    CyPins_SetPinDriveMode(TFT_TEARING_EFFECT, CY_PINS_DM_DIG_HIZ);
-//    CyPins_SetPinDriveMode(TFT_LED_PWR, CY_PINS_DM_RES_DWN);
-//    CyPins_ClearPin(TFT_LED_PWR);
-    
-//    PWM_Start();
-//    setBrightness(0);
     SPI1_Start();
 }
 
