@@ -4,12 +4,10 @@
 *.pbxproj
 *.xcworkspacedata
 *.xcuserstate
+*.a
+generated
 build
 include
-monolib.a
 wayEngDisplayTest
 display/ili9225g/drv_lcd_ili9225g.c.txt
-
 display/ili9225g/hal_gouda.c.txt
-
-*.a
