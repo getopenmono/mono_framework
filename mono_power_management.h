@@ -25,7 +25,7 @@ namespace mono { namespace power {
         
         uint8_t DriveModeRegisters[3*9];
         
-        //ACT8600PowerSystem powerSubsystem;
+        ACT8600PowerSystem powerSubsystem;
         
         
         

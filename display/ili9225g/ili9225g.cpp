@@ -17,6 +17,7 @@ extern "C" {
 #include <ili9225g.h>
 #include <consoles.h>
 #include <application_context_interface.h>
+#include "act8600_power_system.h"
 
 using namespace mono::display;
 
@@ -25,10 +26,14 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
     Reset(TFT_RESET, 0),
     RegisterSelect(TFT_REGISTER_SELECT, 1),
     IM0(TFT_IM0, 1),
-    tearingEffect(TFT_TEARING_EFFECT, PullNone),
+    tearingEffect(TFT_TEARING_EFFECT),
     curWindow(0,0,ScreenWidth(), ScreenHeight())
 {
+    tearingEffect.mode(PullNone);
+    tearingInterruptPending = false;
+    rebootDisplay = false;
     IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
+    IApplicationContext::Instance->RunLoop->addDynamicTask(this);
 }
 
 void ILI9225G::init()
@@ -93,15 +98,21 @@ void ILI9225G::init()
     
     RegisterSelect = 1;
     
-    for (int i=0; i<176*110; i++) {
-        this->write(RedColor);
+    for (int i=0; i<176*20; i++) {
+        this->write(AlizarinColor);
+    }
+    
+    for (int i=20; i<176*200; i++) {
+        this->write(CloudsColor);
     }
     
     PWM_Start();
     setBrightness(128);
     
-    tearingEffect.DeactivateUntilHandled();
-    tearingEffect.fall<ILI9225G>(this, &ILI9225G::tearingEffectHandler);
+    //tearingEffect.DeactivateUntilHandled();
+    tearingEffect.rise<ILI9225G>(this, &ILI9225G::tearingEffectHandler);
+    
+    tearingWatchdog.attach_us<ILI9225G>(this, &ILI9225G::tearingWatchdogHandler, 100000);
 }
 
 void ILI9225G::setWindow(int x, int y, int width, int height)
@@ -130,9 +141,46 @@ void ILI9225G::setWindow(int x, int y, int width, int height)
 void ILI9225G::tearingEffectHandler()
 {
     LastTearningEffectTime = us_ticker_read();
+    tearingInterruptPending = true;
+}
+
+void ILI9225G::taskHandler()
+{
+    
+    if (rebootDisplay)
+    {
+        Reset = 0;
+        RegisterSelect = 0;
+        IM0 = 0;
+        
+        power::ACT8600PowerSystem power;
+        power.setPowerFencePeripherals(true);
+        debug("power: %i\n\r", power.PowerFencePeriperals());
+        CyDelay(1000);
+        power.setPowerFencePeripherals(false);
+        
+        Bootloadable_SET_RUN_TYPE(Bootloadable_START_APP);
+        CySoftwareReset();
+    }
+    
+    if (!tearingInterruptPending)
+        return;
     
     if (refreshHandler != NULL)
+    {
         refreshHandler->call();
+    }
+    
+    tearingInterruptPending = false;
+}
+
+void ILI9225G::tearingWatchdogHandler()
+{
+    watTime = us_ticker_read();
+    teWat = LastTearningEffectTime;
+    
+    if (watTime - LastTearningEffectTime > 100000)
+        rebootDisplay = true;
 }
 
 uint16_t ILI9225G::ScreenWidth() const

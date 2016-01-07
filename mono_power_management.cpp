@@ -14,8 +14,7 @@ using namespace mono::power;
 MonoPowerManagement::MonoPowerManagement()
 {
     powerAwarenessQueue = NULL;
-    
-    
+    PowerSystem = &powerSubsystem;
 }
 
 void MonoPowerManagement::EnterSleep()
@@ -26,8 +25,9 @@ void MonoPowerManagement::EnterSleep()
     //PowerSystem->onSystemEnterSleep();
     wait_ms(10);
     
-    powerDownMCUPeripherals();
+    powerSubsystem.setPowerFencePeripherals(true);
     
+    powerDownMCUPeripherals();
     
     //CyILO_Start1K(); // make sure the 1K ILO Osc is running
     //CyMasterClk_SetSource(CY_MASTER_SOURCE_IMO);
@@ -42,8 +42,11 @@ void MonoPowerManagement::EnterSleep()
     
     //CyMasterClk_SetSource(CY_MASTER_SOURCE_PLL);
     //CyGlobalIntEnable;
+    
     powerUpMCUPeripherals();
     //PowerSystem->onSystemWakeFromSleep();
+    
+    powerSubsystem.setPowerFencePeripherals(false);
     
     mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\n\r", status);
     

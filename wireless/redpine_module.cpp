@@ -297,7 +297,7 @@ void Module::onSystemPowerOnReset()
 
 void Module::onSystemEnterSleep()
 {
-    comIntf->resetModule();
+    //comIntf->resetModule();
 }
 
 void Module::onSystemWakeFromSleep()
