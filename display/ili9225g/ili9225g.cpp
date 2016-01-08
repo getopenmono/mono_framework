@@ -99,7 +99,7 @@ void ILI9225G::init()
     RegisterSelect = 1;
     
     for (int i=0; i<176*20; i++) {
-        this->write(AlizarinColor);
+        this->write(WetAsphaltColor);
     }
     
     for (int i=20; i<176*200; i++) {
@@ -152,6 +152,7 @@ void ILI9225G::taskHandler()
         Reset = 0;
         RegisterSelect = 0;
         IM0 = 0;
+        SPI1_Stop();
         
         power::ACT8600PowerSystem power;
         power.setPowerFencePeripherals(true);
@@ -159,8 +160,7 @@ void ILI9225G::taskHandler()
         CyDelay(1000);
         power.setPowerFencePeripherals(false);
         
-        Bootloadable_SET_RUN_TYPE(Bootloadable_START_APP);
-        CySoftwareReset();
+        IApplicationContext::SoftwareResetToApplication();
     }
     
     if (!tearingInterruptPending)
