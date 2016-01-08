@@ -108,6 +108,13 @@ void ApplicationContext::_softwareResetToBootloader()
     while(1); // silence compiler warning
 }
 
+void ApplicationContext::_softwareResetToApplication()
+{
+    Bootloadable_SET_RUN_TYPE(Bootloadable_START_APP);
+    CySoftwareReset();
+    while(1); // silence compiler warning
+}
+
 void ApplicationContext::resetOnUserButton()
 {
     debug("Mono will reset on user button!\n\r");

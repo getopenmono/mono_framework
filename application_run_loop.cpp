@@ -52,7 +52,7 @@ void AppRunLoop::exec()
             if (CyPins_ReadPin(SW_USER) == 0)
             {
                 debug("Will reset on user button!\n\r");
-                wait_ms(100);
+                wait_ms(300);
                 IApplicationContext::SoftwareReset();
             }
         }

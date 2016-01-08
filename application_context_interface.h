@@ -66,6 +66,12 @@ namespace mono {
         
         
         /**
+         * Subclasses must implement this to enable software reset to application
+         * See @ref SoftwareResetToApplication
+         */
+        virtual void _softwareResetToApplication() = 0;
+        
+        /**
          * Subclasses must implement this method to allow *reset to bootloader*
          * See @ref SoftwareResetToBootloader
          */
@@ -244,6 +250,14 @@ namespace mono {
          * the bootloader will run again, before entering the application.
          */
         static void SoftwareReset() __attribute__((noreturn)) { IApplicationContext::Instance->_softwareReset(); }
+        
+        /**
+         * @brief Trigger a software reset of MOno's MCU, that does not load 
+         * the bootloader.
+         * 
+         * Use this to do a fast reset of the MCU.
+         */
+        static void SoftwareResetToApplication() __attribute__((noreturn)) { IApplicationContext::Instance->_softwareResetToApplication(); }
         
         /**
          * @brief Trigger a software reset, and stay in bootloader.

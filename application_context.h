@@ -46,6 +46,7 @@ namespace mono {
         
         void _softwareReset() __attribute((noreturn));
         void _softwareResetToBootloader() __attribute((noreturn));
+        void _softwareResetToApplication() __attribute((noreturn));
         
     public:
         
