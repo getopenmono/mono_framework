@@ -35,7 +35,7 @@ bool Module::initialize(ModuleCommunication *commInterface)
     
     if (commInterface == NULL)
     {
-        error("Cannot init Redpine Module without comm. interface!\n\r");
+        debug("Cannot init Redpine Module without comm. interface!\n\r");
         return false;
     }
     
@@ -53,7 +53,7 @@ bool Module::initialize(ModuleCommunication *commInterface)
     
     if (!success)
     {
-        error("Initialize failed to init communication interface\n\r");
+        debug("Initialize failed to init communication interface\n\r");
         return false;
     }
     
@@ -90,7 +90,8 @@ bool Module::initialize(ModuleCommunication *commInterface)
     
     if (!success)
     {
-        error("failed to read card ready!");
+        debug("failed to read card ready!");
+        return false;
     }
     
     self->comIntf->interruptCallback.attach<mono::redpine::Module>(self, &Module::moduleEventHandler);

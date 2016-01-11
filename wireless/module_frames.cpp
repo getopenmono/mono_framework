@@ -127,7 +127,7 @@ bool ManagementFrame::commit()
         int retries = 0;
         while (retries < 20) {
             
-            if (mod->comIntf->pollInputQueue())
+            if (mod->comIntf->interruptActive())
                 break;
             
             retries++;
@@ -137,7 +137,8 @@ bool ManagementFrame::commit()
         // sum(50*x, x=1..20) = 10,5 secs timeout
         if (retries == 20)
         {
-            mono::Error << "Response interrupt for frame timed out!\n\r";
+            debug("Response interrupt for frame timed out!\n\r");
+            return false;
         }
         
         //mono::Debug << "Got frame response in " << retries << " retries\n\r";

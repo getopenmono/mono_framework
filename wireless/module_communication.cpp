@@ -78,7 +78,7 @@ SPIReceiveDataBuffer& SPIReceiveDataBuffer::operator<<(mbed::SPI *spi)
 {
     if (length < bytesToRead)
     {
-        error("SPIReceiveDataBuffer read error, buffer is too small!\n\r");
+        debug("SPIReceiveDataBuffer read error, buffer is too small!\n\r");
         return *this;
     }
     
@@ -235,7 +235,7 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     
     if (sendC1C2(cmd1, cmd2) != CMD_SUCCESS)
     {
-        error("Failed to fetch frame length header!");
+        debug("Failed to fetch frame length header!");
         return false;
     }
     
@@ -251,7 +251,7 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     
     if (retval != true)
     {
-        error("Failed to fetch frame length header");
+        debug("Failed to fetch frame length header");
         return false;
     }
     
@@ -486,7 +486,7 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
     
     if (retval != CMD_SUCCESS)
     {
-        mono::defaultSerial.printf("Failed to sent ReadRegister command to module!\n\r");
+        debug("Failed to sent ReadRegister command to module!\n\r");
         return 0;
     }
     
@@ -500,7 +500,7 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
         setChipSelect(false);
     }
     else
-        mono::defaultSerial.printf("Register read failed\n\r");
+        debug("Register read failed\n\r");
     
     return retval;
 }
@@ -522,7 +522,7 @@ uint16 ModuleSPICommunication::readMemory(uint32_t memoryAddress)
     
     if (retval != CMD_SUCCESS)
     {
-        mono::defaultSerial.printf("Failed to sent ReadMemory command to module!");
+        debug("Failed to sent ReadMemory command to module!");
         return 0;
     }
     
@@ -548,7 +548,7 @@ uint16 ModuleSPICommunication::readMemory(uint32_t memoryAddress)
         setChipSelect(false);
     }
     else
-        mono::defaultSerial.printf("Memory read failed");
+        debug("Memory read failed\n\r");
     
     return retval;
 }
@@ -570,7 +570,7 @@ void ModuleSPICommunication::writeMemory(uint32_t memoryAddress, uint16_t value)
     
     if (retval != CMD_SUCCESS)
     {
-        mono::defaultSerial.printf("Failed to sent WriteMemory command to module!");
+        debug("Failed to sent WriteMemory command to module!\n\r");
         return;
     }
     
@@ -584,7 +584,7 @@ void ModuleSPICommunication::writeMemory(uint32_t memoryAddress, uint16_t value)
     
     if (retval != CMD_SUCCESS)
     {
-        mono::defaultSerial.printf("Failed to WriteMemory address to module!\n\r");
+        debug("Failed to WriteMemory address to module!\n\r");
         setChipSelect(false);
         return;
     }
@@ -596,7 +596,7 @@ void ModuleSPICommunication::writeMemory(uint32_t memoryAddress, uint16_t value)
     setChipSelect(false);
     
     if (retval != CMD_SUCCESS)
-        mono::defaultSerial.printf("Failed to WriteMemory value to module!\n\r");
+        debug("Failed to WriteMemory value to module!\n\r");
 }
 
 
@@ -670,7 +670,7 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     if (!success)
     {
-        error("Failed to read FrameDescriptor Header from input\n\r");
+        debug("Failed to read FrameDescriptor Header from input\n\r");
         return false;
     }
     
@@ -681,14 +681,14 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     if (!success)
     {
-        error("Failed to read frame body from input\n\r");
+        debug("Failed to read frame body from input\n\r");
         return false;
     }
     
     if (!bufferIsMgmtFrame(buffer))
     {
         memdump(buffer.buffer, buffer.length);
-        error("Frame is not a management frame!\n\r");
+        debug("Frame is not a management frame!\n\r");
         return false;
     }
     
@@ -704,17 +704,17 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     
     if (rawFrame->status != 0)
     {
-        mono::defaultSerial.printf("Error response for command: 0x%x. Error code: 0x%x\n\r",rawFrame->CommandId,rawFrame->status);
+        debug("Error response for command: 0x%x. Error code: 0x%x\n\r",rawFrame->CommandId,rawFrame->status);
     }
     // check for payload
     else if (request.responsePayload && (rawFrame->LengthType & 0xFFF) > 0)
     {
-        mono::Debug << "Parsing response frame payload data...\n\r";
+        debug("Parsing response frame payload data...\n\r");
         request.responsePayloadHandler(((uint8_t*)rawFrame)+16);
     }
     else if (request.responsePayload)
     {
-        mono::Error << "command frame request expected a response payload, but response is empty!\n\r";
+        debug("command frame request expected a response payload, but response is empty!\n\r");
         return false;
     }
     
@@ -732,7 +732,7 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     
     if (regval != 0)
     {
-        mono::Error << "Cannot write frame to module, input buffer is full!";
+        debug("Cannot write frame to module, input buffer is full!\n\r");
         return false;
     }
     
@@ -758,7 +758,7 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     
     if (statusCode != CMD_SUCCESS)
     {
-        mono::Error << "Failed to write frame to module, error status: " << statusCode;
+        debug("Failed to write frame to module, error status: 0x%x\n\r", statusCode);
         return false;
     }
     
@@ -773,7 +773,7 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     
     if (statusCode != CMD_SUCCESS)
     {
-        mono::Error << "Failed to send length of frame to module, got response: " << statusCode;
+        debug("Failed to send length of frame to module, got response: 0x%x\n\r",statusCode);
         return false;
     }
     
@@ -794,7 +794,7 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     
     if (frame->payloadLength() > 300)
     {
-        mono::Error << "Frame payload data is too large! More than 300 bytes!";
+        debug("Frame payload data is too large! More than 300 bytes!\n\r");
         return false;
     }
     
@@ -814,7 +814,7 @@ bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength
 {
     if (byteLength != (byteLength & ~3))
     {
-        mono::Error << "Data Frame payload data is not 4-byte aligned!";
+        debug("Data Frame payload data is not 4-byte aligned!\n\r");
         return false;
     }
     
@@ -834,7 +834,7 @@ bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength
 
     if (statusCode != CMD_SUCCESS)
     {
-        mono::Error << "Failed to write data to module, error status: " << statusCode;
+        debug("Failed to write data to module, error status: 0x%x\n\r", statusCode);
         return false;
     }
     
@@ -849,7 +849,7 @@ bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength
     
     if (statusCode != CMD_SUCCESS)
     {
-        mono::Error << "Failed to send length of data to module, got response: " << statusCode;
+        debug("Failed to send length of data to module, got response: 0x%x\n\r", statusCode);
         return false;
     }
     
@@ -858,7 +858,7 @@ bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength
     
     if (statusCode != CMD_SUCCESS)
     {
-        mono::Error << "Failed to transfer data frame payload data, got response: " << statusCode;
+        debug("Failed to transfer data frame payload data, got response: 0x%x\n\r", statusCode);
         return false;
     }
     
