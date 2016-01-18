@@ -13,7 +13,7 @@
 
 using namespace mono;
 
-AppRunLoop::AppRunLoop()
+AppRunLoop::AppRunLoop() : userBtn(SW_USER, 1, PullUp)
 {
     runLoopActive = true;
     lastDtrValue = true;
@@ -49,7 +49,7 @@ void AppRunLoop::exec()
         if (resetOnUserButton)
         {
             //TODO: remove cypress reference here!
-            if (CyPins_ReadPin(SW_USER) == 0)
+            if (userBtn == 0)
             {
                 debug("Will reset on user button!\n\r");
                 wait_ms(300);
@@ -161,8 +161,8 @@ void AppRunLoop::setResetOnUserButton(bool roub)
     if (roub)
     {
         //TODO: remove cypress reference here!
-        CyPins_SetPinDriveMode(SW_USER, CY_PINS_DM_RES_UP);
-        CyPins_SetPin(SW_USER);
+        userBtn.setMode(PullUp);
+        userBtn = 1;
         wait_us(10); // wait for pull up resistor
         resetOnUserButton = true;
     }

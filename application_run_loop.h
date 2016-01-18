@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #include <application_run_loop_task_interface.h>
+#include "mn_digital_out.h"
 
 namespace mono {
     
@@ -66,6 +67,8 @@ namespace mono {
         
         /** Internal method to sow together neightbourghs in the linked list */
         void removeTaskInQueue(IRunLoopTask *task);
+        
+        io::DigitalOut userBtn;
         
     public:
         
