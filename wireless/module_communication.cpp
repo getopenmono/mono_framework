@@ -709,7 +709,7 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     // check for payload
     else if (request.responsePayload && (rawFrame->LengthType & 0xFFF) > 0)
     {
-        debug("Parsing response frame payload data...\n\r");
+        //debug("Parsing response frame payload data...\n\r");
         request.responsePayloadHandler(((uint8_t*)rawFrame)+16);
     }
     else if (request.responsePayload)

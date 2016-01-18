@@ -10,6 +10,7 @@
 #include <application_context_interface.h>
 #include "consoles.h"
 
+#include <us_ticker_api.h>
 #include <mbed_debug.h>
 
 using namespace mono::ui;
@@ -49,7 +50,7 @@ void View::repaintScheduledViews()
     
     RepaintScheduledViewsTime = end - start;
     
-    debug("repaint time: %u, TE Offset: %i\n\r",RepaintScheduledViewsTime,start-painter.DisplayController()->LastTearningEffectTime);
+    //debug("repaint time: %u, TE Offset: %i\n\r",RepaintScheduledViewsTime,start-painter.DisplayController()->LastTearningEffectTime);
 }
 
 

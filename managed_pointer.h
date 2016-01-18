@@ -18,7 +18,7 @@ namespace mono {
     
     /**
      * The managed pointer is an object designed to live on the stack, but point
-     * to memory content that live on the heap. The ManagedPointer keeps track 
+     * to memory cobntent that live on the heap. The ManagedPointer keeps track
      * of memory references, such that the it can be shared across multiple
      * objects in your code.
      *

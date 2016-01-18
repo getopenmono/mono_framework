@@ -8,6 +8,7 @@
 
 
 #include "consoles.h"
+#include <string.h>
 #include <Serial.h>
 
 using namespace mono;

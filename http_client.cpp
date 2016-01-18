@@ -24,7 +24,7 @@ HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFra
         String ip = ipreg.Value(ipCaps[1]);
         path = ipreg.Value(ipCaps[2]);
         
-        debug("no domain, ip addr: %s, path: %s\n\r", ip(),path());
+        //debug("no domain, ip addr: %s, path: %s\n\r", ip(),path());
         
         getFrame = new redpine::HttpGetFrame(ip, ip, path, NULL);
         getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
@@ -49,7 +49,7 @@ HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFra
         domain = reg.Value(caps[1]);
         path = reg.Value(caps[2]);
         
-        debug("domain: %s, path: %s\n\r",domain(),path());
+        //debug("domain: %s, path: %s\n\r",domain(),path());
         
         dns = DnsResolver(domain);
         dns.setCompletionCallback<HttpClient>(this, &HttpClient::dnsComplete);
@@ -130,7 +130,7 @@ void HttpClient::dnsComplete(INetworkRequest::CompletionEvent *evnt)
         return;
     }
     
-    debug("dns complete, call http get");
+    //debug("dns complete, call http get");
     getFrame = new redpine::HttpGetFrame(domain, dns.IpAddress(), path, NULL);
     getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
     getFrame->setCompletionCallback<HttpClient>(this, &HttpClient::httpCompletion);
@@ -154,7 +154,7 @@ void HttpClient::triggerDataReady()
     
     if (respData.Finished)
     {
-        debug("comp handlr\n\r");
+        //debug("comp handlr\n\r");
         triggerCompletionHandler();
     }
 }

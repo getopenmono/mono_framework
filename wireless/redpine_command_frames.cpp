@@ -259,7 +259,7 @@ void HttpGetFrame::dataPayload(uint8_t *data)
     memcpy(strPnt++, "", 1); // username param
     memcpy(strPnt++, "", 1); // username param
     
-    debug("sizeof struct: %i, hstnm: %i, ipaddr: %i, url: %i, extHdr: %i\n\r",sizeof(HttpReqFrameSnd),hostname.Length(),ipaddress.Length(),url.Length(),extraHeader.Length());
+    //debug("sizeof struct: %i, hstnm: %i, ipaddr: %i, url: %i, extHdr: %i\n\r",sizeof(HttpReqFrameSnd),hostname.Length(),ipaddress.Length(),url.Length(),extraHeader.Length());
     
     memcpy(strPnt, hostname(), hostname.Length());
     strPnt += hostname.Length()+1;
@@ -313,7 +313,7 @@ int HttpGetFrame::payloadLength()
 
 HttpGetFrame::~HttpGetFrame()
 {
-    debug("dealloc HttpGetFrame\n\r");
+    //debug("dealloc HttpGetFrame\n\r");
 }
 
 // SET POWER MODE FRAME

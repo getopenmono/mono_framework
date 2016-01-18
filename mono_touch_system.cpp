@@ -10,6 +10,8 @@
 #include "application_context_interface.h"
 
 #include <wait_api.h>
+#include <us_ticker_api.h>
+
 #include "consoles.h"
 
 using namespace mono;

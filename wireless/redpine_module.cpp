@@ -217,7 +217,7 @@ void Module::moduleEventHandler()
         if (responseFrameQueue.Length() == 0 && requestFrameQueue.Length() > 0)
         {
             ManagementFrame *request = requestFrameQueue.Dequeue();
-            debug("Sending Mgmt request 0x%x\n\r",request->commandId);
+            //debug("Sending Mgmt request 0x%x\n\r",request->commandId);
             bool success = request->writeFrame();
             
             if (!success)

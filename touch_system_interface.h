@@ -17,7 +17,6 @@
 
 #include "rect.h"
 
-#include <us_ticker_api.h>
 
 #include <stdio.h>
 

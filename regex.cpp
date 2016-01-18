@@ -31,7 +31,7 @@ bool Regex::IsMatch(mono::String matchStr)
 bool Regex::Match(mono::String matchStr, Capture *captureArray, uint32_t capArraySize)
 {
     int res = slre_match(pattern(), matchStr(), matchStr.Length(), captureArray, capArraySize, 0);
-    debug("match res: %i\n\r",res);
+    //debug("match res: %i\n\r",res);
     
     return res > 0 ? true : false;
 }
