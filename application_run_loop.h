@@ -70,6 +70,9 @@ namespace mono {
         
         io::DigitalOut userBtn;
         
+        /** Process a single iteratio of the run loop */
+        void process();
+        
     public:
         
         /**
@@ -151,6 +154,14 @@ namespace mono {
          * @param roub `true` will reset on user button, `false` is normal functionality.
          */
         void setResetOnUserButton(bool roub);
+        
+        /**
+         * Terminate the run loop. 
+         * Application events and more will stop working
+         * 
+         * You should use this, if you use your own embedded run loops.
+         */
+        void quit();
     };
     
 }

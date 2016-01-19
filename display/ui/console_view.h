@@ -91,24 +91,20 @@ namespace mono { namespace ui {
         
         void Write(String txt, bool noRepaint = false)
         {
-            if (curLineIndex > 0)
-                curLineIndex--; // overwrite the last string terminator, to concat strings
+            //if (curLineIndex > 0)
+            //    curLineIndex--; // overwrite the last string terminator, to concat strings
             
             uint32_t symPos = 0;
-            while (curLineIndex < lineLength()) {
+            while (symPos < txt.Length()) {
+                
+                if (txt[symPos] == '\r')
+                {
+                    symPos++;
+                    continue;
+                }
                 
                 textBuffer.insertToCurrentLine(curLineIndex, txt[symPos]);
                 curLineIndex++;
-                
-                //soft wrap
-                if (curLineIndex > lineLength())
-                {
-                    textBuffer.incrementLine();
-                    curLineIndex = 3;
-                    textBuffer.insertToCurrentLine(0,' ');
-                    textBuffer.insertToCurrentLine(1,' ');
-                    textBuffer.insertToCurrentLine(2,' ');
-                }
                 
                 if (txt[symPos] == '\n')
                 {
@@ -118,6 +114,15 @@ namespace mono { namespace ui {
                 else if (txt[symPos] == '\0')
                 {
                     break;
+                }
+                //soft wrap
+                else if (curLineIndex >= lineLength())
+                {
+                    //textBuffer.insertToCurrentLine(curLineIndex,'\0');
+                    textBuffer.incrementLine();
+                    curLineIndex = 2;
+                    textBuffer.insertToCurrentLine(0,' ');
+                    textBuffer.insertToCurrentLine(1,' ');
                 }
                 
                 symPos++;
@@ -138,7 +143,7 @@ namespace mono { namespace ui {
                 //erase previous line
                 View::painter.drawFillRect(cursor.X(), cursor.Y(), viewRect.Width()-4, characterPixelHeight(), true);
                 char *line = textBuffer.getLine(l);
-                while (*line != '\0' && *line != '\n') {
+                while ((*line != '\0' && *line != '\n')) {
                     View::painter.drawChar(cursor.X(), cursor.Y(), *line);
                     
                     cursor.appendX(characterPixelWidth());
@@ -152,12 +157,12 @@ namespace mono { namespace ui {
             if (textBuffer.OldestLinePosition() == 0)
                 return;
                 
-                
-            for (int l=0; l<=textBuffer.LinePosition(); l++) {
+            //cursor = geo::Point(viewRect.X()+2,viewRect.Y()+2);
+            for (int l=0; l<textBuffer.LinePosition(); l++) {
                 //erase previous line
                 View::painter.drawFillRect(cursor.X(), cursor.Y(), viewRect.Width()-4, characterPixelHeight(), true);
                 char *line = textBuffer.getLine(l);
-                while (*line != '\0' && *line != '\n') {
+                while ((*line != '\0' && *line != '\n')) {
                     View::painter.drawChar(cursor.X(), cursor.Y(), *line);
                     
                     cursor.appendX(characterPixelWidth());

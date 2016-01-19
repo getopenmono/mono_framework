@@ -33,46 +33,51 @@ void AppRunLoop::exec()
     
     while (runLoopActive) {
         
-        if (mono::defaultSerial.IsReady())
-        {
-            
-            bool dtr = mono::defaultSerial.DTR();
-            if (resetOnDTR && (!dtr) && lastDtrValue)
-            {
-                debug("mono DTR reboot!\n\r");
-                wait_ms(50);
-                IApplicationContext::SoftwareReset();
-            }
-            lastDtrValue = dtr;
-        }
-        
-        if (resetOnUserButton)
-        {
-            //TODO: remove cypress reference here!
-            if (userBtn == 0)
-            {
-                debug("Will reset on user button!\n\r");
-                wait_ms(300);
-                IApplicationContext::SoftwareReset();
-            }
-        }
-        
-        uint32_t start = us_ticker_read();
-        //handle touch inputs
-        if (IApplicationContext::Instance->TouchSystem != NULL)
-            IApplicationContext::Instance->TouchSystem->processTouchInput();
-        uint32_t tEnd = us_ticker_read();
-        
-        //run scheduled tasks
-        processDynamicTaskQueue();
-        
-        uint32_t end = us_ticker_read();
-        
-        TouchSystemTime = tEnd - start;
-        DynamicTaskQueueTime = end - tEnd;
+        process();
     }
     
     debug("run loop terminated!");
+}
+
+void AppRunLoop::process()
+{
+    if (mono::defaultSerial.IsReady())
+    {
+        
+        bool dtr = mono::defaultSerial.DTR();
+        if (resetOnDTR && (!dtr) && lastDtrValue)
+        {
+            debug("mono DTR reboot!\n\r");
+            wait_ms(50);
+            IApplicationContext::SoftwareReset();
+        }
+        lastDtrValue = dtr;
+    }
+    
+    if (resetOnUserButton)
+    {
+        //TODO: remove cypress reference here!
+        if (userBtn == 0)
+        {
+            debug("Will reset on user button!\n\r");
+            wait_ms(300);
+            IApplicationContext::SoftwareReset();
+        }
+    }
+    
+    uint32_t start = us_ticker_read();
+    //handle touch inputs
+    if (IApplicationContext::Instance->TouchSystem != NULL)
+        IApplicationContext::Instance->TouchSystem->processTouchInput();
+    uint32_t tEnd = us_ticker_read();
+    
+    //run scheduled tasks
+    processDynamicTaskQueue();
+    
+    uint32_t end = us_ticker_read();
+    
+    TouchSystemTime = tEnd - start;
+    DynamicTaskQueueTime = end - tEnd;
 }
 
 
@@ -168,4 +173,9 @@ void AppRunLoop::setResetOnUserButton(bool roub)
     }
     else
         resetOnUserButton = false;
+}
+
+void AppRunLoop::quit()
+{
+    runLoopActive = false;
 }

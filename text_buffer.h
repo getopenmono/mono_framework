@@ -81,15 +81,20 @@ namespace mono {
             return buffer;
         }
         
-        int LinePosition()
+        int LinePosition() const
         {
             return linePtr;
         }
         
-        int OldestLinePosition()
+        int LastLinePosition() const
+        {
+            return linePtr-1 < 0 ? lineCount - 1 : linePtr-1;
+        }
+        
+        int OldestLinePosition() const
         {
             if (looped)
-                return LinePosition()+1;
+                return LinePosition()+1 % lineCount;
             else
                 return 0;
         }
