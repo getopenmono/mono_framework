@@ -46,8 +46,10 @@
 #include <media/image.h>
 #include <media/bmp_image.h>
 
+#ifndef EMUNO
 #include <dns_resolver.h>
 #include <http_client.h>
+#endif
 
 #include <mn_digital_out.h>
 
