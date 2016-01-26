@@ -93,6 +93,7 @@ namespace mono { namespace power {
         {
             V0_6 = 0x00,
             V2_5 = 0x31,
+            V3_1 = 0x37,
             V3_3 = 0x39
         };
         
@@ -143,6 +144,8 @@ namespace mono { namespace power {
         
         void setPowerFencePeripherals(bool off);
         bool PowerFencePeriperals();
+        
+        void powerOffUnused();
         
         void onSystemPowerOnReset();
         void onSystemEnterSleep();

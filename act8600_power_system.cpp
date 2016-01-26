@@ -9,6 +9,7 @@
 #include "act8600_power_system.h"
 #include <mono.h>
 #include <mbed_error.h>
+#include <project.h>
 
 using namespace mono::power;
 
@@ -19,7 +20,7 @@ ACT8600PowerSystem::ACT8600PowerSystem() : i2c(NC, NC)
 
 uint8_t ACT8600PowerSystem::SystemStatus()
 {
-    int8_t data;
+    int8_t data = 0x00;
     if (!readRegister(SYS, &data))
         error("Could not get SystemStatus, I2C failed\n\r");
     
@@ -28,7 +29,7 @@ uint8_t ACT8600PowerSystem::SystemStatus()
 
 ACT8600PowerSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
 {
-    int8_t data;
+    int8_t data = 0x00;
     if (!readRegister(APCH_4, &data))
         error("Failed to read APCH 4 register, I2C failed\n\r");
     
@@ -37,7 +38,7 @@ ACT8600PowerSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
 
 bool ACT8600PowerSystem::PowerFencePeriperals()
 {
-    int8_t data = 0;
+    int8_t data = 0x00;
     if (!readRegister(REG1_EXT, &data))
     {
         debug("could not read from power chip");
@@ -48,12 +49,63 @@ bool ACT8600PowerSystem::PowerFencePeriperals()
     return data & ENABLE ? false : true;
 }
 
+
+void ACT8600PowerSystem::powerOffUnused()
+{
+    bool success = true;
+    success &= writeRegister(REG2_EXT, (uint8_t)(0x00 | (~ENABLE)));
+    int8_t reg = 0;
+    readRegister(REG2_EXT, &reg);
+    debug("reg2: 0x%x\n\r",reg);
+    
+    success &= writeRegister(REG3_EXT, (uint8_t)(0x00 | (~ENABLE)));
+    readRegister(REG3_EXT, &reg);
+    debug("reg3: 0x%x\n\r",reg);
+    
+    success &= writeRegister(REG4_EXT, (uint8_t)(0x00 | (~ENABLE)));
+    readRegister(REG4_EXT, &reg);
+    debug("reg4: 0x%x\n\r",reg);
+    
+    success &= writeRegister(REG5_EXT, (uint8_t)(0x00 | (~ENABLE)));
+    readRegister(REG5_EXT, &reg);
+    debug("reg5: 0x%x\n\r",reg);
+    
+    success &= writeRegister(REG6_EXT, (uint8_t)(0x00 | (~ENABLE)));
+    readRegister(REG6_EXT, &reg);
+    debug("reg6: 0x%x\n\r",reg);
+    
+    success &= writeRegister(REG7_EXT, (uint8_t)(0x00 | (~ENABLE)));
+    readRegister(REG7_EXT, &reg);
+    debug("reg7: 0x%x\n\r",reg);
+    
+    success &= writeRegister(REG8_EXT, (uint8_t)(0x00 | (~ENABLE)));
+    readRegister(REG8_EXT, &reg);
+    debug("reg8: 0x%x\n\r",reg);
+    
+    readRegister(REG910, &reg);
+    debug("reg9: 0x%x\n\r",reg);
+    
+    readRegister(REG1_EXT, &reg);
+    debug("reg1: 0x%x\n\r",reg);
+    
+    if (!success)
+    {
+        debug("Failed to set unused power regs!\n\r");
+    }
+}
+
 void ACT8600PowerSystem::setPowerFencePeripherals(bool off)
 {
+    bool success;
     if (off)
-        writeRegister(REG1_EXT, 0x00 & (~ENABLE));
+        success = writeRegister(REG1_EXT, 0x00 & (~ENABLE));
     else
-        writeRegister(REG1_EXT, 0x00 | ENABLE);
+        success = writeRegister(REG1_EXT, 0x00 | ENABLE);
+    
+    if (!success)
+    {
+        debug("failed to set power fence!\n\r");
+    }
 }
 
 bool ACT8600PowerSystem::setUSBOTGPower(bool on)
@@ -114,10 +166,17 @@ bool ACT8600PowerSystem::readRegister(int8_t regAddr, int8_t *regData)
 {
     
     act8600_i2c_en_Write(1);
+    
+    // TODO: Avoid this delay by impl digital logic with specific truth table
+    // The I2C demux drives the line low, when its not selected. this means the
+    // pull up resistor needs time to pull up the line, when the demux selects it
+    CyDelayUs(10);
+    
     int status = i2c.write(ACT8600I2CAddress, (const char*)&regAddr, 1);
     if (status != 0)
     {
         act8600_i2c_en_Write(0);
+        debug("failed to read from act register (addr write)");
         return false;
     }
     
@@ -126,6 +185,7 @@ bool ACT8600PowerSystem::readRegister(int8_t regAddr, int8_t *regData)
     if (status != 0)
     {
         act8600_i2c_en_Write(0);
+        debug("failed to read value act register");
         return false;
     }
     
@@ -136,6 +196,7 @@ bool ACT8600PowerSystem::readRegister(int8_t regAddr, int8_t *regData)
 bool ACT8600PowerSystem::writeRegister(int8_t regAddr, int8_t regData)
 {
     act8600_i2c_en_Write(1);
+    CyDelayUs(10);
     int8_t data[2] = {regAddr, regData};
     bool success = i2c.write(ACT8600I2CAddress, (const char*)data, 2) == 0 ? true: false;
     act8600_i2c_en_Write(0);
