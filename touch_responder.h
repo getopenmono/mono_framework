@@ -15,7 +15,7 @@
 class ITouchSystem; //forwd decl
 
 namespace mono {
-    
+
     /**
      * The TouchResponder is an interface that classes and inherit from to
      * receive touch input events. This class also defined global static method
@@ -30,12 +30,12 @@ namespace mono {
      * * @ref RespondTouchMove
      * * @ref RespondTouchEnd
      *
-     * These methods are called on any subclass when touch input events are 
+     * These methods are called on any subclass when touch input events are
      * received. *Note* that your subclass will receive all incoming events not
      * handled by other responders.
      *
      * If you want to make touch enabled graphical elements, you should use the
-     * interface @ref ResponderView. This class is the parent class for all touch 
+     * interface @ref ResponderView. This class is the parent class for all touch
      * enabled views.
      *
      * @see ResponderView
@@ -44,43 +44,43 @@ namespace mono {
      */
     class TouchResponder : IQueueItem
     {
-        friend ITouchSystem;
+        friend class ITouchSystem;
     protected:
         static GenericQueue<TouchResponder> ResponderChain;
         static TouchResponder* FirstResponder();
-        
+
     public:
-        
+
         static void RunResponderChainTouchBegin(TouchEvent &event);
         static void RunResponderChainTouchEnd(TouchEvent &event);
         static void RunResponderChainTouchMove(TouchEvent &event);
-        
+
         /**
          * @brief Create a new responder object that receives touch input.
          *
-         * Upon creation, this object is automatically inserted into the 
+         * Upon creation, this object is automatically inserted into the
          * responder chain, to receive touch input events.
          *
          *
          */
         TouchResponder();
-        
+
         virtual void RespondTouchBegin(TouchEvent &event);
         virtual void RespondTouchMove(TouchEvent &event);
         virtual void RespondTouchEnd(TouchEvent &event);
-        
+
         /**
          * Add this responder to the responder chain
          *
          */
         void Activate();
-        
+
         /**
          * Remove this responder from the responder chain
          */
         void Deactivate();
     };
-    
+
 }
 
 #endif /* touch_responder_h */

@@ -17,11 +17,11 @@
 namespace mono {
     class IApplicationContext;
     namespace ui {
-    
+
         class Animator; // forward declaration
-        
+
     /**
-     * Abstract View class/interface. All UI view/widgets that paint to the 
+     * Abstract View class/interface. All UI view/widgets that paint to the
      * screen must inherit from this class. Views handle repaint queues, touch
      * inputs and painting to the display buffer automatically.
      *
@@ -29,7 +29,7 @@ namespace mono {
      * The coordinates define the upper left corner of the view rectangle.
      *
      * As a design pattern, we chose that Views must not contain any state. They
-     * only draw data to the display. Therefore view might contain or have 
+     * only draw data to the display. Therefore view might contain or have
      * references to object holding the actual state information.
      *
      * A TextLabel view
@@ -38,10 +38,10 @@ namespace mono {
      */
         class View : public IQueueItem
     {
-        friend mono::IApplicationContext;
-        friend Animator;
+        friend class mono::IApplicationContext;
+        friend class Animator;
     public:
-        
+
         /**
          * Define the 4 dirrerent orientations the of display. The display controller
          * apply the orientation transformation to real display. For the UI Views
@@ -56,52 +56,52 @@ namespace mono {
             LANDSCAPE_RIGHT = 2,/**< @ref PORTRAIT rotated 90 degrees clock-wise */
             LANDSCAPE_LEFT = 3  /**< @ref PORTRAIT rotated 90 degrees counter clock-wise */
         };
-        
+
         static display::Color StandardTextColor;
         static display::Color StandardBackgroundColor;
         static display::Color StandardBorderColor;
         static display::Color StandardHighlightColor;
-        
+
     protected:
-        
+
         /**
          * Global View painter object. Once the first View is included in the
          * code, this painter is initialized on the stack. Every view object uses
          * this painter to paint itself.
          *
-         * The painter is initialized with the display controller of the 
+         * The painter is initialized with the display controller of the
          * application context. If you want views to draw themselv on another
          * display, you musy subclass or change the current display controller
          * of the @ref mono::ApplicationContext object.
          */
         static display::DisplayPainter painter;
-        
-        
+
+
         /**
          * The rect defines the position and size of this view on the screen.
          * This defines where the view rectangles upper left corner is situated,
          * and the width and height in pixels.
          */
         geo::Rect viewRect;
-        
+
         /**
-         * @brief Indicate is this view should be repainted on next display 
+         * @brief Indicate is this view should be repainted on next display
          * refresh.
-         * 
+         *
          */
         bool isDirty;
-        
+
         /**
          * Views can be visible of non-visisble (hidden). When a view is *not*
          * visible @ref scheduleRepaint will ignore requests.
-         * 
+         *
          * You should use the methods @ref show and @ref hide is toggle visibility.
          * @see show
          * @see hide
          * @see Visible
          */
         bool visible;
-        
+
         /**
          * @brief The global re-paint queue.
          *
@@ -109,7 +109,7 @@ namespace mono {
          * the re-paint queue.
          */
         static GenericQueue<View> dirtyQueue;
-        
+
         /**
          * This class method will run through the scheduled re-paints queue and
          * call the @ref repaint method on all of them.
@@ -118,14 +118,14 @@ namespace mono {
          * need to call it yourself.
          */
         static void repaintScheduledViews();
-        
+
         /**
          * @brief A member method to call the static method @ref repaintScheduledViews
-         * 
+         *
          * @see repaintScheduledViews
          */
         void callRepaintScheduledViews();
-        
+
         /**
          * Re-paint the view content. This method should be called then the view
          * content has changed.
@@ -143,37 +143,37 @@ namespace mono {
          * @brief Repaint the view content, using the @ref View::painter
          */
         virtual void repaint() = 0;
-        
+
     public:
-        
-        
+
+
         /**
          * @brief The CPU time used to repaint the latest set of dirty views.
          * This measure includes both the painting algorithms and the transfer
          * time used to comminicate with the disdplay hardware.
          */
         static uint32_t RepaintScheduledViewsTime;
-        
-        
+
+
         /**
          *
-         * 
+         *
          */
         View();
-        
-        
+
+
         /**
          *
-         * 
+         *
          */
         View(geo::Rect rect);
-        
+
         /**
          *
-         * 
+         *
          */
         ~View();
-        
+
         /**
          * Changes the views position on the screen.
          * Note that changing the position does not implicitly redraw the view.
@@ -184,7 +184,7 @@ namespace mono {
          * @param pos The new position of the view
          */
         virtual void setPosition(geo::Point pos);
-        
+
         /**
          * Changes the views dimensions. The affect of size changes might depend
          * on the specefic view subclass. Some views might use their size to
@@ -198,7 +198,7 @@ namespace mono {
          * @param siz The new size of the view
          */
         virtual void setSize(geo::Size siz);
-        
+
         /**
          * Set the views position and size, by providing a rectangle object.
          *
@@ -208,33 +208,33 @@ namespace mono {
          * @param rect The view rectangle, containing size and position
          */
         virtual void setRect(geo::Rect rect);
-        
+
         /**
          * @brief Get the current position of the views upper left corner
          * @returns A reference to the current position
          */
         virtual geo::Point &Position();
-        
+
         /**
          * @brief Get the views current size rectangle
          * @returns A reference to the views size rectangle
          */
         virtual geo::Size &Size();
-        
+
         /**
-         * This method add the view to the display systems re-paint queue. The 
+         * This method add the view to the display systems re-paint queue. The
          * queue is executed right after a display refresh. This helps prevent
          * graphical artifacts, when running on a single display buffer system.
          *
-         * Because view has no state information, they do not know when to 
+         * Because view has no state information, they do not know when to
          * repaint themselves. You or classes using views, must manually call
          * this repaint method when its time to repaint the view.
          *
          * @brief Schedule this view for repaint at next display refresh
          */
         void scheduleRepaint();
-        
-        
+
+
         /**
          * Get the view visible state. Non-visible view are ignored by the method
          * @ref scheduleRepaint. You change the visibility state by using the
@@ -246,9 +246,9 @@ namespace mono {
          * @see hide
          */
         virtual bool Visible() const;
-        
+
         /**
-         * Change the views visibility state to visible. This means it can be 
+         * Change the views visibility state to visible. This means it can be
          * scheduled for repaint by @ref scheduleRepaint.
          * This method automatically schedules the view for repaint.
          *
@@ -257,7 +257,7 @@ namespace mono {
          * @see Visible
          */
         virtual void show();
-        
+
         /**
          * Change the views state to invisible. THis method will remove the view
          * from the @ref dirtyQueue, if it has already been scheduled for repaint.
@@ -270,30 +270,30 @@ namespace mono {
          * @see Visible
          */
         virtual void hide();
-        
+
         /**
          * Returns the horizontal (X-axis) width of the display canvas, in pixels.
          * The width is always defined as perpendicular to gravity
          */
         static uint16_t DisplayWidth();
-        
+
         /**
          * Returns the vertical (Y-axis) height of the display canvas, in pixels.
          * The height axis is meant to be parallel to the gravitational axis.
          */
         static uint16_t DisplayHeight();
-        
+
         static geo::Size DisplaySize();
-        
+
         /**
          * Returns the current physical display orientation of the display
          * The orientation is controlled by the @ref IDisplayController
          */
         static Orientation DisplayOrientation();
-        
+
     };
-    
-    
+
+
 } }
 
 #endif /* defined(__displaySimTest__view__) */

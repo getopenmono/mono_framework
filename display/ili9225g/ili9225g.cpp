@@ -39,13 +39,13 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
 void ILI9225G::init()
 {
     setBrightness(0);
-    
+
     Reset = 0;
-    
+
     wait_ms(50);
     Reset = 1; // active low
     wait_ms(50);
-    
+
     writeCommand(0xd0, 0x0003);
     writeCommand(0xeb, 0x0b00);
     writeCommand(0xec, 0x000f);
@@ -56,16 +56,16 @@ void ILI9225G::init()
     writeCommand(0x07, 0x0000);
     writeCommand(0x08, 0x0808);
     writeCommand(0x0F, 0x0601);
-    
+
     writeCommand(0x10, 0x0A00);
     writeCommand(0x11, 0x1B41);
-    
+
     wait_ms(50);
-    
+
     writeCommand(0x12, 0x200E);
     writeCommand(0x13, 0x0020);
     writeCommand(0x14, 0x4A5F);
-    
+
     writeCommand(0x30, 0x0000);
     writeCommand(0x31, 0x00DB);
     writeCommand(0x32, 0x0000);
@@ -76,7 +76,7 @@ void ILI9225G::init()
     writeCommand(0x37, 0x0000);
     writeCommand(0x38, 0x00DB);
     writeCommand(0x39, 0x0000);
-    
+
     writeCommand(0x50, 0x0000);
     writeCommand(0x51, 0x0803);
     writeCommand(0x52, 0x0C07);
@@ -87,31 +87,31 @@ void ILI9225G::init()
     writeCommand(0x57, 0x0105);
     writeCommand(0x58, 0x1100);
     writeCommand(0x59, 0x0011);
-    
-    writeCommand(0x20, 0x0000); 
-    writeCommand(0x21, 0x0000); 
-    
+
+    writeCommand(0x20, 0x0000);
+    writeCommand(0x21, 0x0000);
+
     wait_ms(50);
-    
+
     writeCommand(0x07, 0x1017);
     writeRegister(0x22);
-    
+
     RegisterSelect = 1;
-    
-    for (int i=0; i<176*20; i++) {
+
+    for (int i=0; i<176*0; i++) {
         this->write(WetAsphaltColor);
     }
-    
-    for (int i=20; i<176*200; i++) {
+
+    for (int i=20; i<176*220; i++) {
         this->write(CloudsColor);
     }
-    
+
     PWM_Start();
     setBrightness(128);
-    
+
     //tearingEffect.DeactivateUntilHandled();
     tearingEffect.rise<ILI9225G>(this, &ILI9225G::tearingEffectHandler);
-    
+
     tearingWatchdog.attach_us<ILI9225G>(this, &ILI9225G::tearingWatchdogHandler, 100000);
 }
 
@@ -130,7 +130,7 @@ void ILI9225G::setWindow(int x, int y, int width, int height)
     writeCommand(0x37, x);							//x start point
     writeCommand(0x38, y + height - 1); 					    //y end point
     writeCommand(0x39, y);	                        //y start point
-    
+
     // Set the initial value of address Counter
     writeCommand(0x20, x);
     writeCommand(0x21, y);
@@ -146,31 +146,31 @@ void ILI9225G::tearingEffectHandler()
 
 void ILI9225G::taskHandler()
 {
-    
+
     if (rebootDisplay)
     {
         Reset = 0;
         RegisterSelect = 0;
         IM0 = 0;
         SPI1_Stop();
-        
+
         power::ACT8600PowerSystem power;
         power.setPowerFencePeripherals(true);
         debug("power: %i\n\r", power.PowerFencePeriperals());
         CyDelay(1000);
         power.setPowerFencePeripherals(false);
-        
+
         IApplicationContext::SoftwareResetToApplication();
     }
-    
+
     if (!tearingInterruptPending)
         return;
-    
+
     if (refreshHandler != NULL)
     {
         refreshHandler->call();
     }
-    
+
     tearingInterruptPending = false;
 }
 
@@ -178,7 +178,7 @@ void ILI9225G::tearingWatchdogHandler()
 {
     watTime = us_ticker_read();
     teWat = LastTearningEffectTime;
-    
+
     if (watTime - LastTearningEffectTime > 100000)
         rebootDisplay = true;
 }
@@ -269,7 +269,7 @@ void ILI9225G::onSystemEnterSleep()
 //    writeCommand(0x11, 0x07);
 //    wait_ms(50);
 //    writeCommand(0x10, 0x0A01); // put controller into standby
-    
+
 }
 
 void ILI9225G::onSystemWakeFromSleep()
@@ -281,7 +281,7 @@ void ILI9225G::onSystemWakeFromSleep()
     SPI1_Wakeup();
     SPI1_Start();
     PWM_Wakeup();
-    
+
     init();
 }
 
