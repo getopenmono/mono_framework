@@ -1,10 +1,5 @@
-//
-//  display_painter.h
-//  displaySimTest
-//
-//  Created by Kristoffer Lyder Andersen on 28/06/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #ifndef __displaySimTest__display_painter__
 #define __displaySimTest__display_painter__
@@ -17,7 +12,7 @@
 #include "circle.h"
 
 namespace mono { namespace display {
-    
+
     /**
      * The DisplayPainter draws shapes on a display, using the
      * DisplayController interface.
@@ -26,13 +21,13 @@ namespace mono { namespace display {
      * from inside view only. The standard view class has a reference to
      * to an instance of this class.
      *
-     * The coordinate system used by the painter is the same as used by the 
+     * The coordinate system used by the painter is the same as used by the
      * display interface. This means all shape coords are relative to the display
-     * origo at the top left corner for the screen, when screen is in portrait 
+     * origo at the top left corner for the screen, when screen is in portrait
      * mode.
      *
      * A painter keeps track of an active foreground and background color. You
-     * can set new colors at any time, and the succeeding draw calls will paint 
+     * can set new colors at any time, and the succeeding draw calls will paint
      * in that color. The standard draw color is the active foreground color,
      * but some draw routines might use the background color also. An example
      * is the font drawing routines.
@@ -42,7 +37,7 @@ namespace mono { namespace display {
      * @ref drawRect and @ref drawEllipse, the line width used is the currently
      * active line width property of the painter object.
      *
-     * When painting text characters the character size is dependend on the 
+     * When painting text characters the character size is dependend on the
      * textsize property. Text painting is not affected by the current line width.
      *
      */
@@ -50,30 +45,30 @@ namespace mono { namespace display {
     {
     protected:
         IDisplayController *displayCtrl;
-        
+
         Color foregroundColor, backgroundColor;
         uint8_t lineWidth, textSize;
-        
+
         static const unsigned char font[];
-        
+
         /**
          * Inline swap of two numbers.
          */
         void swap(uint16_t &a, uint16_t &b);
-        
+
         int16_t abs(int16_t a);
-        
+
         /**
          * Handler for the DisplayControllers action queue, that gets triggered
          * when the display refreshes.
          *
-         * This handler is normally used by the first @ref View that gets 
+         * This handler is normally used by the first @ref View that gets
          * contructed, to enable the re-paint queue.
          */
         mbed::FunctionPointer displayRefreshHandler;
-        
+
     public:
-        
+
         /**
          * Construct a new painter object that are attached to a display.
          * A painter object is automatically initialized by the view/UI system
@@ -84,13 +79,13 @@ namespace mono { namespace display {
          * @param displayController A pointer to the display controller of the active display
          */
         DisplayPainter(IDisplayController *displayController);
-        
+
         ~DisplayPainter();
-        
+
         /**
          * Set the Painters display refresh callback handler. The display refreshes
          * the screen at a regular interval. To avoid graphical artifacts, you
-         * should restrict your paint calls to right after this callback gets 
+         * should restrict your paint calls to right after this callback gets
          * triggered.
          *
          * The default View painter already has a callback installed, that triggers
@@ -110,18 +105,18 @@ namespace mono { namespace display {
         {
             this->displayRefreshHandler.attach(function);
         }
-        
+
         void setForegroundColor(Color color);
-        
+
         void setBackgroundColor(Color color);
-        
-        
+
+
         uint8_t LineWidth() const;
         void setLineWidth(uint8_t w);
-        
+
         uint8_t TextSize() const;
         void setTextSize(uint8_t size);
-        
+
         /**
          * Get the canvas width in pixels. This is the display display width as
          * well.
@@ -129,7 +124,7 @@ namespace mono { namespace display {
          * @returns The canvas/display width in pixels
          */
         uint16_t CanvasWidth() const;
-        
+
         /**
          * Get the canvas height in pixels. This is the display display height as
          * well.
@@ -137,7 +132,7 @@ namespace mono { namespace display {
          * @returns The canvas/display height in pixels
          */
         uint16_t CanvasHeight() const;
-        
+
         /**
          * Get a pointer to the painters current display controller
          * You can use this method to obtain the display controller interface
@@ -146,11 +141,11 @@ namespace mono { namespace display {
          * @returns A pointer to an object implementing the @ref IDisplayController interface
          */
         IDisplayController* DisplayController() const;
-        
+
         /**
          * Draw a single pixel on a specific position on the display.
          *
-         * The pixel will be the active foreground color, unless you set the 
+         * The pixel will be the active foreground color, unless you set the
          * third parameter to true.
          *
          * @param x The X-coordinate
@@ -158,8 +153,8 @@ namespace mono { namespace display {
          * @param background Optional: Set to true to paint with active background color.
          */
         void drawPixel(uint16_t x, uint16_t y, bool background = false);
-        void drawPixel(geo::Point &pos, bool background = false);
-        
+        void drawPixel(geo::Point const &pos, bool background = false);
+
         /**
          * Paints a filled rectangle in the actuive foreground color. Coordinates
          * a defining the point of the rectangles upper left corner and are given
@@ -173,8 +168,8 @@ namespace mono { namespace display {
          * @param background Optional: Set to `true` to paint in active background color
          */
         void drawFillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool background = false);
-        void drawFillRect(geo::Rect &rct, bool background = false);
-        
+        void drawFillRect(geo::Rect const &rct, bool background = false);
+
         /**
          * Draw a line on the display. The line is defined by its two end points.
          * End point coordinates are in absolute screen coordinates.
@@ -193,8 +188,8 @@ namespace mono { namespace display {
          * @param background Optional: Set this to `true` to paint in active background color
          */
         void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, bool background = false);
-        void drawLine(geo::Point &from, geo::Point &to, bool background = false);
-        
+        void drawLine(geo::Point const &from, geo::Point const &to, bool background = false);
+
         /**
          * Draw an outlined rectangle with the current line width and the active
          * color.
@@ -207,19 +202,19 @@ namespace mono { namespace display {
          * @param background Optional: Set this to `true` to paint in active background color
          */
         void drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool background = false);
-        void drawRect(geo::Rect &rct, bool background = false);
-        
+        void drawRect(geo::Rect const &rct, bool background = false);
+
         /**
-         * Paint a single ASCII character on the display. Characters are always 
-         * painted in the foreground color, with the background color as 
+         * Paint a single ASCII character on the display. Characters are always
+         * painted in the foreground color, with the background color as
          * background fill.
          *
          * The character is painted in the currently selected text size. The text
          * is a monospaced font, width a minimum size of (5,3) per character.
-         * The origo of a character is the upper left corner of the (5,3) 
+         * The origo of a character is the upper left corner of the (5,3)
          * rectangle.
          *
-         * If you want write text on the screen, you should use the TextLabel 
+         * If you want write text on the screen, you should use the TextLabel
          * view, or the Console view.
          *
          * @brief Draw a single character on the display
@@ -228,7 +223,7 @@ namespace mono { namespace display {
          * @param character The text character to draw
          */
         void drawChar(uint16_t x, uint16_t y, char character);
-        
+
         /**
          * Helper function to draw a vertical line very fast. This method uses
          * much less communication with the display.
@@ -241,7 +236,7 @@ namespace mono { namespace display {
          * @param background Optional: Set this to `true` to paint in active background color
          */
         void drawVLine(uint16_t x, uint16_t y1, uint16_t y2, bool background = false);
-        
+
         /**
          * Helper function to draw a horizontal line very fast. This method uses
          * much less communication with the display.
@@ -254,21 +249,21 @@ namespace mono { namespace display {
          * @param background Optional: Set this to `true` to paint in active background color
          */
         void drawHLine(uint16_t x1, uint16_t x2, uint16_t y, bool background = false);
-        
-        
+
+
         /**
          * @brief Paint an outlined circle
-         * 
+         *
          */
         void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, bool background = false);
-        void drawCircle(geo::Circle &circle, bool background = false);
-        
+        void drawCircle(geo::Circle const &circle, bool background = false);
+
         void drawFillCircle(uint16_t x0, uint16_t y0, uint16_t r, bool background = false);
-        void drawFillCircle(geo::Circle &circle, bool background = false);
-        
+        void drawFillCircle(geo::Circle const &circle, bool background = false);
+
         void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, bool background = false);
     };
-    
+
 } }
 
 #endif /* defined(__displaySimTest__display_painter__) */

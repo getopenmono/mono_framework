@@ -1,36 +1,36 @@
 # Mono Framework
-This is the Mono framework, for developing mono applications. It is simple and easy to use, and provide methods for the most common tasks.
+This is the Mono framework, for developing mono applications. It is designed to be simple and easy to use, and provide methods for the most common tasks.
 
 # Overview
-The framework consists of highlevel classes and interfaces to inteact with hardware or to process data. The classes can be divided into these main categories:
+The framework consists of highlevel classes and interfaces to interact with hardware or to process data. The classes can be divided into these main categories:
 
- * **Display UI Widgets** (TextLabels, Buttons, Progressbars or draw shapes)
+ * **Display UI Widgets** (Text labels, Buttons, Progressbars or draw shapes)
  * **Touch Input** (Responders chain, raw touch events)
  * **Accelerometer** Interface API
  * **Thermometer** Interface API
- * **Power Management** Battery low notifcation and sleep / wake notifications
+ * **Power Management** Battery, sleep & wake notifications
  * **Wifi** Access Point setup
  * **HTTP Client** Fetch content from web servers
- * **Regular Expressions** lightweight regex with capture groups
+ * **Regular Expressions** Lightweight regex with capture groups
  * **File I/O** Posix like filesystem I/O (`fprintf`, `fread` & `fwrite`)
  * **Geometry Calculus** Classes to manipalte geometric shapes
  * **Interrupts & Timers** Receive callback notifications on H/W interrupts or timers
  * **USB Serial Console** Use *`printf` and `scanf` via the USB UART
  * **Image Decoding** Read images from SD Card
- 
-Are you looking for low level I/O like I<sup>2</sup>C, SPI, GPIO etc? We use [mbed](https://developer.mbed.org/handbook/Homepage#using-mbed-libraries) as the foundation, and you also have access to mbed. The mbed API's are included in the mono framework.
+
+Are you looking for low level I/O like I<sup>2</sup>C, SPI, GPIO etc? We use [mbed](https://developer.mbed.org/handbook/Homepage#using-mbed-libraries) as the foundation, and this framework also gives you access to mbed. The mbed APIs are included in the mono framework.
 
 ## Application Structure
 The framework basic application structure consists of 3 classes:
 
- * _The Application Controller_: A class that you create, that is the entry point for the application. We expect the _AppController_ to handle crucial system wide events, like power and standby operations.
- * _The main.cpp file_: The classic entry point for C++ applications. The `main` function must create the AppController and start the application run loop, just like Qt applications do.
+ * _The Application Controller_: A class that is the entry point for the application. We expect the _AppController_ to handle crucial system wide events, like power and standby operations. You need to create this class.
+ * _The main.cpp file_: The classic entry point for C++ applications. The `main` function must create the AppController and start the application run loop, just like eg. Qt applications do.
  * _The Application Context_: This is a singleton class that is automatically instantiated in the global context. The _AppContext_ holds references to the hardware controller; like the display, power system and wireless module.
 
-By using these 3 classes we can hide many initialization steps from your code. To draw graphics on the display, you just need to create a _View_ and that it! The _AppContext_ takes care of initializing the display system.
+By using these 3 classes we can hide many initialization steps from your code. To draw graphics on the display, you just need to create a _View_ and that is it! The _AppContext_ takes care of initializing the display system.
 
 ## Display System
-The mono display system consist of 3 abstractions:
+The mono display system consists of 3 abstractions:
 
 * _The Display Controller Interface_: A generic interface for communication with the display chip. This interface uses either SPI or parallel communication, and send commands to the display chip.
 * _The Display Painter_: The painter class can send drawing commands to a display interface. It emits pixels from basic drawing commands like rect, lines and text glyphs.
@@ -57,7 +57,7 @@ Work has begun on making a easy way of getting mono into and out of sleep mode. 
 * * mbed layer
 * * Cypress / MCU layer
 * Mono for Arduino Developers
-* Coding for bare metal! 
+* Coding for bare metal!
 * In-Depth: Mono Framework Startup / Boot procedures
 * In-Depth: Callbacks and interrupts
 * In-Depth: Display System and Touch input

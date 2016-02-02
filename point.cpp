@@ -1,13 +1,7 @@
-//
-//  point.cpp
-//  displaySimTest
-//
-//  Created by Kristoffer Lyder Andersen on 11/07/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #include "point.h"
-
 #include <math.h>
 
 using namespace mono::geo;
@@ -66,7 +60,7 @@ void Point::appendY(int addY)
     this->y += addY;
 }
 
-uint32_t Point::Abs()
+uint32_t Point::Abs() const
 {
     return sqrtf(powf(this->x, 2)+powf(this->y, 2));
 }
