@@ -15,7 +15,6 @@ using namespace mono::power;
 
 ACT8600PowerSystem::ACT8600PowerSystem() : i2c(NC, NC)
 {
-    
 }
 
 uint8_t ACT8600PowerSystem::SystemStatus()
