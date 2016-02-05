@@ -20,6 +20,16 @@ namespace mono { namespace sensor {
          * @return the temperature in celcius (integers)
          */
         virtual int Read() = 0;
+
+        /**
+         * @brief Reads the temperature in fixed point milli-celcius
+         * 
+         * To get a higher precision output, this method will return millicelcius
+         * such that: 22,5 celcius == 22500 mCelcius
+         *
+         * @return The temperature in mCelcius
+         */
+        virtual int ReadMilliCelcius() {return Read() * 1000; }
         
     };
     

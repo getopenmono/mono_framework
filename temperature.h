@@ -9,10 +9,11 @@
 #ifndef temperature_h
 #define temperature_h
 
-#include "pct2075_temperature.h"
+#include "at30ts74_temperature.h"
 
 namespace mono { namespace sensor {
-    static const PCT2075Temperature tcp2045Sensor;
+    static AT30TS74Temperature at30ts74Sensor;
+    //ITemperature *Temperature = &at30ts74Sensor;
 } }
 
 #endif /* temperature_h */

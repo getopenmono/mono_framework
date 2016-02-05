@@ -26,14 +26,21 @@ ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoo
     UserButton(SW_USER, PullUp)
 {
     //enable SWD / JTAG debug, by turning on VTARG/VSYS voltage in expansion connector
-    CyPins_SetPinDriveMode(EXPANSION_PWR_ENABLE, CY_PINS_DM_STRONG);
-    CyPins_SetPin(EXPANSION_PWR_ENABLE);
+//    CyPins_SetPinDriveMode(EXPANSION_PWR_ENABLE, CY_PINS_DM_STRONG);
+//    CyPins_SetPin(EXPANSION_PWR_ENABLE);
     
-    
+    // BEEP
     PWM_Start();
     PWM_WriteCompare2(0);
     PWM_WriteCompare1(0);
     
+    for (int i=10; i<100; i+=12) {
+        PWM_WriteCompare2(i);
+        CyDelay(30);
+    }
+    PWM_WriteCompare2(0);
+    
+    defaultSerial.printf("");
 }
 
 int ApplicationContext::exec()
