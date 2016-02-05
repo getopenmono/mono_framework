@@ -1,10 +1,5 @@
-//
-//  ili9225g.hpp
-//  mono
-//
-//  Created by Kristoffer Andersen on 21/09/15.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef ili9225g_h
 #define ili9225g_h
@@ -14,6 +9,7 @@
 #include "queue_interrupt.h"
 #include "mn_timer.h"
 #include <power_aware_interface.h>
+#include "power_fenced_peripheral_interface.h"
 #include "mn_digital_out.h"
 #include <mbed.h>
 
@@ -43,7 +39,6 @@ namespace mono { namespace display {
         void writeRegister(uint16_t regData);
         
         void writeCommand(uint16_t regData, uint16_t data);
-        
         
         /// Power awareness protocol
         

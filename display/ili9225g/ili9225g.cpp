@@ -1,10 +1,5 @@
-//
-//  ili9225g.cpp
-//  scrTest
-//
-//  Created by Kristoffer Andersen on 21/09/15.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +14,8 @@ extern "C" {
 #include <application_context_interface.h>
 #include "act8600_power_system.h"
 
+#include "../ui/view.h"
+
 using namespace mono::display;
 
 ILI9225G::ILI9225G() : IDisplayController(176,220),
@@ -29,15 +26,21 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
     tearingEffect(TFT_TEARING_EFFECT),
     curWindow(0,0,ScreenWidth(), ScreenHeight())
 {
+
     tearingEffect.mode(PullNone);
     tearingInterruptPending = false;
     rebootDisplay = false;
+
     IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
     IApplicationContext::Instance->RunLoop->addDynamicTask(this);
 }
 
 void ILI9225G::init()
 {
+    // set IM0 high
+    CyPins_SetPinDriveMode(CYREG_PRT6_PC0, CY_PINS_DM_RES_UP);
+    CyPins_SetPin(CYREG_PRT6_PC0);
+
     setBrightness(0);
 
     Reset = 0;
@@ -98,13 +101,13 @@ void ILI9225G::init()
 
     RegisterSelect = 1;
 
-    for (int i=0; i<176*0; i++) {
-        this->write(WetAsphaltColor);
-    }
+    int start = us_ticker_read();
 
-    for (int i=20; i<176*220; i++) {
-        this->write(CloudsColor);
+    for (int i=0; i<176*220; i++) {
+        this->write(ui::View::StandardBackgroundColor);
     }
+    int end = us_ticker_read();
+    debug("\n\rdisplay full paint time: %i\n\r",end-start);
 
     PWM_Start();
     setBrightness(128);
@@ -149,38 +152,83 @@ void ILI9225G::taskHandler()
 
     if (rebootDisplay)
     {
+        PWM_WriteCompare2(64);
+        CyDelay(200);
+        PWM_WriteCompare2(0);
+        CyDelay(200);
+        
+        for (int i=0; i<4; i++) {
+            PWM_WriteCompare2(64);
+            CyDelay(600);
+            PWM_WriteCompare2(0);
+            CyDelay(200);
+        }
+        
+        
         Reset = 0;
         RegisterSelect = 0;
         IM0 = 0;
         SPI1_Stop();
-
+        
+        // power chip IRQ line might be high
+        
+        
+        //SCL: PRT2 PC2
+        //SDA: PRT12 PC5
         power::ACT8600PowerSystem power;
         power.setPowerFencePeripherals(true);
         debug("power: %i\n\r", power.PowerFencePeriperals());
-        CyDelay(1000);
+        
+        CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_STRONG);
+        CyPins_ClearPin(CYREG_PRT5_PC2);
+        
+        CyPins_SetPinDriveMode(RP_nRESET, CY_PINS_DM_OD_LO);
+        CyPins_ClearPin(RP_nRESET);
+        
+        uint8_t sda = CY_GET_REG8(CYREG_PRT12_BYP);
+        CY_SET_REG8(CYREG_PRT12_BYP, sda & ~0x20);
+        uint8_t scl = CY_GET_REG8(CYREG_PRT2_BYP);
+        CY_SET_REG8(CYREG_PRT2_PC2, scl & ~0x04);
+        
+        CyPins_SetPinDriveMode(CYREG_PRT2_PC2, CY_PINS_DM_OD_LO);
+        CyPins_ClearPin(CYREG_PRT2_PC2);
+        
+        CyPins_SetPinDriveMode(CYREG_PRT12_PC5, CY_PINS_DM_OD_LO);
+        CyPins_ClearPin(CYREG_PRT12_PC5);
+        
+        CyDelay(500);
+        
+        // power chip IRQ line
+        CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_DIG_HIZ);
+        
+        CY_SET_REG8(CYREG_PRT12_BYP, sda);
+        CY_SET_REG8(CYREG_PRT2_BYP, scl);
+        
+        
         power.setPowerFencePeripherals(false);
-
-        IApplicationContext::SoftwareResetToApplication();
+        
+        //IApplicationContext::SoftwareResetToApplication();
     }
-
-    if (!tearingInterruptPending)
-        return;
-
-    if (refreshHandler != NULL)
+    
+    if ((tearingInterruptPending && refreshHandler))
     {
         refreshHandler->call();
+        tearingInterruptPending = false;
     }
 
-    tearingInterruptPending = false;
 }
 
 void ILI9225G::tearingWatchdogHandler()
 {
     watTime = us_ticker_read();
     teWat = LastTearningEffectTime;
+    
+    return;
 
     if (watTime - LastTearningEffectTime > 100000)
+    {
         rebootDisplay = true;
+    }
 }
 
 uint16_t ILI9225G::ScreenWidth() const
@@ -218,6 +266,7 @@ void ILI9225G::write(Color pixelColor)
 
 void ILI9225G::writeData(uint16_t data)
 {
+
     RegisterSelect = 1;
     SPI1_WriteTxData(*(((uint8_t*)&data)+1));
     SPI1_WriteTxData(data);
@@ -260,7 +309,7 @@ void ILI9225G::onSystemPowerOnReset()
 
 void ILI9225G::onSystemEnterSleep()
 {
-    PWM_Sleep();
+//    PWM_Sleep();
     SPI1_Stop();
     SPI1_Sleep();
     //CyPins_ClearPin(TFT_LED_PWR);
@@ -280,8 +329,8 @@ void ILI9225G::onSystemWakeFromSleep()
 //
     SPI1_Wakeup();
     SPI1_Start();
-    PWM_Wakeup();
-
+//    PWM_Wakeup();
+    
     init();
 }
 
