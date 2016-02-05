@@ -42,6 +42,7 @@
 #include <display/ui/touch_calibrator.h>
 #include <display/ui/progress_bar_view.h>
 #include <display/ui/status_indicator_view.h>
+#include <display/ui/graph_view.h>
 
 #include <media/image.h>
 #include <media/bmp_image.h>
