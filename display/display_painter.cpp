@@ -68,6 +68,8 @@ IDisplayController* DisplayPainter::DisplayController() const
     return displayCtrl;
 }
 
+// MARK: Draw methods
+
 void DisplayPainter::drawPixel(uint16_t x, uint16_t y, bool bg)
 {
     displayCtrl->setWindow(x, y, 1, 1);
@@ -97,8 +99,10 @@ void DisplayPainter::drawFillRect(uint16_t x, uint16_t y, uint16_t width, uint16
     displayCtrl->setWindow(x, y, width, height);
     //displayCtrl->setCursor(x, y);
 
-    for (int i=0; i<width*height; i++) {
-        displayCtrl->write(bg ? backgroundColor : foregroundColor);
+    Color color = bg ? backgroundColor : foregroundColor;
+    uint32_t size = width*height;
+    for (uint32_t i=0; i<size; i++) {
+        displayCtrl->write(color);
     }
 }
 
