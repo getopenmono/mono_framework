@@ -1,10 +1,5 @@
-//
-//  button_view.h
-//  analog
-//
-//  Created by Kristoffer Andersen on 06/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #ifndef button_view_h
 #define button_view_h

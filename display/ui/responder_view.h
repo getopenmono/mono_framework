@@ -1,10 +1,5 @@
-//
-//  responder_view.h
-//  mono framework
-//
-//  Created by Kristoffer Andersen on 06/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #ifndef responder_view_h
 #define responder_view_h

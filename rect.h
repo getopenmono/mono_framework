@@ -1,10 +1,5 @@
-//
-//  rect.h
-//  displaySimTest
-//
-//  Created by Kristoffer Lyder Andersen on 13/09/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #ifndef __displaySimTest__rect__
 #define __displaySimTest__rect__
