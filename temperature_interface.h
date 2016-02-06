@@ -1,16 +1,27 @@
-//
-//  temperature_interface.h
-//  tempTest
-//
-//  Created by Kristoffer Andersen on 30/11/2015.
-//  Copyright © 2015 your name. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef temperature_interface_h
 #define temperature_interface_h
 
 namespace mono { namespace sensor {
     
+    /**
+     * @brief Abstract Interface for temperature sensors
+     * 
+     * Hardware temperature sensor software used in Mono used subclass this 
+     * interface. When you interact with temperature, this interface create a 
+     * hardware independent abstraction layer.
+     *
+     * To access the temperature sensor, use the global object:
+     *
+     * @code
+     *  ITemperature *mono::sensor::Temperature
+     * @endcode
+     *
+     * This object is automatically initialized by the @ref IApplicationContext
+     * and the current `ITemperature` subclass.
+     */
     class ITemperature
     {
     public:
