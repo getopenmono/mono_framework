@@ -96,6 +96,14 @@ namespace mono {
     public:
         
         /**
+         * @brief Contruct an empty (zero-timeout) re-occurring timer
+         *
+         * After calling this contructor, you must set the time out and
+         * callback function. Then start the timer.
+         */
+        Timer();
+        
+        /**
          * @brief Create a new timer with with an interval or timeout time.
          *
          * All newly created timers are stopped as default. You must also attach

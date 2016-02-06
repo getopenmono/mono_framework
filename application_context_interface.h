@@ -1,10 +1,5 @@
-//
-//  application_context.h
-//  displaySimTest
-//
-//  Created by Kristoffer Lyder Andersen on 11/07/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef displaySimTest_application_context_h
 #define displaySimTest_application_context_h
@@ -40,6 +35,8 @@ namespace mono {
     class IApplicationContext
     {
     protected:
+        
+        // MARK: Abstract Protected Methods
         
         /**
          * Subclasses should overirde this method to make the sysetm goto sleep
@@ -77,6 +74,8 @@ namespace mono {
          */
         virtual void _softwareResetToBootloader() = 0;
         
+        // MARK: Protected Constructor
+        
         /**
          * Protected constructor that must be called by the sub class. It sets up
          * needed pointers for the required subsystems. This ensure the pointers
@@ -85,13 +84,28 @@ namespace mono {
          * If this contructor did not setup the pointers, the PowerManagement
          * constructor would see the @ref Instance global equal `null`.
          */
-        IApplicationContext(power::IPowerManagement *pwr, AppRunLoop *runLp, display::IDisplayController *dispCtrl, ITouchSystem *tchSys, QueueInterrupt *userBtn) : PowerManager(pwr), RunLoop(runLp), DisplayController(dispCtrl), TouchSystem(tchSys), UserButton(userBtn), Accelerometer(NULL), Temperature(NULL)
+        IApplicationContext(power::IPowerManagement *pwr,
+                            AppRunLoop *runLp,
+                            display::IDisplayController *dispCtrl,
+                            ITouchSystem *tchSys,
+                            QueueInterrupt *userBtn,
+                            sensor::ITemperature *temp = 0,
+                            sensor::IAccelerometer *accel = 0
+                            ) :
+            PowerManager(pwr),
+            RunLoop(runLp),
+            DisplayController(dispCtrl),
+            TouchSystem(tchSys),
+            UserButton(userBtn),
+            Temperature(temp),
+            Accelerometer(accel)
         {
             IApplicationContext::Instance = this;
         }
         
     public:
         
+        // MARK: Public Properties
         
         /**
          * Pointer to the global power management object, that controls power
@@ -164,17 +178,13 @@ namespace mono {
         QueueInterrupt *UserButton;
         
         
-        /**
-         *
-         * 
-         */
+        sensor::ITemperature *Temperature;
+        
+        
         sensor::IAccelerometer *Accelerometer;
         
-        /**
-         *
-         * 
-         */
-        sensor::ITemperature *Temperature;
+        
+        // MARK: Public Methods
         
         /**
          * This method starts the global run/event loop for the mono application.
@@ -201,6 +211,8 @@ namespace mono {
 //        {
 //            IApplicationContext::Instance->setMonoApplication(&app);
 //        }
+        
+        // MARK: Static Public Methods
         
         /**
          * Call this method to make mono goto sleep.
@@ -269,6 +281,8 @@ namespace mono {
          * (by the reset button) or program mono using monoprog.**
          */
         static void SoftwareResetToBootloader() __attribute__((noreturn)) { IApplicationContext::Instance->_softwareResetToBootloader(); }
+        
+        // MARK: Static Public Properties
         
         /** Get a pointer to the global application context */
         static IApplicationContext* Instance;

@@ -18,7 +18,6 @@ using namespace mono::sensor;
 MMAAccelerometer::MMAAccelerometer()
 {
     I2C_Start();
-    defaultSerial.printf("");
 }
 
 

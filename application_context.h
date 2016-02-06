@@ -1,20 +1,18 @@
-//
-//  application_context.h
-//  mono
-//
-//  Created by Kristoffer Andersen on 13/07/15.
-//  Copyright (c) 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef __mono__application_context__
 #define __mono__application_context__
 
-#include <application_context_interface.h>
+#include "application_context_interface.h"
 
 #include "display/ili9225g/ili9225g.h"
-#include "mono_touch_system.h"
+#include "at30ts74_temperature.h"
+#include "mono_accelerometer.h"
 
-#include <application_run_loop.h>
+#include "mono_touch_system.h"
+#include "mono_settings.h"
+#include "application_run_loop.h"
 #include "mono_power_management.h"
 
 
@@ -34,9 +32,13 @@ namespace mono {
         //Depends on PowerMgmt
         mono::display::ILI9225G dispController;
         MonoTouchSystem touchSys;
-		
-        QueueInterrupt UserButton;
+        sensor::AT30TS74Temperature at30ts64Sensor;
+        sensor::MMAAccelerometer mmaAccelerometer;
         
+        QueueInterrupt UserButton;
+
+        io::MonoSettings settings;
+
         ApplicationContext();
         
         void enterSleepMode();
@@ -49,8 +51,6 @@ namespace mono {
         void _softwareResetToApplication() __attribute((noreturn));
         
     public:
-        
-        
         
         int exec();
         

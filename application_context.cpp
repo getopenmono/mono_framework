@@ -1,10 +1,5 @@
-//
-//  application_context.cpp
-//  usbtest
-//
-//  Created by Kristoffer Andersen on 13/07/15.
-//  Copyright (c) 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "application_context.h"
 #include "application_controller_interface.h"
@@ -22,8 +17,17 @@ using namespace mono;
 ApplicationContext ApplicationContext::singleton;
 IApplicationContext *IApplicationContext::Instance = NULL; //&(ApplicationContext::singleton);
 
-ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoop, &dispController, &touchSys, &UserButton), dispController(),
-    UserButton(SW_USER, PullUp)
+ApplicationContext::ApplicationContext() : IApplicationContext(
+                                                               &pwrMgmt,
+                                                               &runLoop,
+                                                               &dispController,
+                                                               &touchSys,
+                                                               &UserButton,
+                                                               &at30ts64Sensor,
+                                                               &mmaAccelerometer),
+
+                                            dispController(),
+                                            UserButton(SW_USER, PullUp)
 {
     //enable SWD / JTAG debug, by turning on VTARG/VSYS voltage in expansion connector
 //    CyPins_SetPinDriveMode(EXPANSION_PWR_ENABLE, CY_PINS_DM_STRONG);
@@ -41,6 +45,11 @@ ApplicationContext::ApplicationContext() : IApplicationContext(&pwrMgmt, &runLoo
     PWM_WriteCompare2(0);
     
     defaultSerial.printf("");
+    
+    sensor::Temperature = &this->at30ts64Sensor;
+    
+    defaultSerial.printf("\n\r");
+    defaultSerial.printf("sens temp: 0x%x, obj addr: 0x%x\n\r",sensor::Temperature,&at30ts64Sensor);
 }
 
 int ApplicationContext::exec()

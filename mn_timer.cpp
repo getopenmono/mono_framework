@@ -1,17 +1,22 @@
-//
-//  mn_timer.cpp
-//  mono framework
-//
-//  Created by Kristoffer Andersen on 16/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #include "mn_timer.h"
 #include "application_context_interface.h"
-#include "consoles.h"
 
 using namespace mono;
 
+// MARK: Public Constructors
+
+Timer::Timer()
+{
+    singleShot = false; // the is the proterty of the run loop task
+    running = false;
+    timerSingleShot = false;
+    interruptDidFire = false;
+    interval = 0;
+    autoRelease = false;
+}
 
 Timer::Timer(uint32_t intervalMs, bool snglShot)
 {
@@ -27,6 +32,8 @@ Timer::Timer(uint32_t intervalMs, bool snglShot)
 Timer::Timer(const Timer &timer) {}
 
 Timer& Timer::operator=(const mono::Timer &timer) { return *this; }
+
+// MARK: Public Methods
 
 void Timer::Start()
 {
@@ -71,6 +78,8 @@ void Timer::setInterval(uint32_t newIntervalMs)
     else
         interval = newIntervalMs;
 }
+
+// MARK: Internal Methods
 
 void Timer::taskHandler()
 {

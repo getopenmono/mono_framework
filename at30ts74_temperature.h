@@ -1,10 +1,5 @@
-//
-//  at30ts74_temperature.hpp
-//  tempTest
-//
-//  Created by Kristoffer Andersen on 26/01/2016.
-//  Copyright © 2016 your name. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef at30ts74_temperature_h
 #define at30ts74_temperature_h
