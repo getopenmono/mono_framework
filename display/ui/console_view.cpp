@@ -1,10 +1,5 @@
-//
-//  console_view.cpp
-//  displaySimTest
-//
-//  Created by Kristoffer Andersen on 10/07/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "console_view.h"
 

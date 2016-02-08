@@ -1,10 +1,5 @@
-//
-//  act8600_power_system.cpp
-//  mono
-//
-//  Created by Kristoffer Andersen on 08/09/15.
-//  Copyright (c) 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "act8600_power_system.h"
 #include <mono.h>

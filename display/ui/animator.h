@@ -1,19 +1,17 @@
-//
-//  animator.h
-//  displaySimTest
-//
-//  Created by Kristoffer Lyder Andersen on 11/09/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
-#ifndef __displaySimTest__animator__
-#define __displaySimTest__animator__
+#ifndef __mono_ui_animator__
+#define __mono_ui_animator__
 
 #include "view.h"
 #include "../../application_run_loop_task_interface.h"
 
 namespace mono { namespace ui {
     
+    /**
+     * @deprecated
+     */
     class Animator : public IRunLoopTask
     {
     protected:
@@ -51,4 +49,4 @@ namespace mono { namespace ui {
     
 } }
 
-#endif /* defined(__displaySimTest__animator__) */
+#endif /* defined(__mono_ui_animator__) */

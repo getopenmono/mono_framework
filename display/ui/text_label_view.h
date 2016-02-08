@@ -1,10 +1,5 @@
-//
-//  text_label_view.h
-//  mono
-//
-//  Created by Kristoffer Andersen on 14/09/15.
-//  Copyright (c) 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef __mono__text_label_view__
 #define __mono__text_label_view__

@@ -1,13 +1,8 @@
-//
-//  view.h
-//  displaySimTest
-//
-//  Created by Kristoffer Andersen on 10/07/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
-#ifndef __displaySimTest__view__
-#define __displaySimTest__view__
+#ifndef __mono_ui__view__
+#define __mono_ui__view__
 
 #include <display_painter.h>
 #include <rect.h>
@@ -21,6 +16,8 @@ namespace mono {
         class Animator; // forward declaration
 
     /**
+     * @brief Abstract interface for all UI Views, parent class for all views
+     *
      * Abstract View class/interface. All UI view/widgets that paint to the
      * screen must inherit from this class. Views handle repaint queues, touch
      * inputs and painting to the display buffer automatically.
@@ -30,11 +27,15 @@ namespace mono {
      *
      * As a design pattern, we chose that Views must not contain any state. They
      * only draw data to the display. Therefore view might contain or have
-     * references to object holding the actual state information.
+     * references to objects holding the actual state information.
      *
-     * A TextLabel view
+     * The some simple views, like @ref TextLabelView, are exceptions to this 
+     * rule, since it is highly convenient to let them hold some state. (Like
+     * text content.)
      *
      * @TODO Something on dependence of AppContext and Appctrl design pattern
+     *
+     * @see ResponderView
      */
         class View : public IQueueItem
     {
@@ -156,22 +157,18 @@ namespace mono {
 
 
         /**
-         *
-         *
+         * @brief Construct an empty view, you should not do this!
+         * You should not use View directly, subclass it instead
          */
         View();
 
 
         /**
-         *
-         *
+         * @brief Construct a view with dimensions, you should not do this!
+         * You should not use View directly, subclass it instead
          */
         View(geo::Rect rect);
 
-        /**
-         *
-         *
-         */
         ~View();
 
         /**
@@ -296,4 +293,4 @@ namespace mono {
 
 } }
 
-#endif /* defined(__displaySimTest__view__) */
+#endif /* defined(__mono_ui__view__) */

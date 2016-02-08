@@ -1,10 +1,5 @@
-//
-//  status_indicator_view.h
-//
-//
-//  Created by Kristoffer Andersen on 07/12/2015.
-//  Copyright © 2015 your name. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef status_indicator_view_h
 #define status_indicator_view_h
@@ -13,6 +8,13 @@
 
 namespace mono { namespace ui {
     
+    /**
+     * @brief Indicate a boolean status, true/false, on/off or red/green
+     *
+     * The status indicator displays a circular LED like widget, that is red or
+     * green by default.
+     *
+     */
     class StatusIndicatorView : public View
     {
     protected:
