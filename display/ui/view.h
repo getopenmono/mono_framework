@@ -71,7 +71,7 @@ namespace mono {
          *
          * The painter is initialized with the display controller of the
          * application context. If you want views to draw themselv on another
-         * display, you musy subclass or change the current display controller
+         * display, you must subclass or change the current display controller
          * of the @ref mono::ApplicationContext object.
          */
         static display::DisplayPainter painter;
