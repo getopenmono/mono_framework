@@ -44,7 +44,8 @@ namespace mono {
         
         void processTouchInput();
         
-        void setCalibration(ITouchSystem::Calibration &cal);
+        void setCalibration(TouchCalibration &cal);
+        TouchCalibration CurrentCalibration();
         
         int ToScreenCoordsX(int touchPos, uint16_t screenWidth);
         int ToScreenCoordsY(int touchPos, uint16_t screenHeight);

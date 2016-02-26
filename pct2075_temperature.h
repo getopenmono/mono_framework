@@ -40,7 +40,9 @@ namespace mono { namespace sensor {
         int Read();
         
     protected:
-        
+
+        void EnablePower();
+
         // MARK: - Power Aware Interface
         
         virtual void onSystemPowerOnReset();

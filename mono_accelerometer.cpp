@@ -40,6 +40,7 @@ bool MMAAccelerometer::IsActive()
     uint8_t active;
     if (!readRegister(CTRL_REG1, &active))
     {
+        debug("Accel: Could not read from register\n\r");
         return false;
     }
     

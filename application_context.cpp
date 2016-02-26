@@ -45,11 +45,7 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
     PWM_WriteCompare2(0);
     
     defaultSerial.printf("");
-    
-    sensor::Temperature = &this->at30ts64Sensor;
-    
-    defaultSerial.printf("\n\r");
-    defaultSerial.printf("sens temp: 0x%x, obj addr: 0x%x\n\r",sensor::Temperature,&at30ts64Sensor);
+
 }
 
 int ApplicationContext::exec()

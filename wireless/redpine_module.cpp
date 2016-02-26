@@ -99,6 +99,7 @@ bool Module::initialize(ModuleCommunication *commInterface)
     if (frame.commandId == ModuleFrame::CardReady)
     {
         debug("Card ready received\n\r");
+        self->communicationInitialized = true;
         return true;
     }
     else
@@ -114,7 +115,13 @@ bool Module::setupWifiOnly(String ssid, String passphrase, WifiSecurityModes sec
 {
     // send "set operating mode command"
     Module *self = Module::Instance();
-    
+
+    if (!self->communicationInitialized)
+    {
+        debug("Module not initialized. You must initialize first!");
+        return false;
+    }
+
     //debug("Setting OperMode...\n\r");
     SetOperatingModeFrame *opermode = new SetOperatingModeFrame(SetOperatingModeFrame::WIFI_CLIENT_MODE);
     opermode->setDefaultConfiguration();

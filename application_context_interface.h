@@ -161,17 +161,20 @@ namespace mono {
          * The default callback is set on the `.fall(...)` handler.
          *
          * Example for replacing the user button handler, with a reset handler:
+         *
          * @code
          *
-         * void MyApp::handlerMethod()
-         * {
-         *    IApplicationContext::SoftwareReset();
-         * }
+         *  // the button callback function
+         *  void MyApp::handlerMethod()
+         *  {
+         *      IApplicationContext::SoftwareReset();
+         *  }
          *
-         * void MyApp::monoWakeFromReset()
-         * {
-         *    IApplicationContext::Instance->UserButton->fall<MyApp>(this, &MyApp::handlerMethod);
-         * }
+         *  // on reset install our own button handler callback
+         *  void MyApp::monoWakeFromReset()
+         *  {
+         *      IApplicationContext::Instance->UserButton->fall<MyApp>(this, &MyApp::handlerMethod);
+         *  }
          *
          * @endcode
          */
@@ -201,17 +204,17 @@ namespace mono {
         /** Sets a pointer to the mono application object */
         virtual void setMonoApplication(mono::IApplication *app) = 0;
         
-        /**
-         * The mono application controller should call this to give the
-         * Application Context a reference to itself.
-         *
-         * This will ensure the Application Controllers methods gets called.
-         */
+//        /**
+//         * The mono application controller should call this to give the
+//         * Application Context a reference to itself.
+//         *
+//         * This will ensure the Application Controllers methods gets called.
+//         */
 //        static void SetMonoApplication(mono::IApplication &app)
 //        {
 //            IApplicationContext::Instance->setMonoApplication(&app);
 //        }
-        
+
         // MARK: Static Public Methods
         
         /**

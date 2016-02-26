@@ -25,7 +25,8 @@ void ButtonView::initButton()
 
 ButtonView::ButtonView() :
     ResponderView(),
-borderColor(View::StandardBorderColor),
+    textLabel(geo::Rect(), ""),
+    borderColor(StandardBorderColor),
     borderColorPressed(StandardHighlightColor)
 {
     initButton();
@@ -96,7 +97,7 @@ void ButtonView::repaint()
 {
     
     textLabel.setTextColor( isPressedDown ? borderColorPressed : borderColor );
-    textLabel.repaint();
+    textLabel.scheduleRepaint();
     
     painter.setForegroundColor( isPressedDown ? borderColorPressed : borderColor );
     painter.drawRect(viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height());

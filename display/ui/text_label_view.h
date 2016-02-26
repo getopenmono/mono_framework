@@ -8,7 +8,10 @@
 #include "mn_string.h"
 
 namespace mono { namespace ui {
-    
+
+    class ButtonView;
+    class TouchCalibrateView;
+
     /**
      * @brief A Text Label displays text strings on the display
      *
@@ -70,6 +73,8 @@ namespace mono { namespace ui {
      *
      */
     class TextLabelView : public View {
+        friend ButtonView;
+        friend TouchCalibrateView;
     public:
         
         /**

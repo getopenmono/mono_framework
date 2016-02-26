@@ -93,7 +93,7 @@ namespace mono { namespace power {
         };
         
         
-        enum ChargeState
+        enum ACTChargeState
         {
             PRECONDITION = 3,
             FAST_CHARGE = 2,
@@ -136,7 +136,10 @@ namespace mono { namespace power {
         bool USBOTGPower();
         
         uint8_t USBOTG();
-        
+
+        bool IsPowerFenced();
+        void setPowerFence(bool active);
+
         void setPowerFencePeripherals(bool off);
         bool PowerFencePeriperals();
         

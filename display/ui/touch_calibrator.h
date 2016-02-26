@@ -29,7 +29,7 @@ namespace mono { namespace ui {
         
         mbed::FunctionPointer doneCallback;
         
-        ITouchSystem::Calibration currentCal;
+        TouchCalibration currentCal;
         
         uint8_t blockSize, blockMargin;
         TextLabelView textLbl, textHeader;

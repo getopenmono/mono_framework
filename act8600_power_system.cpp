@@ -27,7 +27,25 @@ ACT8600PowerSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
     if (!readRegister(APCH_4, &data))
         error("Failed to read APCH 4 register, I2C failed\n\r");
     
-    return (ChargeState) ((data >> 4) & 0x03);
+    ACTChargeState state = (ACTChargeState) ((data >> 4) & 0x03);
+
+    switch (state) {
+        case PRECONDITION:
+            return CHARGE_PRECONDITION;
+            break;
+        case FAST_CHARGE:
+            return CHARGE_FAST;
+            break;
+        case END_OF_CHARGE:
+            return CHARGE_ENDED;
+            break;
+        case SUSPENDED:
+            return CHARGE_SUSPENDED;
+            break;
+        default:
+            return UNKNOWN;
+            break;
+    }
 }
 
 bool ACT8600PowerSystem::PowerFencePeriperals()
@@ -86,6 +104,17 @@ void ACT8600PowerSystem::powerOffUnused()
     {
         debug("Failed to set unused power regs!\n\r");
     }
+}
+
+void ACT8600PowerSystem::setPowerFence(bool active)
+{
+    debug("set power fence: %i\n\r",active);
+    setPowerFencePeripherals(active);
+}
+
+bool ACT8600PowerSystem::IsPowerFenced()
+{
+    return PowerFencePeriperals();
 }
 
 void ACT8600PowerSystem::setPowerFencePeripherals(bool off)

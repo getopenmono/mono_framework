@@ -84,7 +84,7 @@ void TouchCalibrateView::repaint()
     textHeader.repaint();
     textLbl.repaint();
     
-    ITouchSystem::Calibration zeroCal(450,400,0,0);
+    TouchCalibration zeroCal(450,400,0,0);
     
     geo::Rect prevRect(0,0,0,0);
     geo::Rect newRect;
@@ -190,7 +190,7 @@ void TouchCalibrateView::StartNewCalibration()
 
 void TouchCalibrateView::calDone()
 {
-    ITouchSystem::Calibration cal;
+    TouchCalibration cal;
     
     int yAvg1 = (cals[0].Y() + cals[1].Y()) / 2;
     int yAvg2 = (cals[2].Y() + cals[3].Y()) / 2;

@@ -16,7 +16,17 @@
 #include <stdio.h>
 
 namespace mono {
-    
+
+    /**
+     * A calibration given for a touch system. It defines origin offsets,
+     * and the scales of the mapping between screen coords and touch input
+     * values.
+     *
+     * A calibration should enable a touch controller to accuratly translate
+     * its touch into screen coords.
+     */
+    typedef geo::Rect TouchCalibration;
+
     /**
      * Interface for the Touch sub-system
      *
@@ -24,18 +34,6 @@ namespace mono {
      */
     class ITouchSystem
     {
-    public:
-        
-        /** 
-         * A calibration given for a touch system. It defines origin offsets,
-         * and the scales of the mapping between screen coords and touch input
-         * values.
-         *
-         * A calibration should enable a touch controller to accuratly translate
-         * its touch into screen coords.
-         */
-        typedef geo::Rect Calibration;
-        
     protected:
         
         TouchEvent lastTouchBegin;
@@ -102,8 +100,9 @@ namespace mono {
         
         virtual int ToScreenCoordsY(int touchPos, uint16_t screenHeight) = 0;
         
-        
-        virtual void setCalibration(Calibration &cal) = 0;
+        virtual TouchCalibration CurrentCalibration() = 0;
+
+        virtual void setCalibration(TouchCalibration &cal) = 0;
     };
 
 }

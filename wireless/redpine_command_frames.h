@@ -296,7 +296,9 @@ namespace mono { namespace redpine {
             scanInfoResp scanInfos[scannedMaximumResponse]; /**< List of results */
         } scanResponse;
         
-        
+        /** Callback handler, used when the list of SSIDs are returned */
+        mbed::FunctionPointerArg1<void, scanResponse*> scanResponseHandler;
+
         const char *ssid;
         
         /**
@@ -313,6 +315,27 @@ namespace mono { namespace redpine {
         
         
         void responsePayloadHandler(uint8_t *dataBuffer);
+
+        /**
+         * @brief Set the ScanResponse callback function
+         *
+         * When the scan for access points is completed, this handler is 
+         * triggered. You set your callback function here, to retrieve a list of
+         * found APs.
+         *
+         * The module returns a maximum of 11 visible AP's, ordered DESC by
+         * signal strength. (RSSI)
+         *
+         * @param obj A pointer to the callback functions member context (the this pointer)
+         * @param memPtr A point to the member function itself.
+         *
+         * @see scanResponse
+         */
+        template <typename Owner>
+        void setScanResponseCallback(Owner *obj, void(Owner::*memPtr)(scanResponse*))
+        {
+            this->scanResponseHandler.attach<Owner>(obj, memPtr);
+        }
     };
     
     

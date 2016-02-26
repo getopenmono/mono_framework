@@ -1,10 +1,5 @@
-//
-//  application_interface.h
-//  mono
-//
-//  Created by Kristoffer Lyder Andersen on 27/06/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef mono_application_interface_h
 #define mono_application_interface_h
@@ -14,6 +9,8 @@
 namespace mono {
     
     /**
+     * @brief Entry point for all mono applications, abstract interface.
+     *
      * Every mono application must implement this interface.
      * This is the starting point of the your application code, you must call it
      * after the runtime initalization.
@@ -21,14 +18,19 @@ namespace mono {
      * You do this from inside the `main()` function. Your main function should
      * look like this:
      *
-     * ``
+     * @code
      * int main()
      * {
-     *     MyIApplicationSubclass appCtrl;
+     *      // Construct you IApplication subclass
+     *      MyIApplicationSubclass appCtrl;
+     *      
+     *      // Tell the IApplicationContext of your existance
+     *      IApplicationContext::Instance->setMonoApplication(&appCtrl);
      *
-     *     return appCtrl.enterRunLoop()
+     *      // Start the run loop... - and never come back! (Gollum!, Gollum!)
+     *      return appCtrl.enterRunLoop();
      * }
-     * ``
+     * @endcode
      * 
      * Your mono applications entry point must be your own subclass of 
      * IApplication. And you _must_ initalize it inside (not outside)
@@ -38,8 +40,6 @@ namespace mono {
      * Also you must call the @ref enterRunLoop method from main, to enter the
      * event loop and prevent `main()` from returning.
      *
-     * @brief Abstract interface for a mono application
-     * @author Kristoffer Andersen
      */
     class IApplication
     {
@@ -77,7 +77,8 @@ namespace mono {
          * Use this method to disconnect from networks or last-minute clean ups.
          * 
          * When you return from this method the system will goto sleep, and at
-         * wakeup the @ref monoWakeFromSleep() method will be called automatically.
+         * wakeup the @ref monoWakeFromSleep() method will be called 
+         * automatically.
          *
          * Do not call this method yourself, it is ontended only to be called by
          * the mono framework runtime.
@@ -102,16 +103,16 @@ namespace mono {
          *
          * The last line in the main.cpp file must be a call to this function:
          *
-         * ``
+         * @code
          * int main()
          * {
          *     MyIApplicationSubclass appCtrl;
          *
-         *     // ** Some app ctrl setup code here perhaps?
+         *     // Some app ctrl setup code here perhaps?
          *     
          *     return appCtrl.enterRunLoop();
          * }
-         * ``
+         * @endcode
          *
          * @brief Start the mono application run loop
          * @returns The run loop never returns, the return type is only for comformaty.

@@ -18,11 +18,23 @@ PCT2075Temperature::PCT2075Temperature()
 
 int PCT2075Temperature::Read()
 {
+    EnablePower();
+
     uint8_t temp[2] = {0,0};
     if (!readRegister(TEMP_REG, (uint16_t*)&temp))
         return 0xFFFF;
     
     return ((int)(temp[0]<<8 | temp[1])) >> 8; // 5 for LSB, and 3 for division by 8
+}
+
+// MARK: Power functions
+
+void PCT2075Temperature::EnablePower()
+{
+    if (IApplicationContext::Instance->PowerManager->PowerSystem->IsPowerFenced())
+    {
+        IApplicationContext::Instance->PowerManager->PowerSystem->setPowerFence(false);
+    }
 }
 
 // MARK: Read/Write Registers

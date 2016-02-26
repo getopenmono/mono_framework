@@ -110,6 +110,31 @@ namespace mono { namespace redpine {
             uint8_t netmask[4];     /**< IPv4 netmask */
             uint8_t gateway[4];     /**< IPv4 Gateway */
         } StaticIPParams;
+
+        /**
+         * @brief List of found AP's, as retreived by the @ref scanNetworks method
+         *
+         * TODO: This class should become generic across H/W!
+         *
+         * @see scanNetworks
+         */
+        class ScannedNetworks
+        {
+        public:
+            class Network
+            {
+                uint8_t rfChannel;          /**< The APs channel */
+                uint8_t securityMode;       /**< AP Wifi Security settings. See @ref ScanFrame */
+                uint8_t rssiVal;            /**< Signal strength */
+                uint8_t uNetworkType;       /**< AP Type: 1 is Infrastructure Mode */
+                uint8_t *ssid;              /**< SSID of the access pint */
+                uint8_t bssid[6];           /**< MAC address of the access point */
+                uint8_t reserved[2];        /**< Reserved bytes */
+            };
+
+            uint32_t Count;                 /**< Number of found networks */
+            Network *networks;              /**< List of results */
+        };
         
     protected:
 
@@ -192,7 +217,39 @@ namespace mono { namespace redpine {
          * @param commInterface The module communication interface to be used
          */
         static bool initialize(ModuleCommunication *commInterface);
-        
+
+        template <typename Owner>
+        static bool scanNetworks(Owner *obj, void(Owner::*memPtr)(ScanFrame::scanResponse*))
+        {
+            Module *self = Module::Instance();
+
+            if (!self->communicationInitialized)
+            {
+                debug("Module not initialized, you must initialize first");
+                return false;
+            }
+
+            //debug("Setting OperMode...\n\r");
+            SetOperatingModeFrame *opermode = new SetOperatingModeFrame(SetOperatingModeFrame::WIFI_CLIENT_MODE);
+            opermode->setDefaultConfiguration();
+            opermode->commitAsync();
+
+            //debug("Setting band...\n\r");
+            BandFrame *band = new BandFrame();
+            band->commitAsync();
+
+            //debug("Initialize module RF and baseband...\n\r");
+            InitFrame *init = new InitFrame();
+            init->commitAsync();
+            
+            //debug("Scanning for networks...\n\r");
+            ScanFrame *scan = new ScanFrame();
+
+            scan->setScanResponseCallback<Owner>(obj, memPtr);
+
+            scan->commitAsync();
+        }
+
         /**
          * Initializes the module in Eifi only mode with enabled TCP/IP stack
          * We expect this mode to be the defult mode, when only using Wifi

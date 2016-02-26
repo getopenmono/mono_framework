@@ -25,8 +25,6 @@ namespace mono { namespace power {
      * This power supply sub-system interface also defines callbacks that are
      * called then the battery events occur. These are:
      *
-     * * Charging begins
-     * * Charging ends (battery full or plugged out)
      * * Battery low warning
      *
      * You can listen to these events by supplying a callback handler function
@@ -37,6 +35,20 @@ namespace mono { namespace power {
     class IPowerSubSystem
     {
     public:
+
+        /** 
+         * Battery charing states
+         * @see ChargeStatus
+         */
+        enum ChargeState
+        {
+            UNKNOWN,                /**< Chip does not support charging or dont disclore it */
+            CHARGE_PRECONDITION,    /**< Charging has just begun (pre-condition) */
+            CHARGE_FAST,            /**< Fast Charging in constant current mode */
+            CHARGE_SLOW,            /**< Slower charging, in Constant Voltage mode */
+            CHARGE_ENDED,           /**< Charge ended of cycle, battery is full */
+            CHARGE_SUSPENDED        /**< No battery attached or wrong battery voltage levels */
+        };
         
         /**
          * Called by the application as first thing after power-on or system
@@ -60,7 +72,43 @@ namespace mono { namespace power {
          * Use this method to turn on any disabled peripheral.
          */
         virtual void onSystemWakeFromSleep() = 0;
-        
+
+        /**
+         * @brief Return the current status of the Power Fence
+         * 
+         * The power fence cuts power to specific peripherals. Each peripheral 
+         * driver should know whether or not it is behind the fence.
+         *
+         * @return `true` if the power fence is active (power is not present), `false` if power is ON.
+         */
+        virtual bool IsPowerFenced() { return false; }
+
+        /**
+         * @brief Turn on/off the power fence
+         *
+         * Some peripherals are behind a power fence, that can cut their power.
+         * You can control this power, and remove their supply upon going to
+         * sleep mode, to safe battery.
+         *
+         * @param active `true` will cut the power, `false` will power the peripherals
+         */
+        virtual void setPowerFence(bool active) {}
+
+        /**
+         * @brief Get the current charge status for the attached battery
+         * 
+         * The Subsystem implememtation might be able to monitor the current
+         * charging state of the battery. If no battery exists the state will be
+         * @ref SUSPENDED. If the implementation does not support charge states
+         * this method will always return @ref UNKNOWN.
+         *
+         * The different states is explained by the @ref ChargeState enum.
+         *
+         * @return The current charge state integer
+         * @see ChargeState
+         */
+        virtual ChargeState ChargeStatus() { return UNKNOWN; }
+
     };
     
 } }

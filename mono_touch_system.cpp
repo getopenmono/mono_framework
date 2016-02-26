@@ -162,7 +162,12 @@ int MonoTouchSystem::ToScreenCoordsY(int touchPos, uint16_t screenHeight)
     return ((touchPos-CalMinY) * factor) >> 10;
 }
 
-void MonoTouchSystem::setCalibration(ITouchSystem::Calibration &cal)
+TouchCalibration MonoTouchSystem::CurrentCalibration()
+{
+    return geo::Rect(CalMinX, CalMinY, CalMaxX-CalMinX, CalMaxY - CalMinY);
+}
+
+void MonoTouchSystem::setCalibration(TouchCalibration &cal)
 {
     CalMinX = cal.X();
     CalMaxX = cal.X2();

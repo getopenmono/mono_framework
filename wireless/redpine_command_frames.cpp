@@ -105,11 +105,19 @@ void ScanFrame::dataPayload(uint8_t *dataBuffer)
 void ScanFrame::responsePayloadHandler(uint8_t *dataBuffer)
 {
     scanResponse *resp = (scanResponse*) dataBuffer;
-    mono::defaultSerial.printf("Scan found %i APs:\n\r", resp->scanCount);
-    if (resp->scanCount < 12) {
-        for (uint16_t i=0; i<resp->scanCount; i++) {
-            scanInfoResp *ap = &(resp->scanInfos[i]);
-            mono::defaultSerial.printf(" * %s, rssi: %i\n\r",ap->ssid, ap->rssiVal);
+
+    if (scanResponseHandler)
+    {
+        scanResponseHandler.call(resp);
+    }
+    else
+    {
+        debug("Scan found %i APs:\n\r", resp->scanCount);
+        if (resp->scanCount < 12) {
+            for (uint16_t i=0; i<resp->scanCount; i++) {
+                scanInfoResp *ap = &(resp->scanInfos[i]);
+                debug(" * %s, rssi: %i\n\r",ap->ssid, ap->rssiVal);
+            }
         }
     }
 }

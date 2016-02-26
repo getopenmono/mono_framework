@@ -86,3 +86,21 @@ bool Rect::contains(geo::Point &p) const
 {
     return (p.X() >= this->x && p.X() <= this->X2() && p.Y() >= this->y && p.Y() <= this->Y2());
 }
+
+bool Rect::contains(const Rect &other) const
+{
+    if (other.X() > this->X() &&
+        other.Y() > this->Y() &&
+        other.X2()< this->X2()&&
+        other.Y2()< this->Y2())
+        return true;
+    else
+        return false;
+}
+
+
+
+mono::String Rect::ToString() const
+{
+    return String::Format("Rect( %i, %i, %i, %i )",X(),Y(),Width(),Height());
+}
