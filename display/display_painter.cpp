@@ -3,6 +3,8 @@
 
 #include "display_painter.h"
 #include "glcdfont.h"
+#include <us_ticker_api.h>
+#include <mbed_debug.h>
 
 using namespace mono::display;
 
