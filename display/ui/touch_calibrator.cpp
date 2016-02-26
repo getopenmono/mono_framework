@@ -9,6 +9,7 @@
 #include "touch_calibrator.h"
 #include "application_context_interface.h"
 #include "consoles.h"
+#include "settings_interface.h"
 
 #include <wait_api.h>
 #include <mbed_debug.h>
@@ -24,6 +25,7 @@ void TouchCalibrateView::initialize()
     blockMargin = 15;
     calStep = 0;
     activateTouchOnRepaint = false;
+    firstRun = true;
     
     textHeader.setTextColor(display::SilverColor);
     textHeader.setTextSize(2);
@@ -61,6 +63,14 @@ TouchCalibrateView::TouchCalibrateView(geo::Rect rct) : ResponderView(rct), text
 
 void TouchCalibrateView::repaint()
 {
+    if (firstRun)
+    {
+//        ITouchSystem::Calibration cal;
+//        //on first run we check for an existing calibration in Settings
+//        io::Settings->read(io::ISettings::CALIBRATION_LOCATION, io::ISettings::CALIBRATION_SIZE, &cal);
+//        memdump(&cal,sizeof(ITouchSystem::Calibration));
+    }
+
     if (calibrationDone)
     {
         painter.setBackgroundColor(View::StandardBackgroundColor);

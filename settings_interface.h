@@ -40,7 +40,7 @@ namespace mono { namespace io {
         enum SettingSizes
         {
             DATETIME_SIZE = sizeof(DateTime),
-            CALIBRATION_SIZE = sizeof(ITouchSystem::Calibration),
+            CALIBRATION_SIZE = sizeof(TouchCalibration),
             WIFI_CONFIGURATION_SIZE = 64 // we just set it ot 64 bytes for now
         };
 
@@ -73,6 +73,11 @@ namespace mono { namespace io {
 
     };
 
+    /**
+     * A pointer to the
+     * 
+     */
+    static ISettings* Settings = 0;
 } }
 
 #endif /* settings_interface_h */
