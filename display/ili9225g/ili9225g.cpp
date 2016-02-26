@@ -39,7 +39,7 @@ void ILI9225G::init()
 {
     // set IM0 high
     CyPins_SetPinDriveMode(CYREG_PRT6_PC0, CY_PINS_DM_RES_UP);
-    CyPins_SetPin(CYREG_PRT6_PC0);
+    CyPins_ClearPin(CYREG_PRT6_PC0);
 
     setBrightness(0);
 
@@ -260,22 +260,25 @@ int ILI9225G::getCursorY()
 
 void ILI9225G::write(Color pixelColor)
 {
-    SPI1_WriteTxData(*(((uint8_t*)&pixelColor)+1));
-    SPI1_WriteTxData(pixelColor.value);
+    // Bit 8 is 1 for Data
+    SPI1_WriteTxData(0x0100 | (*(((uint8_t*)&pixelColor)+1)));
+    SPI1_WriteTxData(0x0100 | pixelColor.value);
 }
 
 void ILI9225G::writeData(uint16_t data)
 {
 
-    RegisterSelect = 1;
-    SPI1_WriteTxData(*(((uint8_t*)&data)+1));
-    SPI1_WriteTxData(data);
+    //RegisterSelect = 1;
+    // Bit 8 is 1 for Data
+    SPI1_WriteTxData(0x0100 | (*(((uint8_t*)&data)+1)));
+    SPI1_WriteTxData(0x0100 | data);
 }
 
 void ILI9225G::writeRegister(uint16_t regData)
 {
-    RegisterSelect = 0;
-    SPI1_WriteTxData(regData & 0xFF);
+    //RegisterSelect = 0;
+    // Bit 8 is 0 for Command
+    SPI1_WriteTxData(0x0000 | (regData & 0xFF));
 }
 
 void ILI9225G::writeCommand(uint16_t regData, uint16_t data)
