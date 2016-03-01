@@ -15,6 +15,7 @@ MBED_FS_PATH=../mbed/libraries/fs
 COMP_LIB=../mono_buildsystem/lib/CyComponentLibrary.a
 CYPRESS_LIB=../mono_buildsystem/lib/monoCyLib.a
 MBED_LIB=../mbedcomp/mbedlib.a
+PACKAGE_TARGET=../dist
 
 # OBJECTS =		$(patsubst %.c,%.o,$(wildcard *.c)) \
 # 				$(patsubst %.cpp,%.o,$(wildcard *.cpp))
@@ -135,20 +136,20 @@ mono_framework.a: cypressLib mbedLib $(MONO_TARGET_OBJECTS)
 	@$(foreach PATH, $(MBED_INCLUDES_REL), $(COPY) -r $(MBED_PATH)/$(PATH)/*.h include/mbed/$(PATH)$(\n))
 	@$(COPY) $(CYLIB_INCLUDE_FILES) include/mbed/target_cypress
 	@echo "Copying to project_template folder..."
-	@$(MKDIR) -p ../project_template/mono/include
-	@$(COPY) mono_framework.a ../project_template/mono
-	@$(COPY) $(COMP_LIB) ../project_template/mono
-	@$(COPY) $(CYPRESS_LIB) ../project_template/mono
-	@$(COPY) $(MBED_LIB) ../project_template/mono
-	@$(COPY) -r include/. ../project_template/mono/include
+	@$(MKDIR) -p $(PACKAGE_TARGET)/mono/include
+	@$(COPY) mono_framework.a $(PACKAGE_TARGET)/mono
+	@$(COPY) $(COMP_LIB) $(PACKAGE_TARGET)/mono
+	@$(COPY) $(CYPRESS_LIB) $(PACKAGE_TARGET)/mono
+	@$(COPY) $(MBED_LIB) $(PACKAGE_TARGET)/mono
+	@$(COPY) -r include/. $(PACKAGE_TARGET)/mono/include
 
 cypressLib:
 	@echo "Building Cypress library..."
-	@make -C ../mono_buildsystem library
+	@make -C $(INCLUDE_DIR)/.. library
 
 mbedLib:
 	@echo "Building mbed library..."
-	@make -C ../mbedcomp mbed
+	@make -C $(MBED_PATH) mbed
 
 monolib2.a: $(MONO_OBJECTS)
 	@echo "Linking Mono Framework..."
