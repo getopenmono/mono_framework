@@ -428,10 +428,10 @@ void ModuleSPICommunication::setChipSelect(bool active)
 
 void ModuleSPICommunication::resetModule()
 {
-    resetLine = 0;
-    wait_ms(100);
-    resetLine = 1;
-    wait_ms(100);
+//    resetLine = 0;
+//    wait_ms(100);
+//    resetLine = 1;
+//    wait_ms(100);
 }
 
 bool ModuleSPICommunication::initializeInterface()
