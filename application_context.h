@@ -11,7 +11,7 @@
 #include "mono_accelerometer.h"
 
 #include "mono_touch_system.h"
-#include "mono_settings.h"
+//#include "mono_settings.h"
 #include "application_run_loop.h"
 #include "mono_power_management.h"
 
@@ -37,7 +37,7 @@ namespace mono {
         
         QueueInterrupt UserButton;
 
-        io::MonoSettings settings;
+        //io::MonoSettings settings;
 
         ApplicationContext();
         
