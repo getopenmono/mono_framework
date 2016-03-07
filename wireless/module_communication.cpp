@@ -113,14 +113,10 @@ SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
 
 ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) :
     spiChipSelect(chipSelect, 1),
-    resetLine(resetPin, 0, OpenDrain),
+    resetLine(resetPin, 1),
     spiInterrupt(interruptPin),
     fakeISRTimer(50)
 {
-    // now the pin is OpenDrain - we stop driving low
-    resetLine.setMode(OpenDrain);
-    resetLine.write(1);
-    
     this->spi = &spi;
     this->InterfaceVersion = 0xAB16; // we expect this is the default version
     
@@ -270,15 +266,15 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
 //    *((int*)readBuf) = spi->write(0);
 //    setChipSelect(false);
     
-    //mono::defaultSerial.printf("Header: 0x%x 0x%x 0x%x 0x%x\n\r",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
+//    mono::defaultSerial.printf("Header: 0x%x 0x%x 0x%x 0x%x\n\r",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
     
     spi->format(8);
     
     // convert number to the current architecture endian
     // (module send as little-endian)
-    if (InterfaceVersion == 0xab15)
-        buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8); // old version where protocol is different
-    else
+//    if (InterfaceVersion == 0xab15)
+//        buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8); // old version where protocol is different
+//    else
         buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8) - 4; // version 1.6 needs this
     
     buffer->totalBytes = readBuf[3] | readBuf[2] << 8;
@@ -290,9 +286,9 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
 {
     // this is big-endian
     uint32_t frameLength;
-    if (this->InterfaceVersion == 0xab15)
-        frameLength = frameHeader.dummyBytes + frameHeader.totalBytes; // old firmware version
-    else
+//    if (this->InterfaceVersion == 0xab15)
+//        frameLength = frameHeader.dummyBytes + frameHeader.totalBytes; // old firmware version
+//    else
         frameLength = frameHeader.dummyBytes + frameHeader.totalBytes - 4; // version 1.6 needs this
     
     //align 4-byte granularity, by AND with 0b111111100
@@ -368,12 +364,9 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     
     spi->format(8);
     
-//    mono::defaultSerial.printf("Raw frm body:\n\r");
-//    for (int i=0; i<buffer.length; i++) {
-//        mono::defaultSerial.printf("0x%x ",buffer.buffer[i]);
-//    }
-//    mono::defaultSerial.printf("\n\r");
-    
+    //mono::defaultSerial.printf("Raw frm body:\n\r");
+    //mono::memdump(buffer.buffer, buffer.length);
+
     return true;
 }
 
