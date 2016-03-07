@@ -43,7 +43,7 @@ namespace mono {
         /**
          * The last seen serial DTR value. Reset can only happen in transitions.
          */
-        bool lastDtrValue;
+        bool lastDtrValue, firstDtrRun;
         
         /**
          * Set to `true` if you want the run loop to call software reset when 
@@ -72,6 +72,9 @@ namespace mono {
         
         /** Process a single iteratio of the run loop */
         void process();
+
+        /** read the UART DTR state if possible */
+        void checkUsbUartState();
         
     public:
         

@@ -10,11 +10,11 @@
 #define __spiTest__consoles__
 
 #include <stdio.h>
-#include <Serial.h>
+#include <mn_serial.h>
 
 namespace mono {
     
-    static mbed::Serial defaultSerial(USBTX,USBRX);
+    static io::Serial defaultSerial;
     
     /**
      * Print a section of memory to the console as hex

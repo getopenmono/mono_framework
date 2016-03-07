@@ -20,16 +20,14 @@ AppRunLoop::AppRunLoop() : userBtn(SW_USER, 1, PullUp)
     resetOnDTR = true;
     resetOnUserButton = false;
     taskQueueHead = NULL;
+    firstDtrRun = true;
 }
 
 void AppRunLoop::exec()
 {
     debug("mono enter run loop!\n\r");
-    
-    if (mono::defaultSerial.IsReady())
-        lastDtrValue = mono::defaultSerial.DTR();
-    else
-        lastDtrValue = false;
+
+    checkUsbUartState();
     
     while (runLoopActive) {
         
@@ -41,18 +39,7 @@ void AppRunLoop::exec()
 
 void AppRunLoop::process()
 {
-    if (mono::defaultSerial.IsReady())
-    {
-        
-        bool dtr = mono::defaultSerial.DTR();
-        if (resetOnDTR && (!dtr) && lastDtrValue)
-        {
-            debug("mono DTR reboot!\n\r");
-            wait_ms(50);
-            IApplicationContext::SoftwareReset();
-        }
-        lastDtrValue = dtr;
-    }
+    //checkUsbUartState();
     
     if (resetOnUserButton)
     {
@@ -159,6 +146,39 @@ void AppRunLoop::removeTaskInQueue(IRunLoopTask *item)
     
     if (item->nextTask != NULL)
         item->nextTask->previousTask = item->previousTask;
+}
+
+void AppRunLoop::checkUsbUartState()
+{
+    power::IPowerSubSystem *power = IApplicationContext::Instance->PowerManager->PowerSystem;
+    bool usbCharge = power->IsUSBCharging();
+
+    if (!usbCharge)
+        return;
+
+    if (firstDtrRun)
+    {
+        firstDtrRun = false;
+        if (mono::defaultSerial.IsReady())
+            lastDtrValue = mono::defaultSerial.DTR();
+        else
+            lastDtrValue = false;
+
+        return;
+    }
+
+    if (mono::defaultSerial.IsReady())
+    {
+
+        bool dtr = mono::defaultSerial.DTR();
+        if (resetOnDTR && (!dtr) && lastDtrValue)
+        {
+            debug("mono DTR reboot!\n\r");
+            wait_ms(50);
+            IApplicationContext::SoftwareReset();
+        }
+        lastDtrValue = dtr;
+    }
 }
 
 void AppRunLoop::setResetOnUserButton(bool roub)
