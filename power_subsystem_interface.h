@@ -109,6 +109,22 @@ namespace mono { namespace power {
          */
         virtual ChargeState ChargeStatus() { return UNKNOWN; }
 
+
+        /**
+         * @brief Get the USB charging state (True if charging now)
+         * 
+         * This methods default implementation uses the @ref ChargeStatus method
+         * to check the CHARGE_* enum and `true` if it is not SUSPENDED or 
+         * UNKNOWN.
+         *
+         * PowerSubsystem subclasses might override this method do their own checks.
+         */
+        virtual bool IsUSBCharging()
+        {
+            ChargeState state = this->ChargeStatus();
+            return state != CHARGE_SUSPENDED && state != UNKNOWN;
+        }
+
     };
     
 } }
