@@ -38,16 +38,15 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
 void ILI9225G::init()
 {
     // set IM0 high
-    CyPins_SetPinDriveMode(CYREG_PRT6_PC0, CY_PINS_DM_RES_UP);
-    CyPins_ClearPin(CYREG_PRT6_PC0);
+    //CyPins_SetPinDriveMode(CYREG_PRT6_PC0, CY_PINS_DM_RES_UP);
+    //CyPins_ClearPin(CYREG_PRT6_PC0);
 
     setBrightness(0);
 
     Reset = 0;
-
-    wait_ms(50);
+    wait_ms(100);
     Reset = 1; // active low
-    wait_ms(50);
+    wait_ms(100);
 
     writeCommand(0xd0, 0x0003);
     writeCommand(0xeb, 0x0b00);
