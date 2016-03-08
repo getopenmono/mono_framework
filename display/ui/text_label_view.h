@@ -191,7 +191,7 @@ namespace mono { namespace ui {
         void setText(const char *txt, bool resizeViewWidth = false);
         void setText(String text, bool resizeViewWidth = false);
         
-    protected:
+    public:
         
         void repaint();
     };

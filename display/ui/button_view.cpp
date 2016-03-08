@@ -97,7 +97,7 @@ void ButtonView::repaint()
 {
     
     textLabel.setTextColor( isPressedDown ? borderColorPressed : borderColor );
-    textLabel.scheduleRepaint();
+    textLabel.repaint();
     
     painter.setForegroundColor( isPressedDown ? borderColorPressed : borderColor );
     painter.drawRect(viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height());
