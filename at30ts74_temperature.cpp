@@ -10,7 +10,7 @@
 
 using namespace mono::sensor;
 
-static ITemperature *Temperature = 0;
+//static ITemperature *Temperature = 0;
 
 AT30TS74Temperature::AT30TS74Temperature()
 {
@@ -90,7 +90,7 @@ bool AT30TS74Temperature::readRegister(uint8_t regAddress, uint16_t *data)
         }
     }
     
-    int ack = I2C_MasterReadBuf(deviceAddress, (uint8_t*)data, 2, I2C_MODE_COMPLETE_XFER);
+    I2C_MasterReadBuf(deviceAddress, (uint8_t*)data, 2, I2C_MODE_COMPLETE_XFER);
     int timeout = 500;
     while ((I2C_MasterStatus() & (I2C_MSTAT_RD_CMPLT | I2C_MSTAT_ERR_XFER)) == 0 && timeout > 0)
     {

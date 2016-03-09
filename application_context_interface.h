@@ -264,7 +264,7 @@ namespace mono {
          * Calls the MCU's reset exception, which will reset the system. When reset
          * the bootloader will run again, before entering the application.
          */
-        static void SoftwareReset() __attribute__((noreturn)) { IApplicationContext::Instance->_softwareReset(); }
+        static void SoftwareReset() { IApplicationContext::Instance->_softwareReset(); }
         
         /**
          * @brief Trigger a software reset of MOno's MCU, that does not load 
@@ -272,7 +272,7 @@ namespace mono {
          * 
          * Use this to do a fast reset of the MCU.
          */
-        static void SoftwareResetToApplication() __attribute__((noreturn)) { IApplicationContext::Instance->_softwareResetToApplication(); }
+        static void SoftwareResetToApplication() { IApplicationContext::Instance->_softwareResetToApplication(); }
         
         /**
          * @brief Trigger a software reset, and stay in bootloader.
@@ -283,7 +283,7 @@ namespace mono {
          * **CAUTION: To get out of bootloader mode you must do a hard reset
          * (by the reset button) or program mono using monoprog.**
          */
-        static void SoftwareResetToBootloader() __attribute__((noreturn)) { IApplicationContext::Instance->_softwareResetToBootloader(); }
+        static void SoftwareResetToBootloader() { IApplicationContext::Instance->_softwareResetToBootloader(); }
         
         // MARK: Static Public Properties
         

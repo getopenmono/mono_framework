@@ -595,7 +595,7 @@ void ModuleSPICommunication::writeMemory(uint32_t memoryAddress, uint16_t value)
 
 bool ModuleSPICommunication::pollInputQueue()
 {
-    bool dataReady = spiInterrupt.read();
+    //bool dataReady = spiInterrupt.read();
     uint8_t regval = readRegister(SPI_HOST_INTR);
     if ((regval & 0x08) == 0x08)
     {
