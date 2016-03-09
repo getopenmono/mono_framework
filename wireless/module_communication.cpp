@@ -228,10 +228,11 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     CommandC2 cmd2;
     cmd2.DataGranularity = CommandC2::THIRTYTWO_BITMODE;
     cmd2.RegisterSelect = 0; // ignored
-    
-    if (sendC1C2(cmd1, cmd2) != CMD_SUCCESS)
+
+    int status = sendC1C2(cmd1, cmd2);
+    if (status != CMD_SUCCESS)
     {
-        debug("Failed to fetch frame length header!");
+        debug("Failed to fetch frame length header, status: 0x%x!",status);
         return false;
     }
     
@@ -630,7 +631,7 @@ bool ModuleSPICommunication::readManagementFrame(ManagementFrame &frame)
         return false;
     }
     
-    mono::defaultSerial.printf("frm head: 0x%x dummy, 0x%x total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
+    //mono::defaultSerial.printf("frm head: 0x%x dummy, 0x%x total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
     
     //alloc memory for incoming frame
     SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);

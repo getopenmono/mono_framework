@@ -284,7 +284,7 @@ void HttpGetFrame::dataPayload(uint8_t *data)
 void HttpGetFrame::responsePayloadHandler(uint8_t *data)
 {
     HttpRsp *resp = (HttpRsp*) data;
-    mono::defaultSerial.printf("HttpGet Recv %i bytes\n\r",resp->data_len);
+    //mono::defaultSerial.printf("HttpGet Recv %i bytes\n\r",resp->data_len);
     
     if (destinationFile)
     {
@@ -307,7 +307,7 @@ void HttpGetFrame::responsePayloadHandler(uint8_t *data)
         lastResponseParsed = true;
         if (destinationFile)
             fclose(destinationFile);
-        mono::defaultSerial.printf("HttpGet ended\n\r");
+        //mono::defaultSerial.printf("HttpGet ended\n\r");
     }
 }
 
