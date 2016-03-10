@@ -233,11 +233,13 @@ void Module::moduleEventHandler()
             ManagementFrame *request = requestFrameQueue.Dequeue();
             //debug("Sending Mgmt request 0x%x\n\r",request->commandId);
             bool success = request->writeFrame();
-            
+
             if (!success)
             {
                 debug("Failed to send MgmtFrame (0x%x) to module\n\r",request->commandId);
-                
+                request->status = 1;
+                request->triggerCompletionHandler();
+
                 if (request->autoReleaseWhenParsed)
                     delete request;
                 
