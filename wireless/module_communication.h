@@ -122,6 +122,16 @@ namespace mono { namespace redpine {
 //        virtual void taskHandler() = 0;
         
     public:
+
+        /**
+         * List of Repine error codes
+         */
+        enum ErrorCode
+        {
+            ERRCODE_NO_ERROR = 0,
+            ERRCODE_START_TOKEN_NOT_RECEIVED = 1,   /**< No start token received within timeout */
+            ERRCODE_SPI_C1C2_CMD_FAILED = 2         /**< The C1 or C2 SPI package send failed */
+        };
         
         /** 
          * Defines the communication protocol version to use.
@@ -173,9 +183,11 @@ namespace mono { namespace redpine {
          * for pending input data. This function blocks, until data is ready.
          *
          * This function can be used it interrupts are not applicable
+         *
+         * @param error An optional pointer to an error enum. Success is error == 0
          * @return `true` if there is data to read, `false` otherwise
          */
-        virtual bool pollInputQueue() = 0;
+        virtual bool pollInputQueue(ErrorCode *error = 0) = 0;
         
         /**
          * @brief Return true if interrupt is active
@@ -387,16 +399,17 @@ namespace mono { namespace redpine {
          * SPI registers are only available to the modules SPI interface
          *
          * @param reg The register to read
+         * @paramOptional error enum. Check for errors by asserting error == 0
          * @return the content of the 8-bit register
          */
-        uint8_t readRegister(SpiRegisters reg);
+        uint8_t readRegister(SpiRegisters reg, ErrorCode *error = 0);
         
         
         uint16_t readMemory(uint32_t memoryAddress);
         void writeMemory(uint32_t memoryAddress, uint16_t value);
         
         
-        bool pollInputQueue();
+        bool pollInputQueue(ErrorCode *error = 0);
         
         bool interruptActive();
         

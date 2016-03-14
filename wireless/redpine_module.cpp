@@ -172,13 +172,28 @@ bool Module::IsNetworkReady()
 
 void Module::moduleEventHandler()
 {
-    
+    static int errorCount = 0;
     if (CurrentPowerState & (LOW_SLEEP | ULTRA_LOW_SLEEP))
         handleSleepWakeUp();
     else
     {
-        
-        if (comIntf->pollInputQueue())
+        ModuleCommunication::ErrorCode err = ModuleCommunication::ERRCODE_NO_ERROR;
+        bool pollSuccess = comIntf->pollInputQueue(&err);
+        if (err != ModuleCommunication::ERRCODE_NO_ERROR)
+        {
+            debug("CommErr: %i - Try %i new init intf. call\n\r",err,++errorCount);
+            bool initSuccess = this->comIntf->initializeInterface();
+
+            if (!initSuccess)
+            {
+                debug("Initialize failed to init communication interface\n\r");
+                return;
+            }
+
+            return;
+        }
+
+        if (pollSuccess)
         {
             //handle a response for any pending request
             ManagementFrame *respFrame = responseFrameQueue.Peek();
@@ -194,7 +209,9 @@ void Module::moduleEventHandler()
             }
             else
             {
-                debug("resp frame cmd id: 0x%x\n\r",respFrame->commandId);
+                if (respFrame->commandId != 0x51)
+                    debug("resp frame cmd id: 0x%x\n\r",respFrame->commandId);
+
                 //memdump(reqFrame, sizeof(mono::redpine::HttpGetFrame));
 
                 bool success = this->comIntf->readManagementFrameResponse(*respFrame);

@@ -33,6 +33,9 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
 
     IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
     IApplicationContext::Instance->RunLoop->addDynamicTask(this);
+
+    PWM_Start();
+    setBrightness(128);
 }
 
 void ILI9225G::init()
@@ -41,12 +44,12 @@ void ILI9225G::init()
     //CyPins_SetPinDriveMode(CYREG_PRT6_PC0, CY_PINS_DM_RES_UP);
     //CyPins_ClearPin(CYREG_PRT6_PC0);
 
-    setBrightness(0);
+    //setBrightness(0);
 
     Reset = 0;
-    wait_ms(100);
+    wait_ms(1);
     Reset = 1; // active low
-    wait_ms(100);
+    wait_ms(1);
 
     writeCommand(0xd0, 0x0003);
     writeCommand(0xeb, 0x0b00);
@@ -62,7 +65,7 @@ void ILI9225G::init()
     writeCommand(0x10, 0x0A00);
     writeCommand(0x11, 0x1B41);
 
-    wait_ms(50);
+    wait_ms(1);
 
     writeCommand(0x12, 0x200E);
     writeCommand(0x13, 0x0020);
@@ -93,28 +96,26 @@ void ILI9225G::init()
     writeCommand(0x20, 0x0000);
     writeCommand(0x21, 0x0000);
 
-    wait_ms(50);
+    wait_ms(1);
 
     writeCommand(0x07, 0x1017);
     writeRegister(0x22);
 
     RegisterSelect = 1;
 
-    int start = us_ticker_read();
+    //int start = us_ticker_read();
 
     for (int i=0; i<176*220; i++) {
         this->write(ui::View::StandardBackgroundColor);
     }
-    int end = us_ticker_read();
-    debug("\n\rdisplay full paint time: %i\n\r",end-start);
-
-    PWM_Start();
-    setBrightness(128);
+    //int end = us_ticker_read();
+    //debug("\n\rdisplay full paint time: %i\n\r",end-start);
 
     //tearingEffect.DeactivateUntilHandled();
     tearingEffect.rise<ILI9225G>(this, &ILI9225G::tearingEffectHandler);
 
-    tearingWatchdog.attach_us<ILI9225G>(this, &ILI9225G::tearingWatchdogHandler, 100000);
+    // TODO: Watchdog kører ikke
+    //tearingWatchdog.attach_us<ILI9225G>(this, &ILI9225G::tearingWatchdogHandler, 100000);
 }
 
 void ILI9225G::setWindow(int x, int y, int width, int height)
@@ -128,9 +129,9 @@ void ILI9225G::setWindow(int x, int y, int width, int height)
 //        0x21, 0, y,
 //        0x22
 //    };
-    writeCommand(0x36, x + width - 1); 					//x end point
+    writeCommand(0x36, x + width - 1); 				//x end point
     writeCommand(0x37, x);							//x start point
-    writeCommand(0x38, y + height - 1); 					    //y end point
+    writeCommand(0x38, y + height - 1); 			//y end point
     writeCommand(0x39, y);	                        //y start point
 
     // Set the initial value of address Counter
@@ -162,49 +163,9 @@ void ILI9225G::taskHandler()
             PWM_WriteCompare2(0);
             CyDelay(200);
         }
-        
-        
-        Reset = 0;
-        RegisterSelect = 0;
-        IM0 = 0;
-        SPI1_Stop();
-        
-        // power chip IRQ line might be high
-        
-        
-        //SCL: PRT2 PC2
-        //SDA: PRT12 PC5
-        power::ACT8600PowerSystem power;
-        power.setPowerFencePeripherals(true);
-        debug("power: %i\n\r", power.PowerFencePeriperals());
-        
-        CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_STRONG);
-        CyPins_ClearPin(CYREG_PRT5_PC2);
-        
-        CyPins_SetPinDriveMode(RP_nRESET, CY_PINS_DM_OD_LO);
-        CyPins_ClearPin(RP_nRESET);
-        
-        uint8_t sda = CY_GET_REG8(CYREG_PRT12_BYP);
-        CY_SET_REG8(CYREG_PRT12_BYP, sda & ~0x20);
-        uint8_t scl = CY_GET_REG8(CYREG_PRT2_BYP);
-        CY_SET_REG8(CYREG_PRT2_PC2, scl & ~0x04);
-        
-        CyPins_SetPinDriveMode(CYREG_PRT2_PC2, CY_PINS_DM_OD_LO);
-        CyPins_ClearPin(CYREG_PRT2_PC2);
-        
-        CyPins_SetPinDriveMode(CYREG_PRT12_PC5, CY_PINS_DM_OD_LO);
-        CyPins_ClearPin(CYREG_PRT12_PC5);
-        
-        CyDelay(500);
-        
-        // power chip IRQ line
-        CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_DIG_HIZ);
-        
-        CY_SET_REG8(CYREG_PRT12_BYP, sda);
-        CY_SET_REG8(CYREG_PRT2_BYP, scl);
-        
-        
-        power.setPowerFencePeripherals(false);
+
+        // stop the watch dog
+        tearingWatchdog.detach();
         
         //IApplicationContext::SoftwareResetToApplication();
     }
@@ -221,8 +182,6 @@ void ILI9225G::tearingWatchdogHandler()
 {
     watTime = us_ticker_read();
     teWat = LastTearningEffectTime;
-    
-    return;
 
     if (watTime - LastTearningEffectTime > 100000)
     {

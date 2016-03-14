@@ -121,18 +121,24 @@ ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelec
     this->InterfaceVersion = 0xAB16; // we expect this is the default version
     
     //spiInterrupt.DeactivateUntilHandled();
-    spiInterrupt.rise<ModuleSPICommunication>(this, &ModuleSPICommunication::interruptHandler);
+    //spiInterrupt.rise<ModuleSPICommunication>(this, &ModuleSPICommunication::interruptHandler);
     
     defaultSerial.printf("starting fake IRQ timer!\n\r");
-    //fakeISRTimer.setCallback<ModuleSPICommunication>(this, &ModuleSPICommunication::fakeISRHandler);
-    //fakeISRTimer.Start();
+    fakeISRTimer.setCallback<ModuleSPICommunication>(this, &ModuleSPICommunication::fakeISRHandler);
+    fakeISRTimer.Start();
 }
 
 // PROTECTED AUXILLARY METHODS
 
 void ModuleSPICommunication::fakeISRHandler()
 {
-    if (pollInputQueue())
+    static int errorCount = 0;
+    ErrorCode error = ERRCODE_NO_ERROR;
+    bool waitingData = pollInputQueue(&error);
+    if (error != ERRCODE_NO_ERROR)
+        debug("Could not poll (%i) input queue register: %i\r\n",++errorCount,error);
+
+    if (waitingData)
         interruptHandler();
 }
 
@@ -157,7 +163,7 @@ CommandStatus ModuleSPICommunication::sendC1C2(spiCommandC1 c1, spiCommandC2 c2)
         retval = spi->write(c1);
         
         if (retval != 0)
-            mono::defaultSerial.printf("Unexpected response for C1 command, not zero but 0x%x!\n\r",retval);
+            debug("Unexpected response for C1 command, not zero but 0x%x!\n\r",retval);
         
         retval = spi->write(c2);
         
@@ -461,7 +467,7 @@ bool ModuleSPICommunication::initializeInterface()
     return false;
 }
 
-uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
+uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg, ErrorCode *error)
 {
     
     CommandC1 cmd1;
@@ -480,7 +486,9 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
     
     if (retval != CMD_SUCCESS)
     {
-        debug("Failed to sent ReadRegister command to module!\n\r");
+        debug("Failed to sent ReadRegister cmd: 0x%X!\n\r",retval);
+        if (error != 0)
+            *error = ERRCODE_SPI_C1C2_CMD_FAILED;
         return 0;
     }
     
@@ -494,7 +502,11 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
         setChipSelect(false);
     }
     else
+    {
         debug("Register read failed\n\r");
+        if (error != 0)
+            *error = ERRCODE_START_TOKEN_NOT_RECEIVED;
+    }
     
     return retval;
 }
@@ -594,10 +606,11 @@ void ModuleSPICommunication::writeMemory(uint32_t memoryAddress, uint16_t value)
 }
 
 
-bool ModuleSPICommunication::pollInputQueue()
+bool ModuleSPICommunication::pollInputQueue(ErrorCode *error)
 {
     //bool dataReady = spiInterrupt.read();
-    uint8_t regval = readRegister(SPI_HOST_INTR);
+    uint8_t regval = readRegister(SPI_HOST_INTR, error);
+
     if ((regval & 0x08) == 0x08)
     {
 //        if (!dataReady)

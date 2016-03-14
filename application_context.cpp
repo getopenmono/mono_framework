@@ -40,14 +40,14 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
     // BEEP
     PWM_Start();
     PWM_WriteCompare2(0);
-    PWM_WriteCompare1(0);
+    //PWM_WriteCompare1(0);
     
-    for (int i=10; i<100; i+=12) {
-        PWM_WriteCompare2(i);
-        CyDelay(30);
-    }
-    PWM_WriteCompare2(0);
-    
+//    for (int i=10; i<100; i+=12) {
+//        PWM_WriteCompare2(i);
+//        CyDelay(8);
+//    }
+//    PWM_WriteCompare2(0);
+
     defaultSerial.printf("");
 
 }
