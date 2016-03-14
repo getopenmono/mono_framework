@@ -182,13 +182,15 @@ void Module::moduleEventHandler()
         if (err != ModuleCommunication::ERRCODE_NO_ERROR)
         {
             debug("CommErr: %i - Try %i new init intf. call\n\r",err,++errorCount);
-            bool initSuccess = this->comIntf->initializeInterface();
+            IApplicationContext::SoftwareResetToApplication();
+            
+            //bool initSuccess = this->comIntf->initializeInterface();
 
-            if (!initSuccess)
-            {
-                debug("Initialize failed to init communication interface\n\r");
-                return;
-            }
+//            if (!initSuccess)
+//            {
+//                debug("Initialize failed to init communication interface\n\r");
+//                return;
+//            }
 
             return;
         }
