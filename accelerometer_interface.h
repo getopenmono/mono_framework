@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 namespace mono { namespace sensor {
-    
+
     /**
      * @brief Abstract inteface for interacting with the accelerometer
      *
@@ -16,17 +16,17 @@ namespace mono { namespace sensor {
     class IAccelerometer
     {
     public:
-        
+
         /**
          * @brief Start the accelerometer
          *
-         * Before you can sample any acceleration, you must start the 
+         * Before you can sample any acceleration, you must start the
          * accelerometer. When the accelerometer is running its power consumption
          * will likely increase. Remember to @ref Stop the accelerometer, when
-         * you are sone sampling the acceleration.
+         * you are done sampling the acceleration.
          */
         virtual void Start() = 0;
-        
+
         /**
          * @brief Stops the accelerometer
          *
@@ -34,30 +34,30 @@ namespace mono { namespace sensor {
          * accelerometer before you sample any axis.
          */
         virtual void Stop() = 0;
-        
+
         /**
          * @brief Return the current Start/Stop state of the accelerometer
          *
          * @returns `true` only if the accelerometer is started and sampling data
          */
         virtual bool IsActive() = 0;
-        
+
         /**
          * @brief <# brief desc #>
          *
          * @returns <# return desc #>
          */
         virtual int16_t rawXAxis() = 0;
-        
+
     protected:
-        
+
         // NOTE: Should we have these here?
         virtual bool readRegister(uint8_t regAddr, uint8_t *data) = 0;
         virtual bool readRegister(uint8_t regAddr, uint16_t *data) = 0;
-        
+
         virtual bool writeRegister(uint8_t regAddr, uint8_t data) = 0;
     };
-    
+
 } }
 
 #endif /* accelerometer_interface_h */
