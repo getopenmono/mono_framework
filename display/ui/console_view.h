@@ -40,7 +40,20 @@ namespace mono { namespace ui {
         int textSize;
         
     public:
-        
+
+
+        ConsoleView() : View(geo::Rect(0,0,W,H)),
+        textColor(StandardTextColor),
+        consoleColor(StandardBackgroundColor),
+        lineSpacing(2),
+        softWrapIndent(5),
+        textSize(1)
+        {
+            this->softWrap = true;
+            this->scrolls = false;
+            this->curLineIndex = 0;
+        }
+
         /**
          * Construct a new ConsoleView, for viewing console output on the screen.
          *
