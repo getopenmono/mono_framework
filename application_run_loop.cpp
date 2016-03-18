@@ -11,6 +11,9 @@
 #include <mbed.h>
 #include <consoles.h>
 
+#include "display/ui/console_view.h"
+extern mono::ui::ConsoleView<176,110> *ui_console_stdout;
+
 using namespace mono;
 
 AppRunLoop::AppRunLoop() : userBtn(SW_USER, 1, PullUp)
@@ -39,7 +42,7 @@ void AppRunLoop::exec()
 
 void AppRunLoop::process()
 {
-    //checkUsbUartState();
+    checkUsbUartState();
     
     if (resetOnUserButton)
     {
@@ -53,9 +56,11 @@ void AppRunLoop::process()
     }
     
     uint32_t start = us_ticker_read();
+    
     //handle touch inputs
     if (IApplicationContext::Instance->TouchSystem != NULL)
         IApplicationContext::Instance->TouchSystem->processTouchInput();
+    
     uint32_t tEnd = us_ticker_read();
     
     //run scheduled tasks
@@ -154,29 +159,39 @@ void AppRunLoop::checkUsbUartState()
     bool usbCharge = power->IsUSBCharging();
 
     if (!usbCharge)
+    {
         return;
+    }
 
     if (firstDtrRun)
     {
+        ui_console_stdout->WriteLine("First DTR run");
         firstDtrRun = false;
-        if (mono::defaultSerial.IsReady())
+        if (mono::defaultSerial.writeable())
+        {
             lastDtrValue = mono::defaultSerial.DTR();
+            ui_console_stdout->printf("UART ready, DTR: %i\r\r",lastDtrValue);
+        }
         else
+        {
             lastDtrValue = false;
+            ui_console_stdout->WriteLine("UART not ready");
+        }
 
         return;
     }
 
-    if (mono::defaultSerial.IsReady())
+    if (mono::defaultSerial.writeable())
     {
-
+        
         bool dtr = mono::defaultSerial.DTR();
         if (resetOnDTR && (!dtr) && lastDtrValue)
         {
             debug("mono DTR reboot!\n\r");
-            wait_ms(50);
+            wait_ms(20);
             IApplicationContext::SoftwareReset();
         }
+        
         lastDtrValue = dtr;
     }
 }

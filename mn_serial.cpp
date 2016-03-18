@@ -2,6 +2,12 @@
 
 #include "mn_serial.h"
 #include "application_context_interface.h"
+#include <us_ticker_api.h>
+#include <device.h>
+
+#ifdef DEVICE_SERIAL
+#include <serial_usb_api.h>
+#endif
 
 using namespace mono::io;
 
@@ -14,25 +20,22 @@ Serial::Serial(PinName tx, PinName rx) : mbed::Serial(tx, rx)
 /// MARK: Public Constructor
 Serial::Serial() : mbed::Serial(USBTX, USBRX)
 {
-    powersystem = IApplicationContext::Instance->PowerManager->PowerSystem;
 }
 
 bool Serial::DTR()
 {
-    return mbed::Serial::DTR();
+#ifdef DEVICE_SERIAL
+    if (serial_usbuart_init_cdc(&_serial))
+    {
+        return serial_usbuart_dtr(&_serial);
+    }
+#endif
+
+    return true;
 }
 
 bool Serial::IsReady()
 {
-    return powersystem->IsUSBCharging() && mbed::Serial::IsReady();
+    return this->writeable();
 }
 
-int Serial::vprintf(const char *format, va_list args)
-{
-    if (powersystem->IsUSBCharging())
-    {
-        return mbed::Serial::vprintf(format, args);
-    }
-
-    return 0;
-}

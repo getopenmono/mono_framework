@@ -9,7 +9,7 @@
 namespace mono { namespace io {
 
     /**
-     * @brief POwer / USB aware serial port class,  that uses only the USB UART
+     * @brief Power / USB aware serial port class,  that uses only the USB UART
      * 
      * THis is the implementation of communication via USBUART. It builds upon
      * mbed's @ref mbed::Serial class. Because mbed ti not aware of changes power
@@ -60,7 +60,7 @@ namespace mono { namespace io {
          */
         bool IsReady();
 
-        int vprintf(const char *format, va_list args);
+        
     };
 
 } }
