@@ -10,6 +10,10 @@
 #include "consoles.h"
 #include <project.h>
 
+#ifdef DEVICE_SERIAL
+#include <serial_usb_api.h>
+#endif
+
 using namespace mono::power;
 
 bool MonoPowerManagement::__RTCFired = false;
@@ -18,6 +22,11 @@ MonoPowerManagement::MonoPowerManagement()
 {
     powerAwarenessQueue = NULL;
     PowerSystem = &powerSubsystem;
+    
+#ifdef DEVICE_SERIAL
+    // if mbed device serial exists, enable if usb powered
+    serial_usbuart_is_powered = PowerSystem->IsUSBCharging();
+#endif
 }
 
 void MonoPowerManagement::EnterSleep()
@@ -194,7 +203,7 @@ void MonoPowerManagement::powerUpMCUPeripherals()
     SPI1_Wakeup();
 #endif
     
-    mbed::Serial::wakeUpRoutine();
+    //mbed::Serial::wakeUpRoutine();
 }
 
 void MonoPowerManagement::saveDMRegisters()
