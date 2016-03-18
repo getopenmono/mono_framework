@@ -23,7 +23,7 @@ Module::Module()
     networkInitialized = false;
 }
 
-// STATIC PUBLIC METHODS
+/// MARK: STATIC PUBLIC METHODS
 
 Module* Module::Instance()
 {
@@ -47,7 +47,7 @@ bool Module::initialize(ModuleCommunication *commInterface)
     
     self->CurrentPowerState = FULL_AWAKE;
     
-    debug("Initializing communication interface...\n\r");
+    //debug("Initializing communication interface...\n\r");
     // initalize interface
     bool success = self->comIntf->initializeInterface();
     
@@ -59,19 +59,19 @@ bool Module::initialize(ModuleCommunication *commInterface)
     
     mono::IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(self);
     
-    debug("Checking bootloader state...\n\r");
+    //debug("Checking bootloader state...\n\r");
     uint16_t regval = self->comIntf->readMemory(HOST_INTF_REG_OUT);
     debug("HOST_INTF_REG_OUT: 0x%x\n\r", regval);
     
     if ((regval & HOST_INTERACT_REG_VALID) == 0xAB00)
     {
-        debug("Module is in bootloader, load Image-I...\n\r");
+        //debug("Module is in bootloader, load Image-I...\n\r");
         self->comIntf->InterfaceVersion = regval;
         self->comIntf->writeMemory(HOST_INTF_REG_IN, HOST_INTERACT_REG_VALID | RSI_LOAD_IMAGE_I_FW);
     }
     
     // we need to wait for board ready frame
-    debug("Waiting for card ready to arrive on input...\n\r");
+    //debug("Waiting for card ready to arrive on input...\n\r");
     int timeout = 0;
     while (!self->comIntf->pollInputQueue() && timeout++ < 50)
     {
@@ -98,7 +98,7 @@ bool Module::initialize(ModuleCommunication *commInterface)
     
     if (frame.commandId == ModuleFrame::CardReady)
     {
-        debug("Card ready received\n\r");
+        //debug("Card ready received\n\r");
         self->communicationInitialized = true;
         return true;
     }
@@ -168,7 +168,7 @@ bool Module::IsNetworkReady()
 }
 
 
-//// PRIVATE METHODS
+/// MARK: PRIVATE METHODS
 
 void Module::moduleEventHandler()
 {
@@ -178,7 +178,7 @@ void Module::moduleEventHandler()
     else
     {
         
-        if (comIntf->interruptActive())
+        if (comIntf->pollInputQueue())
         {
             //handle a response for any pending request
             ManagementFrame *respFrame = responseFrameQueue.Peek();
@@ -186,34 +186,41 @@ void Module::moduleEventHandler()
             {
                 debug("nothing on request queue!\n\r");
                 ManagementFrame frame;
-                comIntf->readManagementFrame(frame);
-            }
-            
-            //debug("resp frame cmd id: 0x%x\n\r",respFrame->commandId);
-            //memdump(reqFrame, sizeof(mono::redpine::HttpGetFrame));
-            
-            bool success = this->comIntf->readManagementFrameResponse(*respFrame);
-            
-            if (!success) {
-                responseFrameQueue.Remove(respFrame);
-                respFrame->triggerCompletionHandler();
-                
-                debug("failed to handle incoming response for resp queue head\n\r");
-            }
-            else if (respFrame->lastResponseParsed)
-            {
-                debug("Frame (0x%x): last response parsed!\n\r",respFrame->commandId);
-                responseFrameQueue.Remove(respFrame);
-                respFrame->triggerCompletionHandler();
-                
-                if (respFrame->autoReleaseWhenParsed)
+                bool success = comIntf->readManagementFrame(frame);
+                if (!success)
                 {
-                    debug("deleting resp frame 0x%x!\n\r",respFrame->commandId);
-                    delete respFrame;
+                    debug("Failed to read unexcepted mgmt frame\n\r");
                 }
-                else
+            }
+            else
+            {
+                debug("resp frame cmd id: 0x%x\n\r",respFrame->commandId);
+                //memdump(reqFrame, sizeof(mono::redpine::HttpGetFrame));
+
+                bool success = this->comIntf->readManagementFrameResponse(*respFrame);
+                
+                if (!success) {
+                    responseFrameQueue.Remove(respFrame);
+                    debug("failed to handle incoming response for resp queue head\n\r");
+                    respFrame->status = 1;
+                    respFrame->triggerCompletionHandler();
+                }
+                else if (respFrame->lastResponseParsed)
                 {
-                    debug("leaving frame 0x%x\n\r",respFrame->commandId);
+                    //debug("Frame (0x%x): last response parsed!\n\r",respFrame->commandId);
+                    responseFrameQueue.Remove(respFrame);
+                    respFrame->triggerCompletionHandler();
+                    
+                    if (respFrame->autoReleaseWhenParsed)
+                    {
+                        //debug("deleting resp frame 0x%x!\n\r",respFrame->commandId);
+                        delete respFrame;
+                    }
+                    else
+                    {
+                        debug("leaving frame 0x%x\n\r",respFrame->commandId);
+                    }
+                    
                 }
                 
             }
@@ -226,11 +233,13 @@ void Module::moduleEventHandler()
             ManagementFrame *request = requestFrameQueue.Dequeue();
             //debug("Sending Mgmt request 0x%x\n\r",request->commandId);
             bool success = request->writeFrame();
-            
+
             if (!success)
             {
                 debug("Failed to send MgmtFrame (0x%x) to module\n\r",request->commandId);
-                
+                request->status = 1;
+                request->triggerCompletionHandler();
+
                 if (request->autoReleaseWhenParsed)
                     delete request;
                 

@@ -64,7 +64,7 @@ namespace mono { namespace power {
          */
         bool HasPower() const
         {
-            
+            return false;
         }
         
         /**
@@ -74,7 +74,7 @@ namespace mono { namespace power {
          */
         bool RequestPower()
         {
-            
+            return false;
         }
         
         /**
@@ -86,7 +86,7 @@ namespace mono { namespace power {
          */
         bool ReleasePower()
         {
-            
+            return false;
         }
         
         /**
@@ -97,7 +97,7 @@ namespace mono { namespace power {
          */
         bool ForceTogglePower()
         {
-            
+            return false;
         }
         
     };

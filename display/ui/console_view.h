@@ -29,7 +29,9 @@ namespace mono { namespace ui {
          * to scroll.
          */
         bool scrolls;
-        
+
+        bool softWrap;
+
         display::Color textColor;
         display::Color consoleColor;
         int lineSpacing;
@@ -43,16 +45,16 @@ namespace mono { namespace ui {
          * Construct a new ConsoleView, for viewing console output on the screen.
          *
          */
-        ConsoleView() : View(),
+        ConsoleView(geo::Point pos) : View(geo::Rect(pos.X(),pos.Y(),W,H)),
             textColor(StandardTextColor),
             consoleColor(StandardBackgroundColor),
             lineSpacing(2),
             softWrapIndent(5),
             textSize(1)
         {
+            this->softWrap = true;
             this->scrolls = false;
             this->curLineIndex = 0;
-            this->setSize( geo::Size(W,H) );
         }
         
         // Console methods
@@ -111,13 +113,17 @@ namespace mono { namespace ui {
                     break;
                 }
                 //soft wrap
-                else if (curLineIndex >= lineLength())
+                else if (softWrap && curLineIndex >= lineLength())
                 {
                     //textBuffer.insertToCurrentLine(curLineIndex,'\0');
                     textBuffer.incrementLine();
                     curLineIndex = 2;
                     textBuffer.insertToCurrentLine(0,' ');
                     textBuffer.insertToCurrentLine(1,' ');
+                }
+                else if (curLineIndex >= lineLength())
+                {
+                    break;
                 }
                 
                 symPos++;
@@ -155,7 +161,7 @@ namespace mono { namespace ui {
             //cursor = geo::Point(viewRect.X()+2,viewRect.Y()+2);
             for (int l=0; l<textBuffer.LinePosition(); l++) {
                 //erase previous line
-                View::painter.drawFillRect(cursor.X(), cursor.Y(), viewRect.Width()-4, characterPixelHeight(), true);
+                View::painter.drawFillRect(cursor.X(), cursor.Y(), viewRect.Width()-4, characterPixelHeight()+lineSpacing, true);
                 char *line = textBuffer.getLine(l);
                 while ((*line != '\0' && *line != '\n')) {
                     View::painter.drawChar(cursor.X(), cursor.Y(), *line);
@@ -168,7 +174,7 @@ namespace mono { namespace ui {
             }
         }
         
-        // Auxilliary methods
+        /// MARK: Auxilliary methods
         
         void setCursor(geo::Point pos)
         {
@@ -179,15 +185,20 @@ namespace mono { namespace ui {
         {
             this->textColor = c;
         }
-        
+
+        void setSoftWrap(bool wrap)
+        {
+            softWrap = wrap;
+        }
+
         uint8_t characterPixelWidth()
         {
-            return (View::painter.TextSize()*5);
+            return (textSize*5);
         }
         
         uint8_t characterPixelHeight()
         {
-            return (View::painter.TextSize()*7);
+            return (textSize*7);
         }
         
         /**
