@@ -21,7 +21,7 @@ uint8_t ACT8600PowerSystem::SystemStatus()
     return data;
 }
 
-ACT8600PowerSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
+IPowerSubSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
 {
     int8_t data = 0x00;
     if (!readRegister(APCH_4, &data))

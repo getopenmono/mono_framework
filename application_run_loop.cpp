@@ -165,17 +165,14 @@ void AppRunLoop::checkUsbUartState()
 
     if (firstDtrRun)
     {
-        ui_console_stdout->WriteLine("First DTR run");
         firstDtrRun = false;
         if (mono::defaultSerial.writeable())
         {
             lastDtrValue = mono::defaultSerial.DTR();
-            ui_console_stdout->printf("UART ready, DTR: %i\r\r",lastDtrValue);
         }
         else
         {
             lastDtrValue = false;
-            ui_console_stdout->WriteLine("UART not ready");
         }
 
         return;
