@@ -18,6 +18,8 @@ namespace mono { namespace ui {
         BackgroundView(display::Color color = StandardBackgroundColor);
 
         void setBackgroundColor(display::Color color);
+        display::Color Color() const;
+
         void repaint();
     };
 

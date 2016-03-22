@@ -16,6 +16,11 @@ void BackgroundView::setBackgroundColor (display::Color color)
     bgColor = color;
 }
 
+mono::display::Color BackgroundView::Color() const
+{
+    return bgColor;
+}
+
 void BackgroundView::repaint ()
 {
     painter.setBackgroundColor(bgColor);
