@@ -71,6 +71,11 @@ namespace mono { namespace geo {
 
         bool contains(Rect const &other) const;
 
+        /**
+         * Return this Rect cropped by the baundaries of another rect
+         */
+        Rect crop(Rect const &other) const;
+
         int Area();
 
         /**

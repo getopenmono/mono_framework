@@ -1,9 +1,4 @@
-//
-//  text_buffer.cpp
-//  displaySimTest
-//
-//  Created by Kristoffer Lyder Andersen on 12/07/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #include "text_buffer.h"

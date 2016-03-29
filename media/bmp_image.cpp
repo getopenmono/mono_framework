@@ -1,14 +1,7 @@
-//
-//  bmp_image.cpp
-//  displaySimTest
-//
-//  Created by Kristoffer Lyder Andersen on 13/09/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #include "bmp_image.h"
-#include <consoles.h>
-#include <mbed.h>
 
 using namespace mono::media;
 
@@ -30,7 +23,7 @@ BMPImage::BMPImage(const char *path)
     
     if (fPointer == NULL)
     {
-        mono::defaultSerial.printf("BMPImage: No such file: %s\n\r",path);
+        printf("BMPImage: No such file: %s\n\r",path);
         return;
     }
     
@@ -39,7 +32,7 @@ BMPImage::BMPImage(const char *path)
     if (fileHeader.bfType != 0x4D42)
     {
         imageValid = false;
-        mono::defaultSerial.printf("BMPIMage: File %s is not a BMP image!\n\r", path);
+        printf("BMPIMage: File %s is not a BMP image!\n\r", path);
     }
     else
     {
@@ -60,7 +53,8 @@ int BMPImage::ReadPixelData(void *target, int bytesToRead)
         fileOpen = true;
     }
     
-    return fread(target, bytesToRead*2, 1, fPointer);
+    size_t bytesRead = fread(target, bytesToRead*2, 1, fPointer);
+    return (int)(bytesRead / PixelByteSize());
 }
 
 int BMPImage::SkipPixelData(int pixelsToSkip)
@@ -74,7 +68,7 @@ int BMPImage::SkipPixelData(int pixelsToSkip)
         fileOpen = true;
     }
     
-    return fseek(fPointer, pixelsToSkip*2, SEEK_CUR);
+    return fseek(fPointer, pixelsToSkip*2, SEEK_CUR) == 0 ? pixelsToSkip : 0;
 }
 
 int BMPImage::Width()
@@ -104,10 +98,14 @@ void BMPImage::SeekToHLine(int vertPos)
     
     if (infoHeader.biHeight < 0)
     {
-        fseek(fPointer, fileHeader.bfOffBits+(vertPos*widthMult4)*PixelByteSize(), SEEK_SET);
+        size_t pos = fileHeader.bfOffBits+(vertPos*widthMult4)*PixelByteSize();
+        fseek(fPointer, pos, SEEK_SET);
     }
     else
-        fseek(fPointer, fileHeader.bfOffBits+((Height()-vertPos)*widthMult4)*PixelByteSize(), SEEK_SET);
+    {
+        size_t pos = fileHeader.bfOffBits+((Height()-vertPos-1)*widthMult4)*PixelByteSize();
+        fseek(fPointer, pos, SEEK_SET);
+    }
 }
 
 void BMPImage::readHeaderData()
@@ -117,7 +115,7 @@ void BMPImage::readHeaderData()
     
     fread(&fileHeader, sizeof(struct BMPImage::BmpFileHeader), 1, fPointer);
     fread(&infoHeader, sizeof(struct BMPImage::BmpInfoHeader), 1, fPointer);
-    widthMult4 = infoHeader.biWidth + (infoHeader.biWidth%4);
+    widthMult4 = ((PixelByteSize()*8*infoHeader.biWidth+31)/32)*PixelByteSize();
 }
 
 BMPImage::~BMPImage()

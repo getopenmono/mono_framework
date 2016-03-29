@@ -20,8 +20,10 @@ namespace mono { namespace display {
     public:
         uint16_t value;
         
-        uint8_t* BytePointer();
-        
+
+
+        /// MARK: Constructors
+
         Color();
         
         Color(const int col);
@@ -29,12 +31,53 @@ namespace mono { namespace display {
         Color(const Color &color);
         
         Color(uint8_t R, uint8_t G, uint8_t B);
+
+        /// MARK: Getters
+
+        /** Return 8-bit red color component */
+        uint8_t Red() const;
+
+        /** Return 8-bit green color component */
+        uint8_t Green() const;
+
+        /** Return 8-bit blue color component */
+        uint8_t Blue() const;
+
+        /// Misc.
+
+        /**
+         * Multiply each RGB channel by a factor from 0-255
+         * @return the scaled color
+         */
+        Color scale(uint8_t factor) const;
+
+        /**
+         * Return the product of two colors
+         * @return the multiply blended color
+         */
+        Color blendMultiply(Color other) const;
+
+        /**
+         * Add this color with another
+         */
+        Color blendAdditive(Color other) const;
+
+        /** Return the inverse */
+        Color invert() const;
+
+        uint8_t* BytePointer();
+
+        /// MARK: Operator overloads
         
         uint16_t operator=(Color col);
         
         bool operator==(const Color &col);
         
         bool operator!=(const Color &col);
+
+        Color operator*(const Color &col);
+
+        Color operator+(const Color &col);
     };
     
     static const Color BlackColor = Color(1, 1, 1); // the value 0x0000 is transparent

@@ -39,17 +39,21 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
 
     // BEEP
     PWM_Start();
-    PWM_WriteCompare2(0);
     PWM_WriteCompare1(0);
-    
-    for (int i=10; i<100; i+=12) {
-        PWM_WriteCompare2(i);
-        CyDelay(30);
-    }
     PWM_WriteCompare2(0);
     
-    defaultSerial.printf("");
+//    for (int i=10; i<100; i+=12) {
+//        PWM_WriteCompare2(i);
+//        CyDelay(30);
+//    }
+//    PWM_WriteCompare2(0);
 
+    //setup default user button handler
+    UserButton.DeactivateUntilHandled(); // dont queue up pushes
+    UserButton.setDebouncing(true);
+    UserButton.fall<ApplicationContext>(this, &ApplicationContext::enterSleepMode);
+
+    defaultSerial.printf("");
 }
 
 int ApplicationContext::exec()
@@ -76,11 +80,6 @@ void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
     mono::IApplicationContext::Instance->DisplayController->init();
     
     touchSys.init();
-    
-    //setup default user button handler
-    UserButton.DeactivateUntilHandled(); // dont queue up pushes
-    UserButton.setDebouncing(true);
-    UserButton.fall<ApplicationContext>(this, &ApplicationContext::enterSleepMode);
     
     monoApp->monoWakeFromReset();
     

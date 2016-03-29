@@ -6,7 +6,9 @@
 #include <device.h>
 
 #ifdef DEVICE_SERIAL
+#ifndef EMUNO
 #include <serial_usb_api.h>
+#endif
 #endif
 
 using namespace mono::io;
@@ -25,10 +27,12 @@ Serial::Serial() : mbed::Serial(USBTX, USBRX)
 bool Serial::DTR()
 {
 #ifdef DEVICE_SERIAL
+#ifndef EMUNO
     if (serial_usbuart_init_cdc(&_serial))
     {
         return serial_usbuart_dtr(&_serial);
     }
+#endif
 #endif
 
     return true;

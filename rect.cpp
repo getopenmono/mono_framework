@@ -98,7 +98,18 @@ bool Rect::contains(const Rect &other) const
         return false;
 }
 
+Rect Rect::crop(const mono::geo::Rect &other) const
+{
+    int x = this->X() > other.X() ? this->X() : other.X();
+    int y = this->Y() > other.Y() ? this->Y() : other.Y();
+    int x2 = this->X2() < other.X2() ? this->X2() : other.X2();
+    int y2 = this->Y2() < other.Y2() ? this->Y2() : other.Y2();
 
+    int w = x2 - x;
+    int h = y2 - y;
+
+    return Rect(x,y,w,h);
+}
 
 mono::String Rect::ToString() const
 {

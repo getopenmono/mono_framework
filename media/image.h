@@ -1,15 +1,10 @@
-//
-//  image.h
-//  displaySimTest
-//
-//  Created by Kristoffer Lyder Andersen on 13/09/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #ifndef displaySimTest_image_h
 #define displaySimTest_image_h
 
-#include <FileSystemLike.h>
+#include <stdio.h>
 
 namespace mono { namespace media {
     

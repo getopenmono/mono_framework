@@ -48,29 +48,33 @@ void ImageView::repaint()
 {
     if (image == NULL)
         return;
-    
-    int h = viewRect.Height() < crop.Height() ? viewRect.Height() : crop.Height();
-    int w = viewRect.Width() < crop.Width() ? viewRect.Width() : crop.Width();
+
+    //copy the image crop/select rect
+    geo::Rect dispRect = crop;
+    //zero the offset
+    dispRect.setPoint(geo::Point(0,0));
+    //crop by viewRect
+    dispRect = dispRect.crop(viewRect);
     
     display::IDisplayController *ctrl = View::painter.DisplayController();
     uint16_t pixels[176];
-    ctrl->setWindow(viewRect.X(), viewRect.Y(), w, h);
+    ctrl->setWindow(viewRect.X(), viewRect.Y(), dispRect.Width(), dispRect.Height());
     
     //painter.setOrigin(viewRect.X(), viewRect.Y());
     //painter.setRotation(90);
     //float32_t *matrix = View::painter.CurrentMatrix();
     int iy = 0;
     
-    for(int16_t y=crop.Y(); y<h; y++)
+    for(int16_t y=crop.Y(); y<crop.Y()+dispRect.Width(); y++)
     {
         image->SeekToHLine(y);
         
         if (crop.X() > 0)
             image->SkipPixelData(crop.X());
         
-        image->ReadPixelData(pixels, w);
+        image->ReadPixelData(pixels, dispRect.Width());
         
-        for (int16_t x=0; x<w-crop.X(); x++) {
+        for (int16_t x=0; x<dispRect.Width(); x++) {
             
             //int16_t x1 = x*matrix[0] + iy*matrix[1] + 1*matrix[2];
             //int16_t y1 = x*matrix[3] + iy*matrix[4] + 1*matrix[5];
