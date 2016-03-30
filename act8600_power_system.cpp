@@ -12,7 +12,6 @@ ACT8600PowerSystem::ACT8600PowerSystem() :
     i2c(NC, NC),
     powerInterrupt(InterruptPin, PullUp)
 {
-    //powerInterrupt.DeactivateUntilHandled();
     enableFaultMask();
     powerInterrupt.fall<ACT8600PowerSystem>(this, &ACT8600PowerSystem::powerInterruptHandler);
 }
@@ -61,8 +60,7 @@ bool ACT8600PowerSystem::PowerFencePeriperals()
         debug("could not read from power chip");
         return false;
     }
-    
-    debug("REG1: 0x%x\n\r",data);
+
     return data & ENABLE ? false : true;
 }
 
@@ -71,39 +69,18 @@ void ACT8600PowerSystem::powerOffUnused()
 {
     bool success = true;
     success &= writeRegister(REG2_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    uint8_t reg = 0;
-    readRegister(REG2_EXT, &reg);
-    debug("reg2: 0x%x\n\r",reg);
     
     success &= writeRegister(REG3_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    readRegister(REG3_EXT, &reg);
-    debug("reg3: 0x%x\n\r",reg);
     
     success &= writeRegister(REG4_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    readRegister(REG4_EXT, &reg);
-    debug("reg4: 0x%x\n\r",reg);
     
     success &= writeRegister(REG5_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    readRegister(REG5_EXT, &reg);
-    debug("reg5: 0x%x\n\r",reg);
     
     success &= writeRegister(REG6_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    readRegister(REG6_EXT, &reg);
-    debug("reg6: 0x%x\n\r",reg);
     
     success &= writeRegister(REG7_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    readRegister(REG7_EXT, &reg);
-    debug("reg7: 0x%x\n\r",reg);
     
     success &= writeRegister(REG8_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    readRegister(REG8_EXT, &reg);
-    debug("reg8: 0x%x\n\r",reg);
-    
-    readRegister(REG910, &reg);
-    debug("reg9: 0x%x\n\r",reg);
-    
-    readRegister(REG1_EXT, &reg);
-    debug("reg1: 0x%x\n\r",reg);
     
     if (!success)
     {
@@ -113,7 +90,6 @@ void ACT8600PowerSystem::powerOffUnused()
 
 void ACT8600PowerSystem::setPowerFence(bool active)
 {
-    debug("set power fence: %i\n\r",active);
     setPowerFencePeripherals(active);
 }
 
@@ -170,13 +146,12 @@ uint8_t ACT8600PowerSystem::USBOTG()
     return otg;
 }
 
-/// POWER SYSTEM METHODS
+/// MARK: POWER AWARE SYSTEM METHODS
 
 void ACT8600PowerSystem::onSystemPowerOnReset()
 {
     //Set output voltage on OUT5 to 3.3V - to power MCU input supply the same as VSYS
     //writeRegister(REG5, VOLTAGE_SELECTION & V3_3);
-    powerInterrupt.fall<ACT8600PowerSystem>(this, &ACT8600PowerSystem::powerInterruptHandler);
 }
 
 void ACT8600PowerSystem::onSystemEnterSleep()
@@ -206,9 +181,6 @@ void ACT8600PowerSystem::enableFaultMask()
         debug("set could not set fault mask 2");
         return;
     }
-
-    readRegister(REG1_EXT, &data);
-    debug("REG1 EXT: 0x%X\n\r",data);
 }
 
 void ACT8600PowerSystem::powerInterruptHandler()
