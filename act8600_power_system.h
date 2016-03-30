@@ -6,6 +6,7 @@
 
 #include <power_subsystem_interface.h>
 #include <mbed.h>
+#include <queue_interrupt.h>
 
 namespace mono { namespace power {
     
@@ -69,7 +70,7 @@ namespace mono { namespace power {
             ENABLE = 0x80, /**< Select the regulator enable bit */
             PHASE_CONTROL = 0x04, /**< Some regulator has a phase control bit */
             OUTPUT_DISCHARGE_CONTROL = 0x04, /**< Some regulators has a discharge control bit */
-            FAULT_MASK_CONTROL = 0x02, /**< Select the fulat mask bit */
+            FAULT_MASK_CONTROL = 0x02, /**< Select the fault mask bit */
             POWER_OK_STATUS = 0x01 /**< Select the Power-OK status bit */
         };
         
@@ -106,16 +107,17 @@ namespace mono { namespace power {
     protected:
         
         static const char ACT8600I2CAddress = 0x5A;
+        static const PinName InterruptPin = (const PinName)CYREG_PRT5_PC2;
         
-        
-        
+        QueueInterrupt powerInterrupt;
+
         /**
          * Read a register from the ACT8600 chip
          * @param regAddr The address of the register
          * @param regData A pointer to the moemory position where the register content is written
          * @return `true` on success, `false` otherwise
          */
-        bool readRegister(int8_t regAddr, int8_t *regData);
+        bool readRegister(int8_t regAddr, uint8_t *regData);
         
         /**
          * Write to a register on the ACT8600 chip
@@ -123,7 +125,13 @@ namespace mono { namespace power {
          * @param regData The new content of the register (data to be written)
          * @return `true` on success, `false` otherwise
          */
-        bool writeRegister(int8_t regAddr, int8_t regData);
+        bool writeRegister(int8_t regAddr, uint8_t regData);
+
+
+        /** enable fault interrupts for REG1 */
+        void enableFaultMask();
+
+        void powerInterruptHandler();
         
     public:
         

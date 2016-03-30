@@ -8,13 +8,18 @@
 
 using namespace mono::power;
 
-ACT8600PowerSystem::ACT8600PowerSystem() : i2c(NC, NC)
+ACT8600PowerSystem::ACT8600PowerSystem() :
+    i2c(NC, NC),
+    powerInterrupt(InterruptPin, PullUp)
 {
+    //powerInterrupt.DeactivateUntilHandled();
+    enableFaultMask();
+    powerInterrupt.fall<ACT8600PowerSystem>(this, &ACT8600PowerSystem::powerInterruptHandler);
 }
 
 uint8_t ACT8600PowerSystem::SystemStatus()
 {
-    int8_t data = 0x00;
+    uint8_t data = 0x00;
     if (!readRegister(SYS, &data))
         error("Could not get SystemStatus, I2C failed\n\r");
     
@@ -23,7 +28,7 @@ uint8_t ACT8600PowerSystem::SystemStatus()
 
 IPowerSubSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
 {
-    int8_t data = 0x00;
+    uint8_t data = 0x00;
     if (!readRegister(APCH_4, &data))
         error("Failed to read APCH 4 register, I2C failed\n\r");
     
@@ -50,7 +55,7 @@ IPowerSubSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
 
 bool ACT8600PowerSystem::PowerFencePeriperals()
 {
-    int8_t data = 0x00;
+    uint8_t data = 0x00;
     if (!readRegister(REG1_EXT, &data))
     {
         debug("could not read from power chip");
@@ -66,7 +71,7 @@ void ACT8600PowerSystem::powerOffUnused()
 {
     bool success = true;
     success &= writeRegister(REG2_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    int8_t reg = 0;
+    uint8_t reg = 0;
     readRegister(REG2_EXT, &reg);
     debug("reg2: 0x%x\n\r",reg);
     
@@ -134,7 +139,7 @@ void ACT8600PowerSystem::setPowerFencePeripherals(bool off)
 bool ACT8600PowerSystem::setUSBOTGPower(bool on)
 {
     writeRegister(OTG, on?ONQ1:0x00);
-    int8_t otg = 0;
+    uint8_t otg = 0;
     bool ok = readRegister(OTG, &otg);
     
     if (!on && ok)
@@ -152,7 +157,7 @@ bool ACT8600PowerSystem::setUSBOTGPower(bool on)
 
 bool ACT8600PowerSystem::USBOTGPower()
 {
-    int8 otg = 0x00;
+    uint8_t otg = 0x00;
     readRegister(OTG, &otg);
     
     return (otg & Q1OK) ? true : false;
@@ -161,7 +166,7 @@ bool ACT8600PowerSystem::USBOTGPower()
 uint8_t ACT8600PowerSystem::USBOTG()
 {
     uint8_t otg = 0x00;
-    readRegister(OTG, (int8_t*)(&otg));
+    readRegister(OTG, &otg);
     return otg;
 }
 
@@ -171,6 +176,7 @@ void ACT8600PowerSystem::onSystemPowerOnReset()
 {
     //Set output voltage on OUT5 to 3.3V - to power MCU input supply the same as VSYS
     //writeRegister(REG5, VOLTAGE_SELECTION & V3_3);
+    powerInterrupt.fall<ACT8600PowerSystem>(this, &ACT8600PowerSystem::powerInterruptHandler);
 }
 
 void ACT8600PowerSystem::onSystemEnterSleep()
@@ -183,9 +189,64 @@ void ACT8600PowerSystem::onSystemWakeFromSleep()
     
 }
 
-/// READ / WRITE REGISTERS
+/// MARK: Protected Methods
 
-bool ACT8600PowerSystem::readRegister(int8_t regAddr, int8_t *regData)
+
+void ACT8600PowerSystem::enableFaultMask()
+{
+    uint8_t data = 0;
+    if (!readRegister(REG1_EXT, &data))
+    {
+        debug("set could not set fault mask");
+        return;
+    }
+
+    if (!writeRegister(REG1_EXT, data | FAULT_MASK_CONTROL))
+    {
+        debug("set could not set fault mask 2");
+        return;
+    }
+
+    readRegister(REG1_EXT, &data);
+    debug("REG1 EXT: 0x%X\n\r",data);
+}
+
+void ACT8600PowerSystem::powerInterruptHandler()
+{
+
+    uint8_t data = 0x00;
+    if (!readRegister(REG1_EXT, &data))
+    {
+        debug("FATAL: could not read from power chip");
+        setPowerFence(true);
+        return;
+    }
+
+    if ((data & ENABLE) != 0 && (data & POWER_OK_STATUS) == 0)
+    {
+        //there is a fault on 3V3 power rail - turn it off!
+        setPowerFence(true);
+
+        // sad weeping beep
+        uint8_t orgPeriod = PWM_ReadPeriod();
+
+        for (int i=1; i<256; i++) {
+            PWM_WritePeriod(i);
+            PWM_WriteCompare2(i/2);
+            wait_ms(2+i/16);
+        }
+
+        PWM_WriteCompare2(0);
+        PWM_WritePeriod(orgPeriod);
+
+        // goto sleep
+        IApplicationContext::EnterSleepMode();
+    }
+}
+
+/// MARK: READ / WRITE REGISTERS
+
+bool ACT8600PowerSystem::readRegister(int8_t regAddr, uint8_t *regData)
 {
     
     act8600_i2c_en_Write(1);
@@ -216,11 +277,11 @@ bool ACT8600PowerSystem::readRegister(int8_t regAddr, int8_t *regData)
     return true;
 }
 
-bool ACT8600PowerSystem::writeRegister(int8_t regAddr, int8_t regData)
+bool ACT8600PowerSystem::writeRegister(int8_t regAddr, uint8_t regData)
 {
     act8600_i2c_en_Write(1);
     CyDelayUs(10);
-    int8_t data[2] = {regAddr, regData};
+    uint8_t data[2] = {(uint8_t)regAddr, regData};
     bool success = i2c.write(ACT8600I2CAddress, (const char*)data, 2) == 0 ? true: false;
     act8600_i2c_en_Write(0);
     
