@@ -76,6 +76,11 @@ bool File::appendString(mono::String text, mono::String path)
     return File::writeString(text, file);
 }
 
+bool File::appendLine(String text, String path, const char *lineDelimiter = "\n")
+{
+    appendString(String::Format("%s%s",text,lineDelimiter), path);
+}
+
 /// MARK: Protected Static Methods
 
 bool File::writeString(mono::String text, FILE *file)

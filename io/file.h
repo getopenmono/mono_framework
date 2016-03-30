@@ -80,8 +80,43 @@ namespace mono { namespace io {
          */
         static bool writeString(String text, String path);
         
-        
+
+        /**
+         * @brief Append a text string to the end of a file
+         * 
+         * Write a text string to a file (appending), without overwriting any
+         * text in the file. Only characters present in the  string are written
+         * to the file. This method does not automatically insert newlines.
+         * If you want to append a line of text see @ref appendLine
+         *
+         * If the file does not exist, it is created and the text is written to
+         * the beginning of the file.
+         *
+         * @param text The text string to append to the file
+         * @param path The path to the file that is appended
+         * @return `true` on success. `false` otherwise.
+         */
         static bool appendString(String text, String path);
+
+        /**
+         * @brief Append a line of text to the end of a file
+         * 
+         * Append a text line (string and a newline character), to the end of
+         * the defined file. By default the newline sequence is `\\n`, but you
+         * can overwrite this behavior using the third optional argument.
+         *
+         * This method ensure that a subsequent string written to the file,
+         * will begin on a new line. If the provided text string already ends 
+         * with a newline sequence, the outline will be 2 lines skipped.
+         *
+         * If the destination file does not exist, it is created.
+         *
+         * @param text The text string to write to the file
+         * @param path The file destination path
+         * @param lineDelimiter Optional: Define a custom new line sequence
+         * @return `true` on success, `false` otherwise
+         */
+        static bool appendLine(String text, String path, const char *lineDelimiter = "\n");
     };
     
 } }
