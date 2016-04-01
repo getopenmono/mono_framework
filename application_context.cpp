@@ -32,7 +32,7 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
     //enable SWD / JTAG debug, by turning on VTARG/VSYS voltage in expansion connector
     // and set the pwr rail to 3.3V
     CyPins_SetPinDriveMode(EXPANSION_3V3_ENABLE, CY_PINS_DM_STRONG);
-    CyPins_SetPin(EXPANSION_3V3_ENABLE);
+    CyPins_ClearPin(EXPANSION_3V3_ENABLE);
     CyPins_SetPinDriveMode(EXPANSION_PWR_ENABLE, CY_PINS_DM_STRONG);
     CyPins_SetPin(EXPANSION_PWR_ENABLE);
 
@@ -53,7 +53,7 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
     UserButton.setDebouncing(true);
     UserButton.fall<ApplicationContext>(this, &ApplicationContext::enterSleepMode);
 
-    defaultSerial.printf("");
+    printf("\n\r");
 }
 
 int ApplicationContext::exec()

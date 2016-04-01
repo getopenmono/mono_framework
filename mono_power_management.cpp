@@ -77,7 +77,6 @@ void MonoPowerManagement::EnterSleep()
     
     processWakeAwarenessQueue();
 
-
 }
 
 
@@ -141,6 +140,11 @@ void MonoPowerManagement::setupMCUPeripherals()
     
     // SW USER must be weak pull up in sleep!
     CyPins_SetPinDriveMode(SW_USER, CY_PINS_DM_RES_UP);
+
+    // EXP_PWR_EN must be strong in sleep!
+    CyPins_SetPinDriveMode(EXPANSION_PWR_ENABLE, CY_PINS_DM_STRONG);
+    // EXP_3V3_EN toggle must also be string drive
+    CyPins_SetPinDriveMode(EXPANSION_3V3_ENABLE, CY_PINS_DM_STRONG);
     
 //    CyPins_SetPinDriveMode(RP_nRESET, CY_PINS_DM_OD_LO);
 //    CyPins_ClearPin(RP_nRESET);
@@ -166,17 +170,19 @@ void MonoPowerManagement::powerDownMCUPeripherals()
     ADC_SAR_1_Sleep();
 //    I2C_Sleep();
     
-#ifndef MONO_DISP_CTRL_HX8340
-    SPI1_Sleep();
-#endif
-    
     I2C_Sleep();
-#ifndef MONO_NO_USB
-    USBUART_SaveConfig();
-    USBUART_Suspend();
-    //USBUART_Stop();
+
+#ifdef DEVICE_SERIAL
+    if (serial_usbuart_is_started())
+    {
+//        USBUART_SaveConfig();
+//        USBUART_Suspend();
+        USBUART_Stop();
+        serial_usbuart_stopped();
+    }
 #endif
-    
+
+
     saveDMRegisters();
     setupMCUPeripherals();
 }
@@ -184,11 +190,9 @@ void MonoPowerManagement::powerDownMCUPeripherals()
 void MonoPowerManagement::powerUpMCUPeripherals()
 {
     restoreDMRegisters();
-    
-#ifndef MONO_NO_USB
-    USBUART_Resume();
-    USBUART_RestoreConfig();
-    //USBUART_Start(0, USBUART_DWR_VDDD_OPERATION);
+
+#ifdef DEVICE_SERIAL
+    serial_usbuart_stopped();
 #endif
     
     PWM_Wakeup();
