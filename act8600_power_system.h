@@ -24,7 +24,7 @@ namespace mono { namespace power {
     class ACT8600PowerSystem : public IPowerSubSystem
     {
     public:
-        
+
         /**
          * @brief List of registers in the ACT8600 chip
          * 
@@ -129,7 +129,7 @@ namespace mono { namespace power {
 
 
         /** enable fault interrupts for REG1 */
-        void enableFaultMask();
+        void enableFaultMask(bool enable = true);
 
         void powerInterruptHandler();
         

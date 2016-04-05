@@ -18,19 +18,25 @@ ACT8600PowerSystem::ACT8600PowerSystem() :
 
 uint8_t ACT8600PowerSystem::SystemStatus()
 {
-    uint8_t data = 0x00;
+    uint8_t data = 0x5A;
     if (!readRegister(SYS, &data))
+    {
+        debug("Could not get SystemStatus\n\r");
+        wait_ms(10);
         error("Could not get SystemStatus, I2C failed\n\r");
-    
+    }
+
     return data;
 }
 
 IPowerSubSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
 {
-    uint8_t data = 0x00;
-    if (!readRegister(APCH_4, &data))
+    uint8_t data = 0x5A;
+    if (!readRegister(APCH_4, &data)) {
+        printf("Failed to read APCH 4 register, I2C failed\n\r");
         error("Failed to read APCH 4 register, I2C failed\n\r");
-    
+    }
+
     ACTChargeState state = (ACTChargeState) ((data >> 4) & 0x03);
 
     switch (state) {
@@ -54,7 +60,7 @@ IPowerSubSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
 
 bool ACT8600PowerSystem::PowerFencePeriperals()
 {
-    uint8_t data = 0x00;
+    uint8_t data = 0x5A;
     if (!readRegister(REG1_EXT, &data))
     {
         debug("could not read from power chip");
@@ -100,11 +106,23 @@ bool ACT8600PowerSystem::IsPowerFenced()
 
 void ACT8600PowerSystem::setPowerFencePeripherals(bool off)
 {
+    uint8_t reg1 = 0x5A;
+    if (!readRegister(REG1_EXT, &reg1))
+    {
+        debug("failed to read REG1");
+        return;
+    }
+
     bool success;
     if (off)
-        success = writeRegister(REG1_EXT, 0x00 & (~ENABLE));
+    {
+
+        success = writeRegister(REG1_EXT, reg1 & (~ENABLE));
+    }
     else
-        success = writeRegister(REG1_EXT, 0x00 | ENABLE);
+    {
+        success = writeRegister(REG1_EXT, reg1 | ENABLE);
+    }
     
     if (!success)
     {
@@ -167,7 +185,7 @@ void ACT8600PowerSystem::onSystemWakeFromSleep()
 /// MARK: Protected Methods
 
 
-void ACT8600PowerSystem::enableFaultMask()
+void ACT8600PowerSystem::enableFaultMask(bool enable)
 {
     uint8_t data = 0;
     if (!readRegister(REG1_EXT, &data))
@@ -176,7 +194,9 @@ void ACT8600PowerSystem::enableFaultMask()
         return;
     }
 
-    if (!writeRegister(REG1_EXT, data | FAULT_MASK_CONTROL))
+    uint8_t bitmask = enable ? (data | FAULT_MASK_CONTROL) : (data & (~FAULT_MASK_CONTROL));
+
+    if (!writeRegister(REG1_EXT, bitmask))
     {
         debug("set could not set fault mask 2");
         return;
@@ -185,12 +205,25 @@ void ACT8600PowerSystem::enableFaultMask()
 
 void ACT8600PowerSystem::powerInterruptHandler()
 {
-
+    uint32_t diff = us_ticker_read() - powerInterrupt.FallTimeStamp();
     uint8_t data = 0x00;
+
+    if (!readRegister(0xC1, &data))
+    {
+        debug("failed to read interrupt reg!\n\r");
+        return;
+    }
+
     if (!readRegister(REG1_EXT, &data))
     {
         debug("FATAL: could not read from power chip");
         setPowerFence(true);
+        return;
+    }
+
+    if (diff < 1000)
+    {
+        mono::Timer::callOnce<ACT8600PowerSystem>(1, this, &ACT8600PowerSystem::powerInterruptHandler);
         return;
     }
 
@@ -254,7 +287,7 @@ bool ACT8600PowerSystem::writeRegister(int8_t regAddr, uint8_t regData)
     act8600_i2c_en_Write(1);
     CyDelayUs(10);
     uint8_t data[2] = {(uint8_t)regAddr, regData};
-    bool success = i2c.write(ACT8600I2CAddress, (const char*)data, 2) == 0 ? true: false;
+    bool success = i2c.write(ACT8600I2CAddress, (const char*)data, 2) == 0 ? true : false;
     act8600_i2c_en_Write(0);
     
     return success;
