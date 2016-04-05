@@ -5,6 +5,7 @@
 #define __displaySimTest__point__
 
 #include <stdint.h>
+#include <mn_string.h>
 
 namespace mono { namespace geo {
 
@@ -38,6 +39,8 @@ namespace mono { namespace geo {
         void setY(int newY);
         void appendX(int addX);
         void appendY(int addY);
+
+        String toString() const;
     };
 
     bool operator==(Point &p1, Point &p2);

@@ -79,3 +79,8 @@ Point mono::geo::operator-(mono::geo::Point &p1, mono::geo::Point &p2)
 {
     return geo::Point(p1.X() - p2.X(), p1.Y() - p2.Y());
 }
+
+mono::String Point::toString() const
+{
+    return String::Format("(%i, %i)",X(),Y());
+}
