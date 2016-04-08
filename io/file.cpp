@@ -76,7 +76,7 @@ bool File::appendString(mono::String text, mono::String path)
     return File::writeString(text, file);
 }
 
-bool File::appendLine(String text, String path, const char *lineDelimiter = "\n")
+bool File::appendLine(String text, String path, const char *lineDelimiter)
 {
     appendString(String::Format("%s%s",text,lineDelimiter), path);
 }

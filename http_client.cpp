@@ -15,7 +15,7 @@ HttpClient::HttpClient() : INetworkRequest(), respData(this), getFrame(NULL) {}
 
 HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFrame(NULL)
 {
-    mono::Regex ipreg("(http://)(\\d+\\.\\d+\\.\\d+\\.\\d)(/?[^\\s'\\\"<>]*)");
+    mono::Regex ipreg("(http://)(\\d+\\.\\d+\\.\\d+\\.\\d+)(/?[^\\s'\\\"<>]*)");
     
     mono::Regex::Capture ipCaps[3];
     bool success = ipreg.Match(anUrl, ipCaps, 3);
