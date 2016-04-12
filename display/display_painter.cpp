@@ -5,12 +5,15 @@
 #include "glcdfont.h"
 #include <us_ticker_api.h>
 #include <mbed_debug.h>
+#include <math.h>
 
 using namespace mono::display;
+using namespace mono;
 
 DisplayPainter::DisplayPainter(IDisplayController *dispctrl) : foregroundColor(WetAsphaltColor), backgroundColor(CloudsColor)
 {
     displayCtrl = dispctrl;
+    antiAliasing = false;
 
 //    if (displayCtrl != NULL)
 //        displayCtrl->AddRefreshCallback(&displayRefreshHandler);
@@ -25,6 +28,8 @@ DisplayPainter::~DisplayPainter()
 //        displayCtrl->RemoveRefreshCallback(&displayRefreshHandler);
 }
 
+/// MARK: Color Accessors
+
 void DisplayPainter::setForegroundColor(Color color)
 {
     foregroundColor = color;
@@ -34,6 +39,30 @@ void DisplayPainter::setBackgroundColor(Color color)
 {
     backgroundColor = color;
 }
+
+Color DisplayPainter::ForegroundColor() const
+{
+    return foregroundColor;
+}
+
+Color DisplayPainter::BackgroundColor() const
+{
+    return backgroundColor;
+}
+
+/// MARK: Anti-aliasing Accessors
+
+void DisplayPainter::useAntialiasedDrawing(bool enable)
+{
+    antiAliasing = enable;
+}
+
+bool DisplayPainter::IsAntialiasedDrawing()
+{
+    return antiAliasing;
+}
+
+/// MARK: Pencil Property Accessors
 
 uint8_t DisplayPainter::LineWidth() const
 {
@@ -55,6 +84,8 @@ void DisplayPainter::setTextSize(uint8_t size)
     textSize = size;
 }
 
+/// MARK: Painting Canvas Info Accessors
+
 uint16_t DisplayPainter::CanvasWidth() const
 {
     return displayCtrl->ScreenWidth();
@@ -70,7 +101,7 @@ IDisplayController* DisplayPainter::DisplayController() const
     return displayCtrl;
 }
 
-// MARK: Draw methods
+/// MARK: Drawing methods
 
 void DisplayPainter::drawPixel(uint16_t x, uint16_t y, bool bg)
 {
@@ -82,6 +113,20 @@ void DisplayPainter::drawPixel(geo::Point const &pos, bool background)
 {
     drawPixel(pos.X(), pos.Y(), background);
 }
+
+void DisplayPainter::drawPixel(uint16_t x, uint16_t y, uint8_t intensity, bool bg)
+{
+    displayCtrl->setWindow(x, y, 1, 1);
+    Color c;
+    if (bg)
+        c = backgroundColor.alphaBlend(intensity, foregroundColor);
+    else
+        c = foregroundColor.alphaBlend(intensity, backgroundColor);
+
+    displayCtrl->write(c);
+}
+
+/// MARK: Rects
 
 void DisplayPainter::drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool bg)
 {
@@ -113,6 +158,8 @@ void DisplayPainter::drawFillRect(geo::Rect const &rct, bool background)
     drawFillRect(rct.X(), rct.Y(), rct.Width(), rct.Height(), background);
 }
 
+/// MARK: Lines
+
 void DisplayPainter::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, bool bg)
 {
     //use VLine or HLine if possible
@@ -120,6 +167,9 @@ void DisplayPainter::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1
         return drawVLine(x0, y0, y1, bg);
     else if (y0==y1)
         return drawHLine(x0, x1, y0, bg);
+
+    if (antiAliasing)
+        return drawAALine(x0, y0, x1, y1, bg);
 
     // Use Bresenham's
     int16_t steep = abs(y1 - y0) > abs(x1 - x0);
@@ -165,6 +215,107 @@ void DisplayPainter::drawLine(geo::Point const &from, geo::Point const &to, bool
     drawLine(from.X(), from.Y(), to.X(), to.Y(), background);
 }
 
+inline uint8_t aa_line_fpart(uint32_t number)
+{
+    return 0x000000FF & number;
+//    if (number < 0.0)
+//        return 1.0 - (number - (int)number);
+//    else
+//        return number - (int)number;
+}
+
+inline uint8_t aa_line_rfpart(uint32_t number)
+{
+    return 255 - aa_line_fpart(number);
+}
+
+void DisplayPainter::drawAALine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, bool bg)
+{
+
+    // Use Xiaolin Wu's line algorithm
+    bool steep = abs(y1 - y0) > abs(x1 - x0);
+
+    if (steep)
+    {
+        swap(x0, y0);
+        swap(x1, y1);
+    }
+
+    if (x0 > x1)
+    {
+        swap(x0, x1);
+        swap(y0, y1);
+    }
+
+    int16_t dx = x1 - x0;
+    int16_t dy = y1 - y0;
+    float gradient = 1.0*dy / dx;
+    int32_t gradientInt = round(gradient*256.0);
+    int32_t intery = (y0 << 8) + gradientInt;
+    
+    // 45 degree line smooth correction
+    uint8_t corr = 0;
+	float aG = gradient > 0 ? gradient : -gradient;
+    if (aG == 1.0)
+    {
+        corr = 255*0.16;
+    }
+
+    // main loop
+    for (uint16_t x=x0; x<x1; x++)
+    {
+        uint8_t i1 = aa_line_rfpart(intery);
+        uint8_t i2 = aa_line_fpart(intery);
+        int16_t rawInt = intery / 256;
+        if (steep) {
+            drawPixel(     rawInt, x, i1, bg);
+            drawPixel(   rawInt+1, x, i2 + corr, bg);
+        } else {
+            drawPixel(x,       rawInt, i1, bg);
+            drawPixel(x,     rawInt+1, i2 + corr, bg);
+
+            if (corr)
+            {
+                drawPixel(x, rawInt-1, i2 + corr, bg);
+            }
+        }
+
+        intery = intery + gradientInt;
+    }
+}
+
+
+
+void DisplayPainter::drawAALine(geo::Point const &from, geo::Point const &to, bool background)
+{
+    drawAALine(from.X(), from.Y(), to.X(), to.Y(), background);
+}
+
+void DisplayPainter::drawVLine(uint16_t x, uint16_t y1, uint16_t y2, bool bg)
+{
+    if (y1 > y2)
+        swap(y1, y2);
+
+    displayCtrl->setWindow(x, y1, 1, y2-y1);
+    for (int i=0; i<y2-y1; i++)
+    {
+        displayCtrl->write(bg ? backgroundColor : foregroundColor);
+    }
+}
+
+void DisplayPainter::drawHLine(uint16_t x1, uint16_t x2, uint16_t y, bool bg)
+{
+    if (x1 > x2)
+        swap(x1, x2);
+
+    displayCtrl->setWindow(x1, y, x2-x1, 1);
+    for (int i=0; i<x2-x1; i++)
+    {
+        displayCtrl->write(bg ? backgroundColor : foregroundColor);
+    }
+}
+
+/// MARK: Simple Characters
 
 void DisplayPainter::drawChar(uint16_t x, uint16_t y, char character)
 {
@@ -209,29 +360,7 @@ void DisplayPainter::drawChar(uint16_t x, uint16_t y, char character)
     }
 }
 
-void DisplayPainter::drawVLine(uint16_t x, uint16_t y1, uint16_t y2, bool bg)
-{
-    if (y1 > y2)
-        swap(y1, y2);
-
-    displayCtrl->setWindow(x, y1, 1, y2-y1);
-    for (int i=0; i<y2-y1; i++)
-    {
-        displayCtrl->write(bg ? backgroundColor : foregroundColor);
-    }
-}
-
-void DisplayPainter::drawHLine(uint16_t x1, uint16_t x2, uint16_t y, bool bg)
-{
-    if (x1 > x2)
-        swap(x1, x2);
-
-    displayCtrl->setWindow(x1, y, x2-x1, 1);
-    for (int i=0; i<x2-x1; i++)
-    {
-        displayCtrl->write(bg ? backgroundColor : foregroundColor);
-    }
-}
+/// MARK: Circles
 
 void DisplayPainter::drawCircle(uint16_t x0, uint16_t y0, uint16_t r, bool color)
 {
@@ -312,6 +441,7 @@ void DisplayPainter::fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t
     }
 }
 
+/// MARK: Simple Helper Methods
 
 void DisplayPainter::swap(uint16_t &a, uint16_t &b)
 {

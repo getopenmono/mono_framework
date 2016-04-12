@@ -91,7 +91,7 @@ void View::setRect(geo::Rect rect)
 
 mono::geo::Point& View::Position()
 {
-    return viewRect.Point();
+    return viewRect;
 }
 
 mono::geo::Size& View::Size()

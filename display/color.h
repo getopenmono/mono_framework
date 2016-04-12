@@ -65,6 +65,8 @@ namespace mono { namespace display {
         /** Return the inverse */
         Color invert() const;
 
+        Color alphaBlend(uint8_t intensity, Color const &other) const;
+
         uint8_t* BytePointer();
 
         /// MARK: Operator overloads

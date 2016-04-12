@@ -97,6 +97,17 @@ Color Color::invert() const
     return Color(r,g,b);
 }
 
+Color Color::alphaBlend(uint8_t intensity, Color const &other) const
+{
+    if (this->value == other.value)
+        return other;
+    
+    Color srcA = this->scale(intensity);
+    uint8_t dstA = (255 - intensity);
+    Color blend = srcA + other.scale(dstA);
+    return blend;
+}
+
 /// MARK: Operator overloads
 
 uint16_t Color::operator=(Color col)

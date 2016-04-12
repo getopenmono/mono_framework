@@ -48,6 +48,7 @@ namespace mono { namespace display {
 
         Color foregroundColor, backgroundColor;
         uint8_t lineWidth, textSize;
+        bool antiAliasing;
 
         static const unsigned char font[];
 
@@ -106,10 +107,54 @@ namespace mono { namespace display {
             this->displayRefreshHandler.attach(function);
         }
 
+        /// MARK: Color Accessors
+
+        /**
+         * @brief Set the painters foreground pencil color
+         *
+         * @param color The new foreground color
+         */
         void setForegroundColor(Color color);
 
+        /**
+         * @brief Sets the painters background pencil color
+         *
+         * @param color the new background color
+         */
         void setBackgroundColor(Color color);
 
+        /**
+         * @brief Gets the painters current foreground pencil color
+         *
+         * @returns The current foreground color
+         */
+        Color ForegroundColor() const;
+
+        /**
+         * @brief Gets the painters current background pencil color
+         *
+         * @returns The current foreground color
+         */
+        Color BackgroundColor() const;
+
+        /**
+         * @brief Turn on/off anti-aliased line drawing.
+         *
+         * You can enable or disable anti-aliased drawing if you need nicer 
+         * graphics or faster rendering. Anti-aliasing smoothes lines edges, that
+         * can otherwise appear jagged.
+         *
+         * @param enable Optional: Switch to turn on/off anti-aliasing. Deafult is enabled.
+         */
+        void useAntialiasedDrawing(bool enable = true);
+
+        /**
+         * @brief Returns `true` if anti-aliased drawing is enabled
+         *
+         * @see useAntialiasedDrawing
+         * @returns `true` if enabled, `false` otherwise.
+         */
+        bool IsAntialiasedDrawing();
 
         uint8_t LineWidth() const;
         void setLineWidth(uint8_t w);
@@ -156,6 +201,23 @@ namespace mono { namespace display {
         void drawPixel(geo::Point const &pos, bool background = false);
 
         /**
+         * @brief Draw a pixel and blend it with the background/foreground color
+         *
+         * Use this method to draw transparent pixels. You define an intensity
+         * of the pixel, that corrosponds to its Alpha value or opacity. 0 is
+         * totally transparent and 255 is fully opaque.
+         *
+         * Only the foreground is influenced by the alpha value, the background
+         * is always treated as fully opaque.
+         *
+         * @param x The pixels x coordinate
+         * @param y The puxels y coordinate
+         * @param intensity The alpha value, 0 to 255 where 0 is transparent.
+         * @param Optional, use the background color as foreground and vice versa
+         */
+        void drawPixel(uint16_t x, uint16_t y, uint8_t intensity, bool background = false);
+
+        /**
          * Paints a filled rectangle in the actuive foreground color. Coordinates
          * a defining the point of the rectangles upper left corner and are given
          * in screen coordinates. (Absolute coordinates)
@@ -189,6 +251,9 @@ namespace mono { namespace display {
          */
         void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, bool background = false);
         void drawLine(geo::Point const &from, geo::Point const &to, bool background = false);
+
+        void drawAALine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, bool background = false);
+        void drawAALine(geo::Point const &from, geo::Point const &to, bool background = false);
 
         /**
          * Draw an outlined rectangle with the current line width and the active

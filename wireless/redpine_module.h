@@ -146,6 +146,8 @@ namespace mono { namespace redpine {
         
         /** True if the module has its network stack ready */
         bool networkInitialized;
+
+        bool joinFailed;
         
         /** The communication interface used by the module */
         ModuleCommunication *comIntf;
@@ -187,7 +189,9 @@ namespace mono { namespace redpine {
         
         /** Callback for the DHCP Mgmt frame response, that indicate the network is ready */
         void onNetworkReady(ManagementFrame::FrameCompletionData *data);
-        
+
+        void onJoinNetworkComplete(ManagementFrame::FrameCompletionData *data);
+
         void onSystemPowerOnReset();
         
         void onSystemEnterSleep();

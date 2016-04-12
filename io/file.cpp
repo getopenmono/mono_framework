@@ -78,7 +78,7 @@ bool File::appendString(mono::String text, mono::String path)
 
 bool File::appendLine(String text, String path, const char *lineDelimiter)
 {
-    appendString(String::Format("%s%s",text,lineDelimiter), path);
+    return appendString(String::Format("%s%s",text(),lineDelimiter), path);
 }
 
 /// MARK: Protected Static Methods
@@ -88,7 +88,7 @@ bool File::writeString(mono::String text, FILE *file)
     if (file == 0)
         return false;
     
-    for (int i=0; i<text.Length(); i++)
+    for (uint32_t i=0; i<text.Length(); i++)
     {
         if (putc(text.stringData[i], file) == EOF)
         {

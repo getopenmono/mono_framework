@@ -49,18 +49,57 @@ namespace mono { namespace geo {
         
         Rect& operator=(Rect r);
         
-        Point& Point();
+        Point Point() const;
         
         Size& Size();
         
         int X2() const;
         
         int Y2() const;
-        
+
+        /**
+         * @brief Reutrn the position of the upper left corner
+         *
+         * This method is the same as casting the `Rect` to a `Point`
+         * @return The point of the upper left corner
+         */
+        class Point UpperLeft() const;
+
+        /**
+         * @brief Reutrn the position of the lower right corner
+         *
+         * @return The point of the lower right corner
+         */
+        class Point LowerRight() const;
+
+        /**
+         * @brief Reutrn the position of the upper right corner
+         *
+         * @return The point of the upper right corner
+         */
+        class Point UpperRight() const;
+
+        /**
+         * @brief Reutrn the position of the lower left corner
+         *
+         * @return The point of the lower left corner
+         */
+        class Point LowerLeft() const;
+
+        /**
+         * @brief Return the position of the Rectangles center
+         */
         class Point Center() const;
-        
+
+        /**
+         * @brief Move (translate) the rectangle by its upper left corner
+         */
         void setPoint(class Point p);
-        
+
+        /**
+         * @brief Set a new size (width/height) of the rectangle
+         *
+         */
         void setSize(class Size s);
         
         /**

@@ -21,6 +21,7 @@ Module::Module()
 {
     communicationInitialized = false;
     networkInitialized = false;
+    joinFailed = false;
 }
 
 /// MARK: STATIC PUBLIC METHODS
@@ -142,6 +143,7 @@ bool Module::setupWifiOnly(String ssid, String passphrase, WifiSecurityModes sec
     //debug("Connecting to %s\n\r",ssid);
     JoinFrame *join = new JoinFrame(ssid, passphrase, secMode);
     join->commitAsync();
+    join->setCompletionCallback<Module>(self, &Module::onJoinNetworkComplete);
 
     //debug("Getting IP address from DHCP...\n\r");
     SetIpParametersFrame *ipparam = new SetIpParametersFrame();
@@ -164,7 +166,8 @@ bool Module::setupWifiOnly(String ssid, String passphrase, WifiSecurityModes sec
 
 bool Module::IsNetworkReady()
 {
-    return Module::Instance()->networkInitialized;
+    Module *self = Module::Instance();
+    return self->networkInitialized && self->joinFailed == false;
 }
 
 
@@ -253,7 +256,7 @@ void Module::moduleEventHandler()
 
 void Module::onNetworkReady(ManagementFrame::FrameCompletionData *data)
 {
-    if (data->Context->commandId == ModuleFrame::SetIPParameters)
+    if (data->Context->commandId == ModuleFrame::SetIPParameters && joinFailed == false)
     {
         SetIpParametersFrame *ip = (SetIpParametersFrame*) data->Context;
         
@@ -268,6 +271,20 @@ void Module::onNetworkReady(ManagementFrame::FrameCompletionData *data)
         if (networkReadyHandler) {
             networkReadyHandler.call();
         }
+    }
+}
+
+void Module::onJoinNetworkComplete(ManagementFrame::FrameCompletionData *data)
+{
+    if (data->Context->commandId == ModuleFrame::Join)
+    {
+        if (!data->Success)
+        {
+            joinFailed = true;
+            debug("Failed joining Network!\r\n");
+        }
+        else
+            debug("Joined Wifi Network!\r\n");
     }
 }
 

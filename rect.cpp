@@ -55,9 +55,29 @@ class Point Rect::Center() const
     return geo::Point( X() + Width()/2, Y() + Height()/2 );
 }
 
-Point& Rect::Point()
+Point Rect::UpperLeft() const
 {
-    return *this;
+    return geo::Point(*this);
+}
+
+Point Rect::LowerRight() const
+{
+    return geo::Point(X2(), Y2());
+}
+
+Point Rect::UpperRight() const
+{
+    return geo::Point(X2(), Y());
+}
+
+Point Rect::LowerLeft() const
+{
+    return geo::Point(X(),Y2());
+}
+
+Point Rect::Point() const
+{
+    return geo::Point(*this);
 }
 
 Size& Rect::Size()
