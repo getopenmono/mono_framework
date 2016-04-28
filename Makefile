@@ -5,7 +5,7 @@ FLASH_ROW_SIZE=256
 FLASH_ARRAY_SIZE=65536
 EE_ARRAY=64
 EE_ROW_SIZE=16
-OPTIMIZATION = -O0
+OPTIMIZATION = -Os
 INCLUDE_DIR=../mono_buildsystem/include
 #LINKER_SCRIPT=${INCLUDE_DIR}/cm3gcc.ld
 BUILD_DIR=build
@@ -25,8 +25,7 @@ PACKAGE_TARGET=../dist
 # 				$(patsubst %.cpp,%.o,$(wildcard $(MBED_PATH)/common/*.cpp)) \
 # 				$(patsubst %.c,%.o,$(wildcard $(MBED_PATH)/target_cypress/*.c))
 #
-MBED_INCLUDES_REL =	. \
-					api \
+MBED_INCLUDES_REL =	api \
 					hal \
 					target_cypress \
 					$(MBED_FS_PATH)/fat \
@@ -35,17 +34,20 @@ MBED_INCLUDES_REL =	. \
 
 MBED_INCLUDES = $(foreach PATH, $(MBED_INCLUDES_REL), $(MBED_PATH)/$(PATH))
 
-MONO_OBJECTS =	$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/*.cpp)) \
+MONO_OBJECTS =	$(patsubst %.c,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/*.c)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/display/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/display/ui/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/display/ili9225g/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/wireless/*.cpp)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/media/*.cpp))
+				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/media/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/io/*.cpp))
 
 MONO_INCLUDES_REL = . \
 					display \
 					display/ili9225g \
 					display/ui \
+					io \
 					wireless \
 					media
 
@@ -114,6 +116,11 @@ $(BUILD_DIR):
 	@echo "Compiling C: $(notdir $<)"
 	@$(CC) $(CC_FLAGS) $(ONLY_C_FLAGS) $(CDEFS) $(INCS) -o $(BUILD_DIR)/$(notdir $@) $<
 
+$(BUILD_DIR)/%.o: %.c
+	@echo "Compiling C: $<"
+	@$(MKDIR) -p $(dir $@)
+	@$(CC) $(CC_FLAGS) $(ONLY_C_FLAGS) -Wno-char-subscripts $(CDEFS) $(INCS) -o $@ $<
+
 $(BUILD_DIR)/%.o: %.cpp
 	@echo "Compiling C++: $<"
 	@$(MKDIR) -p $(dir $@)
@@ -136,12 +143,12 @@ mono_framework.a: cypressLib mbedLib $(MONO_TARGET_OBJECTS)
 	@$(foreach PATH, $(MBED_INCLUDES_REL), $(COPY) -r $(MBED_PATH)/$(PATH)/*.h include/mbed/$(PATH)$(\n))
 	@$(COPY) $(CYLIB_INCLUDE_FILES) include/mbed/target_cypress
 	@echo "Copying to project_template folder..."
-	@$(MKDIR) -p $(PACKAGE_TARGET)/mono/include
-	@$(COPY) mono_framework.a $(PACKAGE_TARGET)/mono
-	@$(COPY) $(COMP_LIB) $(PACKAGE_TARGET)/mono
-	@$(COPY) $(CYPRESS_LIB) $(PACKAGE_TARGET)/mono
-	@$(COPY) $(MBED_LIB) $(PACKAGE_TARGET)/mono
-	@$(COPY) -r include/. $(PACKAGE_TARGET)/mono/include
+	$(MKDIR) -p $(PACKAGE_TARGET)/mono/include
+	$(COPY) mono_framework.a $(PACKAGE_TARGET)/mono
+	$(COPY) $(COMP_LIB) $(PACKAGE_TARGET)/mono
+	$(COPY) $(CYPRESS_LIB) $(PACKAGE_TARGET)/mono
+	$(COPY) $(MBED_LIB) $(PACKAGE_TARGET)/mono
+	$(COPY) -r include/. $(PACKAGE_TARGET)/mono/include
 
 cypressLib:
 	@echo "Building Cypress library..."
