@@ -221,7 +221,7 @@ void ACT8600PowerSystem::powerInterruptHandler()
         return;
     }
 
-    if (diff < 1000)
+    if (diff < FaultTolerenceUs)
     {
         mono::Timer::callOnce<ACT8600PowerSystem>(1, this, &ACT8600PowerSystem::powerInterruptHandler);
         return;

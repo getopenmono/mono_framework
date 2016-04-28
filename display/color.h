@@ -14,7 +14,29 @@
 
 
 namespace mono { namespace display {
-    
+
+    /**
+     * @brief A RGB color representation, generic for display devices
+     *
+     * This class implements a 16-bit RGB 5-6-5 color model. It support methods
+     * for calculating color blendings and more.
+     *
+     * THe class definition also define a set of global constant predefined 
+     * colors, like white, red, green, blue and black. Further, it includes a
+     * set of the FlatUI colors that Mono uses:
+     *
+     * * Clouds
+     * * WetAsphalt
+     * * Concrete
+     * * Silver
+     * * Asbestos
+     * * BelizeHole
+     * * MidnightBlue
+     * * Alizarin
+     * * Turquoise
+     * * Emerald
+     *
+     */
     class Color
     {
     public:
@@ -24,6 +46,7 @@ namespace mono { namespace display {
 
         /// MARK: Constructors
 
+        
         Color();
         
         Color(const int col);
@@ -81,23 +104,39 @@ namespace mono { namespace display {
 
         Color operator+(const Color &col);
     };
-    
+
+    /** A Black color */
     static const Color BlackColor = Color(1, 1, 1); // the value 0x0000 is transparent
+    /** Transparent (Opacity = 0) color (Not supported right now) */
     static const Color TransparentColor = Color(0,0,0);
+    /** Fully red color */
     static const Color RedColor = Color(0xFF,0,0);
+    /** Fully green color */
     static const Color GreenColor = Color(0,0xFF,0);
+    /** Fully blue color */
     static const Color BlueColor = Color(0,0,0xFF);
+    /** Completely white color */
     static const Color WhiteColor = Color(0xFF,0xFF,0xFF);
-    
+
+    /** Clouds color (mostly white) */
     static const Color       CloudsColor(236,240,241);
+    /** FlatUI WetAsphalt color (deep blue) */
     static const Color   WetAsphaltColor(52,73,94);
+    /** FlatUI Concrete color (gray) */
     static const Color     ConcreteColor(149,165,166);
+    /** FlatUI Silver color (light gray) */
     static const Color       SilverColor(189,195,199);
+    /** FlatUI Asbestos color (dark gray) */
     static const Color     AsbestosColor(127,140,141);
+    /** FlatUI BelizeHole color (light blue) */
     static const Color   BelizeHoleColor(41,128,185);
+    /** FlatUI Midnight blue color (dark blue) */
     static const Color MidnightBlueColor(44,62,80);
+    /** FlatUI Alizarin color (red) */
     static const Color     AlizarinColor(231,76,60);
+    /** FlatUI Turquoise color */
     static const Color    TurquoiseColor(26,188,156);
+    /** FlatUI Emerald color (green) */
     static const Color      EmeraldColor(0x2e,0xcc,0x71);
     
 } }

@@ -108,7 +108,8 @@ namespace mono { namespace power {
         
         static const char ACT8600I2CAddress = 0x5A;
         static const PinName InterruptPin = (const PinName)CYREG_PRT5_PC2;
-        
+        static const int FaultTolerenceUs = 10000;
+
         QueueInterrupt powerInterrupt;
 
         /**

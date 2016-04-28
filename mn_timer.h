@@ -46,7 +46,7 @@ namespace mono {
      * Create a reocurring timer that fires each second:
      * @code
      * Timer timr(1000);
-     * timr.attach<MyClass>(this, &MyClass::callback);
+     * timr.setCallback<MyClass>(this, &MyClass::callback);
      * timr.Start();
      * @endcode
      *

@@ -10,17 +10,20 @@ namespace mono { namespace sensor {
      * @brief Abstract Interface for temperature sensors
      *
      * This interface creates a hardware-independent abstraction layer for
-     * interacting with temperature sensors.  Hardware temperature sensors
+     * interacting with temperature sensors. Any hardware temperature sensor
      * in Mono must subclass this interface.
      *
-     * To access the temperature sensor, use the global object:
+     * In Mono Framework these is only initialized one global temperature sensor
+     * object. To obtain a reference to the temperature sensor, use the
+     * @ref IApplicationContext object:
      *
      * @code
-     *  ITemperature *mono::sensor::Temperature
+     *  ITemperature *temp = mono::IApplicationContext::Instance->Temperature;
      * @endcode
      *
-     * This object is automatically be initialized by the @ref IApplicationContext
-     * and the current `ITemperature` subclass.
+     * This object is automatically initialized by the @ref IApplicationContext
+     * and the current `ITemperature` subclass. IT is the @ref IApplicationContext's
+     * job to initialize the temperature sensor.
      */
     class ITemperature
     {
@@ -40,7 +43,7 @@ namespace mono { namespace sensor {
          *
          * @return The temperature in mCelcius
          */
-        virtual int ReadMilliCelcius() {return Read() * 1000; }
+        virtual int ReadMilliCelcius() { return Read() * 1000; }
 
     };
 
