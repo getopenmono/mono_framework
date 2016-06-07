@@ -46,7 +46,6 @@ void AppRunLoop::process()
     
     if (resetOnUserButton)
     {
-        //TODO: remove cypress reference here!
         if (userBtn == 0)
         {
             debug("Will reset on user button!\n\r");
@@ -70,6 +69,11 @@ void AppRunLoop::process()
     
     TouchSystemTime = tEnd - start;
     DynamicTaskQueueTime = end - tEnd;
+}
+
+void AppRunLoop::CheckUsbDtr()
+{
+    checkUsbUartState();
 }
 
 

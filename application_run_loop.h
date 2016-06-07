@@ -58,7 +58,6 @@ namespace mono {
          */
         IRunLoopTask *taskQueueHead;
         
-        
         /**
          * Execute all tasks in the dynamic task queue
          * 
@@ -131,7 +130,13 @@ namespace mono {
          * 
          */
         void exec();
-        
+
+        /**
+         * @brief Do a single check of the DTR on the virtual UART
+         *
+         */
+        void CheckUsbDtr();
+
         /**
          * Add a task to the dynamic task queue. This task is repeated over and
          * over, until it reports that its should not be scheduled.
