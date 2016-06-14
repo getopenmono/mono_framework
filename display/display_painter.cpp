@@ -133,7 +133,7 @@ void DisplayPainter::drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t h
     drawVLine(x, y, y+height, bg);
     drawVLine(x+width, y, y+height, bg);
     drawHLine(x, x+width, y, bg);
-    drawHLine(x, x+width, y+height, bg);
+    drawHLine(x, x+width+1, y+height, bg);
 }
 
 void DisplayPainter::drawRect(geo::Rect const &rct, bool background)
