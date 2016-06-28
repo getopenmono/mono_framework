@@ -58,6 +58,11 @@ uint8_t* Color::BytePointer()
 
 Color Color::scale(uint8_t factor) const
 {
+    if (factor == 0xFF)
+        return *this;
+    else if (factor == 0)
+        return Color(0);
+    
     uint16_t r = this->Red(), g = this->Green(), b = this->Blue();
     r *= factor;
     g *= factor;
