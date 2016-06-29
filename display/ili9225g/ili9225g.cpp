@@ -243,7 +243,11 @@ uint16_t ILI9225G::ScreenHeight() const
 
 void ILI9225G::setCursor(int x, int y)
 {
-    setWindow(x, y, 2, 2);
+    // Set the initial value of address Counter
+    writeCommand(0x20, x);
+    writeCommand(0x21, y);
+    writeRegister(0x22);
+    RegisterSelect = 1;
 }
 
 
