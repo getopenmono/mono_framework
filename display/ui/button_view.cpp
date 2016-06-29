@@ -6,12 +6,14 @@
 
 using namespace mono::ui;
 
+/// MARK: Conructors
+
 void ButtonView::initButton()
 {
     textLabel.setAlignment(TextLabelView::ALIGN_CENTER);
     
     //align text horizontal center
-    uint16_t textHeight = textLabel.TextPixelHeight();
+    uint16_t textHeight = textLabel.TextPixelHeight() - textLabel.Font().baselineOffset;
     int hSpacing = viewRect.Height() - textHeight;
     
     if (hSpacing > 0)
@@ -50,7 +52,9 @@ borderColorPressed(StandardHighlightColor)
     initButton();
 }
 
-void ButtonView::TouchBegin(mono::TouchEvent &event)
+/// MARK: Touch Handlers
+
+void ButtonView::TouchBegin(mono::TouchEvent &)
 {
     isPressedDown = true;
     this->scheduleRepaint();
@@ -87,15 +91,44 @@ void ButtonView::TouchEnd(mono::TouchEvent &event)
         scheduleRepaint();
 }
 
+/// MARK: Accessors
+
 void ButtonView::setText(mono::String txt)
 {
     textLabel.setText(txt);
-    textLabel.scheduleRepaint();
 }
+
+void ButtonView::setFont(MonoFont const &newFont)
+{
+    textLabel.setFont(newFont);
+}
+
+// colors
+void ButtonView::setBorder(Color c)
+{
+    borderColor = c;
+}
+
+void ButtonView::setBackground(Color c)
+{
+    background = c;
+}
+
+void ButtonView::setHighlight(Color c)
+{
+    borderColorPressed = c;
+}
+
+const TextLabelView& ButtonView::TextLabel() const
+{
+    return textLabel;
+}
+
+/// Painters
 
 void ButtonView::repaint()
 {
-    
+
     textLabel.setTextColor( isPressedDown ? borderColorPressed : borderColor );
     textLabel.repaint();
     

@@ -6,6 +6,7 @@
 
 #include "view.h"
 #include "mn_string.h"
+#include <font_interface.h>
 
 namespace mono { namespace ui {
 
@@ -56,10 +57,10 @@ namespace mono { namespace ui {
      *
      * ### Text Format
      *
-     * Currently there are only one font type. But the text color and size can
+     * Currently there are only one font type. But the text color and font can
      * changed. You change these for parameters:
      *
-     * * Text size (from 1 to 6)
+     * * Text font (including size)
      * * Text color
      * * Text background color (the color behind the characters)
      *
@@ -86,11 +87,23 @@ namespace mono { namespace ui {
             ALIGN_CENTER,   /**< Align text in the center */
             ALIGN_RIGHT     /**< Align text to the right */
         };
+
+        /**
+         * @brief This is the default font for all TextLabelView's
+         *
+         * This points to the default Textlabel font. You can overwrite this in
+         * your own code to change the default appearence of all TextLabels.
+         *
+         * You can also overwrite it to use a less memory expensive 
+         * (lower quality) font face.
+         */
+        static const MonoFont *StandardTextFont;
         
     protected:
         
         String text;
-        
+
+        const MonoFont *currentFont;
         uint8_t textSize;
         display::Color textColor;
         display::Color bgColor;
@@ -174,22 +187,70 @@ namespace mono { namespace ui {
         TextLabelView(geo::Rect rct, const char *txt);
         
         // MARK: Getters
+
+        /**
+         * @deprecated Use the @ref Font accessor instead
+         * 
+         * The text size will be phased out in coming releases. You control text
+         * by changing the font.
+         */
         uint8_t TextSize() const;
+
         display::Color TextColor() const;
         TextAlignment Alignment() const;
         
         uint16_t TextPixelWidth() const;
         uint16_t TextPixelHeight() const;
+
+        const MonoFont& Font() const;
         
         // MARK: Setters
+
+        /**
+         * @deprecated Use the @ref setFont accessor instead
+         *
+         * We will phase out this attribute in the coming releases. To change 
+         * the font size you should rely on the font face.
+         *
+         * If you set this to 1 the old font (very bulky) font will be used. Any
+         * other value will load the new default font.
+         */
         void setTextSize(uint8_t newSize);
+
+        /**
+         * @deprecated Name will change. Use @ref setText
+         */
         void setTextColor(display::Color col);
+
+        /**
+         * @deprecated Name will change. Use @ref setBackground
+         */
         void setBackgroundColor(display::Color col);
+
+        /** Set the text color */
+        void setText(display::Color col);
+
+        /** Set the color behind the text */
+        void setBackground(display::Color col);
+
+        /** Controls text justification: center, right, left */
         void setAlignment(TextAlignment align);
         
         void setText(char *text, bool resizeViewWidth = false);
         void setText(const char *txt, bool resizeViewWidth = false);
         void setText(String text, bool resizeViewWidth = false);
+
+        /**
+         * @brief Set a new font face on the label
+         * 
+         * You can pass any @ref MonoFont to the label to change its appearence.
+         * Fonts are header files that you must include youself. Each header file
+         * defines a font in a specific size.
+         *
+         * The header file defines a gloabl `const` variable that you pass to
+         * to this method.
+         */
+        void setFont(MonoFont const &newFont);
         
     public:
         

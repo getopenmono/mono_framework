@@ -23,6 +23,7 @@ struct MonoFont {
     const uint16_t glyphWidth;      /**< The glyph width */
     const uint8_t bitrate;          /**< The number of bits per pixel */
     const uint8_t characterOffset;  /**< Offset of the bitmaps first ASCII character */
+    const uint8_t baselineOffset;   /**< The number of excess pixels below the fonts baseline */
 };
 
 #endif /* font_interface_h */

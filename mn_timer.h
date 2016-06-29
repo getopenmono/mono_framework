@@ -186,6 +186,29 @@ namespace mono {
             
             return timer;
         }
+
+        /**
+         * @brief Create a single shot timer with a delay and callback function
+         *
+         * The timer object is created on the HEAP, which allows it to exists
+         * across stack frame contexts. You can safely create a `callOnce(...)`
+         * timer, and return from a function. Even if you do not have a reference
+         * to the timer object, it will still run and fire. The timer deallocates
+         * itself after it has fired. It cannot be reused.
+         *
+         * @param delayMs Delay time before the timer fires, in milliseconds.
+         * @param memPtr A pointer to the callback C function
+         * @return A pointer to the single shot timer
+         */
+        static Timer* callOnce(uint32_t delayMs, void (*memPtr)(void))
+        {
+            Timer *timer = new Timer(delayMs, true);
+            timer->setCallback(memPtr);
+            timer->autoRelease = true;
+            timer->Start();
+
+            return timer;
+        }
         
     };
     

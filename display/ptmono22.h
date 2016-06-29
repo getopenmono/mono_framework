@@ -510,7 +510,8 @@ namespace mono { namespace display {
         22, // glyphs height
         15, // glyphs width
         2, // pixel bits
-        32 // glyphs ascii offset
+        32, // glyphs ascii offset
+        6
     };
 
 } }

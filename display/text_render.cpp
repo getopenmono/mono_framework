@@ -32,6 +32,7 @@ void TextRender::drawInRect(geo::Rect rect, String text, const MonoFont &fontFac
     if (dispCtrl == 0)
         return;
 
+    dispCtrl->setWindow(rect.X(), rect.Y(), rect.Width(), rect.Height());
     int cnt = 0;
     char c = text[cnt];
     mono::geo::Point offset = rect.Point();

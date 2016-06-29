@@ -109,7 +109,7 @@ void ILI9225G::init()
     debug("\n\rdisplay full paint time: %i\n\r",end-start);
 
     PWM_Start();
-    setBrightness(128);
+    setBrightness(255);
 
     //tearingEffect.DeactivateUntilHandled();
     tearingEffect.rise<ILI9225G>(this, &ILI9225G::tearingEffectHandler);
