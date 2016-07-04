@@ -76,6 +76,8 @@ namespace mono { namespace ui {
          * take over the touch input and screen and run its calibration routine.
          */
         void StartNewCalibration();
+
+        void show();
         
         void RespondTouchBegin(TouchEvent &event);
         

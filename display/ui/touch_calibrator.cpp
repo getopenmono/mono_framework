@@ -46,7 +46,7 @@ void TouchCalibrateView::initialize()
     }
     textLbl.Position().setY(textHeader.Position().Y()+textHeader.TextPixelHeight()+2);
     
-    makeFirstResponder();
+    
 }
 
 TouchCalibrateView::TouchCalibrateView() : ResponderView(geo::Rect(0,0,View::DisplayWidth(),View::DisplayHeight())), textLbl("Touch the center of the cubes..."), textHeader("Calibration"), blockColor(display::EmeraldColor), backgroundColor(display::MidnightBlueColor)
@@ -57,6 +57,12 @@ TouchCalibrateView::TouchCalibrateView() : ResponderView(geo::Rect(0,0,View::Dis
 TouchCalibrateView::TouchCalibrateView(geo::Rect rct) : ResponderView(rct), textLbl(rct,"Touch the center of the cubes..."), textHeader("Calibration"), blockColor(display::EmeraldColor)
 {
     initialize();
+}
+
+void TouchCalibrateView::show()
+{
+    ResponderView::show();
+    makeFirstResponder();
 }
 
 void TouchCalibrateView::repaint()
@@ -80,7 +86,7 @@ void TouchCalibrateView::repaint()
         painter.setForegroundColor(backgroundColor);
         painter.drawFillRect(viewRect);
     }
-    
+
     textHeader.repaint();
     textLbl.repaint();
     
