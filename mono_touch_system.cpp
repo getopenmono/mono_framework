@@ -30,8 +30,6 @@ void MonoTouchSystem::init()
     ADC_SAR_1_Start();
     
     lastTouchProcess = 0;
-    
-    IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
 }
 
 
@@ -182,14 +180,12 @@ void MonoTouchSystem::onSystemPowerOnReset()
 
 void MonoTouchSystem::onSystemEnterSleep()
 {
-    ADC_SAR_1_SaveConfig();
-    ADC_SAR_1_Sleep();
+
 }
 
 void MonoTouchSystem::onSystemWakeFromSleep()
 {
-    ADC_SAR_1_Wakeup();
-    ADC_SAR_1_RestoreConfig();
+
 }
 
 void MonoTouchSystem::OnSystemBatteryLow()
