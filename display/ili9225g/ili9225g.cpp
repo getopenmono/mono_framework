@@ -26,7 +26,8 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
     tearingEffect(TFT_TEARING_EFFECT),
     curWindow(0,0,ScreenWidth(), ScreenHeight())
 {
-
+    setBrightness(0);
+    
     tearingEffect.mode(PullNone);
     tearingInterruptPending = false;
     rebootDisplay = false;

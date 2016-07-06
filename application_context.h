@@ -9,6 +9,7 @@
 #include "display/ili9225g/ili9225g.h"
 #include "at30ts74_temperature.h"
 #include "mono_accelerometer.h"
+#include "mono_buzzer.h"
 
 #include "mono_touch_system.h"
 //#include "mono_settings.h"
@@ -34,6 +35,7 @@ namespace mono {
         MonoTouchSystem touchSys;
         sensor::AT30TS74Temperature at30ts64Sensor;
         sensor::MMAAccelerometer mmaAccelerometer;
+        sensor::MonoBuzzer mnBuzzer;
         
         QueueInterrupt UserButton;
 

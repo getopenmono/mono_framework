@@ -145,7 +145,7 @@ namespace mono {
         void setInterval(uint32_t newIntervalMs);
         
         /**
-         * @brief Sets a callback handler function to the timer
+         * @brief Sets a C++ callback member function to the timer
          * 
          * @param obj A pointer to the callback member function context (the `this` pointer)
          * @param memPtr A pointer to the member function, that is the callback
@@ -156,7 +156,11 @@ namespace mono {
             handler.attach<Owner>(obj, memPtr);
         }
         
-        
+        /**
+         * @brief Sets a callback handler C function to the timer
+         *
+         * @param cFunction A pointer to the C function, that is the callback
+         */
         void setCallback(void(*cFunction)(void))
         {
             handler.attach(cFunction);

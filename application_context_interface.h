@@ -11,6 +11,7 @@
 #include "queue_interrupt.h"
 #include "temperature_interface.h"
 #include "accelerometer_interface.h"
+#include "buzzer_interface.h"
 
 namespace mono {
     
@@ -90,7 +91,8 @@ namespace mono {
                             ITouchSystem *tchSys,
                             QueueInterrupt *userBtn,
                             sensor::ITemperature *temp = 0,
-                            sensor::IAccelerometer *accel = 0
+                            sensor::IAccelerometer *accel = 0,
+                            sensor::IBuzzer *buzzer = 0
                             ) :
             PowerManager(pwr),
             RunLoop(runLp),
@@ -98,7 +100,8 @@ namespace mono {
             TouchSystem(tchSys),
             UserButton(userBtn),
             Temperature(temp),
-            Accelerometer(accel)
+            Accelerometer(accel),
+            Buzzer(buzzer)
         {
             IApplicationContext::Instance = this;
         }
@@ -180,12 +183,29 @@ namespace mono {
          */
         QueueInterrupt *UserButton;
         
-        
+        /**
+         * @brief A pointer to the Temperatrure sensor, if present in hardware
+         * 
+         * This is an automatically initialized pointer to the temperature
+         * object, that is automatically created by the framework.
+         */
         sensor::ITemperature *Temperature;
         
-        
+        /**
+         * @brief A pointer to the Accelerometer, if present in hardware
+         *
+         * This is an automatically initialized pointer to the accelerometer
+         * object, that is automatically created by the framework.
+         */
         sensor::IAccelerometer *Accelerometer;
-        
+
+        /**
+         * @brief A pointer to the buzzer, if present in hardware
+         *
+         * This is an automatically initialized pointer to the buzzer
+         * object, that is automatically created by the framework.
+         */
+        sensor::IBuzzer *Buzzer;
         
         // MARK: Public Methods
         

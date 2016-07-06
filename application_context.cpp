@@ -24,7 +24,8 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
                                                                &touchSys,
                                                                &UserButton,
                                                                &at30ts64Sensor,
-                                                               &mmaAccelerometer),
+                                                               &mmaAccelerometer,
+                                                               &mnBuzzer),
 
                                             dispController(),
                                             UserButton(SW_USER, PullUp)
@@ -37,16 +38,8 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
     CyPins_SetPin(EXPANSION_PWR_ENABLE);
 
 
-    // BEEP
+    // Start the PWM component (as required by buzzer and TFT)
     PWM_Start();
-    PWM_WriteCompare1(0);
-    PWM_WriteCompare2(0);
-    
-//    for (int i=10; i<100; i+=12) {
-//        PWM_WriteCompare2(i);
-//        CyDelay(30);
-//    }
-//    PWM_WriteCompare2(0);
 
     //setup default user button handler
     UserButton.DeactivateUntilHandled(); // dont queue up pushes
