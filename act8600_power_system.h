@@ -59,6 +59,28 @@ namespace mono { namespace power {
             OTG     = 0xB0, /**< USB OTG Power control */
             OTG_EXT = 0xB2  /**<  */
         };
+
+        /** The voltage level threshold settings for the VSYS monitor */
+        enum SystemVoltageLevels
+        {
+            VSYS_DISABLED = 0x0,
+            VSYS_3V3 = 0x8,
+            VSYS_3V4 = 0x9,
+            VSYS_3V5 = 0xA,
+            VSYS_3V6 = 0xB,
+            VSYS_3V7 = 0xC,
+            VSYS_3V8 = 0xD,
+            VSYS_3V9 = 0xE,
+            VSYS_4V0 = 0xF
+        };
+
+        enum SystemMonitorRegMask
+        {
+            SYSLEVMSKn  = 0x80, /**< VSYS Voltage Level Interrupt Mask. Set this bit to 1 to unmask */
+            SYSSTATn    = 0x40, /**< System Voltage Status. Value is 1 when SYSLEV interrupt is generated */
+            VSYSDAT     = 0x20, /**< VSYS Voltage Monitor real time status. Value is 1 when VVSYS < SYSLEV */
+            SYSLEV      = 0x0F  /**< System Voltage Detect Threshold. Defines the SYSLEV voltage threshold. */
+        };
         
         /**
          * Bit masks for the step down regulators registers
@@ -66,12 +88,12 @@ namespace mono { namespace power {
          */
         enum RegulatorMasks
         {
-            VOLTAGE_SELECTION = 0x3F, /**< Select the output voltage bits */
-            ENABLE = 0x80, /**< Select the regulator enable bit */
-            PHASE_CONTROL = 0x04, /**< Some regulator has a phase control bit */
-            OUTPUT_DISCHARGE_CONTROL = 0x04, /**< Some regulators has a discharge control bit */
-            FAULT_MASK_CONTROL = 0x02, /**< Select the fault mask bit */
-            POWER_OK_STATUS = 0x01 /**< Select the Power-OK status bit */
+            VOLTAGE_SELECTION =         0x3F, /**< Select the output voltage bits */
+            ENABLE =                    0x80, /**< Select the regulator enable bit */
+            PHASE_CONTROL =             0x04, /**< Some regulator has a phase control bit */
+            OUTPUT_DISCHARGE_CONTROL =  0x04, /**< Some regulators has a discharge control bit */
+            FAULT_MASK_CONTROL =        0x02, /**< Select the fault mask bit */
+            POWER_OK_STATUS =           0x01  /**< Select the Power-OK status bit */
         };
         
         
@@ -132,7 +154,17 @@ namespace mono { namespace power {
         /** enable fault interrupts for REG1 */
         void enableFaultMask(bool enable = true);
 
+        /** Handle all interrupts from ACT8600 */
         void powerInterruptHandler();
+
+        /** handle all interrupts related to REG1 */
+        void reg1Interrupts(uint32_t diff);
+
+        /** calls @ref reg1Interrupts from timer callback */
+        void reg1InterruptFollowup();
+
+        /** handle all interrupts related to VSYS */
+        void systemInterrupts(uint32_t diff);
         
     public:
         
@@ -151,8 +183,14 @@ namespace mono { namespace power {
 
         void setPowerFencePeripherals(bool off);
         bool PowerFencePeriperals();
-        
+
+        bool IsPowerOk();
+
         void powerOffUnused();
+
+        void setSystemMonitorInterrupt(bool enable);
+        void setSystemVoltageThreshold(SystemVoltageLevels level);
+        SystemVoltageLevels SystemVoltageThreshold();
         
         void onSystemPowerOnReset();
         void onSystemEnterSleep();

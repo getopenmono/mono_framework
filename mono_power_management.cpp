@@ -2,8 +2,10 @@
 // and is available under the MIT license, see LICENSE.txt
 
 #include "mono_power_management.h"
-#include "consoles.h"
+#include "application_context_interface.h"
+//#include "consoles.h"
 #include <project.h>
+
 
 #ifdef DEVICE_SERIAL
 #include <serial_usb_api.h>
@@ -15,18 +17,28 @@ bool MonoPowerManagement::__RTCFired = false;
 
 MonoPowerManagement::MonoPowerManagement()
 {
+    batteryLowFlag = batteryEmptyFlag = false;
     powerAwarenessQueue = NULL;
     PowerSystem = &powerSubsystem;
-    
+
+    PowerSystem->BatteryLowHandler.attach<MonoPowerManagement>(this, &MonoPowerManagement::systemLowBattery);
+    PowerSystem->BatteryEmptyHandler.attach<MonoPowerManagement>(this, &MonoPowerManagement::systemEmptyBattery);
+    singleShot = false;
+    IApplicationContext::Instance->RunLoop->addDynamicTask(this);
+
 #ifdef DEVICE_SERIAL
     // if mbed device serial exists, enable if usb powered
     serial_usbuart_is_powered = PowerSystem->IsUSBCharging();
 #endif
+
+    //turn on peripherals
+    PowerSystem->setPowerFence(false);
 }
 
-void MonoPowerManagement::EnterSleep()
+void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
 {
-    processSleepAwarenessQueue();
+    if (!skipAwarenessQueues)
+        processSleepAwarenessQueue();
     
     mono::defaultSerial.printf("Going to sleep...\n\r");
     //PowerSystem->onSystemEnterSleep();
@@ -69,11 +81,22 @@ void MonoPowerManagement::EnterSleep()
     powerSubsystem.setPowerFencePeripherals(false);
     
     //mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\n\r", status);
-    
-    processWakeAwarenessQueue();
+
+    if (!skipAwarenessQueues)
+        processWakeAwarenessQueue();
 
 }
 
+
+void MonoPowerManagement::taskHandler()
+{
+    if (batteryLowFlag)
+    {
+        batteryLowFlag = false;
+        IPowerManagement::processBatteryLowAwarenessQueue();
+    }
+
+}
 
 
 void MonoPowerManagement::processResetAwarenessQueue()
@@ -134,25 +157,18 @@ void MonoPowerManagement::setupMCUPeripherals()
     CY_SET_REG8(CYREG_PRT15_DM2, 0x00);
     
     // SW USER must be weak pull up in sleep!
-    CyPins_SetPinDriveMode(SW_USER, CY_PINS_DM_RES_UP);
+    CyPins_SetPinDriveMode(USER_SW, CY_PINS_DM_RES_UP);
 
     // EXP_PWR_EN must be strong in sleep!
-    CyPins_SetPinDriveMode(EXPANSION_PWR_ENABLE, CY_PINS_DM_STRONG);
-    // EXP_3V3_EN toggle must also be string drive
-    CyPins_SetPinDriveMode(EXPANSION_3V3_ENABLE, CY_PINS_DM_STRONG);
+    CyPins_SetPinDriveMode(VAUX_EN, CY_PINS_DM_STRONG);
+    // EXP_3V3_EN toggle must also be strong drive
+    CyPins_SetPinDriveMode(VAUX_EN, CY_PINS_DM_STRONG);
+
+    //Power INT res pull up in sleep
+    CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_RES_UP);
     
-//    CyPins_SetPinDriveMode(RP_nRESET, CY_PINS_DM_OD_LO);
-//    CyPins_ClearPin(RP_nRESET);
-//    
-//    CyPins_SetPinDriveMode(CYREG_PRT2_PC2, CY_PINS_DM_OD_LO);
-//    CyPins_ClearPin(CYREG_PRT2_PC2);
-//
-//    // PC12_4 er sda i demo - ikke i PCBv3, her er det PRT12_5
-//    CyPins_SetPinDriveMode(CYREG_PRT12_PC4, CY_PINS_DM_OD_LO);
-//    CyPins_ClearPin(CYREG_PRT12_PC4);
-    
-    CyPins_SetPinDriveMode(ARD_A5, CY_PINS_DM_RES_DWN);
-    CyPins_ClearPin(ARD_D5);
+    CyPins_SetPinDriveMode(A5, CY_PINS_DM_RES_DWN);
+    CyPins_ClearPin(A5);
     
 }
 
@@ -176,7 +192,6 @@ void MonoPowerManagement::powerDownMCUPeripherals()
         serial_usbuart_stopped();
     }
 #endif
-
 
     saveDMRegisters();
     setupMCUPeripherals();
@@ -248,3 +263,24 @@ void MonoPowerManagement::restoreDMPort(uint32_t regAddrOffset, uint8_t srcOffse
     CY_SET_REG8(regAddrOffset+1, srcOffset[1]);
     CY_SET_REG8(regAddrOffset+2, srcOffset[2]);
 }
+
+/// MARK: Power Sub-System Battery callbacks
+
+void MonoPowerManagement::systemLowBattery()
+{
+    batteryLowFlag = true;
+}
+
+void MonoPowerManagement::systemEmptyBattery()
+{
+    //batteryEmptyFlag = true;
+
+    while (!PowerSystem->IsPowerOk())
+    {
+        debug("Sleep until power is OK!\t\n");
+        EnterSleep();
+    }
+
+    IApplicationContext::SoftwareResetToApplication();
+}
+

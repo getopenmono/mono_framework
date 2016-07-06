@@ -13,6 +13,10 @@ ACT8600PowerSystem::ACT8600PowerSystem() :
     powerInterrupt(InterruptPin, PullUp)
 {
     enableFaultMask();
+
+    setSystemVoltageThreshold(VSYS_3V4);
+    setSystemMonitorInterrupt(true);
+
     powerInterrupt.fall<ACT8600PowerSystem>(this, &ACT8600PowerSystem::powerInterruptHandler);
 }
 
@@ -164,6 +168,62 @@ uint8_t ACT8600PowerSystem::USBOTG()
     return otg;
 }
 
+bool ACT8600PowerSystem::IsPowerOk()
+{
+    uint8_t sysreg = 0x00;
+    if (readRegister(SYS, &sysreg))
+    {
+        //printf("ACT8600 VSYS reg: 0x%x\t\n",sysreg);
+        return ((sysreg & VSYSDAT) == 0) ? true : false;
+    }
+
+    printf("ACT8600: failed to read sys reg!");
+    return false;
+}
+
+void ACT8600PowerSystem::setSystemMonitorInterrupt(bool enable)
+{
+    uint8_t data = 0;
+    if (!readRegister(SYS, &data))
+    {
+        //debug("ACT8600: Could not read SYS register\t\n");
+        return;
+    }
+    //printf("SYS: 0x%x\t\n",data);
+    if (enable)
+        writeRegister(SYS, data | SYSLEVMSKn);
+    else
+        writeRegister(SYS, data & ~SYSLEVMSKn);
+}
+
+void ACT8600PowerSystem::setSystemVoltageThreshold(ACT8600PowerSystem::SystemVoltageLevels level)
+{
+    uint8_t data = 0;
+    if (!readRegister(SYS, &data))
+    {
+        debug("ACT8600: Could not read SYS register\t\n");
+        return;
+    }
+    //printf("SYS: 0x%x\t\n",data);
+
+    data &= ~SYSLEV; //clear all threshold bits
+    data |= level; // set new level bits
+    //printf("new SYS reg: 0x%x\t\n",data);
+    writeRegister(SYS, data);
+}
+
+ACT8600PowerSystem::SystemVoltageLevels ACT8600PowerSystem::SystemVoltageThreshold()
+{
+    uint8_t data = 0;
+    if (!readRegister(SYS, &data))
+    {
+        debug("ACT8600: Could not read SYS register\t\n");
+        return VSYS_DISABLED;
+    }
+
+    return (SystemVoltageLevels) (data & SYSLEV);
+}
+
 /// MARK: POWER AWARE SYSTEM METHODS
 
 void ACT8600PowerSystem::onSystemPowerOnReset()
@@ -201,6 +261,7 @@ void ACT8600PowerSystem::enableFaultMask(bool enable)
         debug("set could not set fault mask 2");
         return;
     }
+
 }
 
 void ACT8600PowerSystem::powerInterruptHandler()
@@ -214,6 +275,16 @@ void ACT8600PowerSystem::powerInterruptHandler()
         return;
     }
 
+    if (data == REG1_EXT)
+        reg1Interrupts(diff);
+    if (data == SYS)
+        systemInterrupts(diff);
+
+}
+
+void ACT8600PowerSystem::reg1Interrupts(uint32_t diff)
+{
+    uint8_t data = 0;
     if (!readRegister(REG1_EXT, &data))
     {
         debug("FATAL: could not read from power chip");
@@ -223,7 +294,7 @@ void ACT8600PowerSystem::powerInterruptHandler()
 
     if (diff < FaultTolerenceUs)
     {
-        mono::Timer::callOnce<ACT8600PowerSystem>(1, this, &ACT8600PowerSystem::powerInterruptHandler);
+        mono::Timer::callOnce<ACT8600PowerSystem>(1, this, &ACT8600PowerSystem::reg1InterruptFollowup);
         return;
     }
 
@@ -246,6 +317,53 @@ void ACT8600PowerSystem::powerInterruptHandler()
 
         // goto sleep
         IApplicationContext::EnterSleepMode();
+    }
+}
+
+void ACT8600PowerSystem::reg1InterruptFollowup()
+{
+    uint32_t diff = us_ticker_read() - powerInterrupt.FallTimeStamp();
+    reg1Interrupts(diff);
+}
+
+void ACT8600PowerSystem::systemInterrupts(uint32_t diff)
+{
+
+    uint8_t sysreg = 0;
+    if (!readRegister(SYS, &sysreg))
+        return;
+
+    SystemVoltageLevels threshold = (SystemVoltageLevels) (sysreg & SYSLEV);
+    bool powerOk = !(sysreg & VSYSDAT);
+    bool interrupted = (sysreg & SYSSTATn) != 0;
+
+    debug("VSYS INT: threshold: 0x%x, powerOk: %i, interrupted: %i\t\n",threshold, powerOk, interrupted);
+
+    if (!interrupted)
+    {
+        debug("no SYSLEV intterrupt!");
+        return;
+    }
+
+    // if level is 3.4 or lower!
+    if (!powerOk && threshold == VSYS_3V4)
+    {
+        debug("level is 3.4 or lower!\t\n");
+
+        BatteryEmptyHandler.call();
+    }
+
+    //if level is below 3.6
+//    else if (!powerOk && threshold == VSYS_3V6)
+//    {
+//        debug("level is 3.6 or lower!\t\n");
+//        BatteryLowHandler.call();
+//        setSystemVoltageThreshold(VSYS_3V4);
+//    }
+
+    else
+    {
+        debug("VSYS interrupt not handled!");
     }
 }
 
