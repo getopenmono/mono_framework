@@ -60,7 +60,8 @@ void QueueInterrupt::_irq_rise_handler()
 {
     if (deactivateUntilHandler && !isHandled)
         return;
-    
+
+    this->snapShot = this->read();
     this->riseTimeStamp = us_ticker_read();
     
     if (debounce)
@@ -79,7 +80,8 @@ void QueueInterrupt::_irq_fall_handler()
 {
     if (deactivateUntilHandler && !isHandled)
         return;
-    
+
+    this->snapShot = this->read();
     this->fallTimeStamp = us_ticker_read();
     
     if (debounce)

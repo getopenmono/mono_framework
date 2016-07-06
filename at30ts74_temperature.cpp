@@ -36,7 +36,6 @@ int AT30TS74Temperature::ReadMilliCelcius()
         return 0xFFFF;
 
     int rawTemp = (temp[0]<<8 | temp[1]) >> 4; // right shoft 12-bit number
-    debug("raw temp: %i\n\r",rawTemp);
     int millicelcius = (rawTemp*1000) >> 4; // divide by 16 to get milli-celcius
 
     return millicelcius;
