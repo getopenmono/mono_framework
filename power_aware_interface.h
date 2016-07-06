@@ -1,10 +1,5 @@
-//
-//  power_aware_interface.h
-//  mono
-//
-//  Created by Kristoffer Lyder Andersen on 09/09/15.
-//  Copyright (c) 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef mono_power_aware_interface_h
 #define mono_power_aware_interface_h

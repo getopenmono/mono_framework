@@ -1,10 +1,5 @@
-//
-//  application_run_loop.h
-//  displaySimTest
-//
-//  Created by Kristoffer Lyder Andersen on 12/07/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef __displaySimTest__application_run_loop__
 #define __displaySimTest__application_run_loop__

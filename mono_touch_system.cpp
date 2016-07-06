@@ -1,10 +1,5 @@
-//
-//  mono_touch_system.cpp
-//  analog
-//
-//  Created by Kristoffer Lyder Andersen on 05/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "mono_touch_system.h"
 #include "application_context_interface.h"

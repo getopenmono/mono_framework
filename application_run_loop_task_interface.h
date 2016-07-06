@@ -1,10 +1,5 @@
-//
-//  application_run_loop_task_interface.h
-//  mono
-//
-//  Created by Kristoffer Andersen on 07/09/15.
-//  Copyright (c) 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef mono_application_run_loop_task_interface_h
 #define mono_application_run_loop_task_interface_h

@@ -1,10 +1,5 @@
-//
-//  power_system_interface.h
-//  mono
-//
-//  Created by Kristoffer Andersen on 08/09/15.
-//  Copyright (c) 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef __i2c_power_test__power_subsystem_interface__
 #define __i2c_power_test__power_subsystem_interface__
