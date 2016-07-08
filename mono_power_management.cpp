@@ -134,25 +134,18 @@ void MonoPowerManagement::setupMCUPeripherals()
     CY_SET_REG8(CYREG_PRT15_DM2, 0x00);
     
     // SW USER must be weak pull up in sleep!
-    CyPins_SetPinDriveMode(SW_USER, CY_PINS_DM_RES_UP);
+    CyPins_SetPinDriveMode(USER_SW, CY_PINS_DM_RES_UP);
 
     // EXP_PWR_EN must be strong in sleep!
-    CyPins_SetPinDriveMode(EXPANSION_PWR_ENABLE, CY_PINS_DM_STRONG);
-    // EXP_3V3_EN toggle must also be string drive
-    CyPins_SetPinDriveMode(EXPANSION_3V3_ENABLE, CY_PINS_DM_STRONG);
+    CyPins_SetPinDriveMode(VAUX_EN, CY_PINS_DM_STRONG);
+    // EXP_3V3_EN toggle must also be strong drive
+    CyPins_SetPinDriveMode(VAUX_EN, CY_PINS_DM_STRONG);
+
+    //Power INT res pull up in sleep
+    CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_RES_UP);
     
-//    CyPins_SetPinDriveMode(RP_nRESET, CY_PINS_DM_OD_LO);
-//    CyPins_ClearPin(RP_nRESET);
-//    
-//    CyPins_SetPinDriveMode(CYREG_PRT2_PC2, CY_PINS_DM_OD_LO);
-//    CyPins_ClearPin(CYREG_PRT2_PC2);
-//
-//    // PC12_4 er sda i demo - ikke i PCBv3, her er det PRT12_5
-//    CyPins_SetPinDriveMode(CYREG_PRT12_PC4, CY_PINS_DM_OD_LO);
-//    CyPins_ClearPin(CYREG_PRT12_PC4);
-    
-    CyPins_SetPinDriveMode(ARD_A5, CY_PINS_DM_RES_DWN);
-    CyPins_ClearPin(ARD_D5);
+    CyPins_SetPinDriveMode(A5, CY_PINS_DM_RES_DWN);
+    CyPins_ClearPin(A5);
     
 }
 
