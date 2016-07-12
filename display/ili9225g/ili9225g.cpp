@@ -149,67 +149,6 @@ void ILI9225G::tearingEffectHandler()
 
 void ILI9225G::taskHandler()
 {
-
-    if (rebootDisplay)
-    {
-        PWM_WriteCompare2(64);
-        CyDelay(200);
-        PWM_WriteCompare2(0);
-        CyDelay(200);
-        
-        for (int i=0; i<4; i++) {
-            PWM_WriteCompare2(64);
-            CyDelay(600);
-            PWM_WriteCompare2(0);
-            CyDelay(200);
-        }
-        
-        
-        Reset = 0;
-        RegisterSelect = 0;
-        IM0 = 0;
-        SPI1_Stop();
-        
-        // power chip IRQ line might be high
-        
-        
-        //SCL: PRT2 PC2
-        //SDA: PRT12 PC5
-        power::ACT8600PowerSystem power;
-        power.setPowerFence(true);
-        debug("power: %i\n\r", power.IsPowerFenced());
-        
-        CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_STRONG);
-        CyPins_ClearPin(CYREG_PRT5_PC2);
-        
-        CyPins_SetPinDriveMode(RP_nRESET, CY_PINS_DM_OD_LO);
-        CyPins_ClearPin(RP_nRESET);
-        
-        uint8_t sda = CY_GET_REG8(CYREG_PRT12_BYP);
-        CY_SET_REG8(CYREG_PRT12_BYP, sda & ~0x20);
-        uint8_t scl = CY_GET_REG8(CYREG_PRT2_BYP);
-        CY_SET_REG8(CYREG_PRT2_PC2, scl & ~0x04);
-        
-        CyPins_SetPinDriveMode(CYREG_PRT2_PC2, CY_PINS_DM_OD_LO);
-        CyPins_ClearPin(CYREG_PRT2_PC2);
-        
-        CyPins_SetPinDriveMode(CYREG_PRT12_PC5, CY_PINS_DM_OD_LO);
-        CyPins_ClearPin(CYREG_PRT12_PC5);
-        
-        CyDelay(500);
-        
-        // power chip IRQ line
-        CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_DIG_HIZ);
-        
-        CY_SET_REG8(CYREG_PRT12_BYP, sda);
-        CY_SET_REG8(CYREG_PRT2_BYP, scl);
-        
-        
-        power.setPowerFence(false);
-        
-        //IApplicationContext::SoftwareResetToApplication();
-    }
-    
     if ((tearingInterruptPending && refreshHandler))
     {
         refreshHandler->call();
