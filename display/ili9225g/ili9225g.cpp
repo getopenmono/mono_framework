@@ -161,13 +161,6 @@ void ILI9225G::tearingWatchdogHandler()
 {
     watTime = us_ticker_read();
     teWat = LastTearningEffectTime;
-    
-    return;
-
-    if (watTime - LastTearningEffectTime > 100000)
-    {
-        rebootDisplay = true;
-    }
 }
 
 uint16_t ILI9225G::ScreenWidth() const
