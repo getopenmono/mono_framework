@@ -165,7 +165,10 @@ namespace mono { namespace power {
 
         /** handle all interrupts related to VSYS */
         void systemInterrupts(uint32_t diff);
-        
+
+        void setPowerFencePeripherals(bool off);
+        bool PowerFencePeriperals();
+
     public:
         
         ACT8600PowerSystem();
@@ -181,12 +184,10 @@ namespace mono { namespace power {
         bool IsPowerFenced();
         void setPowerFence(bool active);
 
-        void setPowerFencePeripherals(bool off);
-        bool PowerFencePeriperals();
-
         bool IsPowerOk();
 
         void powerOffUnused();
+        void powerReg8(bool power = true);
 
         void setSystemMonitorInterrupt(bool enable);
         void setSystemVoltageThreshold(SystemVoltageLevels level);

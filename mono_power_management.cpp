@@ -40,11 +40,9 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
     if (!skipAwarenessQueues)
         processSleepAwarenessQueue();
     
-    mono::defaultSerial.printf("Going to sleep...\n\r");
-    //PowerSystem->onSystemEnterSleep();
-    wait_ms(10);
+    PowerSystem->onSystemEnterSleep();
     
-    powerSubsystem.setPowerFencePeripherals(true);
+    powerSubsystem.setPowerFence(true);
     powerSubsystem.powerOffUnused();
     powerDownMCUPeripherals();
     
@@ -76,9 +74,9 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
     //CyGlobalIntEnable;
     
     powerUpMCUPeripherals();
-    //PowerSystem->onSystemWakeFromSleep();
+    PowerSystem->onSystemWakeFromSleep();
 
-    powerSubsystem.setPowerFencePeripherals(false);
+    powerSubsystem.setPowerFence(false);
     
     //mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\n\r", status);
 
