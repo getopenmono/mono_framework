@@ -13,6 +13,10 @@ ACT8600PowerSystem::ACT8600PowerSystem() :
     powerInterrupt(InterruptPin, PullUp)
 {
     enableFaultMask();
+
+    setSystemVoltageThreshold(VSYS_3V4);
+    setSystemMonitorInterrupt(true);
+
     powerInterrupt.fall<ACT8600PowerSystem>(this, &ACT8600PowerSystem::powerInterruptHandler);
 }
 
@@ -21,9 +25,8 @@ uint8_t ACT8600PowerSystem::SystemStatus()
     uint8_t data = 0x5A;
     if (!readRegister(SYS, &data))
     {
-        debug("Could not get SystemStatus\n\r");
+        //debug("Could not get SystemStatus, I2C failed\n\r");
         wait_ms(10);
-        error("Could not get SystemStatus, I2C failed\n\r");
     }
 
     return data;
@@ -33,8 +36,7 @@ IPowerSubSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
 {
     uint8_t data = 0x5A;
     if (!readRegister(APCH_4, &data)) {
-        printf("Failed to read APCH 4 register, I2C failed\n\r");
-        error("Failed to read APCH 4 register, I2C failed\n\r");
+        //printf("Failed to read APCH 4 register, I2C failed\n\r");
     }
 
     ACTChargeState state = (ACTChargeState) ((data >> 4) & 0x03);
@@ -63,7 +65,7 @@ bool ACT8600PowerSystem::PowerFencePeriperals()
     uint8_t data = 0x5A;
     if (!readRegister(REG1_EXT, &data))
     {
-        debug("could not read from power chip");
+        //debug("could not read from power chip");
         return false;
     }
 
@@ -74,28 +76,52 @@ bool ACT8600PowerSystem::PowerFencePeriperals()
 void ACT8600PowerSystem::powerOffUnused()
 {
     bool success = true;
-    success &= writeRegister(REG2_EXT, (uint8_t)(0x00 | (~ENABLE)));
+    uint8_t data = 0x0;
+
+    readRegister(REG2_EXT, &data);
+    success &= writeRegister(REG2_EXT, data & ~ENABLE);
     
-    success &= writeRegister(REG3_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    
-    success &= writeRegister(REG4_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    
-    success &= writeRegister(REG5_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    
-    success &= writeRegister(REG6_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    
-    success &= writeRegister(REG7_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    
-    success &= writeRegister(REG8_EXT, (uint8_t)(0x00 | (~ENABLE)));
-    
+    readRegister(REG3_EXT, &data);
+    success &= writeRegister(REG3_EXT, data & ~ENABLE);
+
+    readRegister(REG4_EXT, &data);
+    success &= writeRegister(REG4_EXT, data & ~ENABLE);
+
+    readRegister(REG5_EXT, &data);
+    success &= writeRegister(REG5_EXT, data & ~ENABLE);
+
+    readRegister(REG6_EXT, &data);
+    success &= writeRegister(REG6_EXT, data & ~ENABLE);
+
+    readRegister(REG7_EXT, &data);
+    success &= writeRegister(REG7_EXT, data & ~ENABLE);
+
+    readRegister(REG8_EXT, &data);
+    success &= writeRegister(REG8_EXT, data & ~ENABLE);
+
     if (!success)
     {
-        debug("Failed to set unused power regs!\n\r");
+        //debug("Failed to set unused power regs!\n\r");
     }
+}
+
+void ACT8600PowerSystem::powerReg8(bool power)
+{
+    uint8_t data = 0;
+    readRegister(REG8_EXT, &data);
+    
+    if (power)
+        writeRegister(REG8_EXT, data | ENABLE);
+    else
+        writeRegister(REG8_EXT, data & ~ENABLE);
 }
 
 void ACT8600PowerSystem::setPowerFence(bool active)
 {
+    // To keep the VSYS interrupt working, ensure that at least one REG is enabled
+    if (active == true)
+        powerReg8();
+
     setPowerFencePeripherals(active);
 }
 
@@ -109,14 +135,13 @@ void ACT8600PowerSystem::setPowerFencePeripherals(bool off)
     uint8_t reg1 = 0x5A;
     if (!readRegister(REG1_EXT, &reg1))
     {
-        debug("failed to read REG1");
+        //debug("failed to read REG1");
         return;
     }
 
     bool success;
     if (off)
     {
-
         success = writeRegister(REG1_EXT, reg1 & (~ENABLE));
     }
     else
@@ -126,7 +151,7 @@ void ACT8600PowerSystem::setPowerFencePeripherals(bool off)
     
     if (!success)
     {
-        debug("failed to set power fence!\n\r");
+        //debug("failed to set power fence!\n\r");
     }
 }
 
@@ -164,6 +189,78 @@ uint8_t ACT8600PowerSystem::USBOTG()
     return otg;
 }
 
+bool ACT8600PowerSystem::IsPowerOk()
+{
+    // Enable at leat one regulator before checking VSYS OK state
+    // For some reason ACT8600 needs at least one REG enabled before VSYS
+    // can be OK at all!
+    uint8_t data = 0x0;
+    readRegister(REG8_EXT, &data);
+    if ((data & ENABLE) == 0)
+    {
+        writeRegister(REG8_EXT, data | ENABLE);
+    }
+
+    uint8_t sysreg = 0x00;
+    if (readRegister(SYS, &sysreg))
+    {
+        // Restore Regulator 8 state
+        writeRegister(REG8_EXT, data & ~ENABLE);
+
+        //printf("ACT8600 VSYS reg: 0x%x\t\n",sysreg);
+        return ((sysreg & VSYSDAT) == 0) ? true : false;
+    }
+
+    // Restore Regulator 8 state
+    writeRegister(REG8_EXT, data & ~ENABLE);
+
+    //printf("ACT8600: failed to read sys reg!");
+    return false;
+}
+
+void ACT8600PowerSystem::setSystemMonitorInterrupt(bool enable)
+{
+    uint8_t data = 0;
+    if (!readRegister(SYS, &data))
+    {
+        //debug("ACT8600: Could not read SYS register\t\n");
+        return;
+    }
+    //printf("SYS: 0x%x\t\n",data);
+    if (enable)
+        writeRegister(SYS, (data | SYSLEVMSKn));
+    else
+        writeRegister(SYS, (data & ~SYSLEVMSKn));
+}
+
+void ACT8600PowerSystem::setSystemVoltageThreshold(ACT8600PowerSystem::SystemVoltageLevels level)
+{
+    uint8_t data = 0;
+    if (!readRegister(SYS, &data))
+    {
+        //debug("ACT8600: Could not read SYS register\t\n");
+        return;
+    }
+    //printf("SYS: 0x%x\t\n",data);
+
+    data &= ~SYSLEV; //clear all threshold bits
+    data |= level; // set new level bits
+    //printf("new SYS reg: 0x%x\t\n",data);
+    writeRegister(SYS, data);
+}
+
+ACT8600PowerSystem::SystemVoltageLevels ACT8600PowerSystem::SystemVoltageThreshold()
+{
+    uint8_t data = 0;
+    if (!readRegister(SYS, &data))
+    {
+        //debug("ACT8600: Could not read SYS register\t\n");
+        return VSYS_DISABLED;
+    }
+
+    return (SystemVoltageLevels) (data & SYSLEV);
+}
+
 /// MARK: POWER AWARE SYSTEM METHODS
 
 void ACT8600PowerSystem::onSystemPowerOnReset()
@@ -174,12 +271,44 @@ void ACT8600PowerSystem::onSystemPowerOnReset()
 
 void ACT8600PowerSystem::onSystemEnterSleep()
 {
-    
+    setSystemMonitorInterrupt(false);
 }
+
+extern char *debugData;
 
 void ACT8600PowerSystem::onSystemWakeFromSleep()
 {
-    
+    // Enable at leat one regulator before checking VSYS OK state
+    // For some reason ACT8600 needs at least one REG enabled before VSYS
+    // can be OK at all!
+    uint8_t data = 0x0;
+    readRegister(REG8_EXT, &data);
+    if ((data & ENABLE) == 0)
+    {
+        writeRegister(REG8_EXT, data | ENABLE);
+    }
+
+    uint8_t sysreg = 0;
+    if (!readRegister(SYS, &sysreg))
+        return;
+
+    // Restore Regulator 8 state
+    writeRegister(REG8_EXT, data & ~ENABLE);
+
+
+    SystemVoltageLevels threshold = (SystemVoltageLevels) (sysreg & SYSLEV);
+    bool powerOk = !(sysreg & VSYSDAT);
+
+    if (!powerOk)
+    {
+        PWM_WriteCompare2(64);
+        wait_ms(30);
+        PWM_WriteCompare2(0);
+
+        BatteryEmptyHandler.call();
+    }
+
+    setSystemMonitorInterrupt(true);
 }
 
 /// MARK: Protected Methods
@@ -190,7 +319,7 @@ void ACT8600PowerSystem::enableFaultMask(bool enable)
     uint8_t data = 0;
     if (!readRegister(REG1_EXT, &data))
     {
-        debug("set could not set fault mask");
+        //debug("set could not set fault mask");
         return;
     }
 
@@ -198,9 +327,10 @@ void ACT8600PowerSystem::enableFaultMask(bool enable)
 
     if (!writeRegister(REG1_EXT, bitmask))
     {
-        debug("set could not set fault mask 2");
+        //debug("set could not set fault mask 2");
         return;
     }
+
 }
 
 void ACT8600PowerSystem::powerInterruptHandler()
@@ -208,22 +338,31 @@ void ACT8600PowerSystem::powerInterruptHandler()
     uint32_t diff = us_ticker_read() - powerInterrupt.FallTimeStamp();
     uint8_t data = 0x00;
 
-    if (!readRegister(0xC1, &data))
+    if (data == REG1_EXT)
+        reg1Interrupts(diff);
+    else if (data == SYS)
     {
-        debug("failed to read interrupt reg!\n\r");
-        return;
+        systemInterrupts(diff);
     }
+    else
+    {
 
+    }
+}
+
+void ACT8600PowerSystem::reg1Interrupts(uint32_t diff)
+{
+    uint8_t data = 0;
     if (!readRegister(REG1_EXT, &data))
     {
-        debug("FATAL: could not read from power chip");
+        //debug("FATAL: could not read from power chip");
         setPowerFence(true);
         return;
     }
 
     if (diff < FaultTolerenceUs)
     {
-        mono::Timer::callOnce<ACT8600PowerSystem>(1, this, &ACT8600PowerSystem::powerInterruptHandler);
+        mono::Timer::callOnce<ACT8600PowerSystem>(1, this, &ACT8600PowerSystem::reg1InterruptFollowup);
         return;
     }
 
@@ -249,6 +388,64 @@ void ACT8600PowerSystem::powerInterruptHandler()
     }
 }
 
+void ACT8600PowerSystem::reg1InterruptFollowup()
+{
+    uint32_t diff = us_ticker_read() - powerInterrupt.FallTimeStamp();
+    reg1Interrupts(diff);
+}
+
+void ACT8600PowerSystem::systemInterrupts(uint32_t diff)
+{
+
+    // Enable at leat one regulator before checking VSYS OK state
+    // For some reason ACT8600 needs at least one REG enabled before VSYS
+    // can be OK at all!
+//    uint8_t data = 0x0;
+//    readRegister(REG8_EXT, &data);
+//    if ((data & ENABLE) == 0)
+//    {
+//        writeRegister(REG8_EXT, data | ENABLE);
+//    }
+
+    uint8_t sysreg = 0;
+    if (!readRegister(SYS, &sysreg))
+    {
+        return;
+    }
+
+
+    // Restore Regulator 8 state
+//    writeRegister(REG8_EXT, data & ~ENABLE);
+
+    SystemVoltageLevels threshold = (SystemVoltageLevels) (sysreg & SYSLEV);
+    bool powerOk = !(sysreg & VSYSDAT);
+    bool interrupted = (sysreg & SYSSTATn) != 0;
+
+    if (!interrupted)
+    {
+        return;
+    }
+
+    // if level is 3.4 or lower!
+    if (!powerOk && threshold == VSYS_3V4)
+    {
+        PWM_WriteCompare2(64);
+        wait_ms(30);
+        PWM_WriteCompare2(0);
+
+        BatteryEmptyHandler.call();
+    }
+
+    //if level is below 3.6
+//    else if (!powerOk && threshold == VSYS_3V6)
+//    {
+//        debug("level is 3.6 or lower!\t\n");
+//        BatteryLowHandler.call();
+//        setSystemVoltageThreshold(VSYS_3V4);
+//    }
+
+}
+
 /// MARK: READ / WRITE REGISTERS
 
 bool ACT8600PowerSystem::readRegister(int8_t regAddr, uint8_t *regData)
@@ -265,7 +462,7 @@ bool ACT8600PowerSystem::readRegister(int8_t regAddr, uint8_t *regData)
     if (status != 0)
     {
         act8600_i2c_en_Write(0);
-        debug("failed to read from act register (addr write)");
+        //debug("failed to read from act register (addr write)");
         return false;
     }
     
@@ -274,7 +471,7 @@ bool ACT8600PowerSystem::readRegister(int8_t regAddr, uint8_t *regData)
     if (status != 0)
     {
         act8600_i2c_en_Write(0);
-        debug("failed to read value act register");
+        //debug("failed to read value act register");
         return false;
     }
     

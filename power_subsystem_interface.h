@@ -4,6 +4,8 @@
 #ifndef __i2c_power_test__power_subsystem_interface__
 #define __i2c_power_test__power_subsystem_interface__
 
+#include <FunctionPointer.h>
+
 namespace mono { namespace power {
     
     /**
@@ -119,6 +121,21 @@ namespace mono { namespace power {
             ChargeState state = this->ChargeStatus();
             return state != CHARGE_SUSPENDED && state != UNKNOWN;
         }
+
+        /**
+         * @brief Return `true` is the battery voltage is OK, `false` is empty.
+         * 
+         * This method query the system power state, to see if the battery is OK.
+         * **In case this return `false`, the system should enter low-power 
+         * sleep immediately!**
+         */
+        virtual bool IsPowerOk() = 0;
+
+        /** Function handler that must be called when the PowerSystem detect low battery */
+        mbed::FunctionPointer BatteryLowHandler;
+
+        /** Function handler that must be called when battery is empty */
+        mbed::FunctionPointer BatteryEmptyHandler;
 
     };
     

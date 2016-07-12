@@ -2,8 +2,10 @@
 // and is available under the MIT license, see LICENSE.txt
 
 #include "mono_power_management.h"
-#include "consoles.h"
+#include "application_context_interface.h"
+//#include "consoles.h"
 #include <project.h>
+
 
 #ifdef DEVICE_SERIAL
 #include <serial_usb_api.h>
@@ -15,24 +17,32 @@ bool MonoPowerManagement::__RTCFired = false;
 
 MonoPowerManagement::MonoPowerManagement()
 {
+    batteryLowFlag = batteryEmptyFlag = false;
     powerAwarenessQueue = NULL;
     PowerSystem = &powerSubsystem;
-    
+
+    PowerSystem->BatteryLowHandler.attach<MonoPowerManagement>(this, &MonoPowerManagement::systemLowBattery);
+    PowerSystem->BatteryEmptyHandler.attach<MonoPowerManagement>(this, &MonoPowerManagement::systemEmptyBattery);
+    singleShot = false;
+    IApplicationContext::Instance->RunLoop->addDynamicTask(this);
+
 #ifdef DEVICE_SERIAL
     // if mbed device serial exists, enable if usb powered
     serial_usbuart_is_powered = PowerSystem->IsUSBCharging();
 #endif
+
+    //turn on peripherals
+    PowerSystem->setPowerFence(false);
 }
 
-void MonoPowerManagement::EnterSleep()
+void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
 {
-    processSleepAwarenessQueue();
+    if (!skipAwarenessQueues)
+        processSleepAwarenessQueue();
     
-    mono::defaultSerial.printf("Going to sleep...\n\r");
-    //PowerSystem->onSystemEnterSleep();
-    wait_ms(10);
+    PowerSystem->onSystemEnterSleep();
     
-    powerSubsystem.setPowerFencePeripherals(true);
+    powerSubsystem.setPowerFence(true);
     powerSubsystem.powerOffUnused();
     powerDownMCUPeripherals();
     
@@ -64,16 +74,27 @@ void MonoPowerManagement::EnterSleep()
     //CyGlobalIntEnable;
     
     powerUpMCUPeripherals();
-    //PowerSystem->onSystemWakeFromSleep();
+    PowerSystem->onSystemWakeFromSleep();
 
-    powerSubsystem.setPowerFencePeripherals(false);
+    powerSubsystem.setPowerFence(false);
     
     //mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\n\r", status);
-    
-    processWakeAwarenessQueue();
+
+    if (!skipAwarenessQueues)
+        processWakeAwarenessQueue();
 
 }
 
+
+void MonoPowerManagement::taskHandler()
+{
+    if (batteryLowFlag)
+    {
+        batteryLowFlag = false;
+        IPowerManagement::processBatteryLowAwarenessQueue();
+    }
+
+}
 
 
 void MonoPowerManagement::processResetAwarenessQueue()
@@ -170,7 +191,6 @@ void MonoPowerManagement::powerDownMCUPeripherals()
     }
 #endif
 
-
     saveDMRegisters();
     setupMCUPeripherals();
 }
@@ -241,3 +261,24 @@ void MonoPowerManagement::restoreDMPort(uint32_t regAddrOffset, uint8_t srcOffse
     CY_SET_REG8(regAddrOffset+1, srcOffset[1]);
     CY_SET_REG8(regAddrOffset+2, srcOffset[2]);
 }
+
+/// MARK: Power Sub-System Battery callbacks
+
+void MonoPowerManagement::systemLowBattery()
+{
+    batteryLowFlag = true;
+}
+
+void MonoPowerManagement::systemEmptyBattery()
+{
+    //batteryEmptyFlag = true;
+
+    while (!PowerSystem->IsPowerOk())
+    {
+        debug("Sleep until power is OK!\t\n");
+        EnterSleep();
+    }
+
+    IApplicationContext::SoftwareResetToApplication();
+}
+

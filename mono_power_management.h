@@ -13,16 +13,18 @@ namespace mono {
 
 namespace mono { namespace power {
     
-    class MonoPowerManagement : public IPowerManagement
+    class MonoPowerManagement : public IPowerManagement, IRunLoopTask
     {
         friend mono::ApplicationContext;
     protected:
         
         uint8_t DriveModeRegisters[3*9];
-        
+
+        bool batteryLowFlag, batteryEmptyFlag;
+
         ACT8600PowerSystem powerSubsystem;
         
-        
+        void taskHandler();
         
         void processResetAwarenessQueue();
         
@@ -34,13 +36,16 @@ namespace mono { namespace power {
         void saveDMPort(uint32_t regAddrOffset, uint8_t *destOffset);
         void restoreDMRegisters();
         void restoreDMPort(uint32_t regAddrOffset, uint8_t *srcOffset);
-        
+
+        void systemLowBattery();
+        void systemEmptyBattery();
+
     public:
         
         MonoPowerManagement();
         
-        
-        void EnterSleep();
+        void EnterSleep() { EnterSleep(false); }
+        void EnterSleep(bool skipAwarenessQueues);
 
         static bool __RTCFired;
     };

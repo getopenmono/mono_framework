@@ -176,8 +176,8 @@ void ILI9225G::taskHandler()
         //SCL: PRT2 PC2
         //SDA: PRT12 PC5
         power::ACT8600PowerSystem power;
-        power.setPowerFencePeripherals(true);
-        debug("power: %i\n\r", power.PowerFencePeriperals());
+        power.setPowerFence(true);
+        debug("power: %i\n\r", power.IsPowerFenced());
         
         CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_STRONG);
         CyPins_ClearPin(CYREG_PRT5_PC2);
@@ -205,7 +205,7 @@ void ILI9225G::taskHandler()
         CY_SET_REG8(CYREG_PRT2_BYP, scl);
         
         
-        power.setPowerFencePeripherals(false);
+        power.setPowerFence(false);
         
         //IApplicationContext::SoftwareResetToApplication();
     }
