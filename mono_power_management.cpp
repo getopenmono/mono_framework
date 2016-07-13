@@ -9,6 +9,7 @@
 
 #ifdef DEVICE_SERIAL
 #include <serial_usb_api.h>
+extern char serial_usbuart_is_powered;
 #endif
 
 using namespace mono::power;
@@ -39,13 +40,13 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
 {
     if (!skipAwarenessQueues)
         processSleepAwarenessQueue();
-    
+
     PowerSystem->onSystemEnterSleep();
-    
+
     powerSubsystem.setPowerFence(true);
     powerSubsystem.powerOffUnused();
     powerDownMCUPeripherals();
-    
+
     //CyILO_Start1K(); // make sure the 1K ILO Osc is running
     //CyMasterClk_SetSource(CY_MASTER_SOURCE_IMO);
 
@@ -69,15 +70,15 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
         }
 
     }
-    
+
     //CyMasterClk_SetSource(CY_MASTER_SOURCE_PLL);
     //CyGlobalIntEnable;
-    
+
     powerUpMCUPeripherals();
     PowerSystem->onSystemWakeFromSleep();
 
     powerSubsystem.setPowerFence(false);
-    
+
     //mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\n\r", status);
 
     if (!skipAwarenessQueues)
@@ -109,51 +110,51 @@ void MonoPowerManagement::setupMCUPeripherals()
     CY_SET_REG8(CYREG_PRT0_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT0_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT0_DM2, 0x00);
-    
+
     // set all PORT 1 (Exp. conn. to res pull down)
     CY_SET_REG8(CYREG_PRT1_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT1_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT1_DM2, 0x00);
-    
+
     // set all PORT 2 (RP spi to res pull down)
     // set PRT2_2 as OD, drives low
     CY_SET_REG8(CYREG_PRT2_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT2_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT2_DM2, 0x00);
-    
+
     // set all PORT 3 (TFT to res pull down)
     CY_SET_REG8(CYREG_PRT3_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT3_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT3_DM2, 0x00);
-    
+
     // set all PORT 4 (exp. conn to res pull down)
     CY_SET_REG8(CYREG_PRT4_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT4_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT4_DM2, 0x00);
-    
+
     // set all PORT 5 (switches and inputs, to res pull down)
     // set PRT5_0 as OD drives low
     CY_SET_REG8(CYREG_PRT5_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT5_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT5_DM2, 0x00);
-    
+
     // set all PORT 6 (TFT conn. to res pull down)
     CY_SET_REG8(CYREG_PRT6_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT6_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT6_DM2, 0x00);
-    
+
     // set all PORT 12 (misc. to res pull down)
     //set PRT12_5 as OD, drives low
     CY_SET_REG8(CYREG_PRT12_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT12_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT12_DM2, 0x00);
-    
+
     //CY_SET_REG8(CYREG_PRT12_SIO_CFG, 0x00); // SIO non-reg output
-    
+
     CY_SET_REG8(CYREG_PRT15_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT15_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT15_DM2, 0x00);
-    
+
     // SW USER must be weak pull up in sleep!
     CyPins_SetPinDriveMode(USER_SW, CY_PINS_DM_RES_UP);
 
@@ -164,10 +165,10 @@ void MonoPowerManagement::setupMCUPeripherals()
 
     //Power INT res pull up in sleep
     CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_RES_UP);
-    
+
     CyPins_SetPinDriveMode(A5, CY_PINS_DM_RES_DWN);
     CyPins_ClearPin(A5);
-    
+
 }
 
 void MonoPowerManagement::powerDownMCUPeripherals()
@@ -178,7 +179,7 @@ void MonoPowerManagement::powerDownMCUPeripherals()
 //    SPI_RP_Sleep();
     ADC_SAR_1_Sleep();
 //    I2C_Sleep();
-    
+
     I2C_Sleep();
 
 #ifdef DEVICE_SERIAL
@@ -202,7 +203,7 @@ void MonoPowerManagement::powerUpMCUPeripherals()
 #ifdef DEVICE_SERIAL
     serial_usbuart_stopped();
 #endif
-    
+
     PWM_Wakeup();
     I2C_Wakeup();
     SPI1_Wakeup();
@@ -210,18 +211,18 @@ void MonoPowerManagement::powerUpMCUPeripherals()
 //    SPI_RP_Wakeup();
     ADC_SAR_1_Wakeup();
 //    I2C_Wakeup();
-    
+
 #ifndef MONO_DISP_CTRL_HX8340
     SPI1_Wakeup();
 #endif
-    
+
     //mbed::Serial::wakeUpRoutine();
 }
 
 void MonoPowerManagement::saveDMRegisters()
 {
     uint8_t cnt = 0;
-    
+
     saveDMPort(CYREG_PRT0_DM0,  DriveModeRegisters+(cnt++)*3);
     saveDMPort(CYREG_PRT1_DM0,  DriveModeRegisters+(cnt++)*3);
     saveDMPort(CYREG_PRT2_DM0,  DriveModeRegisters+(cnt++)*3);
@@ -236,7 +237,7 @@ void MonoPowerManagement::saveDMRegisters()
 void MonoPowerManagement::restoreDMRegisters()
 {
     uint8_t cnt = 0;
-    
+
     restoreDMPort(CYREG_PRT0_DM0,  DriveModeRegisters+(cnt++)*3);
     restoreDMPort(CYREG_PRT1_DM0,  DriveModeRegisters+(cnt++)*3);
     restoreDMPort(CYREG_PRT2_DM0,  DriveModeRegisters+(cnt++)*3);
@@ -281,4 +282,3 @@ void MonoPowerManagement::systemEmptyBattery()
 
     IApplicationContext::SoftwareResetToApplication();
 }
-

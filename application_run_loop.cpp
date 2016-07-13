@@ -3,11 +3,12 @@
 
 #include "application_run_loop.h"
 #include "application_context_interface.h"
-#include <mbed.h>
 #include <consoles.h>
 
-#include "display/ui/console_view.h"
-extern mono::ui::ConsoleView<176,110> *ui_console_stdout;
+extern "C" {
+#include <serial_usb_api.h>
+extern char serial_usbuart_is_powered;
+}
 
 using namespace mono;
 
@@ -23,22 +24,22 @@ AppRunLoop::AppRunLoop() : userBtn(SW_USER, 1, PullUp)
 
 void AppRunLoop::exec()
 {
-    debug("mono enter run loop!\n\r");
+    //debug("mono enter run loop!\n\r");
 
     checkUsbUartState();
-    
+
     while (runLoopActive) {
-        
+
         process();
     }
-    
-    debug("run loop terminated!");
+
+    //debug("run loop terminated!");
 }
 
 void AppRunLoop::process()
 {
     checkUsbUartState();
-    
+
     if (resetOnUserButton)
     {
         if (userBtn == 0)
@@ -48,20 +49,20 @@ void AppRunLoop::process()
             IApplicationContext::SoftwareReset();
         }
     }
-    
+
     uint32_t start = us_ticker_read();
-    
+
     //handle touch inputs
     if (IApplicationContext::Instance->TouchSystem != NULL)
         IApplicationContext::Instance->TouchSystem->processTouchInput();
-    
+
     uint32_t tEnd = us_ticker_read();
-    
+
     //run scheduled tasks
     processDynamicTaskQueue();
-    
+
     uint32_t end = us_ticker_read();
-    
+
     TouchSystemTime = tEnd - start;
     DynamicTaskQueueTime = end - tEnd;
 }
@@ -78,19 +79,19 @@ void AppRunLoop::processDynamicTaskQueue()
     {
         return;
     }
-    
-    
+
+
     IRunLoopTask *task = taskQueueHead;
     while (task != NULL) {
         task->taskHandler();
-        
+
         if (task->singleShot)
         {
-            debug("Removing task from dynamic queue!\n\r");
+            //debug("Removing task from dynamic queue!\n\r");
             removeTaskInQueue(task);
         }
-        
-        
+
+
         // we can still use the tasks next pointer,
         //  even if its not in the list anymore
         task = task->nextTask;
@@ -113,12 +114,12 @@ bool AppRunLoop::addDynamicTask(mono::IRunLoopTask *task)
         {
             item = item->nextTask;
         }
-        
+
         item->nextTask = task;
         task->previousTask = item;
         task->nextTask = NULL;
     }
-    
+
     return true;
 }
 
@@ -126,9 +127,9 @@ bool AppRunLoop::removeDynamicTask(mono::IRunLoopTask *task)
 {
     if (taskQueueHead == NULL)
         return false;
-    
+
     IRunLoopTask *item = taskQueueHead;
-    
+
     while (item != NULL)
     {
         if (item == task)
@@ -136,10 +137,10 @@ bool AppRunLoop::removeDynamicTask(mono::IRunLoopTask *task)
             removeTaskInQueue(item);
             return true;
         }
-        
+
         item = item->nextTask;
     }
-    
+
     return false;
 }
 
@@ -147,7 +148,7 @@ void AppRunLoop::removeTaskInQueue(IRunLoopTask *item)
 {
     if (item->previousTask != NULL)
         item->previousTask->nextTask = item->nextTask;
-    
+
     if (item->nextTask != NULL)
         item->nextTask->previousTask = item->previousTask;
 }
@@ -156,9 +157,13 @@ void AppRunLoop::checkUsbUartState()
 {
     power::IPowerSubSystem *power = IApplicationContext::Instance->PowerManager->PowerSystem;
     bool usbCharge = power->IsUSBCharging();
+#ifdef DEVICE_SERIAL
+    serial_usbuart_is_powered = usbCharge;
+#endif
 
     if (!usbCharge)
     {
+        firstDtrRun = lastDtrValue = true;
         return;
     }
 
@@ -179,7 +184,7 @@ void AppRunLoop::checkUsbUartState()
 
     if (mono::defaultSerial.writeable())
     {
-        
+
         bool dtr = mono::defaultSerial.DTR();
         if (resetOnDTR && (!dtr) && lastDtrValue)
         {
@@ -187,7 +192,7 @@ void AppRunLoop::checkUsbUartState()
             wait_ms(20);
             IApplicationContext::SoftwareReset();
         }
-        
+
         lastDtrValue = dtr;
     }
 }
@@ -196,7 +201,6 @@ void AppRunLoop::setResetOnUserButton(bool roub)
 {
     if (roub)
     {
-        //TODO: remove cypress reference here!
         userBtn.setMode(PullUp);
         userBtn = 1;
         wait_us(10); // wait for pull up resistor
