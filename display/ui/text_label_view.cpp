@@ -178,10 +178,10 @@ void TextLabelView::repaint()
     painter.setBackgroundColor(bgColor);
     painter.setForegroundColor(TextColor());
 
+    View::painter.drawFillRect(this->viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
+
     if (textSize == 1)
     {
-
-        View::painter.drawFillRect(this->viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
 
         int cnt = 0;
         char c = text[cnt];
