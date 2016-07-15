@@ -5,10 +5,12 @@
 #include "application_context_interface.h"
 #include <consoles.h>
 
+#ifdef DEVICE_SERIAL
 extern "C" {
 #include <serial_usb_api.h>
 extern char serial_usbuart_is_powered;
 }
+#endif
 
 using namespace mono;
 
