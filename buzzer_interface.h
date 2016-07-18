@@ -24,7 +24,7 @@ namespace mono { namespace sensor {
      *
      * To make a short buzz sound do:
      * @code
-     * mono::IApplicationContext::instance->Buzzer->buzzAsync(100);
+     * mono::IApplicationContext::Instance->Buzzer->buzzAsync(100);
      * @endcode
      */
     class IBuzzer
