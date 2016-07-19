@@ -14,10 +14,11 @@ TextLabelView::TextLabelView(String txt) :
     textColor(StandardTextColor),
     bgColor(StandardBackgroundColor)
 {
+    this->incrementalRepaint = false;
     currentFont = TextLabelView::StandardTextFont;
     this->text = txt;
     this->setTextSize(2);
-    
+
     viewRect.setSize( geo::Size(TextPixelWidth(), TextPixelHeight()) );
 }
 
@@ -25,10 +26,11 @@ TextLabelView::TextLabelView(const char *txt) :
     textColor(StandardTextColor),
     bgColor(StandardBackgroundColor)
 {
+    this->incrementalRepaint = false;
     currentFont = TextLabelView::StandardTextFont;
     this->text = txt;
     this->setTextSize(2);
-    
+
     viewRect.setSize( geo::Size(TextPixelWidth(), TextPixelHeight()) );
 }
 
@@ -37,6 +39,7 @@ TextLabelView::TextLabelView(geo::Rect rct, String txt) :
     textColor(StandardTextColor),
     bgColor(StandardBackgroundColor)
 {
+    this->incrementalRepaint = false;
     currentFont = TextLabelView::StandardTextFont;
     this->text = txt;
     this->setTextSize(2);
@@ -47,6 +50,7 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
     textColor(StandardTextColor),
     bgColor(StandardBackgroundColor)
 {
+    this->incrementalRepaint = false;
     currentFont = TextLabelView::StandardTextFont;
     this->text = txt;
     this->setTextSize(2);
@@ -144,8 +148,12 @@ void TextLabelView::setText(mono::String text, bool resizeViewWidth)
     {
         viewRect.setWidth(TextPixelWidth());
     }
-    
+
+    if (isDirty)
+        return;
+
     scheduleRepaint();
+    incrementalRepaint = true;
 }
 
 void TextLabelView::setFont(const MonoFont &newFont)
@@ -156,6 +164,17 @@ void TextLabelView::setFont(const MonoFont &newFont)
 }
 
 /// MARK: Aux Functions
+
+void TextLabelView::scheduleRepaint()
+{
+    this->incrementalRepaint = false;
+
+    if (isDirty || !visible)
+        return;
+
+    this->isDirty = true;
+    dirtyQueue.Enqueue((View*) this);
+}
 
 void TextLabelView::repaint()
 {
@@ -178,10 +197,10 @@ void TextLabelView::repaint()
     painter.setBackgroundColor(bgColor);
     painter.setForegroundColor(TextColor());
 
-    View::painter.drawFillRect(this->viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
-
     if (textSize == 1)
     {
+
+        View::painter.drawFillRect(this->viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
 
         int cnt = 0;
         char c = text[cnt];
@@ -197,9 +216,59 @@ void TextLabelView::repaint()
     }
     else if (currentFont != 0)
     {
-        geo::Rect textRect(offset.X(),offset.Y(), viewRect.X2()-offset.X(), viewRect.Y2()-offset.Y());
+        if (!incrementalRepaint || prevText.Length() == 0 || prevText.Length() != text.Length())
+        {
+            View::painter.drawFillRect(this->viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
 
-        display::TextRender tr(painter);
-        tr.drawInRect(textRect, text, *currentFont);
+            geo::Rect textRect(offset.X(),offset.Y(),   viewRect.X2()-offset.X(), viewRect.Y2()-offset.Y());
+
+            display::TextRender tr(painter);
+            tr.drawInRect(textRect, text, *currentFont);
+        }
+        else
+        {
+            display::TextRender tr(painter);
+
+            uint32_t glyphIdx = 0;
+            uint32_t glyphWidth = this->currentFont->glyphWidth;
+            uint32_t glyphHeight = this->currentFont->glyphHeight;
+            uint32_t newlines = 0;
+            uint32_t lineIdx = 0;
+            while(glyphIdx < text.Length() && glyphIdx < prevText.Length())
+            {
+                if (text[glyphIdx] == '\n')
+                {
+                    newlines++;
+                    lineIdx = 0;
+                }
+
+                if (text[glyphIdx] != prevText[glyphIdx])
+                {
+                    uint32_t xOff = offset.X()+lineIdx*glyphWidth;
+                    uint32_t yOff = offset.Y()+newlines*glyphHeight;
+                    geo::Rect glypsRct(xOff, yOff, viewRect.X2()-xOff, viewRect.Y2()-yOff);
+
+                    painter.drawFillRect(glypsRct, true);
+
+                    tr.drawInRect(glypsRct, String::Format("%c",text[glyphIdx]), *currentFont);
+                }
+
+                glyphIdx++;
+                lineIdx++;
+            }
+
+            if (glyphIdx < text.Length())
+            {
+                uint32_t xOff = offset.X()+lineIdx*glyphWidth;
+                uint32_t yOff = offset.Y()+newlines*glyphHeight;
+                geo::Rect txtRct(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
+
+                String remainder(text()+glyphIdx);
+                tr.drawInRect(txtRct, remainder, *currentFont);
+            }
+        }
+
+        // previous text is always the last painted text
+        this->prevText = this->text;
     }
 }
