@@ -9,32 +9,32 @@
 #include "../mn_string.h"
 
 namespace mono { namespace io {
-    
+
     class TextReader
     {
     protected:
-        
+
         FILE *_filePointer;
         String _filePath;
-        
-        
+
+
     public:
-        
+
         TextReader(String path);
-        
+
         TextReader(FILE *textFile);
-        
+
         bool open();
         bool close();
-        
+
         bool IsOpen();
-        
+
         String readLine();
-        String read(uint32_t length);
-        
+        //String read(uint32_t length);
+
         bool hasNext();
     };
-    
+
 } }
 
 #endif /* text_reader_h */

@@ -16,11 +16,11 @@
 #include "wireless/redpine_command_frames.h"
 
 namespace mono { namespace network {
-    
+
     class HttpClient : public INetworkRequest
     {
     public:
-        
+
         class HttpResponseData
         {
         public:
@@ -28,14 +28,14 @@ namespace mono { namespace network {
             String HttpHeaderRaw;
             String bodyChunk;
             bool Finished;
-            
+
             HttpResponseData(HttpClient *cnxt) :
                 Context(cnxt),
                 HttpHeaderRaw(String()),
                 bodyChunk(String()),
                 Finished(false)
             {}
-            
+
             HttpResponseData &operator=(const HttpResponseData &other)
             {
                 Context = other.Context;
@@ -45,51 +45,51 @@ namespace mono { namespace network {
                 return *this;
             }
         };
-        
+
     protected:
         mbed::FunctionPointerArg1<void, const HttpResponseData&> dataHandler;
-        
+
         String domain;
         String path;
         DnsResolver dns;
         HttpResponseData respData;
-        
+
         redpine::HttpGetFrame *getFrame;
-        
+
         /** Error callback for dns resolver */
         void dnsResolutionError(INetworkRequest::ErrorEvent *evnt);
-        
+
         /** dns resolver completion event handler */
         void dnsComplete(INetworkRequest::CompletionEvent *evnt);
-        
+
         void httpData(redpine::HttpGetFrame::CallbackData *data);
-        
+
         /** when the HTTP GET frame completes, check for error */
         void httpCompletion(redpine::ManagementFrame::FrameCompletionData *data);
-        
+
         void triggerDataReady();
     public:
-        
-        
+
+
         HttpClient();
-        
-        
+
+
         HttpClient(String anUrl);
-        
+
         HttpClient(const HttpClient &other);
-        
+
         HttpClient &operator=(const HttpClient &other);
-        
+
         ~HttpClient();
-        
+
         template <typename Owner>
         void setDataReadyCallback(Owner *cnxt, void (Owner::*memPtr)(const HttpResponseData&))
         {
             dataHandler.attach(cnxt, memPtr);
         }
     };
-    
-    
+
+
 } }
 
 #endif /* http_client_h */

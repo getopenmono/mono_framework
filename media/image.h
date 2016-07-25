@@ -7,11 +7,11 @@
 #include <stdio.h>
 
 namespace mono { namespace media {
-    
+
     /**
      * Generic image container class, defining generic properties and methods
      * for all image formats.
-     * 
+     *
      * Subclasses of this class implement different image formats, that can be
      * decoded by mono framework. See @ref BMPImage
      *
@@ -25,25 +25,19 @@ namespace mono { namespace media {
      */
     class Image
     {
-    protected:
-        const char *filePath;
-        FILE *fPointer;
-        bool fileOpen;
-        bool imageValid;
-        
     public:
-        
+
         /**
          * Returns the width of the image in pixels
          *
          */
         virtual int Width() = 0;
-        
+
         /**
          * Returns the height of the image in pixels
          */
         virtual int Height() = 0;
-        
+
         /**
          * Returns the pixel size in bytes. This is the format pixels are returned
          * in, by the method @ref ReadPixelData
@@ -51,10 +45,10 @@ namespace mono { namespace media {
          * @returns Pixel size in bytes
          */
         virtual int PixelByteSize() = 0;
-        
+
         /**
-         * Read raw uncompressed pixels from the image. The pixels are read from 
-         * the current position (as set by @ref SeekToHLine), and copied to the 
+         * Read raw uncompressed pixels from the image. The pixels are read from
+         * the current position (as set by @ref SeekToHLine), and copied to the
          * `target` position.
          *
          * @param target Pointer to the array where pixels are copied to
@@ -62,7 +56,7 @@ namespace mono { namespace media {
          * @returns The number of pixels that was actually read
          */
         virtual int ReadPixelData(void *target, int pixelsToRead) = 0;
-        
+
         /**
          * Like @ref ReadPixelData but will just skip the pixels, not read them.
          * This method increments the image current position pointer, as it is set
@@ -72,7 +66,7 @@ namespace mono { namespace media {
          * @returns The number of pixels thatwas skipped
          */
         virtual int SkipPixelData(int pixelsToSkip) = 0;
-        
+
         /**
          * Changes the current position cursor of the image to a certain line in
          * the image.
@@ -80,32 +74,14 @@ namespace mono { namespace media {
          * @param vertPos The horizontal line in the image, the Y-coordinate
          */
         virtual void SeekToHLine(int vertPos) = 0;
-        
+
         /**
-         * Returns `true` if image file is loaded correctly.
-         * @returns `true` if file is really an image, `false` otherwise
+         * Returns `true` if image is usable.
+         * @returns `true` if you can actually get a proper image, `false` otherwise
          */
-        virtual bool IsValid()
-        {
-            return imageValid;
-        }
-        
-        /**
-         * Close the file system object, to free resources. You should close the
-         * file, if you do not expect to read from the image file in a while.
-         *
-         */
-        virtual void Close()
-        {
-            if (fPointer && fileOpen)
-            {
-                fclose(fPointer);
-                fileOpen = false;
-            }
-            
-        }
+        virtual bool IsValid() = 0;
     };
-    
+
 } }
 
 #endif

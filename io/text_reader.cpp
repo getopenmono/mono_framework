@@ -10,12 +10,12 @@ using namespace mono::io;
 
 TextReader::TextReader(String path) : _filePointer(0), _filePath(path)
 {
-    
+
 }
 
 TextReader::TextReader(FILE *fileHandle) : _filePointer(fileHandle)
 {
-    
+
 }
 
 /// Stream Status Methods
@@ -24,7 +24,7 @@ bool TextReader::open()
 {
     if (_filePath.Length() > 0)
         _filePointer = fopen(_filePath(), "r");
-    
+
     return _filePointer == 0 ? false : true;
 }
 
@@ -50,35 +50,27 @@ String TextReader::readLine()
 {
     if (!IsOpen())
         return String();
-    
+
     int scanned = 0;
     int c = 'a';
     off_t position = ftell(_filePointer);
-    
+
     while (c != '\n' && feof(_filePointer) != EOF) {
         c = getc(_filePointer);
         scanned++;
     }
-    
+
     fseek(_filePointer, position, SEEK_SET);
     int lineSize = scanned;
-    
+
     if (c != '\n')
         lineSize++; // add space for the terminator char
-    
+
     String line(lineSize);
     fread(line.stringData, scanned, 1, _filePointer);
     line.stringData[lineSize] = '\0'; // insert terminator
-    
-    return line;
-}
 
-String TextReader::read(uint32_t length)
-{
-    if (!IsOpen())
-        return String();
-    
-    
+    return line;
 }
 
 

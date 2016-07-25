@@ -296,7 +296,7 @@ void ACT8600PowerSystem::onSystemWakeFromSleep()
     writeRegister(REG8_EXT, data & ~ENABLE);
 
 
-    SystemVoltageLevels threshold = (SystemVoltageLevels) (sysreg & SYSLEV);
+    //SystemVoltageLevels threshold = (SystemVoltageLevels) (sysreg & SYSLEV);
     bool powerOk = !(sysreg & VSYSDAT);
 
     if (!powerOk)

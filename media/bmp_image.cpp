@@ -9,7 +9,6 @@ BMPImage::BMPImage()
 {
     filePath = NULL;
     fPointer = NULL;
-    fileOpen = false;
     imageValid = false;
 }
 
@@ -17,7 +16,6 @@ BMPImage::BMPImage(const char *path)
 {
     filePath = path;
     fPointer = NULL;
-    fileOpen = true;
     imageValid = false;
     fPointer = fopen(filePath, "rb");
 
@@ -31,43 +29,26 @@ BMPImage::BMPImage(const char *path)
 
     if (fileHeader.bfType != 0x4D42)
     {
-        imageValid = false;
         printf("BMPIMage: File %s is not a BMP image!\r\n", path);
     }
     else
     {
         imageValid = true;
     }
-
-    Close();
 }
 
 int BMPImage::ReadPixelData(void *target, int bytesToRead)
 {
-    if (filePath == NULL)
+    if (!IsValid())
         return -1;
-
-    if (!fileOpen)
-    {
-        fPointer = fopen(filePath, "rb");
-        fileOpen = true;
-    }
-
     size_t bytesRead = fread(target, bytesToRead*2, 1, fPointer);
     return (int)(bytesRead / PixelByteSize());
 }
 
 int BMPImage::SkipPixelData(int pixelsToSkip)
 {
-    if (filePath == NULL)
+    if (!IsValid())
         return -1;
-
-    if (!fileOpen)
-    {
-        fPointer = fopen(filePath, "rb");
-        fileOpen = true;
-    }
-
     return fseek(fPointer, pixelsToSkip*2, SEEK_CUR) == 0 ? pixelsToSkip : 0;
 }
 
@@ -87,15 +68,8 @@ int BMPImage::PixelByteSize()
 
 void BMPImage::SeekToHLine(int vertPos)
 {
-    if (filePath == NULL)
+    if (!IsValid())
         return;
-
-    if (!fileOpen)
-    {
-        fPointer = fopen(filePath, "rb");
-        fileOpen = true;
-    }
-
     if (infoHeader.biHeight < 0)
     {
         size_t pos = fileHeader.bfOffBits+(vertPos*widthMult4)*PixelByteSize();
@@ -110,16 +84,21 @@ void BMPImage::SeekToHLine(int vertPos)
 
 void BMPImage::readHeaderData()
 {
-    if (filePath == NULL || fPointer == NULL)
-        return;
-
     fread(&fileHeader, sizeof(struct BMPImage::BmpFileHeader), 1, fPointer);
     fread(&infoHeader, sizeof(struct BMPImage::BmpInfoHeader), 1, fPointer);
     widthMult4 = ((PixelByteSize()*8*infoHeader.biWidth+31)/32)*PixelByteSize();
 }
 
+bool BMPImage::IsValid ()
+{
+    return imageValid;
+}
+
 BMPImage::~BMPImage()
 {
-    if (fPointer != NULL)
-        Close();
+    if (fPointer != 0)
+    {
+        fclose(fPointer);
+        fPointer = 0;
+    }
 }

@@ -14,7 +14,7 @@ ImageView::ImageView() : crop(0,0,0,0)
 ImageView::ImageView(media::Image *img) : crop(0,0, img->Width(), img->Height())
 {
     image = img;
-    
+
     //crop within display canvas
     if (img->Width() > View::painter.CanvasWidth())
         crop.setWidth(View::painter.CanvasWidth());
@@ -57,46 +57,26 @@ void ImageView::repaint()
     dispRect.setPoint(geo::Point(0,0));
     //crop by viewRect
     dispRect = dispRect.crop(viewRect);
-    
+
     display::IDisplayController *ctrl = View::painter.DisplayController();
     uint16_t pixels[176];
     ctrl->setWindow(viewRect.X(), viewRect.Y(), dispRect.Width(), dispRect.Height());
-    
-    //painter.setOrigin(viewRect.X(), viewRect.Y());
-    //painter.setRotation(90);
-    //float32_t *matrix = View::painter.CurrentMatrix();
+
     int iy = 0;
-    
+
     for(int16_t y=crop.Y(); y<crop.Y()+dispRect.Width(); y++)
     {
         image->SeekToHLine(y);
-        
+
         if (crop.X() > 0)
             image->SkipPixelData(crop.X());
-        
+
         image->ReadPixelData(pixels, dispRect.Width());
-        
+
         for (int16_t x=0; x<dispRect.Width(); x++) {
-            
-            //int16_t x1 = x*matrix[0] + iy*matrix[1] + 1*matrix[2];
-            //int16_t y1 = x*matrix[3] + iy*matrix[4] + 1*matrix[5];
-            
-            //if (x1 == x && iy == y1)
                 ctrl->write(pixels[x]);
-//            else
-//            {
-//                painter.setForegroundColor(pixels[x]);
-//                painter.drawPixel(viewRect.X()+x, viewRect.Y()+iy);
-//            }
-            
-            //View::painter.setForegroundColor(pixel);
-            //View::painter.drawPixel(viewRect.X()+x, viewRect.Y()+y);
         }
-        
+
         iy++;
     }
-    
-    image->Close();
-    // set to identity
-    //painter.ResetTransformation();
 }
