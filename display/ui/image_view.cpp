@@ -20,6 +20,8 @@ ImageView::ImageView(media::Image *img) : crop(0,0, img->Width(), img->Height())
         crop.setWidth(View::painter.CanvasWidth());
     if (img->Height() > View::painter.CanvasHeight())
         crop.setHeight(View::painter.CanvasHeight());
+
+    viewRect.setSize(crop);
 }
 
 void ImageView::setCrop(geo::Rect crp)
