@@ -42,18 +42,18 @@ void TouchResponder::RunResponderChainTouchBegin(mono::TouchEvent &event)
 {
     if (ResponderChain.Peek() == NULL)
     {
-        defaultSerial.printf("No first touch responder!\n\r");
+        defaultSerial.printf("No first touch responder!\r\n");
         return;
     }
-    
+
     TouchResponder *res = ResponderChain.Peek();
-    
+
     while (res != NULL) {
         res->RespondTouchBegin(event);
-        
+
         if (event.handled)
             return;
-        
+
         res = ResponderChain.Next(res);
     }
 }
@@ -64,16 +64,16 @@ void TouchResponder::RunResponderChainTouchEnd(mono::TouchEvent &event)
     {
         return;
     }
-    
+
     TouchResponder *res = ResponderChain.Peek();
-    
+
     while (res != NULL) {
-        
+
         res->RespondTouchEnd(event);
-        
+
         if (event.handled)
             return;
-        
+
         res = ResponderChain.Next(res);
     }
 }
@@ -84,13 +84,13 @@ void TouchResponder::RunResponderChainTouchMove(mono::TouchEvent &event)
     {
         return;
     }
-    
+
     TouchResponder *res = ResponderChain.Peek();
-    
+
     while (res != NULL) {
-        
+
         res->RespondTouchMove(event);
-        
+
         res = ResponderChain.Next(res);
     }
 }

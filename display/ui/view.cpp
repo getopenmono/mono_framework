@@ -23,29 +23,29 @@ uint32_t View::RepaintScheduledViewsTime = 0;
 
 void View::repaintScheduledViews()
 {
-    
+
     //early exit if queue is empty
     if (View::dirtyQueue.Peek() == NULL)
         return;
-    
+
     uint32_t start = us_ticker_read();
     View *view = View::dirtyQueue.Dequeue();
     while (view != NULL) {
-        
+
         if (view->isDirty)
         {
             view->repaint();
             view->isDirty = false;
         }
-        
-        
+
+
         view = View::dirtyQueue.Dequeue();
     }
     uint32_t end = us_ticker_read();
-    
+
     RepaintScheduledViewsTime = end - start;
-    
-    //debug("repaint time: %u, TE Offset: %i\n\r",RepaintScheduledViewsTime,start-painter.DisplayController()->LastTearningEffectTime);
+
+    //debug("repaint time: %u, TE Offset: %i\r\n",RepaintScheduledViewsTime,start-painter.DisplayController()->LastTearningEffectTime);
 }
 
 
@@ -103,7 +103,7 @@ void View::scheduleRepaint()
 {
     if (isDirty || !visible)
         return;
-    
+
     isDirty = true;
     dirtyQueue.Enqueue((View*) this);
 }

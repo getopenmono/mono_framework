@@ -20,21 +20,21 @@ DnsResolver::DnsResolver(String aDomain) :
     INetworkRequest()
 {
     domain = aDomain;
-    
+
     if (!redpine::Module::IsNetworkReady())
     {
         lastErrorCode = NETWORK_NOT_READY_ERROR;
         this->triggerQueuedErrorHandler();
         return;
     }
-    
+
     dnsFrame = new redpine::DnsResolutionFrame(domain);
     dnsFrame->setCompletionCallback<DnsResolver>(this, &DnsResolver::dnsCompletion);
     dnsFrame->autoReleaseWhenParsed = true;
     dnsFrame->commitAsync();
-    
-    debug("init dns: %s\n\r",domain());
-    
+
+    debug("init dns: %s\r\n",domain());
+
     setState(IN_PROGRESS_STATE);
 }
 
@@ -42,7 +42,7 @@ mono::String DnsResolver::IpAddress() const
 {
     if (state != COMPLETED_STATE)
         return String();
-    
+
     if (ipver == IP_v4)
         return String::Format("%i.%i.%i.%i",ipAddress[0],ipAddress[1],ipAddress[2],ipAddress[3]);
     else if (ipver == IP_v6)
@@ -67,7 +67,7 @@ mono::String DnsResolver::IpAddress() const
     }
     else
         return String();
-    
+
 }
 
 DnsResolver::IpVersions DnsResolver::IpVersion() const
@@ -84,27 +84,27 @@ void DnsResolver::dnsCompletion(redpine::ManagementFrame::FrameCompletionData *d
 {
     if (!data->Success)
     {
-        debug("dns res err\n\r");
+        debug("dns res err\r\n");
         lastErrorCode = DNS_RESOLUTION_FAILED_ERROR;
         triggerDirectErrorHandler();
     }
     else if (data->Context->commandId == redpine::ModuleFrame::DnsResolution)
     {
         redpine::DnsResolutionFrame *dns = (redpine::DnsResolutionFrame*) data->Context;
-        
+
         //success
         ipver = (IpVersions) dns->ipVersion;
         memcpy(this->ipAddress, dns->resIpAddress, ipver == IP_v4 ? 4 : 16);
         triggerCompletionHandler();
-        
+
     }
     else
     {
-        debug("dns other comm err\n\r");
+        debug("dns other comm err\r\n");
         lastErrorCode = COMMUNICATION_ERROR;
         triggerDirectErrorHandler();
     }
-    
+
     if (dnsFrame->autoReleaseWhenParsed)
     {
         dnsFrame = NULL;
@@ -117,34 +117,34 @@ DnsResolver::DnsResolver(const DnsResolver &other) : INetworkRequest(other), dns
     memcpy(ipAddress, other.ipAddress, 16);
     ipver = other.ipver;
     dnsFrame = other.dnsFrame; // copy pointer
-    
+
     //overwrite any dnsFrame callback to myself
     if (dnsFrame->completionHandler)
     {
         dnsFrame->setCompletionCallback<DnsResolver>(this, &DnsResolver::dnsCompletion);
     }
-    
-    
+
+
 }
 
 DnsResolver &DnsResolver::operator=(const DnsResolver &other)
 {
-    
+
     INetworkRequest::operator=(other);
-    
+
     domain = other.domain;
     memcpy(ipAddress, other.ipAddress, 16);
     ipver = other.ipver;
-    
+
     dnsFrame = other.dnsFrame;
-    
-    
+
+
     //overwrite any dnsFrame callback to myself
     if (dnsFrame->completionHandler)
     {
         dnsFrame->setCompletionCallback<DnsResolver>(this, &DnsResolver::dnsCompletion);
     }
-    
+
     return *this;
 }
 

@@ -24,15 +24,15 @@ Regex::Regex(String aPattern)
 bool Regex::IsMatch(mono::String matchStr)
 {
     int res = slre_match(pattern(), matchStr(), matchStr.Length(), NULL, 0, 0);
-    
+
     return res > 0 ? true : false;
 }
 
 bool Regex::Match(mono::String matchStr, Capture *captureArray, uint32_t capArraySize)
 {
     int res = slre_match(pattern(), matchStr(), matchStr.Length(), captureArray, capArraySize, 0);
-    //debug("match res: %i\n\r",res);
-    
+    //debug("match res: %i\r\n",res);
+
     return res > 0 ? true : false;
 }
 
@@ -49,7 +49,7 @@ String Regex::Value(Capture &cap)
         String capture((char*)cap.ptr, cap.len+1); // add terminator
         char *txt = capture();
         txt[cap.len] = '\0';
-        
+
         return capture;
     }
 }
@@ -58,23 +58,23 @@ String Regex::Value(Capture &cap)
 //{
 //    if (match.Context != this)
 //    {
-//        debug("CaptureGroup context did not match Regex object!\n\r");
+//        debug("CaptureGroup context did not match Regex object!\r\n");
 //        return false;
 //    }
-//    
+//
 //    struct slre_cap caps[2];
 //    int i, j = match.MatchIndex, str_len = matchStr.Length();
-//    
+//
 //    while (j < str_len &&
 //          (i = slre_match(pattern(), matchStr() + j, str_len - j, caps, 2, 0)) > 0)
 //    {
 //        match.MatchIndex = j + i;
 //        match.Value = String((char*)caps[0].ptr, caps[0].len);
 //        match.Match = true;
-//        
+//
 //        return true;
 //    }
-//    
+//
 //    match.Match = false;
 //    match.Value = String();
 //    match.MatchIndex = 0;

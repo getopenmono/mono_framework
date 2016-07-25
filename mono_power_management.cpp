@@ -79,7 +79,7 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
 
     powerSubsystem.setPowerFence(false);
 
-    //mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\n\r", status);
+    //mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\r\n", status);
 
     if (!skipAwarenessQueues)
         processWakeAwarenessQueue();

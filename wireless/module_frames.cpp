@@ -26,12 +26,12 @@ ModuleFrame::~ModuleFrame()
     // if this object exists in a queue - remove it
     if (_queueNextPointer != NULL)
     {
-        debug("freeing frame: 0x%x from queues...\n\r",commandId);
+        debug("freeing frame: 0x%x from queues...\r\n",commandId);
         Module *mod = Module::Instance();
         mod->requestFrameQueue.Remove(this);
         if (mod->responseFrameQueue.Remove(this))
         {
-            warning("A Redpine response queue frame was freed! The communication will be out of sync!\n\r");
+            warning("A Redpine response queue frame was freed! The communication will be out of sync!\r\n");
         }
     }
 }
@@ -80,14 +80,14 @@ ManagementFrame::ManagementFrame(const ManagementFrame &other)
     status = other.status;
     autoReleaseWhenParsed = other.autoReleaseWhenParsed;
     handlerContextObject = other.handlerContextObject;
-    
+
     completionHandler = other.completionHandler;
 }
 
 ManagementFrame &ManagementFrame::operator=(const mono::redpine::ManagementFrame &other)
 {
-    debug("mgmt frame assign\n\r");
-    
+    debug("mgmt frame assign\r\n");
+
     direction = other.direction;
     commandId = other.commandId;
     responsePayload = other.responsePayload;
@@ -96,9 +96,9 @@ ManagementFrame &ManagementFrame::operator=(const mono::redpine::ManagementFrame
     status = other.status;
     autoReleaseWhenParsed = other.autoReleaseWhenParsed;
     handlerContextObject = other.handlerContextObject;
-    
+
     completionHandler = other.completionHandler;
-    
+
     return *this;
 }
 
@@ -106,54 +106,54 @@ bool ManagementFrame::commit()
 {
     if (this->direction != TX_FRAME)
     {
-        mono::Error << "You cannot send a RX frame to the module!\n\r";
+        mono::Error << "You cannot send a RX frame to the module!\r\n";
         return false;
     }
-    
+
     Module *mod = Module::Instance();
-    
+
     bool success = mod->comIntf->writeFrame(this);
-    
+
     if (!success)
     {
-        mono::Error << "Failed to send RX frame\n\r";
+        mono::Error << "Failed to send RX frame\r\n";
         return false;
     }
-    
+
     // always execute once, and maybe more: if lastReponseParsed == false
     do
     {
         //wait for response
         int retries = 0;
         while (retries < 20) {
-            
+
             if (mod->comIntf->interruptActive())
                 break;
-            
+
             retries++;
             wait_ms(50*retries);
         }
-        
+
         // sum(50*x, x=1..20) = 10,5 secs timeout
         if (retries == 20)
         {
-            debug("Response interrupt for frame timed out!\n\r");
+            debug("Response interrupt for frame timed out!\r\n");
             return false;
         }
-        
-        //mono::Debug << "Got frame response in " << retries << " retries\n\r";
-        
+
+        //mono::Debug << "Got frame response in " << retries << " retries\r\n";
+
         success = mod->comIntf->readManagementFrameResponse(*this);
-        
+
         if (!success)
         {
-            warning("Failed to read response frame!\n\r");
+            warning("Failed to read response frame!\r\n");
             return false;
         }
-        
+
     } while (!this->lastResponseParsed);
-    
-    
+
+
     return true;
 }
 
@@ -161,32 +161,32 @@ void ManagementFrame::commitAsync()
 {
     if (this->direction != TX_FRAME)
     {
-        error("You cannot send a RX frame to the module!\n\r");
+        error("You cannot send a RX frame to the module!\r\n");
         return;
     }
-    
+
     Module *module = Module::Instance();
-    
+
     module->requestFrameQueue.Enqueue(this);
-    
-    
+
+
     Timer::callOnce<Module>(0, module, &Module::moduleEventHandler);
 }
 
 void ManagementFrame::abort()
 {
-    debug("Aborting MGMT Frame: 0x%x\n\r",commandId);
-    
+    debug("Aborting MGMT Frame: 0x%x\r\n",commandId);
+
     Module *mod = Module::Instance();
     mod->requestFrameQueue.Remove(this);
-    
+
     this->completionHandler.attach<ManagementFrame>(NULL, NULL);
 }
 
 bool ManagementFrame::writeFrame()
 {
     Module *module = Module::Instance();
-    
+
     return module->comIntf->writeFrame(this);
 }
 
@@ -199,7 +199,7 @@ void ManagementFrame::triggerCompletionHandler()
         data.Context = this;
         completionHandler.call(&data);
     }
-    
+
 }
 
 
@@ -208,7 +208,7 @@ void ManagementFrame::rawFrameFormat(mgmtFrameRaw *data)
     data->LengthType = this->payloadLength() | (0x40 << 8); // 0x40 for mgmt frame type
     data->CommandId = this->commandId;
     data->status = this->status;
-    
+
     //zero out reserved memeory
     memset(data->reserved, 0, 8);
     memset(data->reserved2, 0, 2);

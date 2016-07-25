@@ -46,36 +46,36 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
     UserButton.setDebouncing(true);
     UserButton.fall<ApplicationContext>(this, &ApplicationContext::enterSleepMode);
 
-    printf("\n\r");
+    printf("\r\n");
 }
 
 int ApplicationContext::exec()
 {
     runLoop.exec();
-    
+
     return 0;
 }
 
 void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
 {
     this->application = monoApp;
-    
+
     CyIntSetSysVector(CY_INT_NMI_IRQN, &mbed_die);
     CyIntSetSysVector(CY_INT_HARD_FAULT_IRQN, &mbed_die);
     CyIntSetSysVector(CY_INT_MEM_MANAGE_IRQN, &mbed_die);
     CyIntSetSysVector(CY_INT_BUS_FAULT_IRQN, &mbed_die);
     CyIntSetSysVector(CY_INT_USAGE_FAULT_IRQN, &mbed_die);
-    
+
     //PowerSystem->onSystemPowerOnReset();
     pwrMgmt.processResetAwarenessQueue();
-    
+
     //defaultSerial.printf("Display init deactivated\n\t");
     mono::IApplicationContext::Instance->DisplayController->init();
-    
+
     touchSys.init();
-    
+
     monoApp->monoWakeFromReset();
-    
+
 }
 
 void ApplicationContext::sleepForMs(uint32_t ms)
@@ -84,22 +84,22 @@ void ApplicationContext::sleepForMs(uint32_t ms)
     while ((1u << ticks) < ms) {
         ticks++;
     }
-    
-    defaultSerial.printf("Setting CTW to: %i for ms: %i\n\r",ticks, ms);
+
+    defaultSerial.printf("Setting CTW to: %i for ms: %i\r\n",ticks, ms);
     *((reg8*)CYREG_PM_TW_CFG1) = 0x0F & ticks;
     PM_TW_CFG2 = PM_TW_CFG2 | 0x0C; // CTW enable and CTW interrupts
-    defaultSerial.printf("CTW CFG Reg: 0x%x\n\r",PM_TW_CFG2);
+    defaultSerial.printf("CTW CFG Reg: 0x%x\r\n",PM_TW_CFG2);
     enterSleepMode();
 }
 
 void ApplicationContext::enterSleepMode()
 {
     this->application->monoWillGotoSleep();
-    
+
     PowerManager->EnterSleep();
-    
+
     this->application->monoWakeFromSleep();
-    
+
 }
 
 void ApplicationContext::_softwareReset()
@@ -125,7 +125,7 @@ void ApplicationContext::_softwareResetToApplication()
 
 void ApplicationContext::resetOnUserButton()
 {
-    debug("Mono will reset on user button!\n\r");
+    debug("Mono will reset on user button!\r\n");
     this->runLoop.setResetOnUserButton(true);
 }
 

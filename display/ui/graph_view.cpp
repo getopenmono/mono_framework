@@ -55,7 +55,7 @@ void GraphView::setCursorActive(bool active)
 {
     if (useCursor != active)
         scheduleRepaint();
-    
+
     useCursor = active;
 }
 
@@ -147,7 +147,7 @@ void GraphView::repaint()
 
     // draw graph line
     bool viewSmallerThanBuffer = source->BufferLenght() > viewRect.Width();
-    
+
 
     int newestIndexMapped = 0;
 
@@ -174,16 +174,16 @@ void GraphView::repaint()
                 }
                 if (sample > max)
                     max = sample;
-                
+
                 if (newestIndex != 0 && newestIndex == xBuf+s)
                 {
                     newestIndexMapped = x;
                 }
             }
-            
+
             int mapMax = sampleMap*max;
             int mapMin = sampleMap*min;
-            
+
             if (mapMin == mapMax)
                 mapMax++;
 
@@ -195,7 +195,7 @@ void GraphView::repaint()
         }
         else
         {
-            debug("buffers smaller than view length not yet supported!\n\r");
+            debug("buffers smaller than view length not yet supported!\r\n");
             return;
         }
     }
@@ -219,5 +219,5 @@ void GraphView::repaint()
 
     int fill = fillRect - start;
     int out = outRect - fillRect;
-    debug("Fill: %i, Outline: %i, graph: %i, cursor: %i, total: %i\n\r",fill,out,graphTime,cursor,fill+out+graphTime+cursor);
+    debug("Fill: %i, Outline: %i, graph: %i, cursor: %i, total: %i\r\n",fill,out,graphTime,cursor,fill+out+graphTime+cursor);
 }

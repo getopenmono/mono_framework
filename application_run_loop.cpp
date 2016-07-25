@@ -26,7 +26,7 @@ AppRunLoop::AppRunLoop() : userBtn(SW_USER, 1, PullUp)
 
 void AppRunLoop::exec()
 {
-    //debug("mono enter run loop!\n\r");
+    //debug("mono enter run loop!\r\n");
 
     checkUsbUartState();
 
@@ -46,7 +46,7 @@ void AppRunLoop::process()
     {
         if (userBtn == 0)
         {
-            debug("Will reset on user button!\n\r");
+            debug("Will reset on user button!\r\n");
             wait_ms(300);
             IApplicationContext::SoftwareReset();
         }
@@ -89,7 +89,7 @@ void AppRunLoop::processDynamicTaskQueue()
 
         if (task->singleShot)
         {
-            //debug("Removing task from dynamic queue!\n\r");
+            //debug("Removing task from dynamic queue!\r\n");
             removeTaskInQueue(task);
         }
 
@@ -190,7 +190,7 @@ void AppRunLoop::checkUsbUartState()
         bool dtr = mono::defaultSerial.DTR();
         if (resetOnDTR && (!dtr) && lastDtrValue)
         {
-            debug("mono DTR reboot!\n\r");
+            debug("mono DTR reboot!\r\n");
             wait_ms(20);
             IApplicationContext::SoftwareReset();
         }

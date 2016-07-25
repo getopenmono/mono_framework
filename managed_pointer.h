@@ -15,7 +15,7 @@
 #include <mbed_debug.h>
 
 namespace mono {
-    
+
     /**
      * The managed pointer is an object designed to live on the stack, but point
      * to memory cobntent that live on the heap. The ManagedPointer keeps track
@@ -35,83 +35,83 @@ namespace mono {
     class ManagedPointer
     {
     protected:
-        
+
         uint32_t *refCount;
         ContentClass *content;
-        
+
     public:
-        
+
         /** Create an empty pointer */
         ManagedPointer() : refCount(NULL), content(NULL)
         {}
-        
+
         ManagedPointer(ContentClass *contentPtr, uint32_t initialRefCount = 1)
         {
             content = contentPtr;
             refCount = (uint32_t*) malloc(sizeof(uint32_t));
             *refCount = initialRefCount;
         }
-        
+
         ManagedPointer(const ManagedPointer &other)
         {
             content = other.content;
             refCount = other.refCount;
             *refCount = *refCount + 1;
         }
-        
+
         ManagedPointer &operator=(const ManagedPointer &other)
         {
-            //debug("mgrPtr assigning: 0x%x\n\r",other.content);
+            //debug("mgrPtr assigning: 0x%x\r\n",other.content);
             content = other.content;
             refCount = other.refCount;
             *refCount = *refCount + 1;
-            
+
             return *this;
         }
-        
+
         ManagedPointer &operator=(ContentClass *contentPtr)
         {
-            //debug("raw ptr to mgrPtr: 0x%x\n\r",contentPtr);
+            //debug("raw ptr to mgrPtr: 0x%x\r\n",contentPtr);
             if (contentPtr == NULL)
                 return *this;
-            
+
             content = contentPtr;
             refCount = (uint32_t*) malloc(sizeof(uint32_t));
             *refCount = 1;
-            
+
             return *this;
         }
-        
+
         ContentClass* operator->()
         {
             return content;
         }
-        
+
         bool operator==(ManagedPointer &other) const
         {
             return content == other.content;
         }
-        
+
         bool operator==(ContentClass *other) const
         {
             return content == other;
         }
-        
+
         bool operator!=(ManagedPointer &other) const
         {
             return content != other.content;
         }
-        
+
         bool operator!=(ContentClass *other) const
         {
             return content != other;
         }
-        
+
         operator bool() const
         {
             return content != NULL;
         }
-        
+
         /**
          * Give up this ManagedPointers refrences to the content object, by setting
          * its pointer to NULL.
@@ -127,35 +127,35 @@ namespace mono {
         {
             content = NULL;
         }
-        
+
         uint32_t References() const
         {
             return refCount != 0 ? *refCount : 0;
         }
-        
+
         uint32_t Address() const
         {
             return (uint32_t) content;
         }
-        
+
         ~ManagedPointer()
         {
             if (content != NULL) {
                 (*refCount) = *refCount-1;
             }
-            
+
             if (*refCount <= 0)
             {
                 free(refCount);
-                
+
                 if (content != NULL)
                     delete content;
             }
-            
+
         }
-        
+
     };
-    
+
 }
 
 #endif /* managed_pointer_h */

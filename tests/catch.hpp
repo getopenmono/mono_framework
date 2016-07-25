@@ -7007,7 +7007,7 @@ namespace Catch {
         return lc;
     }
     std::string trim( std::string const& str ) {
-        static char const* whitespaceChars = "\n\r\t ";
+        static char const* whitespaceChars = "\r\n\t ";
         std::string::size_type start = str.find_first_not_of( whitespaceChars );
         std::string::size_type end = str.find_last_not_of( whitespaceChars );
 

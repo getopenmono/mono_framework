@@ -25,7 +25,7 @@ uint8_t ACT8600PowerSystem::SystemStatus()
     uint8_t data = 0x5A;
     if (!readRegister(SYS, &data))
     {
-        //debug("Could not get SystemStatus, I2C failed\n\r");
+        //debug("Could not get SystemStatus, I2C failed\r\n");
         wait_ms(10);
     }
 
@@ -36,7 +36,7 @@ IPowerSubSystem::ChargeState ACT8600PowerSystem::ChargeStatus()
 {
     uint8_t data = 0x5A;
     if (!readRegister(APCH_4, &data)) {
-        //printf("Failed to read APCH 4 register, I2C failed\n\r");
+        //printf("Failed to read APCH 4 register, I2C failed\r\n");
     }
 
     ACTChargeState state = (ACTChargeState) ((data >> 4) & 0x03);
@@ -80,7 +80,7 @@ void ACT8600PowerSystem::powerOffUnused()
 
     readRegister(REG2_EXT, &data);
     success &= writeRegister(REG2_EXT, data & ~ENABLE);
-    
+
     readRegister(REG3_EXT, &data);
     success &= writeRegister(REG3_EXT, data & ~ENABLE);
 
@@ -101,7 +101,7 @@ void ACT8600PowerSystem::powerOffUnused()
 
     if (!success)
     {
-        //debug("Failed to set unused power regs!\n\r");
+        //debug("Failed to set unused power regs!\r\n");
     }
 }
 
@@ -109,7 +109,7 @@ void ACT8600PowerSystem::powerReg8(bool power)
 {
     uint8_t data = 0;
     readRegister(REG8_EXT, &data);
-    
+
     if (power)
         writeRegister(REG8_EXT, data | ENABLE);
     else
@@ -148,10 +148,10 @@ void ACT8600PowerSystem::setPowerFencePeripherals(bool off)
     {
         success = writeRegister(REG1_EXT, reg1 | ENABLE);
     }
-    
+
     if (!success)
     {
-        //debug("failed to set power fence!\n\r");
+        //debug("failed to set power fence!\r\n");
     }
 }
 
@@ -160,12 +160,12 @@ bool ACT8600PowerSystem::setUSBOTGPower(bool on)
     writeRegister(OTG, on?ONQ1:0x00);
     uint8_t otg = 0;
     bool ok = readRegister(OTG, &otg);
-    
+
     if (!on && ok)
         return true;
     else if (!on)
         return false;
-    
+
     if (ok && otg & Q1OK)
     {
         return true;
@@ -178,7 +178,7 @@ bool ACT8600PowerSystem::USBOTGPower()
 {
     uint8_t otg = 0x00;
     readRegister(OTG, &otg);
-    
+
     return (otg & Q1OK) ? true : false;
 }
 
@@ -450,14 +450,14 @@ void ACT8600PowerSystem::systemInterrupts(uint32_t diff)
 
 bool ACT8600PowerSystem::readRegister(int8_t regAddr, uint8_t *regData)
 {
-    
+
     act8600_i2c_en_Write(1);
-    
+
     // TODO: Avoid this delay by impl digital logic with specific truth table
     // The I2C demux drives the line low, when its not selected. this means the
     // pull up resistor needs time to pull up the line, when the demux selects it
     CyDelayUs(10);
-    
+
     int status = i2c.write(ACT8600I2CAddress, (const char*)&regAddr, 1);
     if (status != 0)
     {
@@ -465,8 +465,8 @@ bool ACT8600PowerSystem::readRegister(int8_t regAddr, uint8_t *regData)
         //debug("failed to read from act register (addr write)");
         return false;
     }
-    
-    
+
+
     status = i2c.read(ACT8600I2CAddress, (char*)regData, 1);
     if (status != 0)
     {
@@ -474,7 +474,7 @@ bool ACT8600PowerSystem::readRegister(int8_t regAddr, uint8_t *regData)
         //debug("failed to read value act register");
         return false;
     }
-    
+
     act8600_i2c_en_Write(0);
     return true;
 }
@@ -486,6 +486,6 @@ bool ACT8600PowerSystem::writeRegister(int8_t regAddr, uint8_t regData)
     uint8_t data[2] = {(uint8_t)regAddr, regData};
     bool success = i2c.write(ACT8600I2CAddress, (const char*)data, 2) == 0 ? true : false;
     act8600_i2c_en_Write(0);
-    
+
     return success;
 }

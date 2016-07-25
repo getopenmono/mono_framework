@@ -27,7 +27,7 @@ ILI9225G::ILI9225G() : IDisplayController(176,220),
     curWindow(0,0,ScreenWidth(), ScreenHeight())
 {
     setBrightness(0);
-    
+
     tearingEffect.mode(PullNone);
     tearingInterruptPending = false;
     rebootDisplay = false;
@@ -107,7 +107,7 @@ void ILI9225G::init()
         this->write(ui::View::StandardBackgroundColor);
     }
     int end = us_ticker_read();
-    debug("\n\rdisplay full paint time: %i\n\r",end-start);
+    debug("\r\ndisplay full paint time: %i\r\n",end-start);
 
     PWM_Start();
     setBrightness(255);
@@ -269,7 +269,7 @@ void ILI9225G::onSystemWakeFromSleep()
     SPI1_Wakeup();
     SPI1_Start();
 //    PWM_Wakeup();
-    
+
     init();
 }
 

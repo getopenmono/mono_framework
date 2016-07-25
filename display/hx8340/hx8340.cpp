@@ -74,10 +74,10 @@ uint8_t HX8340::Brightness() const
 
 void HX8340::init()
 {
-    
+
     TFT_Start();
-    printf("init display HX8340\n\r");
-    
+    printf("init display HX8340\r\n");
+
 	LCD_Write_COM_DATA(0x26,0x0084); //PT=10,GON=0, DTE=0, D=0100
     CyDelay(40);
 	LCD_Write_COM_DATA(0x26,0x00B8); //PT=10,GON=1, DTE=1, D=1000
@@ -116,12 +116,12 @@ void HX8340::init()
 	CyDelay(20);
 
 	//Power Setting
-	LCD_Write_COM_DATA(0x1F,0x0003); //VRH=4.65V     VREG1?GAMMA? 00~1E  080421    
+	LCD_Write_COM_DATA(0x1F,0x0003); //VRH=4.65V     VREG1?GAMMA? 00~1E  080421
 	LCD_Write_COM_DATA(0x20,0x0000); //BT (VGH~15V,VGL~-12V,DDVDH~5V)
 	LCD_Write_COM_DATA(0x24,0x0024); //VCOMH(VCOM High voltage3.2V)     0024/12    080421    11~40
-	LCD_Write_COM_DATA(0x25,0x0034); //VCOML(VCOM Low voltage -1.2V)    0034/4A    080421    29~3F 
+	LCD_Write_COM_DATA(0x25,0x0034); //VCOML(VCOM Low voltage -1.2V)    0034/4A    080421    29~3F
 	//****VCOM offset**///
-	LCD_Write_COM_DATA(0x23,0x002F); //VMF(no offset)                            
+	LCD_Write_COM_DATA(0x23,0x002F); //VMF(no offset)
 	CyDelay(20);
 
 	//##################################################################
@@ -143,8 +143,8 @@ void HX8340::init()
 	CyDelay(20);
 
 	//SET GRAM AREA
-	LCD_Write_COM_DATA(0x02,0x0000); 
-	LCD_Write_COM_DATA(0x03,0x0000); 
+	LCD_Write_COM_DATA(0x02,0x0000);
+	LCD_Write_COM_DATA(0x03,0x0000);
 	LCD_Write_COM_DATA(0x04,0x0000);
 	LCD_Write_COM_DATA(0x05,0x00AF);
 	LCD_Write_COM_DATA(0x06,0x0000);
@@ -156,11 +156,11 @@ void HX8340::init()
 	LCD_Write_COM_DATA(0x17,0x0005);//COLMOD Control Register (R17h)
 	LCD_Write_COM(0x21);
 	LCD_Write_COM(0x22);
-    
+
     for (int i=0; i<176*220; i++) {
         this->write(BlackColor);
     }
-    
+
     PWM_Start();
     setBrightness(128);
 }

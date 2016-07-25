@@ -43,34 +43,34 @@ SPIReceiveDataBuffer::SPIReceiveDataBuffer(int size, uint16_t fwVer) : DataRecei
     this->length = size;
     this->ownsMemory = true;
     this->firmwareVersion = fwVer;
-    
-    //mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
+
+    //mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\r\n");
     this->buffer = (uint8_t*) malloc(size);
     if (buffer == NULL)
     {
-        error("HEAP overflow!\n\r");
+        error("HEAP overflow!\r\n");
     }
 }
 
 SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead, uint16_t fwVer)
 {
     this->firmwareVersion = fwVer;
-    
+
     if (firmwareVersion == 0xab15) {
         this->length = (frmHead.totalBytes + 3) & (~3); // old protocol 1.5
     }
     else
         this->length = ((frmHead.totalBytes - 4) + 3) & (~3); // -4 needed for version 1.6
-    
+
     this->ownsMemory = true;
-    
-    //mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\n\r");
+
+    //mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\r\n");
     this->buffer = (uint8_t*) malloc(this->length);
     if (buffer == NULL)
     {
-        error("HEAP overflow! Could not alloc: %i bytes\n\r",this->length);
+        error("HEAP overflow! Could not alloc: %i bytes\r\n",this->length);
     }
-    
+
     this->bytesToRead = this->length;
 }
 
@@ -78,27 +78,27 @@ SPIReceiveDataBuffer& SPIReceiveDataBuffer::operator<<(mbed::SPI *spi)
 {
     if (length < bytesToRead)
     {
-        debug("SPIReceiveDataBuffer read error, buffer is too small!\n\r");
+        debug("SPIReceiveDataBuffer read error, buffer is too small!\r\n");
         return *this;
     }
-    
+
     spi->format(32);
-    
+
     uint32_t buf = 0;
     uint32_t *writePtr = (uint32_t*) this->buffer;
-    
+
     while (this->bytesToRead > 0)
     {
         buf = spi->write(0);
         //set LSByte on index 0, and MSByte on index 3
         *writePtr = (buf & 0xFF)<<24 | (buf & 0xFF00)<<8 | (buf & 0xFF0000)>>8 | (buf&0xFF000000)>>24;
-        
+
         bytesToRead -= 4;
         writePtr++; // increment 4 bytes
     }
-    
+
     spi->format(8);
-    
+
     return *this;
 }
 
@@ -108,7 +108,7 @@ SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
     {
         free(this->buffer);
     }
-    
+
 }
 
 ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) :
@@ -119,11 +119,11 @@ ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelec
 {
     this->spi = &spi;
     this->InterfaceVersion = 0xAB16; // we expect this is the default version
-    
+
     //spiInterrupt.DeactivateUntilHandled();
     spiInterrupt.rise<ModuleSPICommunication>(this, &ModuleSPICommunication::interruptHandler);
-    
-    defaultSerial.printf("starting fake IRQ timer!\n\r");
+
+    defaultSerial.printf("starting fake IRQ timer!\r\n");
     //fakeISRTimer.setCallback<ModuleSPICommunication>(this, &ModuleSPICommunication::fakeISRHandler);
     //fakeISRTimer.Start();
 }
@@ -138,10 +138,10 @@ void ModuleSPICommunication::fakeISRHandler()
 
 void ModuleSPICommunication::interruptHandler()
 {
-    //defaultSerial.printf("SPI ISR has occured!\n\r");
+    //defaultSerial.printf("SPI ISR has occured!\r\n");
     if (interruptCallback == true)
     {
-        //defaultSerial.printf("calling event handler!\n\r");
+        //defaultSerial.printf("calling event handler!\r\n");
         interruptCallback.call();
     }
 }
@@ -151,22 +151,22 @@ CommandStatus ModuleSPICommunication::sendC1C2(spiCommandC1 c1, spiCommandC2 c2)
     int retval = BUSY_RESPONSE;
     int reTries = 0;
     spi->format(8);
-    
+
     setChipSelect(true);
     while (retval == BUSY_RESPONSE && reTries < 10) {
         retval = spi->write(c1);
-        
+
         if (retval != 0)
-            mono::defaultSerial.printf("Unexpected response for C1 command, not zero but 0x%x!\n\r",retval);
-        
+            mono::defaultSerial.printf("Unexpected response for C1 command, not zero but 0x%x!\r\n",retval);
+
         retval = spi->write(c2);
-        
+
         if (retval == BUSY_RESPONSE)
             wait_ms(100);
         reTries++;
     }
     setChipSelect(false);
-    
+
     return (CommandStatus) retval;
 }
 
@@ -181,7 +181,7 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
     // set 32-bit mode if selected
     if (thirtyTwoBitMode)
         spi->format(32);
-    
+
     int retval = 0;
     int timeout = 500, to = 0;
     setChipSelect(true);
@@ -194,24 +194,24 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
         {
             retval = START_TOKEN;
         }
-        
+
         if (retval != START_TOKEN)
             wait_us(100);
-        
+
         to++;
     }
     setChipSelect(false);
-    
+
     // set mode back to 8 bit
     if (thirtyTwoBitMode)
         spi->format(8);
-    
+
     //  we receive start token?
     if (retval == START_TOKEN)
         return true;
     else
-        mono::defaultSerial.printf("Failed to receive start token\n\r");
-    
+        mono::defaultSerial.printf("Failed to receive start token\r\n");
+
     return false;
 }
 
@@ -224,7 +224,7 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     cmd1.MemoryFrameAccess = true;
     cmd1.TransferLengthSelect = true;
     cmd1.TransferLength = CommandC1::FOUR_BYTES; // ignored
-    
+
     CommandC2 cmd2;
     cmd2.DataGranularity = CommandC2::THIRTYTWO_BITMODE;
     cmd2.RegisterSelect = 0; // ignored
@@ -235,26 +235,26 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
         debug("Failed to fetch frame length header, status: 0x%x!",status);
         return false;
     }
-    
+
     spiCommandC3 c3 = 0x04; // read 4 bytes of frame
     spiCommandC4 c4 = 0x00;
-    
+
     setChipSelect(true);
     int retval = spi->write(c3);
     retval = spi->write(c4);
     setChipSelect(false);
-    
+
     retval = waitForStartToken();
-    
+
     if (retval != true)
     {
         debug("Failed to fetch frame length header");
         return false;
     }
-    
+
     //receive frame head 4-bytes
     spi->format(8);
-    
+
     uint8_t readBuf[4];
     setChipSelect(true);
     readBuf[0] = spi->write(0);
@@ -262,24 +262,24 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     readBuf[2] = spi->write(0);
     readBuf[3] = spi->write(0);
     setChipSelect(false);
-    
+
 //    setChipSelect(true);
 //    *((int*)readBuf) = spi->write(0);
 //    setChipSelect(false);
-    
-//    mono::defaultSerial.printf("Header: 0x%x 0x%x 0x%x 0x%x\n\r",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
-    
+
+//    mono::defaultSerial.printf("Header: 0x%x 0x%x 0x%x 0x%x\r\n",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
+
     spi->format(8);
-    
+
     // convert number to the current architecture endian
     // (module send as little-endian)
 //    if (InterfaceVersion == 0xab15)
 //        buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8); // old version where protocol is different
 //    else
         buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8) - 4; // version 1.6 needs this
-    
+
     buffer->totalBytes = readBuf[3] | readBuf[2] << 8;
-    
+
     return true;
 }
 
@@ -291,10 +291,10 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
 //        frameLength = frameHeader.dummyBytes + frameHeader.totalBytes; // old firmware version
 //    else
         frameLength = frameHeader.dummyBytes + frameHeader.totalBytes - 4; // version 1.6 needs this
-    
+
     //align 4-byte granularity, by AND with 0b111111100
     int readLength = (frameLength + 3) & (~3);
-    
+
     // Setup init command structure
     CommandC1 c1;
     c1.CommandType = CommandC1::READ_WRITE;
@@ -303,37 +303,37 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     c1.MemoryFrameAccess = true;
     c1.TransferLengthSelect = true;
     c1.TransferLength = CommandC1::ONE_BYTE; // ignored
-    
+
     CommandC2 c2;
     c2.DataGranularity = CommandC2::THIRTYTWO_BITMODE;
     c2.RegisterSelect = 0; // ignored
-    
+
     // send the commands to read a frame
     if (sendC1C2(c1,c2) != CMD_SUCCESS)
     {
-        mono::defaultSerial.printf("Failed to send frameRead body c1 and c2 command\n\r");
+        mono::defaultSerial.printf("Failed to send frameRead body c1 and c2 command\r\n");
         return false;
     }
-    
+
     spiCommandC3 c3 = readLength & 0xFF; // lower byte
     spiCommandC4 c4 = (readLength & 0xFF00) >> 8; // upper byte
-    
-    //mono::defaultSerial.printf("Frm read, length: 0x%x\n\r",readLength);
-    
+
+    //mono::defaultSerial.printf("Frm read, length: 0x%x\r\n",readLength);
+
     setChipSelect(true);
     // send read-length
     spi->write(c3);
     spi->write(c4);
     setChipSelect(false);
-    
+
     // wait for module to respond
     if (waitForStartToken() != true)
     {
-        mono::defaultSerial.printf("Failed to recv START_TOKEN for frameRead body.\n\r");
+        mono::defaultSerial.printf("Failed to recv START_TOKEN for frameRead body.\r\n");
         return false;
     }
-    
-    
+
+
     // read and discard any dummy bytes
     // dummy bytes are not 32-bit aligned
     if (frameHeader.dummyBytes > 0) {
@@ -344,28 +344,28 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
             //mono::defaultSerial.printf("0x%x ", spi->write(0) );
         }
         setChipSelect(false);
-        
-        //mono::defaultSerial.printf("\n\r");
+
+        //mono::defaultSerial.printf("\r\n");
     }
-    
+
     //raed the real data bytes
     if (buffer.length < readLength - frameHeader.dummyBytes)
     {
-        mono::defaultSerial.printf("Module frame read failed: Receive buffer too small!\n\r");
+        mono::defaultSerial.printf("Module frame read failed: Receive buffer too small!\r\n");
         return false;
     }
-    
+
     spi->format(32);
-    
+
     buffer.bytesToRead = readLength - frameHeader.dummyBytes;
 
     setChipSelect(true);
     buffer << spi;
     setChipSelect(false);
-    
+
     spi->format(8);
-    
-    //mono::defaultSerial.printf("Raw frm body:\n\r");
+
+    //mono::defaultSerial.printf("Raw frm body:\r\n");
     //mono::memdump(buffer.buffer, buffer.length);
 
     return true;
@@ -376,15 +376,15 @@ int ModuleSPICommunication::spiWrite(uint8_t *data, int byteLength, bool thirtyT
     if (thirtyTwoBitMode)
     {
         spi->format(32);
-        
+
         if (byteLength != (byteLength & ~3))
             mono::Warn << "SPI Write: the data buffer is not 4-byte aligned, but transfer mode is 32-bit!";
     }
-    
+
     int spiRead = 0;
-    
+
     setChipSelect(true);
-    
+
     if (thirtyTwoBitMode)
     {
         for (int i=0; i<byteLength; i+=4)
@@ -399,15 +399,15 @@ int ModuleSPICommunication::spiWrite(uint8_t *data, int byteLength, bool thirtyT
             spiRead = spi->write( data[i] );
         }
     }
-    
+
     if (thirtyTwoBitMode)
     {
         spiRead = (spiRead >> 24) & 0xFF; // reverse reponse endian for 32-bit
         spi->format(8);
     }
-    
+
     setChipSelect(false);
-    
+
     return spiRead;
 }
 
@@ -430,8 +430,8 @@ void ModuleSPICommunication::resetModule()
 
 bool ModuleSPICommunication::initializeInterface()
 {
-    
-    
+
+
     // Setup init command structure
     CommandC1 cmd;
     cmd.CommandType = CommandC1::INITIALIZATION;
@@ -440,30 +440,30 @@ bool ModuleSPICommunication::initializeInterface()
     cmd.MemoryFrameAccess = 0;
     cmd.TransferLengthSelect = 1;
     cmd.TransferLength = CommandC1::ONE_BYTE;
-    
+
     // convert to command byte
     spiCommandC1 initCmd = cmd.exportByteCommand();
-    
+
     setChipSelect(true);
     int retval = spi->write(initCmd);
     retval = spi->write(0x00);
     setChipSelect(false);
-    
+
     if (retval == CMD_SUCCESS)
         return true;
     else if (retval == CMD_FAILURE)
     {
-        mono::defaultSerial.printf("Failed to init SPI interface, module returned failure.\n\r");
+        mono::defaultSerial.printf("Failed to init SPI interface, module returned failure.\r\n");
         return false;
     }
-    
-    mono::defaultSerial.printf("Failed to init SPI interface, unknown module response: 0x%x!\n\r",retval);
+
+    mono::defaultSerial.printf("Failed to init SPI interface, unknown module response: 0x%x!\r\n",retval);
     return false;
 }
 
 uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
 {
-    
+
     CommandC1 cmd1;
     cmd1.CommandType = CommandC1::READ_WRITE;
     cmd1.ReadWrite = false;
@@ -471,21 +471,21 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
     cmd1.MemoryFrameAccess = 0; // ignored
     cmd1.TransferLengthSelect = false;
     cmd1.TransferLength = CommandC1::ONE_BYTE;
-    
+
     CommandC2 cmd2;
     cmd2.DataGranularity = CommandC2::EIGHT_BITMODE;
     cmd2.RegisterSelect = reg;
-    
+
     int retval = sendC1C2(cmd1, cmd2);
-    
+
     if (retval != CMD_SUCCESS)
     {
-        debug("Failed to sent ReadRegister command to module!\n\r");
+        debug("Failed to sent ReadRegister command to module!\r\n");
         return 0;
     }
-    
+
     retval = waitForStartToken();
-    
+
     //  we receive start token?
     if (retval == true)
     {
@@ -494,8 +494,8 @@ uint8_t ModuleSPICommunication::readRegister(SpiRegisters reg)
         setChipSelect(false);
     }
     else
-        debug("Register read failed\n\r");
-    
+        debug("Register read failed\r\n");
+
     return retval;
 }
 
@@ -508,18 +508,18 @@ uint16 ModuleSPICommunication::readMemory(uint32_t memoryAddress)
     cmd1.MemoryFrameAccess = false; // ignored
     cmd1.TransferLengthSelect = false;
     cmd1.TransferLength = CommandC1::TWO_BYTES;
-    
+
     CommandC2 cmd2;
     cmd2.DataGranularity = CommandC2::EIGHT_BITMODE;
-    
+
     int retval = sendC1C2(cmd1, cmd2);
-    
+
     if (retval != CMD_SUCCESS)
     {
         debug("Failed to sent ReadMemory command to module!");
         return 0;
     }
-    
+
     //write address
     uint8_t *addr = (uint8_t*) &memoryAddress;
     setChipSelect(true);
@@ -528,9 +528,9 @@ uint16 ModuleSPICommunication::readMemory(uint32_t memoryAddress)
     spi->write(addr[2]);
     spi->write(addr[3]);
     setChipSelect(false);
-    
+
     retval = waitForStartToken();
-    
+
     //  we receive start token?
     if (retval == true)
     {
@@ -542,8 +542,8 @@ uint16 ModuleSPICommunication::readMemory(uint32_t memoryAddress)
         setChipSelect(false);
     }
     else
-        debug("Memory read failed\n\r");
-    
+        debug("Memory read failed\r\n");
+
     return retval;
 }
 
@@ -556,18 +556,18 @@ void ModuleSPICommunication::writeMemory(uint32_t memoryAddress, uint16_t value)
     cmd1.MemoryFrameAccess = false; // ignored
     cmd1.TransferLengthSelect = false;
     cmd1.TransferLength = CommandC1::TWO_BYTES;
-    
+
     CommandC2 cmd2;
     cmd2.DataGranularity = CommandC2::EIGHT_BITMODE;
-    
+
     int retval = sendC1C2(cmd1, cmd2);
-    
+
     if (retval != CMD_SUCCESS)
     {
-        debug("Failed to sent WriteMemory command to module!\n\r");
+        debug("Failed to sent WriteMemory command to module!\r\n");
         return;
     }
-    
+
     //write address
     uint8_t *addr = (uint8_t*) &memoryAddress;
     setChipSelect(true);
@@ -575,22 +575,22 @@ void ModuleSPICommunication::writeMemory(uint32_t memoryAddress, uint16_t value)
     spi->write(addr[1]);
     spi->write(addr[2]);
     retval = spi->write(addr[3]);
-    
+
     if (retval != CMD_SUCCESS)
     {
-        debug("Failed to WriteMemory address to module!\n\r");
+        debug("Failed to WriteMemory address to module!\r\n");
         setChipSelect(false);
         return;
     }
-    
+
     uint8_t *retarr = (uint8_t*) &value;
     // write data
     spi->write(retarr[0]);
     retval = spi->write(retarr[1]);
     setChipSelect(false);
-    
+
     if (retval != CMD_SUCCESS)
-        debug("Failed to WriteMemory value to module!\n\r");
+        debug("Failed to WriteMemory value to module!\r\n");
 }
 
 
@@ -601,15 +601,15 @@ bool ModuleSPICommunication::pollInputQueue()
     if ((regval & 0x08) == 0x08)
     {
 //        if (!dataReady)
-//            debug("input data ready, but interrupt is low!\n\r");
-        
+//            debug("input data ready, but interrupt is low!\r\n");
+
         return true;
     }
     else
     {
 //        if (dataReady)
-//            debug("no input data ready, but interrupt is high!\n\r");
-        
+//            debug("no input data ready, but interrupt is high!\r\n");
+
         return false;
     }
 }
@@ -624,35 +624,35 @@ bool ModuleSPICommunication::readManagementFrame(ManagementFrame &frame)
     // get the size of the incoming frame
     frameDescriptorHeader frmHead;
     bool success = readFrameDescriptorHeader(&frmHead);
-    
+
     if (!success)
     {
-        mono::defaultSerial.printf("Failed to read FrameDescriptor Header from input\n\r");
+        mono::defaultSerial.printf("Failed to read FrameDescriptor Header from input\r\n");
         return false;
     }
-    
-    //mono::defaultSerial.printf("frm head: 0x%x dummy, 0x%x total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
-    
+
+    //mono::defaultSerial.printf("frm head: 0x%x dummy, 0x%x total\r\n", frmHead.dummyBytes,frmHead.totalBytes);
+
     //alloc memory for incoming frame
     SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
-    
+
     success = readFrameBody(frmHead, buffer);
-    
+
     if (!success)
     {
-        mono::defaultSerial.printf("Failed to read frame body from input\n\r");
+        mono::defaultSerial.printf("Failed to read frame body from input\r\n");
         return false;
     }
-    
+
     if (!bufferIsMgmtFrame(buffer))
     {
-        mono::defaultSerial.printf("Frame is not a management frame!\n\r");
+        mono::defaultSerial.printf("Frame is not a management frame!\r\n");
         return false;
     }
-    
+
     mgmtFrameRaw *rawFrame = (mgmtFrameRaw*) buffer.buffer;
     frame = ManagementFrame(rawFrame);
-    
+
     return true;
 }
 
@@ -661,61 +661,61 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     // get the size of the incoming frame
     frameDescriptorHeader frmHead;
     bool success = readFrameDescriptorHeader(&frmHead);
-    
+
     if (!success)
     {
-        debug("Failed to read FrameDescriptor Header from input\n\r");
+        debug("Failed to read FrameDescriptor Header from input\r\n");
         return false;
     }
-    
+
     //alloc memory for incoming frame
     SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
-    
+
     success = readFrameBody(frmHead, buffer);
-    
+
     if (!success)
     {
-        debug("Failed to read frame body from input\n\r");
+        debug("Failed to read frame body from input\r\n");
         return false;
     }
-    
+
     if (!bufferIsMgmtFrame(buffer))
     {
         memdump(buffer.buffer, buffer.length);
-        debug("Frame is not a management frame!\n\r");
+        debug("Frame is not a management frame!\r\n");
         return false;
     }
-    
-    
+
+
     mgmtFrameRaw *rawFrame = (mgmtFrameRaw*) buffer.buffer;
-    
+
     //check that the frame is a correct response to the request
     if (rawFrame->CommandId != request.commandId)
     {
-        debug("Read frame response. Wrong resp command Id. Was 0x%x expected 0x%x\n\r",rawFrame->CommandId,request.commandId);
+        debug("Read frame response. Wrong resp command Id. Was 0x%x expected 0x%x\r\n",rawFrame->CommandId,request.commandId);
         return false;
     }
-    
+
     if (rawFrame->status != 0)
     {
-        debug("Error response for command: 0x%x. Error code: 0x%x\n\r",rawFrame->CommandId,rawFrame->status);
+        debug("Error response for command: 0x%x. Error code: 0x%x\r\n",rawFrame->CommandId,rawFrame->status);
     }
     // check for payload
     else if (request.responsePayload && (rawFrame->LengthType & 0xFFF) > 0)
     {
-        //debug("Parsing response frame payload data...\n\r");
+        //debug("Parsing response frame payload data...\r\n");
         request.responsePayloadHandler(((uint8_t*)rawFrame)+16);
     }
     else if (request.responsePayload)
     {
-        debug("command frame request expected a response payload, but response is empty!\n\r");
+        debug("command frame request expected a response payload, but response is empty!\r\n");
         return false;
     }
-    
+
     request.length = rawFrame->LengthType & 0xFFF;
     request.direction = ModuleFrame::RX_FRAME;
     request.status = rawFrame->status;
-    
+
     return rawFrame->status == 0;
 }
 
@@ -723,18 +723,18 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
 {
     //see if there is room in the module input buffer
     uint8_t regval = readRegister(SPI_HOST_INTR);
-    
+
     if (regval != 0)
     {
-        debug("Cannot write frame to module, input buffer is full!\n\r");
+        debug("Cannot write frame to module, input buffer is full!\r\n");
         return false;
     }
-    
+
     mgmtFrameRaw rawFrame;
     frame->rawFrameFormat(&rawFrame);
-    
+
     // Write the command / mgmt frame
-    
+
     CommandC1 cmd1;
     cmd1.CommandType = CommandC1::READ_WRITE;
     cmd1.ReadWrite = true;
@@ -742,65 +742,65 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     cmd1.MemoryFrameAccess = true;
     cmd1.TransferLengthSelect = true;
     cmd1.TransferLength = CommandC1::FOUR_BYTES; // ignored
-    
+
     CommandC2 c2;
     c2.DataGranularity = CommandC2::EIGHT_BITMODE;
     c2.RegisterSelect = 0; // ignored
-    
+
     int statusCode = sendC1C2(cmd1, c2);
     //int statusCode = sendC1C2(0x7c, 0x40);
-    
+
     if (statusCode != CMD_SUCCESS)
     {
-        debug("Failed to write frame to module, error status: 0x%x\n\r", statusCode);
+        debug("Failed to write frame to module, error status: 0x%x\r\n", statusCode);
         return false;
     }
-    
+
     spiCommandC3 c3 = frame->size & 0xFF; // lower byte
     spiCommandC4 c4 = 0; // upper byte
-    
+
     // send write-length
     setChipSelect(true);
     statusCode = spi->write(c3);
     statusCode = spi->write(c4);
     setChipSelect(false);
-    
+
     if (statusCode != CMD_SUCCESS)
     {
-        debug("Failed to send length of frame to module, got response: 0x%x\n\r",statusCode);
+        debug("Failed to send length of frame to module, got response: 0x%x\r\n",statusCode);
         return false;
     }
-    
+
     // write the mgmt/cmd frame
     statusCode = spiWrite((uint8_t*)&rawFrame, sizeof(rawFrame));
-    
-    
+
+
     if (frame->payloadLength() <= 0)
     {
         return true;
     }
-    
+
     // write the data frame with payload
     // the size of 300 comes from redpines own source code
     // but this size might be too large for embedded memory sizes
     uint8_t payloadBuffer[300];
     memset(payloadBuffer, 0, 300);
-    
+
     if (frame->payloadLength() > 300)
     {
-        debug("Frame payload data is too large! More than 300 bytes!\n\r");
+        debug("Frame payload data is too large! More than 300 bytes!\r\n");
         return false;
     }
-    
+
     frame->dataPayload(payloadBuffer);
-    
+
     bool success = writePayloadData(payloadBuffer, frame->payloadLength());
-    
+
     if (!success)
     {
         return false;
     }
-    
+
     return true;
 }
 
@@ -808,10 +808,10 @@ bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength
 {
     if (byteLength != (byteLength & ~3))
     {
-        debug("Data Frame payload data is not 4-byte aligned!\n\r");
+        debug("Data Frame payload data is not 4-byte aligned!\r\n");
         return false;
     }
-    
+
     CommandC1 cmd1;
     cmd1.CommandType = CommandC1::READ_WRITE;
     cmd1.ReadWrite = true;
@@ -819,43 +819,43 @@ bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength
     cmd1.MemoryFrameAccess = true;
     cmd1.TransferLengthSelect = true;
     cmd1.TransferLength = CommandC1::FOUR_BYTES; // ignored
-    
+
     CommandC2 c2;
     c2.DataGranularity = CommandC2::EIGHT_BITMODE;
     c2.RegisterSelect = 0; // ignored
-    
+
     int statusCode = sendC1C2(cmd1, c2);
 
     if (statusCode != CMD_SUCCESS)
     {
-        debug("Failed to write data to module, error status: 0x%x\n\r", statusCode);
+        debug("Failed to write data to module, error status: 0x%x\r\n", statusCode);
         return false;
     }
-    
+
     spiCommandC3 c3 = byteLength & 0xFF; // lower byte
     spiCommandC4 c4 = (byteLength & 0xFF00) >> 8; // upper byte
-    
+
     // send write-length
     setChipSelect(true);
     statusCode = spi->write(c3);
     statusCode = spi->write(c4);
     setChipSelect(false);
-    
+
     if (statusCode != CMD_SUCCESS)
     {
-        debug("Failed to send length of data to module, got response: 0x%x\n\r", statusCode);
+        debug("Failed to send length of data to module, got response: 0x%x\r\n", statusCode);
         return false;
     }
-    
+
     // write the data
     statusCode = spiWrite(data, byteLength);
-    
+
     if (statusCode != CMD_SUCCESS)
     {
-        debug("Failed to transfer data frame payload data, got response: 0x%x\n\r", statusCode);
+        debug("Failed to transfer data frame payload data, got response: 0x%x\r\n", statusCode);
         return false;
     }
-    
+
     return true;
 }
 

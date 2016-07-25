@@ -14,14 +14,14 @@ void INetworkRequest::setState(INetworkRequest::States newState)
 {
     if (newState == state)
         return;
-    
+
     StateChangeEvent evnt;
     evnt.Context = this;
     evnt.NewState = newState;
     evnt.OldState = state;
-    
+
     this->state = newState;
-    
+
     if (stateChangeHandler) {
         stateChangeHandler.call(&evnt);
     }
@@ -30,27 +30,27 @@ void INetworkRequest::setState(INetworkRequest::States newState)
 void INetworkRequest::triggerCompletionHandler()
 {
     setState(COMPLETED_STATE);
-    
+
     if (completionHandler == false)
         return;
-    
+
     CompletionEvent evnt;
     evnt.Context = this;
-    
+
     completionHandler.call(&evnt);
 }
 
 void INetworkRequest::triggerDirectErrorHandler()
 {
     setState(ERROR_STATE);
-    
+
     if (errorHandler == false)
         return;
-    
+
     ErrorEvent evnt;
     evnt.Context = this;
     evnt.ErrorCode = lastErrorCode;
-    
+
     errorHandler.call(&evnt);
 }
 
@@ -79,7 +79,7 @@ bool INetworkRequest::HasFailed() const
 INetworkRequest::~INetworkRequest()
 {
     if (cbTimer) {
-        debug("deleting the pending callback trigger timer\n\r");
+        debug("deleting the pending callback trigger timer\r\n");
         delete cbTimer;
     }
 }
