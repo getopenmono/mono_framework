@@ -1,5 +1,5 @@
 TARGET = mono_project
-ARCH="/usr/local/gcc-arm-none-eabi-4_8/bin/arm-none-eabi-"
+ARCH="/usr/local/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi-"
 FLASH_SIZE=262144
 FLASH_ROW_SIZE=256
 FLASH_ARRAY_SIZE=65536
@@ -76,15 +76,15 @@ COPY=cp
 MKDIR=mkdir
 MONOPROG=monoprog
 ELFTOOL='C:\Program Files (x86)\Cypress\PSoC Creator\3.1\PSoC Creator\bin\cyelftool.exe'
-INCS = -I . $(addprefix -I, $(MONO_INCLUDES) $(MBED_INCLUDES) $(INCLUDE_DIR)) 
+INCS = -I . $(addprefix -I, $(MONO_INCLUDES) $(MBED_INCLUDES) $(INCLUDE_DIR))
 CDEFS= #-DMONO_DISP_CTRL_HX8340
 ASDEFS=
 AS_FLAGS = -c -g -Wall -mcpu=cortex-m3 -mthumb -mthumb-interwork -march=armv7-m
 CC_FLAGS = -c -g -Wall -mcpu=cortex-m3 -mthumb $(OPTIMIZATION) -mthumb-interwork -fno-common -fmessage-length=0 -ffunction-sections -fdata-sections -march=armv7-m
-ONLY_C_FLAGS = -std=gnu99 
+ONLY_C_FLAGS = -std=gnu99
 ONLY_CPP_FLAGS = -std=gnu++98 -fno-rtti -fno-exceptions
 LDSCRIPT = -T $(LINKER_SCRIPT)
-LD_FLAGS = -g -mcpu=cortex-m3 -mthumb -march=armv7-m -fno-rtti -Wl,--gc-sections -specs=nano.specs 
+LD_FLAGS = -g -mcpu=cortex-m3 -mthumb -march=armv7-m -fno-rtti -Wl,--gc-sections -specs=nano.specs
 LD_SYS_LIBS = -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 
 #"libs/CyCompLib.a"
@@ -171,13 +171,13 @@ monoFiles:
 monoIncludes:
 	@echo $(MONO_INCLUDE_FILES)
 
-includeFiles: 
+includeFiles:
 	@echo $(INCS)
 
 clean:
 	$(RM) -r $(addprefix $(BUILD_DIR)/, $(MONO_OBJECTS)) include/* monolib.a mono_framework.a
 
-	
+
 
 ## $(LD) -Wl,--start-group $(LD_FLAGS) libs/CyCompLib.a $(LDSCRIPT) -o $@ $^ -Wl,--end-group $(LD_SYS_LIBS)
 ## $(ELFTOOL) -C $@ --flash_size $(FLASH_SIZE) --flash_row_size $(FLASH_ROW_SIZE)
