@@ -18,7 +18,7 @@ SCENARIO("test the mono string class works")
         
         THEN("it should not be malloced")
         {
-            REQUIRE(conStr.malloced == false);
+            REQUIRE(conStr.malloced == true);
         }
         
         WHEN("we create a copy of the string")
@@ -47,7 +47,7 @@ SCENARIO("test the mono string class works")
             
             THEN("it shoul dref the original")
             {
-                REQUIRE(dynStr.stringData == copy.stringData);;
+                REQUIRE(dynStr.stringData == copy.stringData);
             }
         }
     }

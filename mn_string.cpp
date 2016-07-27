@@ -15,6 +15,12 @@ String String::Format(const char *format, ...)
     va_start(args, format);
     uint32_t size = vsnprintf(NULL, 0, format, args);
     String str(size+1);
+#ifdef __LP64__
+    // Workaound for va_start and vsnprintf on 64bit OS X and *nix systems
+    // See https://gist.github.com/foobit/4618064
+    va_end(args);
+    va_start(args, format);
+#endif
     vsnprintf(str.stringData,size+1, format, args);
     va_end(args);
 
@@ -51,6 +57,11 @@ String::String(char *str, uint32_t length)
     // Make room for the string terminator.
     preAllocbytes(length+1);
     memcpy(stringData, str, length);
+}
+
+String::String(char *str)
+{
+    CopyFromCString(str);
 }
 
 String::String(const char *str)
