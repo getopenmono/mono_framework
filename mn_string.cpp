@@ -1,18 +1,11 @@
-//
-//  string.cpp
-//  analog
-//
-//  Created by Kristoffer Andersen on 13/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "mn_string.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-//#include "consoles.h"
 
 using namespace mono;
 
@@ -35,17 +28,6 @@ String::String()
     malloced = false;
 }
 
-//String::String(const char *format, ...)
-//{
-//    va_list args;
-//    va_start(args, format);
-//    va_
-//    uint32_t size = snprintf(NULL,0, format, args);
-//    preAllocbytes(size);
-//    snprintf(stringData,size, format, args);
-//    va_end(args);
-//}
-
 String::String(uint32_t preAllocBytes)
 {
     preAllocbytes(preAllocBytes);
@@ -53,22 +35,17 @@ String::String(uint32_t preAllocBytes)
 
 void String::CopyFromCString(const char * cstring)
 {
-    uint32_t strLen = strlen(cstring)+1; // plus string terminator
-    malloced = true;
-    stringData = (char*) malloc(strLen+sizeof(uint32_t));
-    memset(stringData, 0, strLen+sizeof(uint32_t));
+    // Make room for the string terminator.
+    uint32_t strLen = 1 + (0 == cstring) ? 0 : strlen(cstring);
+    preAllocbytes(strLen);
     strcpy(stringData, cstring);
-    refCount = (uint32_t*) (stringData+strLen);
-    *refCount = 1;
 }
 
 String::String(char *str, uint32_t length)
 {
-    malloced = true;
-    stringData = (char*) malloc(length+sizeof(uint32_t));
+    // Make room for the string terminator.
+    preAllocbytes(length+1);
     memcpy(stringData, str, length);
-    refCount = (uint32_t*) (stringData+length);
-    *refCount = 1;
 }
 
 String::String(const char *str)
