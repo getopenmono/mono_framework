@@ -149,6 +149,9 @@ namespace mono { namespace redpine {
 
         bool joinFailed;
 
+        /** List of callback handlers associated with a socket descriptor */
+        mbed::FunctionPointerArg1<void, void *> activeSockets[10];
+
         /** The communication interface used by the module */
         ModuleCommunication *comIntf;
 
@@ -199,6 +202,11 @@ namespace mono { namespace redpine {
         void onSystemWakeFromSleep();
 
         void OnSystemBatteryLow();
+
+        /**
+         * Handles an incomming data frame (expect that it contain socket data
+         */
+        void handleDataPayload(ModuleCommunication::DataPayload const &payload);
 
     public:
 

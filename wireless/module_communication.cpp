@@ -266,8 +266,8 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
 //    setChipSelect(true);
 //    *((int*)readBuf) = spi->write(0);
 //    setChipSelect(false);
-
-//    mono::defaultSerial.printf("Header: 0x%x 0x%x 0x%x 0x%x\r\n",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
+    
+    printf("Header: 0x%x 0x%x 0x%x 0x%x\r\n",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
 
     spi->format(8);
 
@@ -337,15 +337,15 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     // read and discard any dummy bytes
     // dummy bytes are not 32-bit aligned
     if (frameHeader.dummyBytes > 0) {
-        //mono::defaultSerial.printf("reading dummy bytes: ");
+        printf("reading dummy bytes: ");
         setChipSelect(true);
         for (int i=0; i<frameHeader.dummyBytes; i++) {
-            spi->write(0);
-            //mono::defaultSerial.printf("0x%x ", spi->write(0) );
+            //spi->write(0);
+            printf("0x%x ", spi->write(0) );
         }
         setChipSelect(false);
-
-        //mono::defaultSerial.printf("\r\n");
+        
+        printf("\r\n");
     }
 
     //raed the real data bytes
@@ -668,6 +668,8 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
         return false;
     }
 
+    printf("frm head: 0x%x dummy, 0x%x total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
+
     //alloc memory for incoming frame
     SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
 
@@ -717,6 +719,54 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     request.status = rawFrame->status;
 
     return rawFrame->status == 0;
+}
+
+bool ModuleSPICommunication::readDataFrame(DataPayloadHandler &payloadHandler)
+{
+    // get the size of the incoming frame
+    frameDescriptorHeader frmHead;
+    bool success = readFrameDescriptorHeader(&frmHead);
+
+    if (!success)
+    {
+        mono::defaultSerial.printf("Failed to read FrameDescriptor Header from input\n\r");
+        return false;
+    }
+
+    mono::defaultSerial.printf("frm head: 0x%x dummy, 0x%x total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
+
+    //alloc memory for incoming frame
+    SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
+
+    success = readFrameBody(frmHead, buffer);
+
+    if (!success)
+    {
+        mono::defaultSerial.printf("Failed to read frame body from input\n\r");
+        return false;
+    }
+
+    if (!bufferIsDataFrame(buffer))
+    {
+        mono::defaultSerial.printf("Frame is not a data frame!\n\r");
+        memdump(buffer.buffer, buffer.length);
+        return false;
+    }
+
+    dataFrameRaw *rawFrame = (dataFrameRaw*) buffer.buffer;
+
+    // check for payload
+    if ((rawFrame->LengthType & 0xFFF) > 0)
+    {
+        struct DataPayload payload = { ((uint8_t*)rawFrame)+16, (uint16_t)(rawFrame->LengthType & 0xFFF) };
+        payloadHandler.call(payload);
+    }
+    else
+    {
+        debug("Data frame with no payload!\t\n");
+    }
+
+    return true;
 }
 
 bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)

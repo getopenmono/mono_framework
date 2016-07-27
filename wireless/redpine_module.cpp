@@ -95,6 +95,7 @@ bool Module::initialize(ModuleCommunication *commInterface)
         return false;
     }
 
+    // attach callback handlers
     self->comIntf->interruptCallback.attach<mono::redpine::Module>(self, &Module::moduleEventHandler);
 
     if (frame.commandId == ModuleFrame::CardReady)
@@ -187,12 +188,14 @@ void Module::moduleEventHandler()
             ManagementFrame *respFrame = responseFrameQueue.Peek();
             if (respFrame == NULL)
             {
-                debug("nothing on request queue!\r\n");
-                ManagementFrame frame;
-                bool success = comIntf->readManagementFrame(frame);
+                debug("nothing on request queue, trying as data frame...\r\n");
+                ModuleCommunication::DataPayloadHandler handler;
+                handler.attach<Module>(this, &Module::handleDataPayload);
+                bool success = comIntf->readDataFrame(handler);
+
                 if (!success)
                 {
-                    debug("Failed to read unexcepted mgmt frame\r\n");
+                    debug("failed to handle incoming frame!\r\n");
                 }
             }
             else
@@ -252,6 +255,17 @@ void Module::moduleEventHandler()
             responseFrameQueue.Enqueue(request);
         }
     }
+}
+
+void Module::handleDataPayload(ModuleCommunication::DataPayload const &payload)
+{
+    //we expect all incoming data frame as a socket receiving data
+    printf("Got data payload length: %i\t\n",payload.length);
+
+    memdump(payload.data, payload.length);
+
+    OpenSocketFrame::recvFrameTcp *socketRecv = (OpenSocketFrame::recvFrameTcp*) payload.data;
+    printf("SD: %i, len: %lu, data: %s\t\n",socketRecv->recvSocket, socketRecv->recvBufLen, socketRecv->recvDataBuf);
 }
 
 void Module::onNetworkReady(ManagementFrame::FrameCompletionData *data)

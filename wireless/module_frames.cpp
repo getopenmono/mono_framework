@@ -125,8 +125,7 @@ bool ManagementFrame::commit()
     {
         //wait for response
         int retries = 0;
-        while (retries < 20) {
-
+        while (retries < 22) {
             if (mod->comIntf->interruptActive())
                 break;
 
@@ -135,7 +134,7 @@ bool ManagementFrame::commit()
         }
 
         // sum(50*x, x=1..20) = 10,5 secs timeout
-        if (retries == 20)
+        if (retries == 22)
         {
             debug("Response interrupt for frame timed out!\r\n");
             return false;

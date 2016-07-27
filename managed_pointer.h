@@ -138,6 +138,16 @@ namespace mono {
             return (uint32_t) content;
         }
 
+        ContentClass* Pointer() const
+        {
+            return content;
+        }
+
+        ContentClass& Reference() const
+        {
+            return *content;
+        }
+        
         ~ManagedPointer()
         {
             if (content != NULL) {
