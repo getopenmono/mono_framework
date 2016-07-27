@@ -36,9 +36,14 @@ String::String(uint32_t preAllocBytes)
 void String::CopyFromCString(const char * cstring)
 {
     // Make room for the string terminator.
-    uint32_t strLen = 1 + (0 == cstring) ? 0 : strlen(cstring);
-    preAllocbytes(strLen);
-    strcpy(stringData, cstring);
+    if (0 == cstring)
+        preAllocbytes(1);
+    else
+    {
+        uint32_t strLen = 1 + strlen(cstring);
+        preAllocbytes(strLen);
+        strcpy(stringData, cstring);
+    }
 }
 
 String::String(char *str, uint32_t length)
