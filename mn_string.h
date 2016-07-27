@@ -13,7 +13,7 @@
 #include <stdarg.h>
 
 namespace mono {
-    
+
     /**
      * The mono framework has it own string class, that either reside on the HEAP
      * or inside the read-only data segment (`.rodata`).
@@ -41,12 +41,7 @@ namespace mono {
      * references are passed to the objects `str2` and `str3`. Only as the last
      * object is deallocated is the data disposed from the HEAP.
      *
-     * If you create a string from some static C text string (of type `const char*`),
-     * the compiler will put the data in the read-only data segment (`.rodata`).
-     * The string object would not alloc anything on the HEAP, but just reference
-     * the static string in the data segment.
-     *
-     * These features makes the class very lightweight and safe to pass around 
+     * These features makes the class very lightweight and safe to pass around
      * functions and objects.
      *
      * @brief High level string class, that is allocated on the HEAP or `rodata`
@@ -57,47 +52,39 @@ namespace mono {
         uint32_t *refCount;
         bool malloced;
         char *stringData;
-        
+
         void preAllocbytes(uint32_t count);
-        
+
     public:
-        
+
         static String Format(const char *format, ...);
-        
+
         String();
-        
-        //String(const char *format, ...);
-        
+
         String(uint32_t preAllocBytes);
-        
-        String(char *str);
-        
+
         String(char *str, uint32_t length);
-        
+
         String(const char *str);
-        
+
         String(const String &str);
-        
-        
+
         uint32_t Length() const;
-        
-        
+
         String& operator=(const char *str);
-        
+
         String& operator=(const String &str);
-        
+
         char operator[](uint32_t pos) const;
-        
+
         char* operator()() const;
-        
+
         ~String();
-        
-        //char* operator=(const String &str);
-        
+
+    private:
+        void CopyFromCString(const char * cstring);
+
     };
-    
-    //char* operator=(const String &str);
-    
 }
 
 #endif /* mn_string_h */

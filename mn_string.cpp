@@ -24,7 +24,7 @@ String String::Format(const char *format, ...)
     String str(size+1);
     vsnprintf(str.stringData,size+1, format, args);
     va_end(args);
-    
+
     return str;
 }
 
@@ -51,13 +51,13 @@ String::String(uint32_t preAllocBytes)
     preAllocbytes(preAllocBytes);
 }
 
-String::String(char *str)
+void String::CopyFromCString(const char * cstring)
 {
-    uint32_t strLen = strlen(str)+1; // plus string terminator
+    uint32_t strLen = strlen(cstring)+1; // plus string terminator
     malloced = true;
     stringData = (char*) malloc(strLen+sizeof(uint32_t));
     memset(stringData, 0, strLen+sizeof(uint32_t));
-    strcpy(stringData, str);
+    strcpy(stringData, cstring);
     refCount = (uint32_t*) (stringData+strLen);
     *refCount = 1;
 }
@@ -73,9 +73,7 @@ String::String(char *str, uint32_t length)
 
 String::String(const char *str)
 {
-    stringData = (char*) str;
-    malloced = false;
-    refCount = NULL;
+    CopyFromCString(str);
 }
 
 String::String(const String &str)
@@ -89,7 +87,7 @@ String::String(const String &str)
     {
         refCount = NULL;
     }
-    
+
     stringData = str.stringData;
     this->malloced = str.malloced;
 }
@@ -106,11 +104,11 @@ String& String::operator=(const char *str)
 {
     if (this != NULL)
         this->~String();
-    
+
     stringData = (char*) str;
     malloced = false;
     refCount = NULL;
-    
+
     return *this;
 }
 
@@ -118,7 +116,7 @@ String& String::operator=(const String &str)
 {
     if (this != NULL)
         this->~String();
-    
+
     if (str.malloced)
     {
         this->refCount = str.refCount;
@@ -128,10 +126,10 @@ String& String::operator=(const String &str)
     {
         refCount = NULL;
     }
-    
+
     this->stringData = str.stringData;
     this->malloced = str.malloced;
-    
+
     return *this;
 }
 
@@ -151,12 +149,12 @@ String::~String()
     {
         *refCount = *refCount-1;
     }
-    
+
     if (malloced && *refCount <= 0)
     {
         free(stringData);
     }
-    
+
 }
 
 ///////// PRIVATE METHODS
