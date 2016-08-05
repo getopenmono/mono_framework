@@ -153,6 +153,9 @@ void AppRunLoop::removeTaskInQueue(IRunLoopTask *item)
 
     if (item->nextTask != NULL)
         item->nextTask->previousTask = item->previousTask;
+
+    if (taskQueueHead == item)
+        taskQueueHead = item->nextTask;
 }
 
 void AppRunLoop::checkUsbUartState()

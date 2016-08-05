@@ -13,3 +13,5 @@ display/ili9225g/drv_lcd_ili9225g.c.txt
 display/ili9225g/hal_gouda.c.txt
 tests/fileIOTest
 tests/heapQueueTest
+unittest
+unittest.dSYM

@@ -39,11 +39,11 @@ void Timer::Start()
 {
     if (handler == false)
         return;
-    
+
     running = true;
     IApplicationContext::Instance->RunLoop->addDynamicTask(this);
-    
-    // tockers do not support zero interval
+
+    // tickers do not support zero interval
     if (interval > 0)
         ticker.attach_us<Timer>(this, &Timer::hwTimerInterrupt, interval*1000);
     else
