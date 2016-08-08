@@ -27,6 +27,8 @@ namespace mono { namespace media {
     {
     public:
 
+        virtual ~Image() {}
+
         /**
          * Returns the width of the image in pixels
          *

@@ -169,7 +169,7 @@ namespace mono {
          */
         View(geo::Rect rect);
 
-        ~View();
+        virtual ~View();
 
         /**
          * Changes the views position on the screen.
