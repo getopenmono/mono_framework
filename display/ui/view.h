@@ -20,18 +20,16 @@ namespace mono {
      *
      * Abstract View class/interface. All UI view/widgets that paint to the
      * screen must inherit from this class. Views handle repaint queues, touch
-     * inputs and painting to the display buffer automatically.
+     * input and painting to the display buffer automatically.
      *
-     * All views has a width and height, along with an absolute x,y coordinate.
-     * The coordinates define the upper left corner of the view rectangle.
+     * All views have a width and height, along with an absolute x,y coordinate
+     * that defines the upper left corner of the view rectangle.
      *
-     * As a design pattern, we chose that Views must not contain any state. They
-     * only draw data to the display. Therefore view might contain or have
-     * references to objects holding the actual state information.
-     *
-     * The some simple views, like @ref TextLabelView, are exceptions to this 
-     * rule, since it is highly convenient to let them hold some state. (Like
-     * text content.)
+     * Views must not contain any state. They only draw data to the display.
+     * Therefore views might contain or have references to objects holding the
+     * actual state information. Some simple views, like @ref TextLabelView,
+     * are exceptions to this rule, since it is highly convenient to let them
+     * hold some state. (Like text content.)
      *
      * @TODO Something on dependence of AppContext and Appctrl design pattern
      *
@@ -47,7 +45,7 @@ namespace mono {
          * Define the 4 dirrerent orientations the of display. The display controller
          * apply the orientation transformation to real display. For the UI Views
          * the coordinate system remains the same, it just changes width and height.
-         * The orico is always the top left corner (defined relative to gravity),
+         * The origo is always the top left corner (defined relative to gravity),
          * no matter the physical orientation of mono's display.
          */
         enum Orientation
@@ -128,7 +126,7 @@ namespace mono {
         void callRepaintScheduledViews();
 
         /**
-         * Re-paint the view content. This method should be called then the view
+         * Re-paint the view content. This method should be called when the view
          * content has changed.
          * You can call this method directly, but it might cause graphics artifacts
          * because the display is not double buffered. Instead you should
@@ -172,24 +170,23 @@ namespace mono {
         virtual ~View();
 
         /**
-         * Changes the views position on the screen.
+         * Changes the view's position on the screen.
          * Note that changing the position does not implicitly redraw the view.
          * This means you will need to update the screen the affected areas
          * to make the change visible.
          *
-         * @brief Change the views position on the screens coordinate system
+         * @brief Change the view's position on the screens coordinate system
          * @param pos The new position of the view
          */
         virtual void setPosition(geo::Point pos);
 
         /**
-         * Changes the views dimensions. The affect of size changes might depend
+         * Changes the view's dimensions. The effect of size changes might depend
          * on the specefic view subclass. Some views might use their size to
-         * calculate their internal layout - other might only support fixed sizes.
+         * calculate their internal layout - others might only support fixed size.
          *
-         * Note that changing the size here does not redraw the view. The screen
-         * needs to be redrawn the affected places, to make the size change
-         * visible.
+         * Note that changing the size here does not redraw the view. The
+         * screen needs to be redrawn to make the size change visible.
          *
          * @brief Change the size (width, height) of the view.
          * @param siz The new size of the view
@@ -197,7 +194,7 @@ namespace mono {
         virtual void setSize(geo::Size siz);
 
         /**
-         * Set the views position and size, by providing a rectangle object.
+         * Set the view's position and size, by providing a rectangle object.
          *
          * *Note* that this method does not repaint the view, you must do that
          * explicitly.
@@ -207,14 +204,14 @@ namespace mono {
         virtual void setRect(geo::Rect rect);
 
         /**
-         * @brief Get the current position of the views upper left corner
+         * @brief Get the current position of the view's upper left corner
          * @returns A reference to the current position
          */
         virtual geo::Point &Position();
 
         /**
-         * @brief Get the views current size rectangle
-         * @returns A reference to the views size rectangle
+         * @brief Get the view's current size rectangle
+         * @returns A reference to the view's size rectangle
          */
         virtual geo::Size &Size();
 
@@ -223,9 +220,9 @@ namespace mono {
          * queue is executed right after a display refresh. This helps prevent
          * graphical artifacts, when running on a single display buffer system.
          *
-         * Because view has no state information, they do not know when to
-         * repaint themselves. You or classes using views, must manually call
-         * this repaint method when its time to repaint the view.
+         * Because views have no state information, they do not know when to
+         * repaint themselves. You, or classes using views, must call
+         * this repaint method when the view is ready to be repainted.
          *
          * @brief Schedule this view for repaint at next display refresh
          */
@@ -237,7 +234,7 @@ namespace mono {
          * @ref scheduleRepaint. You change the visibility state by using the
          * methods @ref show and @ref hide
          *
-         * @brief Returns the views visibility
+         * @brief Returns the view's visibility
          * @returns `true` if the view can/should be painted on the screen, `false` otherwise.
          * @see show
          * @see hide
@@ -245,7 +242,7 @@ namespace mono {
         virtual bool Visible() const;
 
         /**
-         * Change the views visibility state to visible. This means it can be
+         * Change the view's visibility state to visible. This means it can be
          * scheduled for repaint by @ref scheduleRepaint.
          * This method automatically schedules the view for repaint.
          *
@@ -256,7 +253,7 @@ namespace mono {
         virtual void show();
 
         /**
-         * Change the views state to invisible. THis method will remove the view
+         * Change the view's state to invisible. This method will remove the view
          * from the @ref dirtyQueue, if it has already been scheduled for repaint.
          *
          * Any calls to @ref scheduleRepaint will be ignored, until the view is
