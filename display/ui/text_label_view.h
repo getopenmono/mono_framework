@@ -115,18 +115,6 @@ namespace mono { namespace ui {
         // MARK: Public Constructors
 
         /**
-         * @brief Construct an empty TextLabel, with no dimensions and content
-         *
-         * An empty view has view dimensions (0,0,0,0) and the empty string as
-         * its content. You have setup its dimensions and its content before
-         * it can be rendered on the display.
-         *
-         * @see setRect
-         * @see setText
-         */
-        TextLabelView();
-
-        /**
          * @brief Construct a text label with defined content, but no dimensions
          *
          * Before you can render the label you still need to set the view
