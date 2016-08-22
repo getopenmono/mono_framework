@@ -64,7 +64,7 @@ void ImageView::repaint()
 
     int iy = 0;
 
-    for(int16_t y=crop.Y(); y<crop.Y()+dispRect.Width(); y++)
+    for(int16_t y=crop.Y(); y<crop.Y()+dispRect.Height(); y++)
     {
         image->SeekToHLine(y);
 
