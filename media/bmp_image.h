@@ -5,7 +5,11 @@
 #define __displaySimTest__bmp_image__
 
 #include "image.h"
+#include "mn_string.h"
+#include "managed_pointer.h"
+
 #include <stdint.h>
+
 
 namespace mono { namespace media {
 
@@ -42,15 +46,19 @@ namespace mono { namespace media {
 
         void readHeaderData();
 
-        const char *filePath;
-        FILE *fPointer;
+        String filePath;
+        FILE* fPointer;
         bool imageValid;
 
     public:
 
         BMPImage();
 
-        BMPImage(const char *path);
+        BMPImage(String path);
+
+        BMPImage(BMPImage const &img);
+
+        BMPImage &operator=(BMPImage const &img);
 
         ~BMPImage();
 

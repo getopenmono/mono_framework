@@ -56,7 +56,10 @@ namespace mono { namespace ui {
         void setCrop(geo::Rect crp);
         void setCrop(geo::Size crp);
         void setCrop(geo::Point crp);
-        
+
+
+        const geo::Rect &Crop() const;
+
         void repaint();
     };
     

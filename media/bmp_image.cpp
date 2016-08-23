@@ -2,6 +2,8 @@
 // Released under the MIT license, see LICENSE.txt
 
 #include "bmp_image.h"
+#include <mbed_debug.h>
+#include <errno.h>
 
 using namespace mono::media;
 
@@ -12,16 +14,18 @@ BMPImage::BMPImage()
     imageValid = false;
 }
 
-BMPImage::BMPImage(const char *path)
+// MARK: Rule of 3
+
+BMPImage::BMPImage(String path)
 {
     filePath = path;
     fPointer = NULL;
     imageValid = false;
-    fPointer = fopen(filePath, "rb");
+    fPointer = fopen(filePath(), "rb");
 
-    if (fPointer == NULL)
+    if (!fPointer)
     {
-        printf("BMPImage: No such file: %s\r\n",path);
+        debug("BMPImage: No such file: %s\r\n",path());
         return;
     }
 
@@ -29,7 +33,7 @@ BMPImage::BMPImage(const char *path)
 
     if (fileHeader.bfType != 0x4D42)
     {
-        printf("BMPIMage: File %s is not a BMP image!\r\n", path);
+        debug("BMPIMage: File %s is not a BMP image!\r\n", path());
     }
     else
     {
@@ -37,12 +41,47 @@ BMPImage::BMPImage(const char *path)
     }
 }
 
+BMPImage::BMPImage(BMPImage const &img)
+{
+    filePath = img.filePath;
+    imageValid = img.imageValid;
+    fileHeader = img.fileHeader;
+    infoHeader = img.infoHeader;
+    widthMult4 = img.widthMult4;
+
+    fPointer = fopen(img.filePath(), "rb");
+    fpos_t pos;
+    fgetpos(img.fPointer, &pos);
+    fseek(fPointer, pos, SEEK_SET);
+}
+
+
+BMPImage& BMPImage::operator=(const BMPImage &img)
+{
+    filePath = img.filePath;
+    imageValid = img.imageValid;
+    fileHeader = img.fileHeader;
+    infoHeader = img.infoHeader;
+    widthMult4 = img.widthMult4;
+
+    if (fPointer != NULL)
+        fclose(fPointer);
+
+    fPointer = fopen(img.filePath(), "rb");
+    fpos_t pos;
+    fgetpos(img.fPointer, &pos);
+    fseek(fPointer, pos, SEEK_SET);
+
+    return *this;
+}
+
 int BMPImage::ReadPixelData(void *target, int bytesToRead)
 {
     if (!IsValid())
         return -1;
-    size_t bytesRead = fread(target, bytesToRead*2, 1, fPointer);
-    return (int)(bytesRead / PixelByteSize());
+
+    size_t bytesRead = fread(target, PixelByteSize(), bytesToRead, fPointer);
+    return (int)(bytesRead);
 }
 
 int BMPImage::SkipPixelData(int pixelsToSkip)
@@ -96,9 +135,8 @@ bool BMPImage::IsValid ()
 
 BMPImage::~BMPImage()
 {
-    if (fPointer != 0)
+    if (fPointer != NULL)
     {
         fclose(fPointer);
-        fPointer = 0;
     }
 }

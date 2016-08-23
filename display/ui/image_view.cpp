@@ -2,7 +2,7 @@
 // and is available under the MIT license, see LICENSE.txt
 
 #include "image_view.h"
-#include <consoles.h>
+#include <mbed_debug.h>
 
 using namespace mono::ui;
 
@@ -49,7 +49,9 @@ void ImageView::setImage(media::Image *img)
 void ImageView::repaint()
 {
     if (image == NULL)
+    {
         return;
+    }
 
     //copy the image crop/select rect
     geo::Rect dispRect = crop;
@@ -79,4 +81,9 @@ void ImageView::repaint()
 
         iy++;
     }
+}
+
+const mono::geo::Rect &ImageView::Crop() const
+{
+    return crop;
 }
