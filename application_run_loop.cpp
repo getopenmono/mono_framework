@@ -119,7 +119,7 @@ bool AppRunLoop::addDynamicTask(mono::IRunLoopTask *task)
 
         item->nextTask = task;
         task->previousTask = item;
-        task->nextTask = NULL;
+        task->nextTask = 0;
     }
 
     return true;
@@ -127,12 +127,12 @@ bool AppRunLoop::addDynamicTask(mono::IRunLoopTask *task)
 
 bool AppRunLoop::removeDynamicTask(mono::IRunLoopTask *task)
 {
-    if (taskQueueHead == NULL)
+    if (taskQueueHead == 0)
         return false;
 
     IRunLoopTask *item = taskQueueHead;
 
-    while (item != NULL)
+    while (item != 0)
     {
         if (item == task)
         {
@@ -148,10 +148,10 @@ bool AppRunLoop::removeDynamicTask(mono::IRunLoopTask *task)
 
 void AppRunLoop::removeTaskInQueue(IRunLoopTask *item)
 {
-    if (item->previousTask != NULL)
+    if (item->previousTask != 0)
         item->previousTask->nextTask = item->nextTask;
 
-    if (item->nextTask != NULL)
+    if (item->nextTask != 0)
         item->nextTask->previousTask = item->previousTask;
 
     if (taskQueueHead == item)
