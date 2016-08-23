@@ -215,6 +215,15 @@ namespace mono {
          */
         virtual geo::Size &Size();
 
+
+        /**
+         * @brief Get the views *view rect*
+         * 
+         * This method returns a reference to the views current view rect.
+         */
+        virtual const geo::Rect &ViewRect() const;
+
+
         /**
          * This method add the view to the display systems re-paint queue. The
          * queue is executed right after a display refresh. This helps prevent

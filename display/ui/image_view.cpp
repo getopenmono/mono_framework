@@ -56,7 +56,7 @@ void ImageView::repaint()
     //copy the image crop/select rect
     geo::Rect dispRect = crop;
     //zero the offset
-    dispRect.setPoint(geo::Point(0,0));
+    dispRect.setPoint(viewRect);
     //crop by viewRect
     dispRect = dispRect.crop(viewRect);
 

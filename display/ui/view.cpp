@@ -99,6 +99,11 @@ mono::geo::Size& View::Size()
     return viewRect.Size();
 }
 
+const mono::geo::Rect& View::ViewRect() const
+{
+    return viewRect;
+}
+
 void View::scheduleRepaint()
 {
     if (isDirty || !visible)

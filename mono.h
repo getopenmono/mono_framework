@@ -39,8 +39,10 @@
 #include <touch_system_interface.h>
 
 #ifndef EMUNO
-#include <dns_resolver.h>
 #include <http_client.h>
+#include <dns_resolver.h>
+#else
+#include <emuno.h>
 #endif
 
 namespace mono {
