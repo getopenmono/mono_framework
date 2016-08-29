@@ -12,6 +12,7 @@
 #include <circle.h>
 #include <color.h>
 #include <consoles.h>
+#include <async.h>
 #include <display/ui/animator.h>
 #include <display/ui/background_view.h>
 #include <display/ui/button_view.h>
