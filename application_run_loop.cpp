@@ -3,7 +3,9 @@
 
 #include "application_run_loop.h"
 #include "application_context_interface.h"
-#include <consoles.h>
+#include <mbed_debug.h>
+#include <wait_api.h>
+#include <us_ticker_api.h>
 
 #ifdef DEVICE_SERIAL
 extern "C" {
