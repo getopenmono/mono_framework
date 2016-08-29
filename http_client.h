@@ -1,7 +1,4 @@
 //
-//  http_client.h
-//  wifiTest
-//
 //  Created by Kristoffer Andersen on 17/11/2015.
 //  Copyright © 2015 Monolit ApS. All rights reserved.
 //
@@ -9,7 +6,6 @@
 #ifndef http_client_h
 #define http_client_h
 
-#include <mbed.h>
 
 #include "network_request.h"
 #include "dns_resolver.h"
@@ -49,8 +45,13 @@ namespace mono { namespace network {
     protected:
         mbed::FunctionPointerArg1<void, const HttpResponseData&> dataHandler;
 
+        static const char *ipRegex;
+        static const char *domainRegex;
+
         String domain;
         String path;
+        uint32_t destPort;
+
         DnsResolver dns;
         HttpResponseData respData;
 

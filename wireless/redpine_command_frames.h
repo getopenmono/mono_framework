@@ -588,6 +588,9 @@ namespace mono { namespace redpine {
         
         /** The URL to call, ex: `/index.html` */
         String url;
+
+        /** The destination TCP/IP port */
+        uint32_t httpPort;
         
         /** Extra HTTP headers to sent along with the GET request. */
         String extraHeader;
@@ -607,8 +610,9 @@ namespace mono { namespace redpine {
          * @param hostname The hostname of the HTTP server (might be a virtual host)
          * @param serverIp The real IP address of the server, as string
          * @param Url The URL to call on the HTTP server
+         * @param serverPort The TCP/IP port where the server responds (Defaults to 80)
          */
-        HttpGetFrame(String hostname, String serverIp, String Url, FILE *destFile);
+        HttpGetFrame(String hostname, String serverIp, String Url, FILE *destFile, uint32_t serverPort = 80);
         
         ~HttpGetFrame();
         

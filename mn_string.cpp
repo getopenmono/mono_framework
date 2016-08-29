@@ -126,6 +126,38 @@ String& String::operator=(const String &str)
     return *this;
 }
 
+bool String::operator==(const mono::String &other)
+{
+    if (this->stringData == 0 || other.stringData == 0)
+        return false;
+
+    return strcmp(this->stringData, other.stringData) == 0 ? true : false;
+}
+
+bool String::operator!=(const mono::String &other)
+{
+    if (this->stringData == 0 || other.stringData == 0)
+        return false;
+
+    return strcmp(this->stringData, other.stringData) == 0 ? false : true;
+}
+
+bool String::operator==(const char *other)
+{
+    if (this->stringData == 0)
+        return false;
+
+    return strcmp(this->stringData, other) == 0 ? true : false;
+}
+
+bool String::operator!=(const char *other)
+{
+    if (this->stringData == 0)
+        return false;
+    
+    return strcmp(this->stringData, other) == 0 ? false : true;
+}
+
 char String::operator[](uint32_t pos) const
 {
     return stringData[pos];

@@ -7,9 +7,7 @@
 //
 
 #include "regex.h"
-#include "consoles.h"
-
-#include <mbed_debug.h>
+#include <string.h>
 
 using namespace mono;
 
@@ -23,13 +21,15 @@ Regex::Regex(String aPattern)
 
 bool Regex::IsMatch(mono::String matchStr)
 {
-    int res = slre_match(pattern(), matchStr(), matchStr.Length(), NULL, 0, 0);
+    int res = slre_match(pattern(), matchStr(), matchStr.Length(), 0, 0, 0);
 
     return res > 0 ? true : false;
 }
 
 bool Regex::Match(mono::String matchStr, Capture *captureArray, uint32_t capArraySize)
 {
+    //zero out capture array to prevents bugs from non-init mem.
+    memset(captureArray, 0, sizeof(Capture)*capArraySize);
     int res = slre_match(pattern(), matchStr(), matchStr.Length(), captureArray, capArraySize, 0);
     //debug("match res: %i\r\n",res);
 
@@ -39,7 +39,7 @@ bool Regex::Match(mono::String matchStr, Capture *captureArray, uint32_t capArra
 String Regex::Value(Capture &cap)
 {
     if (cap.len <= 0)
-        return  String();
+        return String();
     else if (cap.ptr[cap.len] == '\0')
     {
         return String((char*)cap.ptr, cap.len);

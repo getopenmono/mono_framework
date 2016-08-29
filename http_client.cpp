@@ -11,22 +11,30 @@
 
 using namespace mono::network;
 
+const char *HttpClient::ipRegex = "(http://)(\\d+\\.\\d+\\.\\d+\\.\\d+):?(\\d*)(/?[^\\s'\\\"<>]*)";
+const char *HttpClient::domainRegex = "(http://)([^\\s/'\\\"<>\\?:,_;\\*\\^\\!<>]+):?(\\d*)(/?[^\\s'\\\"<>]*)";
+
 HttpClient::HttpClient() : INetworkRequest(), respData(this), getFrame(NULL) {}
 
 HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFrame(NULL)
 {
-    mono::Regex ipreg("(http://)(\\d+\\.\\d+\\.\\d+\\.\\d+)(/?[^\\s'\\\"<>]*)");
+    destPort =  80;
+    mono::Regex ipreg(HttpClient::ipRegex);
 
-    mono::Regex::Capture ipCaps[3];
-    bool success = ipreg.Match(anUrl, ipCaps, 3);
+    mono::Regex::Capture ipCaps[4];
+    bool success = ipreg.Match(anUrl, ipCaps, 4);
     if (success)
     {
         String ip = ipreg.Value(ipCaps[1]);
-        path = ipreg.Value(ipCaps[2]);
+        String httpPort = ipreg.Value(ipCaps[2]);
+        path = ipreg.Value(ipCaps[3]);
 
-        //debug("no domain, ip addr: %s, path: %s\r\n", ip(),path());
+        if (httpPort.Length() > 0 && httpPort != String("80"))
+        {
+            sscanf(httpPort(), "%lu",&destPort);
+        }
 
-        getFrame = new redpine::HttpGetFrame(ip, ip, path, NULL);
+        getFrame = new redpine::HttpGetFrame(ip, ip, path, NULL, destPort);
         getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
         getFrame->setCompletionCallback<HttpClient>(this, &HttpClient::httpCompletion);
 
@@ -34,10 +42,10 @@ HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFra
     }
     else
     {
-        mono::Regex reg("(http://)([^\\s/'\\\"<>\\?]+)(/?[^\\s'\\\"<>]*)");
+        mono::Regex reg(domainRegex);
 
-        mono::Regex::Capture caps[3];
-        success = reg.Match(anUrl, caps, 3);
+        mono::Regex::Capture caps[4];
+        success = reg.Match(anUrl, caps, 4);
 
         if (!success) {
             debug("url parse err");
@@ -47,9 +55,13 @@ HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFra
         }
 
         domain = reg.Value(caps[1]);
-        path = reg.Value(caps[2]);
+        path = reg.Value(caps[3]);
+        String httpPort = reg.Value(caps[2]);
 
-        //debug("domain: %s, path: %s\r\n",domain(),path());
+        if (httpPort.Length() > 0 && httpPort != String("80"))
+        {
+            sscanf(httpPort(), "%lu", &destPort);
+        }
 
         dns = DnsResolver(domain);
         dns.setCompletionCallback<HttpClient>(this, &HttpClient::dnsComplete);
@@ -131,7 +143,7 @@ void HttpClient::dnsComplete(INetworkRequest::CompletionEvent *evnt)
     }
 
     //debug("dns complete, call http get");
-    getFrame = new redpine::HttpGetFrame(domain, dns.IpAddress(), path, NULL);
+    getFrame = new redpine::HttpGetFrame(domain, dns.IpAddress(), path, NULL, destPort);
     getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
     getFrame->setCompletionCallback<HttpClient>(this, &HttpClient::httpCompletion);
     getFrame->commitAsync();

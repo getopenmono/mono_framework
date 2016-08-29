@@ -242,12 +242,13 @@ void DnsResolutionFrame::responsePayloadHandler(uint8_t *databuffer)
 
 // HTTP GET Frame
 
-HttpGetFrame::HttpGetFrame(String host, String ipaddrs, String url, FILE *destFile) :
+HttpGetFrame::HttpGetFrame(String host, String ipaddrs, String url, FILE *destFile, uint32_t httpPort) :
     ManagementFrame(HttpGet)
 {
     this->hostname = host;
     this->ipaddress = ipaddrs;
     this->url = url;
+    this->httpPort = httpPort;
     this->extraHeader = "";
     this->responsePayload = true;
     this->lastResponseParsed = false;
@@ -260,7 +261,7 @@ void HttpGetFrame::dataPayload(uint8_t *data)
 
     HttpReqFrameSnd *frm = (HttpReqFrameSnd*) data;
     frm->ip_version = 4;
-    frm->http_port = 80;
+    frm->http_port = httpPort;
     frm->options = ENABLE_NULL_DELIMITER;
     uint8_t *strPnt = (uint8_t*) &(frm->buffer);
 

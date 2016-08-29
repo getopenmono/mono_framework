@@ -10,7 +10,6 @@
 #define mn_timer_h
 
 #include <mbed.h>
-#include <FunctionPointer.h>
 #include "application_run_loop_task_interface.h"
 
 
