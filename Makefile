@@ -1,19 +1,19 @@
 TARGET = mono_project
-ARCH="/usr/local/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi-"
+ARCH="/usr/local/openmono/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi-"
 FLASH_SIZE=262144
 FLASH_ROW_SIZE=256
 FLASH_ARRAY_SIZE=65536
 EE_ARRAY=64
 EE_ROW_SIZE=16
 OPTIMIZATION = -Os
-INCLUDE_DIR=../mono_buildsystem/include
-#LINKER_SCRIPT=${INCLUDE_DIR}/cm3gcc.ld
 BUILD_DIR=build
 MONO_FRAMEWORK_PATH=.
+PSOC5_PATH=../mono_psoc5_library
 MBED_PATH=../mbedcomp
 MBED_FS_PATH=../mbed/libraries/fs
-COMP_LIB=../mono_buildsystem/lib/CyComponentLibrary.a
-CYPRESS_LIB=../mono_buildsystem/lib/monoCyLib.a
+COMP_LIB=$(PSOC5_PATH)/lib/CyComponentLibrary.a
+INCLUDE_DIR=$(PSOC5_PATH)/include
+CYPRESS_LIB=$(PSOC5_PATH)/lib/monoCyLib.a
 MBED_LIB=../mbedcomp/mbedlib.a
 PACKAGE_TARGET=../dist
 
@@ -152,7 +152,7 @@ mono_framework.a: cypressLib mbedLib $(MONO_TARGET_OBJECTS)
 
 cypressLib:
 	@echo "Building Cypress library..."
-	@make -C $(INCLUDE_DIR)/.. library
+	@make -C $(PSOC5_PATH) library
 
 mbedLib:
 	@echo "Building mbed library..."
