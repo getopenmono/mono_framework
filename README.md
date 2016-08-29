@@ -1,7 +1,7 @@
 # Mono Framework
 This is the Mono framework, for developing mono applications. It is designed to be simple and easy to use, and provide methods for the most common tasks.
 
-# Overview
+## Overview
 The framework consists of highlevel classes and interfaces to interact with hardware or to process data. The classes can be divided into these main categories:
 
  * **Display UI Widgets** (Text labels, Buttons, Progressbars or draw shapes)
@@ -20,38 +20,58 @@ The framework consists of highlevel classes and interfaces to interact with hard
 
 Are you looking for low level I/O like I<sup>2</sup>C, SPI, GPIO etc? We use [mbed](https://developer.mbed.org/handbook/Homepage#using-mbed-libraries) as the foundation, and this framework also gives you access to mbed. The mbed APIs are included in the mono framework.
 
-## Application Structure
-The framework basic application structure consists of 3 classes:
+## Building
 
- * _The Application Controller_: A class that is the entry point for the application. We expect the _AppController_ to handle crucial system wide events, like power and standby operations. You need to create this class.
- * _The main.cpp file_: The classic entry point for C++ applications. The `main` function must create the AppController and start the application run loop, just like eg. Qt applications do.
- * _The Application Context_: This is a singleton class that is automatically instantiated in the global context. The _AppContext_ holds references to the hardware controller; like the display, power system and wireless module.
+To build the framework you need several prerequisites. First you should checkout the following repos:
 
-By using these 3 classes we can hide many initialization steps from your code. To draw graphics on the display, you just need to create a _View_ and that is it! The _AppContext_ takes care of initializing the display system.
+* [mbed](https://github.com/getopenmono/mbed) : Provide basic I/O and filesystem support (required by *mbedcomp*)
+* [mono_psoc5_library](https://github.com/getopenmono/mono_psoc5_library) : Provide the Cypress Hardware layer (required by *mbedcomp*)
+* [mbedcomp](https://github.com/getopenmono/mbedComp) : Provide the mbed compability for Mono's MCU (required by *Mono Framework*)
 
-## Display System
-The mono display system consists of 3 abstractions:
+Checkout all repositories (including this one) in the same directory:
 
-* _The Display Controller Interface_: A generic interface for communication with the display chip. This interface uses either SPI or parallel communication, and send commands to the display chip.
-* _The Display Painter_: The painter class can send drawing commands to a display interface. It emits pixels from basic drawing commands like rect, lines and text glyphs.
-* _The Views_: Like moderns UI frameworks, mono uses View object to render graphics on the display. All views share a common painter object, and draw themselves using the painters draw functions. Because mono is a small device, we do not have a traditional view hierarchy. This means a view cannot contains other views.
+```
+$ mkdir mono; cd mono
+$ git clone https://github.com/getopenmono/mbed.git
+$ git clone https://github.com/getopenmono/mono_psoc5_library.git
+$ git clone https://github.com/getopenmono/mbedComp.git
+$ git clone https://github.com/getopenmono/mono_framework.git
+$ cd mono_framework
+```
 
-Our goal is to make drawing UIs on mono very convenient. We do not want you to paint your own UI with rectangles and lines, but using our Button and TextLabel views!
+Now you should be in the *mono_framework* repository. We now must setup the the correct paths in the `Makefile`. Open the file `Makefile` in your favorite editor.
 
+In line 2 you see the define for the path `ARCH`. This to the prefix for the compiler to be used. To must change this to your installation of the [ARM GCC Embedded](https://launchpad.net/gcc-arm-embedded) toolchain. If you have Mono SDK installed you can use the included compiler. Just change the path to:
 
-## Wireless communication stack
-We have re-implemented and re-structured the communication stack for our wireless module. The stack provide the SPI communication with the wireless module. So far we still need a clear and good abstraction between module specific code and generic code like the network stack.
+* MacOS: `/usr/local/openmono/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi-`
+* Windows: `C:/openmono/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi-`
+* Linux (Ubuntu): `arm-none-eabi-`
 
-## Power System
-Work has begun on making a easy way of getting mono into and out of sleep mode. With many peripherals and hardware I/O components, getting power consumption down during sleep is a challenge. The power system is a set on classes that handle the power supply IC and the internal MCU peripherals. See the files:
+Save the file, can compile the framework with:
 
-* *power_management_interface.h*: Interface for overall power control
-* *power_subsystem_interface.h*: Interface for power supply IC control classes
-* *power_aware_interface.h*: Interface for classes that must respond to power related events.
+```
+$ make release
+```
+
+Now the libraries are being compiled. First the system builds `mono_psoc5_library`, then `mbedComp` and lastly the framework itself. The resulting library and header files is place in a directory called `dist`, next the repositories:
+
+```
+$ cd ../dist
+$ ls -l mono
+```
+
+The compiled result are all header files and 4 static libraries:
+
+* `mono_framework.a` : This framework 
+* `mbedlib.a` : The mbed library
+* `monoCyLib.a` : The Cypress hardware library
+* `CyComponentLibrary.a` : Cypress dependencies
+
+You can replace these files with the once in your Mono SDK installation folder: `openmono/mono`. Then you can take advantage of your own modifications to Mono framework.
+
 
 ##Documentation ToDo's
 
-* Getting Started Tutorial
 * Mono Framework: Architectural Overview
 * * Mono Layer
 * * mbed layer
@@ -69,4 +89,4 @@ Work has begun on making a easy way of getting mono into and out of sleep mode. 
 
 The software is released under the open source MIT License.
 
-Copyright(C) Monolit ApS 2015
+Copyright(C) Monolit ApS 2016
