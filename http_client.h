@@ -1,7 +1,5 @@
-//
-//  Created by Kristoffer Andersen on 17/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #ifndef http_client_h
 #define http_client_h

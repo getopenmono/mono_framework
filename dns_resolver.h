@@ -1,10 +1,5 @@
-//
-//  dns_resolver.h
-//  wifiTest
-//
-//  Created by Kristoffer Lyder Andersen on 17/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #ifndef dns_resolver_h
 #define dns_resolver_h

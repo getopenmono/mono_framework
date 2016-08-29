@@ -1,10 +1,5 @@
-//
-//  http_client.cpp
-//  mono framework
-//
-//  Created by Kristoffer Andersen on 17/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #include "http_client.h"
 #include "regex.h"
