@@ -107,11 +107,13 @@ void ButtonView::setFont(MonoFont const &newFont)
 void ButtonView::setBorder(Color c)
 {
     borderColor = c;
+    textLabel.setTextColor(c);
 }
 
 void ButtonView::setBackground(Color c)
 {
     background = c;
+    textLabel.setBackground(c);
 }
 
 void ButtonView::setHighlight(Color c)

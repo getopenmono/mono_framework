@@ -36,6 +36,10 @@ void View::repaintScheduledViews()
         {
             view->repaint();
             view->isDirty = false;
+#ifdef VIEW_BOUNDARY_DEBUG
+            painter.setForegroundColor(mono::display::RedColor);
+            painter.drawRect(view->ViewRect());
+#endif
         }
 
 

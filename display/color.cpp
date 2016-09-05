@@ -108,6 +108,11 @@ Color Color::alphaBlend(uint8_t intensity, Color const &other) const
     return blend;
 }
 
+mono::String Color::toString() const
+{
+    return String::Format("(%u, %u, %u)", Red(), Green(), Blue());
+}
+
 /// MARK: Operator overloads
 
 uint16_t Color::operator=(Color col)

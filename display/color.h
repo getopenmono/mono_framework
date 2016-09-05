@@ -10,7 +10,7 @@
 #define displaySimTest_color_h
 
 #include <stdint.h>
-
+#include <mn_string.h>
 
 
 namespace mono { namespace display {
@@ -91,6 +91,15 @@ namespace mono { namespace display {
         Color alphaBlend(uint8_t intensity, Color const &other) const;
 
         uint8_t* BytePointer();
+
+        /**
+         * @brief Get a human readable string representatio of the color
+         * 
+         * Returns a string of the form: (RR, GG, BB)
+         *
+         * @return a color string
+         */
+        mono::String toString() const;
 
         /// MARK: Operator overloads
         

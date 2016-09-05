@@ -15,6 +15,8 @@
 #include <async.h>
 #include <display/ui/animator.h>
 #include <display/ui/background_view.h>
+#include <display/ui/abstract_button_view.h>
+#include <display/ui/on_off_button_view.h>
 #include <display/ui/button_view.h>
 #include <display/ui/console_view.h>
 #include <display/ui/graph_view.h>
