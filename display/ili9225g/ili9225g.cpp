@@ -248,27 +248,18 @@ void ILI9225G::onSystemPowerOnReset()
 
 void ILI9225G::onSystemEnterSleep()
 {
-//    PWM_Sleep();
     SPI1_Stop();
     SPI1_Sleep();
-    //CyPins_ClearPin(TFT_LED_PWR);
-//    writeCommand(0x07, 0x00);
-//    wait_ms(50);
-//    writeCommand(0x11, 0x07);
-//    wait_ms(50);
-//    writeCommand(0x10, 0x0A01); // put controller into standby
 
+    // disable tearing interrupt listener - we dont wanne wake on noise
+    tearingEffect.disable_irq();
 }
 
 void ILI9225G::onSystemWakeFromSleep()
 {
-//    writeCommand(0x10, 0x0A00);
-//    wait_ms(50);
-//    writeCommand(0x07, 0x1017);
-//
+    tearingEffect.enable_irq();
     SPI1_Wakeup();
     SPI1_Start();
-//    PWM_Wakeup();
 
     init();
 }

@@ -111,6 +111,8 @@ SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
 
 }
 
+// MARK: Module SPI Communication
+
 ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) :
     spiChipSelect(chipSelect, 1),
     resetLine(resetPin, 1),
@@ -123,9 +125,11 @@ ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelec
     //spiInterrupt.DeactivateUntilHandled();
     spiInterrupt.rise<ModuleSPICommunication>(this, &ModuleSPICommunication::interruptHandler);
 
-    defaultSerial.printf("starting fake IRQ timer!\r\n");
-    //fakeISRTimer.setCallback<ModuleSPICommunication>(this, &ModuleSPICommunication::fakeISRHandler);
-    //fakeISRTimer.Start();
+//    defaultSerial.printf("starting fake IRQ timer!\r\n");
+//    fakeISRTimer.setCallback<ModuleSPICommunication>(this, &ModuleSPICommunication::fakeISRHandler);
+//    fakeISRTimer.Start();
+
+    IApplicationContext::Instance->PowerManager->AppendToPowerAwareQueue(this);
 }
 
 // PROTECTED AUXILLARY METHODS
@@ -859,6 +863,24 @@ bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength
     return true;
 }
 
+
+// MARK: Power Aware Interface
+
+void ModuleSPICommunication::onSystemPowerOnReset()
+{
+}
+void ModuleSPICommunication::onSystemEnterSleep()
+{
+    spiInterrupt.disable_irq();
+}
+void ModuleSPICommunication::onSystemWakeFromSleep()
+{
+    spiInterrupt.enable_irq();
+}
+void ModuleSPICommunication::OnSystemBatteryLow()
+{
+
+}
 
 
 

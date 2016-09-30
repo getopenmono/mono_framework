@@ -20,6 +20,8 @@
 #include "spi_commands.h"
 #include "module_frames.h"
 
+#include <power_aware_interface.h>
+
 
 #include <stdint.h>
 
@@ -270,7 +272,7 @@ namespace mono { namespace redpine {
     /**
      * SPI based communication subclass
      */
-    class ModuleSPICommunication : public ModuleCommunication
+    class ModuleSPICommunication : public ModuleCommunication, mono::power::IPowerAware
     {
         friend AppController;
     public:
@@ -407,6 +409,13 @@ namespace mono { namespace redpine {
         bool writeFrame(ManagementFrame *frame);
         
         bool writePayloadData(uint8_t *data, uint16_t byteLength);
+
+        // MARK: Power Aware Interface
+
+        virtual void onSystemPowerOnReset();
+        virtual void onSystemEnterSleep();
+        virtual void onSystemWakeFromSleep();
+        virtual void OnSystemBatteryLow();
     };
     
 }}
