@@ -13,7 +13,7 @@ HttpClient::HttpClient() : INetworkRequest(), respData(this), getFrame(NULL) {}
 
 HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFrame(NULL)
 {
-    destPort =  80;
+    destPort = 80;
     mono::Regex ipreg(HttpClient::ipRegex);
 
     mono::Regex::Capture ipCaps[4];
@@ -22,7 +22,7 @@ HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFra
     {
         String ip = ipreg.Value(ipCaps[1]);
         String httpPort = ipreg.Value(ipCaps[2]);
-        path = ipreg.Value(ipCaps[3]);
+        path = ipCaps[3].len == 0 ? "/" : ipreg.Value(ipCaps[3]);
 
         if (httpPort.Length() > 0 && httpPort != String("80"))
         {
@@ -50,7 +50,7 @@ HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFra
         }
 
         domain = reg.Value(caps[1]);
-        path = reg.Value(caps[3]);
+        path = caps[3].len == 0 ? "/" : reg.Value(caps[3]);
         String httpPort = reg.Value(caps[2]);
 
         if (httpPort.Length() > 0 && httpPort != String("80"))
@@ -76,6 +76,7 @@ HttpClient::HttpClient(const HttpClient &other) :
     domain = other.domain;
     path = other.path;
     dns = other.dns;
+    destPort = other.destPort;
 
     dns.setCompletionCallback<HttpClient>(this, &HttpClient::dnsComplete);
     dns.setErrorCallback<HttpClient>(this, &HttpClient::dnsResolutionError);
@@ -95,6 +96,7 @@ HttpClient &HttpClient::operator=(const mono::network::HttpClient &other)
     domain = other.domain;
     path = other.path;
     dns = other.dns;
+    destPort = other.destPort;
 
     dns.setCompletionCallback<HttpClient>(this, &HttpClient::dnsComplete);
     dns.setErrorCallback<HttpClient>(this, &HttpClient::dnsResolutionError);
@@ -137,7 +139,6 @@ void HttpClient::dnsComplete(INetworkRequest::CompletionEvent *evnt)
         return;
     }
 
-    //debug("dns complete, call http get");
     getFrame = new redpine::HttpGetFrame(domain, dns.IpAddress(), path, NULL, destPort);
     getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
     getFrame->setCompletionCallback<HttpClient>(this, &HttpClient::httpCompletion);
