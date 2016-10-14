@@ -53,21 +53,27 @@ Save the file, can compile the framework with:
 $ make release
 ```
 
-Now the libraries are being compiled. First the system builds `mono_psoc5_library`, then `mbedComp` and lastly the framework itself. The resulting library and header files is place in a directory called `dist`, next the repositories:
+Now the libraries are being compiled. First the system builds `mono_psoc5_library`, then `mbedComp` and lastly the framework itself. The resulting library and header files are place in a directory called `dist`, next to the repositories:
 
 ```
-$ cd ../dist
-$ ls -l mono
+$ ls -l ../dist/mono
 ```
 
-The compiled result are all header files and 4 static libraries:
+The result is all header files and 4 static libraries:
 
-* `mono_framework.a` : This framework 
+* `mono_framework.a` : This framework
 * `mbedlib.a` : The mbed library
 * `monoCyLib.a` : The Cypress hardware library
 * `CyComponentLibrary.a` : Cypress dependencies
 
-You can replace these files with the once in your Mono SDK installation folder: `openmono/mono`. Then you can take advantage of your own modifications to Mono framework.
+To use these newly created files instead of the ones from the official release, overwrite the official file:
+
+```
+$ sudo cp -r ../dist/mono/* /usr/local/openmono/
+```
+
+
+replace the files with the ones in your Mono SDK installation folder: `openmono/mono`. Then you can take advantage of your own modifications to Mono framework.
 
 
 ##Documentation ToDo's

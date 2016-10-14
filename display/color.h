@@ -1,10 +1,5 @@
-//
-//  color.h
-//  displaySimTest
-//
-//  Created by Kristoffer Andersen on 10/07/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #ifndef displaySimTest_color_h
 #define displaySimTest_color_h
@@ -21,7 +16,7 @@ namespace mono { namespace display {
      * This class implements a 16-bit RGB 5-6-5 color model. It support methods
      * for calculating color blendings and more.
      *
-     * THe class definition also define a set of global constant predefined 
+     * The class definition also define a set of global constant predefined
      * colors, like white, red, green, blue and black. Further, it includes a
      * set of the FlatUI colors that Mono uses:
      *
@@ -41,18 +36,18 @@ namespace mono { namespace display {
     {
     public:
         uint16_t value;
-        
+
 
 
         /// MARK: Constructors
 
-        
+
         Color();
-        
+
         Color(const int col);
-        
+
         Color(const Color &color);
-        
+
         Color(uint8_t R, uint8_t G, uint8_t B);
 
         /// MARK: Getters
@@ -94,7 +89,7 @@ namespace mono { namespace display {
 
         /**
          * @brief Get a human readable string representatio of the color
-         * 
+         *
          * Returns a string of the form: (RR, GG, BB)
          *
          * @return a color string
@@ -102,11 +97,11 @@ namespace mono { namespace display {
         mono::String toString() const;
 
         /// MARK: Operator overloads
-        
+
         uint16_t operator=(Color col);
-        
+
         bool operator==(const Color &col);
-        
+
         bool operator!=(const Color &col);
 
         Color operator*(const Color &col);
@@ -147,7 +142,7 @@ namespace mono { namespace display {
     static const Color    TurquoiseColor(26,188,156);
     /** FlatUI Emerald color (green) */
     static const Color      EmeraldColor(0x2e,0xcc,0x71);
-    
+
 } }
 
 #endif

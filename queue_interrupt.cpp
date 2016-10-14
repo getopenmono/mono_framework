@@ -1,11 +1,5 @@
-//
-//  queue_interrupt.cpp
-//  mono
-//
-//  Created by Kristoffer Andersen on 13/10/15.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
-
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 #include "queue_interrupt.h"
 #include "application_context_interface.h"
 #include <us_ticker_api.h>
@@ -21,10 +15,7 @@ QueueInterrupt::QueueInterrupt(PinName pin, PinMode mode) : mbed::InterruptIn(pi
     this->isHandled = true;
     this->debounce = false;
     this->debounceTimeoutUs = 30000;
-//    this->changeEvent = false;
 }
-
-
 
 QueueInterrupt::~QueueInterrupt()
 {
@@ -47,15 +38,6 @@ void QueueInterrupt::fall(void (*fptr)())
     gpio_irq_set(&gpio_irq, IRQ_FALL, 1);
 }
 
-//void QueueInterrupt::change(void (*fptr)())
-//{
-//    activateQueueTaskHandler();
-//    __queue_change.attach(fptr);
-//    _fall.attach<QueueInterrupt>(this, &QueueInterrupt::_irq_change_handler);
-//    gpio_irq_set(&gpio_irq, (gpio_irq_event)3, 1);
-//}
-
-
 void QueueInterrupt::_irq_rise_handler()
 {
     if (deactivateUntilHandler && !isHandled)
@@ -63,7 +45,7 @@ void QueueInterrupt::_irq_rise_handler()
 
     this->snapShot = this->read();
     this->riseTimeStamp = us_ticker_read();
-    
+
     if (debounce)
     {
         debounceRiseTimer.attach_us<QueueInterrupt>(this, &QueueInterrupt::debounceRiseHandler, debounceTimeoutUs);
@@ -73,7 +55,6 @@ void QueueInterrupt::_irq_rise_handler()
         this->riseEvent = true;
         this->isHandled = false;
     }
-    
 }
 
 void QueueInterrupt::_irq_fall_handler()
@@ -83,7 +64,7 @@ void QueueInterrupt::_irq_fall_handler()
 
     this->snapShot = this->read();
     this->fallTimeStamp = us_ticker_read();
-    
+
     if (debounce)
     {
         debounceFallTimer.attach_us<QueueInterrupt>(this, &QueueInterrupt::debounceFallHandler, debounceTimeoutUs);
@@ -93,14 +74,7 @@ void QueueInterrupt::_irq_fall_handler()
         this->fallEvent = true;
         this->isHandled = false;
     }
-    
 }
-
-//void QueueInterrupt::_irq_change_handler()
-//{
-//    changeEvent = true;
-//    if (CY_GET_REG8(this->gpio_irq.snapShotAddr))
-//}
 
 void QueueInterrupt::debounceRiseHandler()
 {
@@ -133,11 +107,6 @@ void QueueInterrupt::taskHandler()
         _queue_fall.call();
         isHandled = true;
     }
-//    if (changeEvent)
-//    {
-//        changeEvent = false;
-//        _change.call();
-//    }
 }
 
 void QueueInterrupt::DeactivateUntilHandled(bool deactive)
@@ -183,8 +152,8 @@ void QueueInterrupt::activateQueueTaskHandler()
         IApplicationContext::Instance->RunLoop->addDynamicTask(this);
         addedToRunLoop = true;
     }
-    
 }
+
 void QueueInterrupt::deactivateQueueTaskHandler()
 {
     if (addedToRunLoop)
@@ -192,5 +161,4 @@ void QueueInterrupt::deactivateQueueTaskHandler()
         IApplicationContext::Instance->RunLoop->removeDynamicTask(this);
         addedToRunLoop = false;
     }
-    
 }
