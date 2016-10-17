@@ -1,8 +1,8 @@
 ARCH="/usr/local/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi-"
 MBED_FS=./libraries/fs
 BUILD_DIR=../build
-PSOC5_PATH=../../mono_psoc5_library
-INCLUDE_DIR=$(PSOC5_PATH)/include
+PSOC5_PATH=../cypress/psoc5
+INCLUDE_DIR=$(PSOC5_PATH)
 
 MBED_PATH=.
 BUILD_INCLUDE_DIR=$(BUILD_DIR)/include
@@ -25,6 +25,13 @@ MBED_INCLUDE_FILES = $(foreach FILE,$(MBED_INCLUDE_DIRS),$(wildcard $(FILE)/*.h)
 MBED_TARGET_OBJECTS = $(addprefix $(BUILD_DIR)/, $(MBED_OBJECTS))
 INCS = -I . $(addprefix -I, $(MBED_INCLUDE_DIRS) $(INCLUDE_DIR))
 
+ifeq ($(OS),Windows_NT)
+	RM = cmd //C del //Q //F
+	RRM = cmd //C rmdir //Q //S
+else
+	RM = rm -f
+	RRM = rm -f -r
+endif
 CC=$(ARCH)gcc
 CXX=$(ARCH)g++
 LD=$(ARCH)gcc
@@ -70,7 +77,7 @@ $(BUILD_DIR)/mbedlib.a: $(MBED_TARGET_OBJECTS)
 
 .PHONY: clean
 clean:
-	$(RM) -r $(BUILD_DIR)
+	$(RRM) $(BUILD_DIR)
 
 # Debugging this Makefile
 

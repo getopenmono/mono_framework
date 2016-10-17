@@ -1,4 +1,4 @@
-RELEASE_DIR=../dist
+RELEASE_DIR=dist
 ARCH="/usr/local/openmono/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi-"
 
 FLASH_SIZE=262144
@@ -9,12 +9,12 @@ EE_ROW_SIZE=16
 OPTIMIZATION = -Os
 BUILD_DIR=build
 MONO_FRAMEWORK_PATH=.
-PSOC5_PATH=../mono_psoc5_library
+PSOC5_PATH=./cypress
 MBED_PATH=./mbedcomp
 MBED_FS_PATH=libraries/fs
 COMP_LIB=$(PSOC5_PATH)/lib/CyComponentLibrary.a
-INCLUDE_DIR=$(PSOC5_PATH)/include
-CYPRESS_LIB=$(PSOC5_PATH)/lib/monoCyLib.a
+INCLUDE_DIR=$(PSOC5_PATH)/psoc5
+CYPRESS_LIB=$(BUILD_DIR)/monoCyLib.a
 
 MBED_INCLUDES_REL =	api \
 					hal \
@@ -132,7 +132,7 @@ $(MONO_LIB): $(MONO_TARGET_OBJECTS)
 	@echo "Linking Mono Framework..."
 	@$(AR) rcs $@ $^
 
-$(MONO_FRAMEWORK): cypressLib $(MBED_LIB) $(MONO_TARGET_OBJECTS)
+$(MONO_FRAMEWORK): $(CYPRESS_LIB) $(MBED_LIB) $(MONO_TARGET_OBJECTS)
 	@echo "Linking Mono Framework Release..."
 	@$(AR) rcs $@ $(MONO_TARGET_OBJECTS)
 	@echo "Copying linker and header files to include dir"
@@ -142,9 +142,9 @@ $(MONO_FRAMEWORK): cypressLib $(MBED_LIB) $(MONO_TARGET_OBJECTS)
 	$(foreach PATH, $(MBED_INCLUDES_REL), $(COPY) -r $(MBED_PATH)/$(PATH)/*.h $(BUILD_DIR)/include/mbed/$(PATH)$(\n))
 	@$(COPY) $(CYLIB_INCLUDE_FILES) $(BUILD_DIR)/include/mbed/target_cypress
 
-cypressLib:
+$(CYPRESS_LIB):
 	@echo "Building Cypress library..."
-	@make -C $(PSOC5_PATH) library
+	@make -C $(PSOC5_PATH)
 
 $(MBED_LIB):
 	@echo "Building mbed library..."
@@ -157,10 +157,10 @@ clean:
 # Debugging this Makefile
 
 monoFiles:
-	@echo $(MONO_TARGET_OBJECTS)
+	@echo "MONO_TSRGET_OBJECTS --> $(MONO_TARGET_OBJECTS)"
 
 monoIncludes:
-	@echo $(MONO_INCLUDE_FILES)
+	@echo "MONO_INCLUDE_FILES --> $(MONO_INCLUDE_FILES)"
 
 includeFiles:
-	@echo $(INCS)
+	@echo "INCS --> $(INCS)"

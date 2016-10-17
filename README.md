@@ -22,19 +22,7 @@ Are you looking for low level I/O like I<sup>2</sup>C, SPI, GPIO etc? We use [mb
 
 ## Building
 
-To build the framework you need several prerequisites. First you should checkout the following repos:
-
-* [mono_psoc5_library](https://github.com/getopenmono/mono_psoc5_library) : Provide the Cypress Hardware layer (required by *mbedcomp*)
-
-Checkout all repositories (including this one) in the same directory:
-
-```
-$ git clone https://github.com/getopenmono/mono_psoc5_library.git
-$ git clone https://github.com/getopenmono/mono_framework.git
-$ cd mono_framework
-```
-
-Now you should be in the *mono_framework* repository. We now must setup the the correct paths in the `Makefile`. Open the file `Makefile` in your favorite editor.
+We now must setup the the correct paths in the `Makefile`. Open the file `Makefile` in your favorite editor.
 
 In line 2 you see the define for the path `ARCH`. This to the prefix for the compiler to be used. To must change this to your installation of the [ARM GCC Embedded](https://launchpad.net/gcc-arm-embedded) toolchain. If you have Mono SDK installed you can use the included compiler. Just change the path to:
 
