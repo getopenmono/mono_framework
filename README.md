@@ -24,17 +24,12 @@ Are you looking for low level I/O like I<sup>2</sup>C, SPI, GPIO etc? We use [mb
 
 To build the framework you need several prerequisites. First you should checkout the following repos:
 
-* [mbed](https://github.com/getopenmono/mbed) : Provide basic I/O and filesystem support (required by *mbedcomp*)
 * [mono_psoc5_library](https://github.com/getopenmono/mono_psoc5_library) : Provide the Cypress Hardware layer (required by *mbedcomp*)
-* [mbedcomp](https://github.com/getopenmono/mbedComp) : Provide the mbed compability for Mono's MCU (required by *Mono Framework*)
 
 Checkout all repositories (including this one) in the same directory:
 
 ```
-$ mkdir mono; cd mono
-$ git clone https://github.com/getopenmono/mbed.git
 $ git clone https://github.com/getopenmono/mono_psoc5_library.git
-$ git clone https://github.com/getopenmono/mbedComp.git
 $ git clone https://github.com/getopenmono/mono_framework.git
 $ cd mono_framework
 ```
