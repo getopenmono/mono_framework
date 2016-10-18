@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/getopenmono/mono_framework.svg)](https://travis-ci.org/getopenmono/mono_framework)
+
 # Mono Framework
 This is the Mono framework, for developing mono applications. It is designed to be simple and easy to use, and provide methods for the most common tasks.
 
