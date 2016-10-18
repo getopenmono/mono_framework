@@ -1,0 +1,19 @@
+language: cpp
+sudo: required
+services: docker
+addons:
+  apt:
+    packages: libc6-i386
+branches:
+  only:
+    - travis
+compiler:
+  - gcc
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq gcc-arm-none-eabi
+before_script:
+  - make clean
+script:
+  - echo Building on $TRAVIS_OS_NAME...
+  - make release
