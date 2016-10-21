@@ -15,7 +15,6 @@ Install version 5 of the [ARM GCC Embedded toolchain](https://launchpad.net/gcc-
 
 Run
 ```
-$ cd src
 $ make release
 ```
 to compile a new version of the framework into the `dist` folder.  The result is all header files and 4 static libraries:
