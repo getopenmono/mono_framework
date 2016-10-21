@@ -1,6 +1,6 @@
 ARCH="arm-none-eabi-"
 MBED_FS=./libraries/fs
-BUILD_DIR=../build
+BUILD_DIR=../../build
 PSOC5_PATH=../cypress/psoc5
 INCLUDE_DIR=$(PSOC5_PATH)
 

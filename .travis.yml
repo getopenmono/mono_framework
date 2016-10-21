@@ -11,7 +11,6 @@ compiler:
   - gcc
 before_install:
   - sudo apt-get update -qq
-#  - sudo apt-get install -qq gcc-arm-none-eabi
 install:
   - export GCC_DIR=$HOME/gcc-arm-none-eabi-5_2-2015q4
   - export GCC_ARCHIVE=$HOME/gcc-arm-none-eabi-5_2-2015q4-20151219-linux.tar.bz2

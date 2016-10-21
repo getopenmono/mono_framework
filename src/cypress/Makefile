@@ -1,5 +1,5 @@
 ARCH="arm-none-eabi-"
-BUILD_DIR=../build
+BUILD_DIR=../../build
 CYPRESS_LIB=$(BUILD_DIR)/monoCyLib.a
 
 FLASH_SIZE=262144

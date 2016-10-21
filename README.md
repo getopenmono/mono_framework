@@ -1,6 +1,6 @@
 # Mono Framework
 
-This is a framework for developing [Mono](http://openmono.com) applications.  For documentation on how to install and use this framework, see the [developer site](http://developer.openmono.com/).
+This is a framework for developing [Mono](http://openmono.com) applications.  For documentation on how to install and use this framework, see the [developer site](http://developer.openmono.com/).  If you want to generate the documentation, see [DOXYGEN.md](src/DOXYGEN.md).
 
 This text describes how to build the framework.
 
@@ -15,6 +15,7 @@ Install version 5 of the [ARM GCC Embedded toolchain](https://launchpad.net/gcc-
 
 Run
 ```
+$ cd src
 $ make release
 ```
 to compile a new version of the framework into the `dist` folder.  The result is all header files and 4 static libraries:
