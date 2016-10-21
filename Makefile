@@ -1,4 +1,4 @@
-RELEASE_DIR=../dist
+RELEASE_DIR=dist
 ARCH="arm-none-eabi-"
 
 FLASH_SIZE=262144
@@ -7,10 +7,10 @@ FLASH_ARRAY_SIZE=65536
 EE_ARRAY=64
 EE_ROW_SIZE=16
 OPTIMIZATION = -Os
-BUILD_DIR=../build
-MONO_FRAMEWORK_PATH=.
-PSOC5_PATH=./cypress
-MBED_PATH=./mbedcomp
+BUILD_DIR=build
+FRAMEWORK_PATH=src
+PSOC5_PATH=src/cypress
+MBED_PATH=src/mbedcomp
 MBED_FS_PATH=libraries/fs
 COMP_LIB=$(PSOC5_PATH)/lib/CyComponentLibrary.a
 INCLUDE_DIR=$(PSOC5_PATH)/psoc5
@@ -25,14 +25,14 @@ MBED_INCLUDES_REL =	api \
 
 MBED_INCLUDES = $(foreach PATH, $(MBED_INCLUDES_REL), $(MBED_PATH)/$(PATH))
 
-MONO_OBJECTS =	$(patsubst %.c,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/*.c)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/*.cpp)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/display/*.cpp)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/display/ui/*.cpp)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/display/ili9225g/*.cpp)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/wireless/*.cpp)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/media/*.cpp)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(MONO_FRAMEWORK_PATH)/io/*.cpp))
+MONO_OBJECTS =	$(patsubst %.c,%.o,$(wildcard $(FRAMEWORK_PATH)/*.c)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/display/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/display/ui/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/display/ili9225g/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/wireless/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/media/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/io/*.cpp))
 
 MONO_INCLUDES_REL = . \
 					display \
@@ -42,7 +42,7 @@ MONO_INCLUDES_REL = . \
 					wireless \
 					media
 
-MONO_INCLUDES =	$(foreach PATH, $(MONO_INCLUDES_REL), $(MONO_FRAMEWORK_PATH)/$(PATH))
+MONO_INCLUDES =	$(foreach PATH, $(MONO_INCLUDES_REL), $(FRAMEWORK_PATH)/$(PATH))
 
 MONO_TARGET_OBJECTS = $(addprefix $(BUILD_DIR)/, $(MONO_OBJECTS))
 
@@ -137,7 +137,7 @@ $(MONO_FRAMEWORK): $(CYPRESS_LIB) $(MBED_LIB) $(MONO_TARGET_OBJECTS)
 	@$(AR) rcs $@ $(MONO_TARGET_OBJECTS)
 	@echo "Copying linker and header files to include dir"
 	@$(foreach PATH, $(MONO_INCLUDES_REL), $(MKDIR) -p $(BUILD_DIR)/include/$(PATH)$(\n))
-	@$(foreach PATH, $(MONO_INCLUDES_REL), $(COPY) -r $(MONO_FRAMEWORK_PATH)/$(PATH)/*.h $(BUILD_DIR)/include/$(PATH)$(\n))
+	@$(foreach PATH, $(MONO_INCLUDES_REL), $(COPY) -r $(FRAMEWORK_PATH)/$(PATH)/*.h $(BUILD_DIR)/include/$(PATH)$(\n))
 	$(foreach PATH, $(MBED_INCLUDES_REL), $(MKDIR) -p $(BUILD_DIR)/include/mbed/$(PATH)$(\n))
 	$(foreach PATH, $(MBED_INCLUDES_REL), $(COPY) -r $(MBED_PATH)/$(PATH)/*.h $(BUILD_DIR)/include/mbed/$(PATH)$(\n))
 	@$(COPY) $(CYLIB_INCLUDE_FILES) $(BUILD_DIR)/include/mbed/target_cypress
