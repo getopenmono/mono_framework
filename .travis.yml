@@ -1,12 +1,9 @@
 language: cpp
-sudo: required
+sudo: false
 services: docker
 addons:
   apt:
     packages: libc6-i386
-branches:
-  only:
-    - travis
 cache:
   directories:
     - $HOME/gcc-arm-none-eabi-5_2-2015q4
