@@ -10,14 +10,16 @@
 using namespace mono::display;
 using namespace mono;
 
-DisplayPainter::DisplayPainter(IDisplayController *dispctrl) : foregroundColor(WetAsphaltColor), backgroundColor(CloudsColor)
+DisplayPainter::DisplayPainter(IDisplayController *dispctrl, bool assignRefreshHandler) : foregroundColor(WetAsphaltColor), backgroundColor(CloudsColor)
 {
     displayCtrl = dispctrl;
     antiAliasing = false;
 
 //    if (displayCtrl != NULL)
 //        displayCtrl->AddRefreshCallback(&displayRefreshHandler);
-    displayCtrl->setRefreshHandler(&displayRefreshHandler);
+    if (assignRefreshHandler)
+        displayCtrl->setRefreshHandler(&displayRefreshHandler);
+    
     lineWidth = 1;
     textSize = 1;
 }

@@ -78,8 +78,9 @@ namespace mono { namespace display {
          * In most cases you should not have to initialize your own display painter.
          *
          * @param displayController A pointer to the display controller of the active display
+         * @param Take ownership of the DisplayControllers refresh callback handler
          */
-        DisplayPainter(IDisplayController *displayController);
+        DisplayPainter(IDisplayController *displayController, bool assignRefreshHandler = true);
 
         ~DisplayPainter();
 

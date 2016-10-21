@@ -130,7 +130,7 @@ const TextLabelView& ButtonView::TextLabel() const
 
 void ButtonView::repaint()
 {
-
+    textLabel.incrementalRepaint = false;
     textLabel.setTextColor( isPressedDown ? borderColorPressed : borderColor );
     textLabel.repaint();
     
