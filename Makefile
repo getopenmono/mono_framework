@@ -1,5 +1,5 @@
 RELEASE_DIR=dist
-ARCH="/usr/local/openmono/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi-"
+ARCH="arm-none-eabi-"
 
 FLASH_SIZE=262144
 FLASH_ROW_SIZE=256

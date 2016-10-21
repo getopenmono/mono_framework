@@ -1,4 +1,4 @@
-ARCH="/usr/local/gcc-arm-none-eabi-5_2-2015q4/bin/arm-none-eabi-"
+ARCH="arm-none-eabi-"
 MBED_FS=./libraries/fs
 BUILD_DIR=../build
 PSOC5_PATH=../cypress/psoc5
