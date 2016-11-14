@@ -22,6 +22,10 @@ MonoPowerManagement::MonoPowerManagement()
     mbed::DigitalOut vauxSel(VAUX_SEL, 1); // Select 3V3 for Vaux
     mbed::DigitalOut vauxEn(VAUX_EN, 1); // Enable Vaux
 
+    // The J_TIP to PullDown and low
+    CyPins_SetPinDriveMode(J_TIP, CY_PINS_DM_RES_UP);
+    CyPins_ClearPin(J_TIP);
+
     batteryLowFlag = batteryEmptyFlag = false;
     powerAwarenessQueue = NULL;
     PowerSystem = &powerSubsystem;
@@ -51,9 +55,6 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
     powerSubsystem.powerOffUnused();
     powerDownMCUPeripherals();
 
-    //CyILO_Start1K(); // make sure the 1K ILO Osc is running
-    //CyMasterClk_SetSource(CY_MASTER_SOURCE_IMO);
-
     bool wakeup = false;
     while(wakeup == false)
     {
@@ -62,11 +63,9 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
 
         __RTCFired = false;
         CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_PICU | PM_SLEEP_SRC_CTW);
-        //CyPmHibernate();
 
         CyPmRestoreClocks();
 
-        //int status = CyPmReadStatus(CY_PM_CTW_INT);
         if (__RTCFired)
         {
             wakeup = false;
@@ -75,15 +74,10 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
 
     }
 
-    //CyMasterClk_SetSource(CY_MASTER_SOURCE_PLL);
-    //CyGlobalIntEnable;
-
     powerUpMCUPeripherals();
     PowerSystem->onSystemWakeFromSleep();
 
     powerSubsystem.setPowerFence(false);
-
-    //mono::defaultSerial.printf("Wake up! Restore clocks and read status regs: 0x%x\r\n", status);
 
     if (!skipAwarenessQueues)
         processWakeAwarenessQueue();
@@ -110,50 +104,48 @@ void MonoPowerManagement::processResetAwarenessQueue()
 
 void MonoPowerManagement::setupMCUPeripherals()
 {
-    // set all PORT 0 (Exp. conn. to res pull down)
+    // set all PORT 0 (Exp. conn. to res high impedance)
     CY_SET_REG8(CYREG_PRT0_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT0_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT0_DM2, 0x00);
 
-    // set all PORT 1 (Exp. conn. to res pull down)
+    // set all PORT 1 (Exp. conn. to res high impedance)
     CY_SET_REG8(CYREG_PRT1_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT1_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT1_DM2, 0x00);
 
-    // set all PORT 2 (RP spi to res pull down)
+    // set all PORT 2 (RP spi to res high impedance)
     // set PRT2_2 as OD, drives low
     CY_SET_REG8(CYREG_PRT2_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT2_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT2_DM2, 0x00);
 
-    // set all PORT 3 (TFT to res pull down)
+    // set all PORT 3 (TFT to res high impedance)
     CY_SET_REG8(CYREG_PRT3_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT3_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT3_DM2, 0x00);
 
-    // set all PORT 4 (exp. conn to res pull down)
+    // set all PORT 4 (exp. conn to res high impedance)
     CY_SET_REG8(CYREG_PRT4_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT4_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT4_DM2, 0x00);
 
-    // set all PORT 5 (switches and inputs, to res pull down)
+    // set all PORT 5 (switches and inputs, to res high impedance)
     // set PRT5_0 as OD drives low
     CY_SET_REG8(CYREG_PRT5_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT5_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT5_DM2, 0x00);
 
-    // set all PORT 6 (TFT conn. to res pull down)
+    // set all PORT 6 (TFT conn. to res high impedance)
     CY_SET_REG8(CYREG_PRT6_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT6_DM1, 0x00);
     CY_SET_REG8(CYREG_PRT6_DM2, 0x00);
 
-    // set all PORT 12 (misc. to res pull down)
-    //set PRT12_5 as OD, drives low
-    CY_SET_REG8(CYREG_PRT12_DM0, 0x00);
-    CY_SET_REG8(CYREG_PRT12_DM1, 0x00);
+    // set all PORT 12 (misc. to res high impedance)
+    // set J_TIP to Res. PullDown
+    CY_SET_REG8(CYREG_PRT12_DM0, 0x08);
+    CY_SET_REG8(CYREG_PRT12_DM1, 0x08);
     CY_SET_REG8(CYREG_PRT12_DM2, 0x00);
-
-    //CY_SET_REG8(CYREG_PRT12_SIO_CFG, 0x00); // SIO non-reg output
 
     CY_SET_REG8(CYREG_PRT15_DM0, 0x00);
     CY_SET_REG8(CYREG_PRT15_DM1, 0x00);
@@ -167,19 +159,15 @@ void MonoPowerManagement::setupMCUPeripherals()
     // VauxSel must set to 3V3 in sleep mode
     mbed::DigitalOut vauxSel(VAUX_SEL, 1);
 
-    //Power INT res pull up in sleep
+    //Power INT res pull up in sleep - so the power interrupt still works
     CyPins_SetPinDriveMode(nIRQ, CY_PINS_DM_RES_UP);
 }
 
 void MonoPowerManagement::powerDownMCUPeripherals()
 {
     PWM_Sleep();
-//    SPI_SD_Sleep();
     SPI1_Sleep();
-//    SPI_RP_Sleep();
     ADC_SAR_1_Sleep();
-//    I2C_Sleep();
-
     I2C_Sleep();
 
 #ifdef DEVICE_SERIAL
