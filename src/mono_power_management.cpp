@@ -169,11 +169,6 @@ void MonoPowerManagement::setupMCUPeripherals()
 
     //Power INT res pull up in sleep
     CyPins_SetPinDriveMode(nIRQ, CY_PINS_DM_RES_UP);
-
-    
-    CyPins_SetPinDriveMode(A5, CY_PINS_DM_RES_DWN);
-    CyPins_ClearPin(A5);
-
 }
 
 void MonoPowerManagement::powerDownMCUPeripherals()
