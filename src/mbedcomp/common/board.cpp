@@ -22,6 +22,7 @@
 WEAK void mbed_die(void) {
     
 #ifndef EMUNO
+    CyHalt(1);
     PWM_Start();
     PWM_WriteCompare2(0);
     CyPins_SetPinDriveMode(SW_USER, CY_PINS_DM_RES_UP);
