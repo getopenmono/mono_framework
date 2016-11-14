@@ -46,11 +46,11 @@ typedef enum {
     RP_INT = RP_INTERRUPT,          /**< Wireless module interrupt on data, input! */
     
     /// MARK: SD Card SPI pins
-    SD_SPI_HARD_WIRE,                           /**< Enum for SD card SPI pins */
+    SD_SPI_HARD_WIRE,               /**< Enum for SD card SPI pins */
     SD_SPI_CLK = SD_SPI_HARD_WIRE,
     SD_SPI_MOSI = SD_SPI_HARD_WIRE,
     SD_SPI_MISO = SD_SPI_HARD_WIRE,
-    SD_SPI_CS = SD_SPI_HARD_WIRE,               /**< SD Card chip select, hard wired in firmware. */
+    SD_SPI_CS = SD_SPI_HARD_WIRE,   /**< SD Card chip select, hard wired in firmware. */
 
     /// MARK: Display SPI pins
     TFT_SPI_HARD_WIRE,
@@ -70,7 +70,7 @@ typedef enum {
     TFT_TOUCH_X1 = CYREG_PRT1_PC6,  /**< TFT touch input X1 */
     TFT_TOUCH_Y2 = CYREG_PRT1_PC5,  /**< TFT touch input Y2 */
     TFT_TOUCH_X2 = CYREG_PRT1_PC2,  /**< TFT touch input X2 */
-    TFT_LED = TFT_LED_PWR,      /**< TFT LED backlight PWM pin */
+    TFT_LED = TFT_LED_PWR,          /**< TFT LED backlight PWM pin */
 
     /// MARK: Public touch input pins
     T_Xn = TFT_TOUCH_X1,   /**< Display touch input X- */
@@ -91,32 +91,34 @@ typedef enum {
 
     SENSE = CYREG_PRT0_PC4,     /**< Not used. Modify PCB to use as current sense input */
 
+    nIRQ = CYREG_PRT5_PC2,      /**< The active low interrupt signal from the power sub system */
+
     /// MARK: Arduino Digital pins
-    D0 = CYREG_PRT4_PC0,
-    D1 = CYREG_PRT4_PC1,
-    D2 = CYREG_PRT4_PC2,
-    D3 = CYREG_PRT4_PC3,
-    D4 = CYREG_PRT4_PC4,
-    D5 = CYREG_PRT4_PC5,
-    D6 = CYREG_PRT4_PC6,
-    D7 = CYREG_PRT4_PC7,
+    D0 = CYREG_PRT4_PC0,    /**< D0 on Shield Adaptor */
+    D1 = CYREG_PRT4_PC1,    /**< D1 on Shield Adaptor */
+    D2 = CYREG_PRT4_PC2,    /**< D2 on Shield Adaptor */
+    D3 = CYREG_PRT4_PC3,    /**< D3 on Shield Adaptor */
+    D4 = CYREG_PRT4_PC4,    /**< D4 on Shield Adaptor */
+    D5 = CYREG_PRT4_PC5,    /**< D5 on Shield Adaptor */
+    D6 = CYREG_PRT4_PC6,    /**< D6 on Shield Adaptor */
+    D7 = CYREG_PRT4_PC7,    /**< D7 on Shield Adaptor */
     
-    D8 = CYREG_PRT0_PC3,
+    D8 = CYREG_PRT0_PC3,    /**< D8 on Shield Adaptor */
 
-    D9 = CYREG_PRT12_PC3,   /**< Pin is shared between D9 and @ref JC_TIP */
+    D9 = CYREG_PRT12_PC3,   /**< Shared between D9 on Shield Adaptor and @ref JC_TIP */
 
-    D10 = CYREG_PRT0_PC2,   /**< Pin is shared between D10 and @ref JC_RING1 */
-    D11 = CYREG_PRT0_PC1,   /**< Pin is shared between D11 and @ref JC_RING2 */
-    D12 = CYREG_PRT0_PC5,
-    D13 = CYREG_PRT0_PC6,
+    D10 = CYREG_PRT0_PC2,   /**< Shared between D10 on Shield Adaptor and @ref JC_RING1 */
+    D11 = CYREG_PRT0_PC1,   /**< Shared between D11 on Shield Adaptor and @ref JC_RING2 */
+    D12 = CYREG_PRT0_PC5,   /**< D12 on Shield Adaptor */
+    D13 = CYREG_PRT0_PC6,   /**< D13 on Shield Adaptor */
     
     /// MARK: Arduino Analog pins
-    A0 = CYREG_PRT3_PC2,
-    A1 = CYREG_PRT3_PC1,
-    A2 = CYREG_PRT3_PC0,
-    A3 = CYREG_PRT3_PC3,
-    A4 = CYREG_PRT3_PC4,
-    A5 = CYREG_PRT3_PC5,
+    A0 = CYREG_PRT3_PC2,    /**< A0 on Shield Adaptor */
+    A1 = CYREG_PRT3_PC1,    /**< A1 on Shield Adaptor */
+    A2 = CYREG_PRT3_PC0,    /**< A2 on Shield Adaptor */
+    A3 = CYREG_PRT3_PC3,    /**< A3 on Shield Adaptor */
+    A4 = CYREG_PRT3_PC4,    /**< A4 on Shield Adaptor */
+    A5 = CYREG_PRT3_PC5,    /**< A5 on Shield Adaptor */
 
     /// MARK: USB Pseudo pins
     USBTX,

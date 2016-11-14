@@ -18,6 +18,10 @@ bool MonoPowerManagement::__RTCFired = false;
 
 MonoPowerManagement::MonoPowerManagement()
 {
+    //Confgure the VAUX power to be 3V3 and ENABLED
+    mbed::DigitalOut vauxSel(VAUX_SEL, 1); // Select 3V3 for Vaux
+    mbed::DigitalOut vauxEn(VAUX_EN, 1); // Enable Vaux
+
     batteryLowFlag = batteryEmptyFlag = false;
     powerAwarenessQueue = NULL;
     PowerSystem = &powerSubsystem;
@@ -158,14 +162,15 @@ void MonoPowerManagement::setupMCUPeripherals()
     // SW USER must be weak pull up in sleep!
     CyPins_SetPinDriveMode(USER_SW, CY_PINS_DM_RES_UP);
 
-    // EXP_PWR_EN must be strong in sleep!
-    CyPins_SetPinDriveMode(VAUX_EN, CY_PINS_DM_STRONG);
-    // EXP_3V3_EN toggle must also be strong drive
-    CyPins_SetPinDriveMode(VAUX_EN, CY_PINS_DM_STRONG);
+    // Vaux must be strong low in sleep! (Turns off Vaux power)
+    mbed::DigitalOut vauxEn(VAUX_EN, 0);
+    // VauxSel must set to 3V3 in sleep mode
+    mbed::DigitalOut vauxSel(VAUX_SEL, 1);
 
     //Power INT res pull up in sleep
-    CyPins_SetPinDriveMode(CYREG_PRT5_PC2, CY_PINS_DM_RES_UP);
+    CyPins_SetPinDriveMode(nIRQ, CY_PINS_DM_RES_UP);
 
+    
     CyPins_SetPinDriveMode(A5, CY_PINS_DM_RES_DWN);
     CyPins_ClearPin(A5);
 
@@ -200,6 +205,10 @@ void MonoPowerManagement::powerUpMCUPeripherals()
 {
     restoreDMRegisters();
 
+    // Restore 3V3 on Vaux
+    mbed::DigitalOut vauxSel(VAUX_SEL, 1);
+    mbed::DigitalOut vauxEn(VAUX_EN, 1);
+
 #ifdef DEVICE_SERIAL
     serial_usbuart_stopped();
 #endif
@@ -207,16 +216,7 @@ void MonoPowerManagement::powerUpMCUPeripherals()
     PWM_Wakeup();
     I2C_Wakeup();
     SPI1_Wakeup();
-//    SPI_SD_Wakeup();
-//    SPI_RP_Wakeup();
     ADC_SAR_1_Wakeup();
-//    I2C_Wakeup();
-
-#ifndef MONO_DISP_CTRL_HX8340
-    SPI1_Wakeup();
-#endif
-
-    //mbed::Serial::wakeUpRoutine();
 }
 
 void MonoPowerManagement::saveDMRegisters()

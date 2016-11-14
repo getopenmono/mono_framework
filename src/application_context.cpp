@@ -30,14 +30,6 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
                                             dispController(),
                                             UserButton(SW_USER, PullUp)
 {
-    //enable SWD / JTAG debug, by turning on VTARG/VSYS voltage in expansion connector
-    // and set the pwr rail to 3.3V
-    CyPins_SetPinDriveMode(EXPANSION_3V3_ENABLE, CY_PINS_DM_STRONG);
-    CyPins_ClearPin(EXPANSION_3V3_ENABLE);
-    CyPins_SetPinDriveMode(EXPANSION_PWR_ENABLE, CY_PINS_DM_STRONG);
-    CyPins_SetPin(EXPANSION_PWR_ENABLE);
-
-
     // Start the PWM component (as required by buzzer and TFT)
     PWM_Start();
 
