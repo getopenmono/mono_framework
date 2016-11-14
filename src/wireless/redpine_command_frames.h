@@ -640,11 +640,25 @@ namespace mono { namespace redpine {
     };
     
     
-//    class HttpPostFrame : public HttpGetFrame
-//    {
-//        HttpPostFrame(String hostname, String serverIp, String path, );
-//    };
-    
+    class HttpPostFrame : public HttpGetFrame
+    {
+    public:
+
+        class HttpBody
+        {
+            uint16_t length;
+            char *data;
+        };
+
+        mbed::FunctionPointerArg1<void, char*> requestDataCallback;
+        mbed::FunctionPointerArg1<uint16_t, void> requestDataLengthCallback;
+
+        HttpPostFrame(String hostname, String serverIp, String Url, FILE *destFile, uint32_t serverPort = 80);
+
+        void dataPayload(uint8_t *data);
+        int payloadLength();
+    };
+
     
     /**
      * Command to set the module into one of 5 power saving modes. Some modes is

@@ -325,6 +325,34 @@ HttpGetFrame::~HttpGetFrame()
     //debug("dealloc HttpGetFrame\r\n");
 }
 
+// MARK: HTTP POST FRAME
+
+HttpPostFrame::HttpPostFrame(String hostname, String serverIp, String Url, FILE *destFile, uint32_t serverPort) :
+    mono::redpine::HttpGetFrame(hostname, serverIp, Url, destFile, serverPort)
+{
+    commandId = HttpPost;
+}
+
+int HttpPostFrame::payloadLength()
+{
+    if (requestDataLengthCallback)
+        return HttpGetFrame::payloadLength() + requestDataLengthCallback.call() + 1;
+    else
+        return HttpGetFrame::payloadLength();
+}
+
+void HttpPostFrame::dataPayload(uint8_t *data)
+{
+    HttpGetFrame::dataPayload(data);
+    int len = HttpGetFrame::payloadLength();
+    memset(data+len, 0, 1);
+
+    if (requestDataCallback)
+        requestDataCallback.call((char*)data+len+1);
+}
+
+
+
 // SET POWER MODE FRAME
 
 PowerModeFrame::PowerModeFrame(PowerModeFrame::PowerSaveModes saveMode, PowerModeFrame::UltraLowPowerModes powMode, bool dtimBeacon) : ManagementFrame(PowerSaveMode)
