@@ -8,12 +8,15 @@ using namespace mono::network;
 
 HttpPostClient::HttpPostClient() : HttpClient()
 {
-
+    shouldPost = false;
 }
 
-HttpPostClient::HttpPostClient(String anUrl)
+HttpPostClient::HttpPostClient(String anUrl, String headers)
 {
+    shouldPost = false;
     destPort = 80;
+    this->headers = headers;
+
     mono::Regex ipreg(HttpClient::ipRegex);
 
     mono::Regex::Capture ipCaps[4];
@@ -21,6 +24,7 @@ HttpPostClient::HttpPostClient(String anUrl)
     if (success)
     {
         String ip = ipreg.Value(ipCaps[1]);
+        domain = ip;
         String httpPort = ipreg.Value(ipCaps[2]);
         path = ipCaps[3].len == 0 ? "/" : ipreg.Value(ipCaps[3]);
 
@@ -29,11 +33,8 @@ HttpPostClient::HttpPostClient(String anUrl)
             sscanf(httpPort(), "%lu",&destPort);
         }
 
-        postFrame = new redpine::HttpPostFrame(ip, ip, path, NULL, destPort);
-        postFrame->setDataReadyCallback<HttpClient>(this, &HttpPostClient::httpData);
-        postFrame->setCompletionCallback<HttpClient>(this, &HttpPostClient::httpCompletion);
-
-
+        getFrame = 0;
+        createFrameRequest(ip);
     }
     else
     {
@@ -59,9 +60,10 @@ HttpPostClient::HttpPostClient(String anUrl)
         }
 
         dns = DnsResolver(domain);
-        dns.setCompletionCallback<HttpClient>(this, &HttpPostClient::dnsComplete);
-        dns.setErrorCallback<HttpClient>(this, &HttpPostClient::dnsResolutionError);
+        dns.setCompletionCallback<HttpPostClient>(this, &HttpPostClient::dnsComplete);
+        dns.setErrorCallback<HttpPostClient>(this, &HttpPostClient::dnsResolutionError);
         getFrame = NULL;
+        postFrame = NULL;
     }
     
 
@@ -70,18 +72,74 @@ HttpPostClient::HttpPostClient(String anUrl)
 HttpPostClient::HttpPostClient(const HttpPostClient &other) : HttpClient(other)
 {
     postFrame = other.postFrame;
+    shouldPost = other.shouldPost;
+    frameDataHandler = other.frameDataHandler;
+    frameDataLengthHandler = other.frameDataLengthHandler;
+
+    if (postFrame != NULL)
+    {
+        postFrame->setDataReadyCallback<HttpPostClient>(this, &HttpPostClient::httpData);
+        postFrame->setCompletionCallback<HttpPostClient>(this, &HttpPostClient::httpCompletion);
+    }
 }
 
 HttpPostClient &HttpPostClient::operator=(const HttpPostClient &other)
 {
     this->HttpClient::operator=(other);
     postFrame = other.postFrame;
+    shouldPost = other.shouldPost;
+    frameDataHandler = other.frameDataHandler;
+    frameDataLengthHandler = other.frameDataLengthHandler;
+
+    if (postFrame != NULL)
+    {
+        postFrame->setDataReadyCallback<HttpPostClient>(this, &HttpPostClient::httpData);
+        postFrame->setCompletionCallback<HttpPostClient>(this, &HttpPostClient::httpCompletion);
+    }
 
     return *this;
 }
 
+void HttpPostClient::createFrameRequest(String ip)
+{
+    postFrame = new redpine::HttpPostFrame(domain, ip, path, NULL, destPort);
+    postFrame->setDataReadyCallback<HttpPostClient>(this, &HttpPostClient::httpData);
+    postFrame->setCompletionCallback<HttpPostClient>(this, &HttpPostClient::httpCompletion);
+    postFrame->requestDataLengthCallback = frameDataLengthHandler;
+    postFrame->requestDataCallback = frameDataHandler;
+
+    if (headers.Length() > 0)
+        postFrame->extraHeader = headers();
+}
+
+bool HttpPostClient::hasFrameRequest()
+{
+    return postFrame != 0;
+}
+
+void HttpPostClient::dnsComplete(INetworkRequest::CompletionEvent *evnt)
+{
+    if (hasFrameRequest())
+    {
+        debug("post frame already exists!\r\n");
+    }
+
+    this->HttpClient::dnsComplete(evnt);
+
+    if (postFrame != 0 && shouldPost)
+    {
+        setState(IN_PROGRESS_STATE);
+        postFrame->commitAsync();
+    }
+}
+
 void HttpPostClient::post()
 {
-    setState(IN_PROGRESS_STATE);
-    postFrame->commitAsync();
+    shouldPost = true;
+
+    if (hasFrameRequest())
+    {
+        setState(IN_PROGRESS_STATE);
+        postFrame->commitAsync();
+    }
 }

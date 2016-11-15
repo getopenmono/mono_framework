@@ -568,8 +568,8 @@ namespace mono { namespace redpine {
             uint16_t ip_version;    /**< ip version 4 or 6 */
             uint16_t options;       /**< Options for HTTPS, delimiter and SSL */
             uint16_t http_port;     /**< server port number */
-            uint8_t  buffer;        /**< Username, Password,Hostname, IP address,url,header,data */
-        } HttpReqFrameSnd;
+            uint8_t  buffer;        /**< Username, Password, Hostname, IP address, url, header, data */
+        } __attribute__((packed)) HttpReqFrameSnd;
         
         /** @brief The raw data response payload */
         typedef struct
@@ -578,7 +578,7 @@ namespace mono { namespace redpine {
             uint32_t offset;    /**< Is always '0' */
             uint32_t data_len;  /**< Lenght of current data chunk (bytes) */
             uint8_t  data;      /**< The current data chunk, max is 1400 bytes */
-        } HttpRsp;
+        } __attribute__((packed)) HttpRsp;
         
         /** The HTTP servers hostname (for virtual hosts) */
         String hostname;

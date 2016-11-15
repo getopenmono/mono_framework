@@ -3,6 +3,7 @@
 
 #include "http_client.h"
 #include "regex.h"
+#include "async.h"
 
 using namespace mono::network;
 
@@ -11,8 +12,9 @@ const char *HttpClient::domainRegex = "(http://)([^\\s/'\\\"<>\\?:,_;\\*\\^\\!<>
 
 HttpClient::HttpClient() : INetworkRequest(), respData(this), getFrame(NULL) {}
 
-HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFrame(NULL)
+HttpClient::HttpClient(String anUrl, String headers) : INetworkRequest(), respData(this), getFrame(NULL)
 {
+    this->headers = headers;
     destPort = 80;
     mono::Regex ipreg(HttpClient::ipRegex);
 
@@ -29,11 +31,7 @@ HttpClient::HttpClient(String anUrl) : INetworkRequest(), respData(this), getFra
             sscanf(httpPort(), "%lu",&destPort);
         }
 
-        getFrame = new redpine::HttpGetFrame(ip, ip, path, NULL, destPort);
-        getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
-        getFrame->setCompletionCallback<HttpClient>(this, &HttpClient::httpCompletion);
-
-        getFrame->commitAsync();
+        createFrameRequest(ip);
     }
     else
     {
@@ -77,6 +75,7 @@ HttpClient::HttpClient(const HttpClient &other) :
     path = other.path;
     dns = other.dns;
     destPort = other.destPort;
+    headers = other.headers;
 
     dns.setCompletionCallback<HttpClient>(this, &HttpClient::dnsComplete);
     dns.setErrorCallback<HttpClient>(this, &HttpClient::dnsResolutionError);
@@ -97,6 +96,7 @@ HttpClient &HttpClient::operator=(const mono::network::HttpClient &other)
     path = other.path;
     dns = other.dns;
     destPort = other.destPort;
+    headers = other.headers;
 
     dns.setCompletionCallback<HttpClient>(this, &HttpClient::dnsComplete);
     dns.setErrorCallback<HttpClient>(this, &HttpClient::dnsResolutionError);
@@ -131,18 +131,32 @@ void HttpClient::dnsResolutionError(INetworkRequest::ErrorEvent *evnt)
 
 void HttpClient::dnsComplete(INetworkRequest::CompletionEvent *evnt)
 {
-    if (getFrame != NULL)
+    if (hasFrameRequest())
     {
-        debug("getFrame != NULL, Invalid state! getFrame is: 0x%x\r\n",getFrame);
+        debug("req frame != NULL, Invalid state! getFrame is: 0x%x\r\n",getFrame);
         lastErrorCode = INVALID_STATE_ERROR;
         triggerDirectErrorHandler(); // dns complete cb is already queued
         return;
     }
 
-    getFrame = new redpine::HttpGetFrame(domain, dns.IpAddress(), path, NULL, destPort);
+    createFrameRequest(dns.IpAddress());
+}
+
+void HttpClient::createFrameRequest(String ipAddress)
+{
+    getFrame = new redpine::HttpGetFrame(domain, ipAddress, path, NULL, destPort);
     getFrame->setDataReadyCallback<HttpClient>(this, &HttpClient::httpData);
     getFrame->setCompletionCallback<HttpClient>(this, &HttpClient::httpCompletion);
+
+    if (headers.Length() > 0)
+        getFrame->extraHeader = headers();
+
     getFrame->commitAsync();
+}
+
+bool HttpClient::hasFrameRequest()
+{
+    return getFrame != 0;
 }
 
 void HttpClient::httpData(redpine::HttpGetFrame::CallbackData *data)
@@ -150,11 +164,12 @@ void HttpClient::httpData(redpine::HttpGetFrame::CallbackData *data)
     respData.bodyChunk = String((char*)(data->data), data->dataLength+1);
     respData.bodyChunk.stringData[data->dataLength] = 0;
     respData.Finished = data->context->lastResponseParsed;
+    //respData.HttpHeaderRaw = String();
 
     //debug("got data call data ready async\r\n");
     //debug("-> %s\r\n",respData.bodyChunk());
     // call data ready async, to release mem. objs on stack
-    Timer::callOnce<HttpClient>(0, this, &HttpClient::triggerDataReady);
+    async<HttpClient>(this, &HttpClient::triggerDataReady);
 }
 
 void HttpClient::triggerDataReady()

@@ -49,6 +49,7 @@ namespace mono { namespace network {
         String domain;
         String path;
         uint32_t destPort;
+        String headers;
 
         DnsResolver dns;
         HttpResponseData respData;
@@ -59,7 +60,7 @@ namespace mono { namespace network {
         void dnsResolutionError(INetworkRequest::ErrorEvent *evnt);
 
         /** dns resolver completion event handler */
-        void dnsComplete(INetworkRequest::CompletionEvent *evnt);
+        virtual void dnsComplete(INetworkRequest::CompletionEvent *evnt);
 
         void httpData(redpine::HttpGetFrame::CallbackData *data);
 
@@ -67,13 +68,17 @@ namespace mono { namespace network {
         void httpCompletion(redpine::ManagementFrame::FrameCompletionData *data);
 
         void triggerDataReady();
+
+        virtual void createFrameRequest(String ipAddress);
+        virtual bool hasFrameRequest();
+
     public:
 
 
         HttpClient();
 
 
-        HttpClient(String anUrl);
+        HttpClient(String anUrl, String headers = String());
 
         HttpClient(const HttpClient &other);
 

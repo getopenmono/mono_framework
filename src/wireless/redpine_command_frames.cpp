@@ -266,7 +266,7 @@ void HttpGetFrame::dataPayload(uint8_t *data)
     uint8_t *strPnt = (uint8_t*) &(frm->buffer);
 
     memcpy(strPnt++, "", 1); // username param
-    memcpy(strPnt++, "", 1); // username param
+    memcpy(strPnt++, "", 1); // password param
 
     //debug("sizeof struct: %i, hstnm: %i, ipaddr: %i, url: %i, extHdr: %i\r\n",sizeof(HttpReqFrameSnd),hostname.Length(),ipaddress.Length(),url.Length(),extraHeader.Length());
 
@@ -315,7 +315,7 @@ void HttpGetFrame::responsePayloadHandler(uint8_t *data)
 int HttpGetFrame::payloadLength()
 {
     int size = sizeof(HttpReqFrameSnd);
-    size += 1 + 1 + hostname.Length() + 1 + ipaddress.Length() + 1 + url.Length() + 1 + extraHeader.Length() + 1;
+    size += 1 + hostname.Length() + 1 + ipaddress.Length() + 1 + url.Length() + 1 + extraHeader.Length();
 
     return (size+3) & ~3;
 }
@@ -335,20 +335,45 @@ HttpPostFrame::HttpPostFrame(String hostname, String serverIp, String Url, FILE 
 
 int HttpPostFrame::payloadLength()
 {
+    int size = sizeof(HttpReqFrameSnd);
+    size += 1 + hostname.Length() + 1 + ipaddress.Length() + 1 + url.Length() + 1 + extraHeader.Length() + 1;
+
     if (requestDataLengthCallback)
-        return HttpGetFrame::payloadLength() + requestDataLengthCallback.call() + 1;
-    else
-        return HttpGetFrame::payloadLength();
+        size += requestDataLengthCallback.call();
+
+    // the padding zeroes becomes a part of the request body (but 4-byte alignment is required by the API)
+    return (size+3) & ~3; //4 byte align
 }
 
 void HttpPostFrame::dataPayload(uint8_t *data)
 {
-    HttpGetFrame::dataPayload(data);
-    int len = HttpGetFrame::payloadLength();
-    memset(data+len, 0, 1);
+    memset(data, 0, this->payloadLength());
+
+    HttpReqFrameSnd *frm = (HttpReqFrameSnd*) data;
+    frm->ip_version = 4;
+    frm->http_port = httpPort;
+    frm->options = ENABLE_NULL_DELIMITER;
+    uint8_t *strPnt = (uint8_t*) &(frm->buffer);
+
+    memcpy(strPnt++, "", 1); // username param
+    memcpy(strPnt++, "", 1); // password param
+
+    //debug("sizeof struct: %i, hstnm: %i, ipaddr: %i, url: %i, extHdr: %i\r\n",sizeof(HttpReqFrameSnd),hostname.Length(),ipaddress.Length(),url.Length(),extraHeader.Length());
+
+    memcpy(strPnt, hostname(), hostname.Length());
+    strPnt += hostname.Length()+1;
+
+    memcpy(strPnt, ipaddress(), ipaddress.Length());
+    strPnt += ipaddress.Length()+1;
+
+    memcpy(strPnt, url(), url.Length());
+    strPnt += url.Length()+1;
+
+    memcpy(strPnt, extraHeader(), extraHeader.Length());
+    strPnt += extraHeader.Length()+1;
 
     if (requestDataCallback)
-        requestDataCallback.call((char*)data+len+1);
+        requestDataCallback.call((char*)(strPnt));
 }
 
 
