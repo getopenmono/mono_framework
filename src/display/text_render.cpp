@@ -37,7 +37,7 @@ void TextRender::drawInRect(geo::Rect rect, String text, const MonoFont &fontFac
     char c = text[cnt];
     mono::geo::Point offset = rect.Point();
 
-    while (c != '\0' && offset.X()+fontFace.glyphWidth < rect.X2())
+    while (c != '\0' && offset.X()+fontFace.glyphWidth <= rect.X2())
     {
         if (c == '\n')
         {

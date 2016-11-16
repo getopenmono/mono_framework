@@ -246,11 +246,12 @@ void TextLabelView::repaint()
                 {
                     uint32_t xOff = offset.X()+lineIdx*glyphWidth;
                     uint32_t yOff = offset.Y()+newlines*glyphHeight;
-                    geo::Rect glypsRct(xOff, yOff, viewRect.X2()-xOff, viewRect.Y2()-yOff);
+                    geo::Rect glypsRct(xOff, yOff, glyphWidth, glyphHeight);
 
                     painter.drawFillRect(glypsRct, true);
 
-                    tr.drawInRect(glypsRct, String::Format("%c",text[glyphIdx]), *currentFont);
+                    String glyph = String::Format("%c",text[glyphIdx]);
+                    tr.drawInRect(glypsRct, glyph, *currentFont);
                 }
 
                 glyphIdx++;
