@@ -12,6 +12,7 @@
 #include "temperature_interface.h"
 #include "accelerometer_interface.h"
 #include "buzzer_interface.h"
+#include "rtc_interface.h"
 
 namespace mono {
     
@@ -92,7 +93,8 @@ namespace mono {
                             QueueInterrupt *userBtn,
                             sensor::ITemperature *temp = 0,
                             sensor::IAccelerometer *accel = 0,
-                            sensor::IBuzzer *buzzer = 0
+                            sensor::IBuzzer *buzzer = 0,
+                            IRTCSystem *irtc = 0
                             ) :
             PowerManager(pwr),
             RunLoop(runLp),
@@ -101,7 +103,8 @@ namespace mono {
             UserButton(userBtn),
             Temperature(temp),
             Accelerometer(accel),
-            Buzzer(buzzer)
+            Buzzer(buzzer),
+            RTC(irtc)
         {
             IApplicationContext::Instance = this;
         }
@@ -206,7 +209,19 @@ namespace mono {
          * object, that is automatically created by the framework.
          */
         sensor::IBuzzer *Buzzer;
-        
+
+
+        /**
+         * @brief A Pointer to the current RTC interface, if such exists
+         *
+         * Mono has a RTC clock, that can control a system date time clock, that
+         * is accessed by the @ref DateTime class
+         *
+         * You can start or stop the RTC using this interface. Note that this 
+         * pointer might be NULL
+         */
+        IRTCSystem *RTC;
+
         // MARK: Public Methods
         
         /**

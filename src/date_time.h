@@ -103,10 +103,32 @@ namespace mono {
 
         /**
          * @brief Return an ISO8601 formatted timestamp as a string
+         *
+         * This returned string is on the format:
+         * yyyy-MM-ddTHH:mm:ss+tt:00 if not UTC or yyyy-MM-ddTHH:mm:ssZ
          */
         String toISO8601() const;
 
+        /**
+         * @brief Return only a time string from the DateTime
+         *
+         * The format is: HH:mm:ss
+         */
+        String toTimeString() const;
 
+        /**
+         * @brief Return only a date string from the DateTime
+         *
+         * The format is: yyyy-MM-dd
+         */
+        String toDateString() const;
+
+
+        /**
+         * @brief Return `true` if the DateTime is valid
+         * 
+         * Invalid date object is contructed by the default constructor
+         */
         bool isValid() const;
 
         /** @brief Convert this DateTime to UTC time */
@@ -123,11 +145,43 @@ namespace mono {
         bool operator<=(const mono::DateTime &other) const;
 
         // MARK: Date / Time manipulation
-        
+
+        /**
+         * @brief Return a new object with a number of seconds added
+         * 
+         * This method increments the timestamp for the given second interval
+         * @param seconds The seconds to add
+         * @return The new DateTime object with seconds added
+         */
         DateTime addSeconds(int seconds) const;
+
+        /**
+         * @brief Return a new object with a number of minutes added
+         *
+         * This method increments the timestamp for the given minute interval
+         * @param minutes The minutes to add
+         * @return The new DateTime object with minutes added
+         */
         DateTime addMinutes(int minutes) const;
+
+        /**
+         * @brief Return a new object with a number of hours added
+         *
+         * This method increments the timestamp for the given hour interval
+         * @param hours The hours to add
+         * @return The new DateTime object with hours added
+         */
         DateTime addHours(int hours) const;
+
+        /**
+         * @brief Return a new object with a number of days added
+         *
+         * This method increments the timestamp for the given day interval
+         * @param days The days to add
+         * @return The new DateTime object with days added
+         */
         DateTime addDays(int days) const;
+
 //        DateTime addMonths(int months) const;
 //        DateTime addYears(int years) const;
 
@@ -172,14 +226,31 @@ namespace mono {
         inline uint8_t trim(uint8_t value, uint8_t min, uint8_t max);
 
         static DateTime systemDateTimeClock;
-        static void incrementSystemClock();
 
     public:
 
+        /**
+         * @brief The systems current TimeZone setting
+         *
+         * The timezone is just an hour-offset from the UTC / GMT time
+         */
         static int LocalTimeZoneHourOffset;
 
+        /**
+         * @brief Set a new system DateTime
+         */
         static void setSystemDateTime(DateTime dt);
+
+        /**
+         * @brief Get the current DateTime from the system RTC clock
+         */
         static DateTime now();
+
+        /**
+         * @brief Internal method used by the RTC system to increment the system
+         * DateTime. You should not call this manually.
+         */
+        static void incrementSystemClock();
     };
 
 }

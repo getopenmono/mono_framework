@@ -3,6 +3,7 @@
 
 #include "date_time.h"
 #include "regex.h"
+#include "application_context_interface.h"
 #include <stdio.h>
 
 using namespace mono;
@@ -95,6 +96,16 @@ String DateTime::toISO8601() const
     }
 
     return String::Format("%04d-%02d-%02dT%02d:%02d:%02d%s",year,month,day,hours,mins,secs,timeZone);
+}
+
+String DateTime::toTimeString() const
+{
+    return String::Format("%02d:%02d:%02d",hours,mins,secs);
+}
+
+String DateTime::toDateString() const
+{
+    return String::Format("%04d-%02d-%02d",year,month,day);
 }
 
 bool DateTime::isValid() const
@@ -389,5 +400,11 @@ DateTime DateTime::now()
 
 void DateTime::setSystemDateTime(mono::DateTime dt)
 {
+    if (IApplicationContext::Instance->RTC)
+        IApplicationContext::Instance->RTC->stopRtc();
+
     systemDateTimeClock = dt;
+
+    if (IApplicationContext::Instance->RTC)
+        IApplicationContext::Instance->RTC->startRtc();
 }

@@ -15,6 +15,7 @@
 //#include "mono_settings.h"
 #include "application_run_loop.h"
 #include "mono_power_management.h"
+#include "mono_rtc.h"
 
 
 namespace mono {
@@ -36,6 +37,7 @@ namespace mono {
         sensor::AT30TS74Temperature at30ts64Sensor;
         sensor::MMAAccelerometer mmaAccelerometer;
         sensor::MonoBuzzer mnBuzzer;
+        MonoRTC rtc;
         
         QueueInterrupt UserButton;
 

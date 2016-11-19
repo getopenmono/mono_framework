@@ -25,7 +25,8 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
                                                                &UserButton,
                                                                &at30ts64Sensor,
                                                                &mmaAccelerometer,
-                                                               &mnBuzzer),
+                                                               &mnBuzzer,
+                                                               &rtc),
 
                                             dispController(),
                                             UserButton(SW_USER, PullUp)
@@ -65,6 +66,9 @@ void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
     mono::IApplicationContext::Instance->DisplayController->init();
 
     touchSys.init();
+    
+    rtc.setupRtcSystem();
+    rtc.startRtc();
 
     monoApp->monoWakeFromReset();
 
