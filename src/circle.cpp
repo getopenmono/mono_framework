@@ -1,10 +1,5 @@
-//
-//  circle.cpp
-//  circleTest
-//
-//  Created by Kristoffer Andersen on 07/12/2015.
-//  Copyright © 2015 your name. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "circle.h"
 

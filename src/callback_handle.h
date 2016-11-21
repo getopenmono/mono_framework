@@ -1,10 +1,5 @@
-//
-//  callback_handle.h
-//  mono
-//
-//  Created by Kristoffer Lyder Andersen on 12/07/15.
-//  Copyright (c) 2015 Monolit Aps. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef __mono__callback_handle__
 #define __mono__callback_handle__

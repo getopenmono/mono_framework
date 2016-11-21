@@ -1,10 +1,5 @@
-//
-//  spi_commands.h
-//  Mono::Redpine
-//
-//  Created by Kristoffer Andersen on 26/05/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef spiTest_spi_commands_h
 #define spiTest_spi_commands_h

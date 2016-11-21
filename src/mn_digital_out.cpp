@@ -1,10 +1,5 @@
-//
-//  mn_output_out.cpp
-//  
-//
-//  Created by Kristoffer Andersen on 10/12/2015.
-//  Copyright © 2015 your name. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "mn_digital_out.h"
 

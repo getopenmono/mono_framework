@@ -1,10 +1,5 @@
-//
-//  module_communication.cpp
-//  Mono::Redpine
-//
-//  Created by Kristoffer Andersen on 27/05/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "module_communication.h"
 #include <mono.h>

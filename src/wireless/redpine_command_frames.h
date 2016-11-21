@@ -1,10 +1,5 @@
-//
-//  redpine_command_frames.h
-//  Mono::Redpine
-//
-//  Created by Kristoffer Andersen on 01/06/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef __spiTest__redpine_command_frames__
 #define __spiTest__redpine_command_frames__

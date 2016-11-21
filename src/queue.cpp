@@ -1,10 +1,5 @@
-//
-//  heap_queue.cpp
-//  heapQueueTest
-//
-//  Created by Kristoffer Andersen on 10/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "queue.h"
 

@@ -1,4 +1,5 @@
-
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "mn_serial.h"
 #include "application_context_interface.h"

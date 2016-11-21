@@ -1,9 +1,5 @@
-//
-//  module_communication.h
-//
-//  Created by Kristoffer Andersen on 27/05/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef __spiTest__module_communication__
 #define __spiTest__module_communication__

@@ -1,10 +1,5 @@
-//
-//  display_controller_interface.h
-//  displaySimTest
-//
-//  Created by Kristoffer Lyder Andersen on 27/06/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef displaySimTest_display_controller_interface_h
 #define displaySimTest_display_controller_interface_h

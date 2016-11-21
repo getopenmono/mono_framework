@@ -1,10 +1,5 @@
-//
-//  mn_timer.h
-//  mono framework
-//
-//  Created by Kristoffer Andersen on 16/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef mn_timer_h
 #define mn_timer_h

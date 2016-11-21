@@ -1,10 +1,5 @@
-//
-//  consoles.h
-//  Mono
-//
-//  Created by Kristoffer Andersen on 27/05/15.
-//
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef __spiTest__consoles__
 #define __spiTest__consoles__

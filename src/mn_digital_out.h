@@ -1,10 +1,5 @@
-//
-//  mn_output_out.h
-//
-//
-//  Created by Kristoffer Andersen on 10/12/2015.
-//  Copyright © 2015 your name. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef mn_output_out_h
 #define mn_output_out_h

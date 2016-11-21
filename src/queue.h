@@ -1,10 +1,5 @@
-//
-//  heap_queue.h
-//  mono framework
-//
-//  Created by Kristoffer Andersen on 10/11/2015.
-//  Copyright © 2015 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef heap_queue_h
 #define heap_queue_h
