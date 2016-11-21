@@ -23,7 +23,7 @@ MonoPowerManagement::MonoPowerManagement()
     mbed::DigitalOut vauxEn(VAUX_EN, 1); // Enable Vaux
 
     // The J_TIP to PullDown and low
-    CyPins_SetPinDriveMode(J_TIP, CY_PINS_DM_RES_UP);
+    CyPins_SetPinDriveMode(J_TIP, CY_PINS_DM_RES_DWN);
     CyPins_ClearPin(J_TIP);
 
     batteryLowFlag = batteryEmptyFlag = false;
