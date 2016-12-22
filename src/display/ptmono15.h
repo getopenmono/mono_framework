@@ -468,7 +468,8 @@ static const unsigned char pt_mono_15_4bit_bitmap[] = {
         15,
         10,
         4,
-        32
+        32,
+        0
     };
 
 } }
