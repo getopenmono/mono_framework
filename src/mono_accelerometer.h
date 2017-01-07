@@ -18,12 +18,14 @@ namespace mono { namespace sensor {
         
         MMAAccelerometer();
         
-        void Start();
-        void Stop();
+        void start();
+        void stop();
         
         bool IsActive();
-        
-        virtual int16_t rawXAxis();
+
+        int16_t rawXAxis(bool monoOrientation = true);
+        int16_t rawYAxis(bool monoOrientation = true);
+        int16_t rawZAxis(bool monoOrientation = true);
         
         enum Registers
         {

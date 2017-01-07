@@ -6,6 +6,7 @@
 
 #include "network_request.h"
 #include <wireless/redpine_module.h>
+#include <wireless/redpine_command_frames.h>
 
 namespace mono { namespace network {
     

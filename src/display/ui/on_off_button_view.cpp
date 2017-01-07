@@ -106,6 +106,19 @@ void OnOffButtonView::TouchEnd(mono::TouchEvent &event)
         scheduleRepaint();
 }
 
+
+void OnOffButtonView::setState(bool on, bool fireClick)
+{
+    if (state != on)
+    {
+        state = on;
+        if (fireClick)
+            clickHandler.call();
+        
+        scheduleRepaint();
+    }
+}
+
 // MARK: Paints
 
 void OnOffButtonView::repaint()

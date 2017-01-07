@@ -16,7 +16,7 @@ MMAAccelerometer::MMAAccelerometer()
 }
 
 
-void MMAAccelerometer::Start()
+void MMAAccelerometer::start()
 {
     uint8_t state;
     if (!readRegister(CTRL_REG1, &state))
@@ -25,7 +25,7 @@ void MMAAccelerometer::Start()
     writeRegister(CTRL_REG1, (state|0x01));
 }
 
-void MMAAccelerometer::Stop()
+void MMAAccelerometer::stop()
 {
     uint8_t state;
     if (!readRegister(CTRL_REG1, &state))
@@ -49,7 +49,7 @@ bool MMAAccelerometer::IsActive()
     return (active & 0x01) == 0x01;
 }
 
-int16_t MMAAccelerometer::rawXAxis()
+int16_t MMAAccelerometer::rawXAxis(bool monoOrientation)
 {
     uint8_t dataReady = 0xFF;
     readRegister(STATUS, &dataReady);
@@ -59,6 +59,38 @@ int16_t MMAAccelerometer::rawXAxis()
 
     uint8_t data[2];
     readRegister(OUT_X_MSB, (uint16_t*) data);
+
+    int16_t x = ((data[0]<<8) | data[1]);
+
+    return x>>4;
+}
+
+int16_t MMAAccelerometer::rawYAxis(bool monoOrientation)
+{
+    uint8_t dataReady = 0xFF;
+    readRegister(STATUS, &dataReady);
+
+    if ((dataReady & 0x08) == 0)
+        debug("data not ready!\r\n");
+
+    uint8_t data[2];
+    readRegister(OUT_Y_MSB, (uint16_t*) data);
+
+    int16_t x = ((data[0]<<8) | data[1]);
+
+    return x>>4;
+}
+
+int16_t MMAAccelerometer::rawZAxis(bool monoOrientation)
+{
+    uint8_t dataReady = 0xFF;
+    readRegister(STATUS, &dataReady);
+
+    if ((dataReady & 0x08) == 0)
+        debug("data not ready!\r\n");
+
+    uint8_t data[2];
+    readRegister(OUT_Z_MSB, (uint16_t*) data);
 
     int16_t x = ((data[0]<<8) | data[1]);
 

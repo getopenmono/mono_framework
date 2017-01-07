@@ -25,7 +25,8 @@ namespace mono { namespace sensor {
          * will likely increase. Remember to @ref Stop the accelerometer, when
          * you are done sampling the acceleration.
          */
-        virtual void Start() = 0;
+        virtual void Start() { start(); };
+        virtual void start() = 0;
 
         /**
          * @brief Stops the accelerometer
@@ -33,7 +34,8 @@ namespace mono { namespace sensor {
          * A stopped accelerometer can not sample acceleration. @ref Start the
          * accelerometer before you sample any axis.
          */
-        virtual void Stop() = 0;
+        virtual void Stop() { stop(); };
+        virtual void stop() = 0;
 
         /**
          * @brief Return the current Start/Stop state of the accelerometer
@@ -47,7 +49,21 @@ namespace mono { namespace sensor {
          *
          * @returns <# return desc #>
          */
-        virtual int16_t rawXAxis() = 0;
+        virtual int16_t rawXAxis(bool monoOrientation = true) = 0;
+
+        /**
+         * @brief <# brief desc #>
+         *
+         * @returns <# return desc #>
+         */
+        virtual int16_t rawYAxis(bool monoOrientation = true) = 0;
+
+        /**
+         * @brief <# brief desc #>
+         *
+         * @returns <# return desc #>
+         */
+        virtual int16_t rawZAxis(bool monoOrientation = true) = 0;
 
     protected:
 

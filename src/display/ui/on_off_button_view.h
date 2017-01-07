@@ -56,6 +56,8 @@ namespace mono { namespace ui {
          */
         void setHighlight(display::Color c);
 
+        
+        void setState(bool on, bool fireClickHandler = false);
 
 
         display::Color BackgroundColor() const;
