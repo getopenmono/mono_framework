@@ -40,6 +40,7 @@
 #include <regex.h>
 #include <size.h>
 #include <touch_system_interface.h>
+#include <power_saver.h>
 
 #ifndef EMUNO
 #include <http_client.h>
