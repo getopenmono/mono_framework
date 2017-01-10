@@ -41,6 +41,8 @@
 #include <size.h>
 #include <touch_system_interface.h>
 #include <power_saver.h>
+#include <date_time.h>
+#include <scheduled_task.h>
 
 #ifndef EMUNO
 #include <http_client.h>

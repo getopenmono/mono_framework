@@ -21,6 +21,15 @@ namespace mono {
     {
     public:
         
+        /**
+         * @brief The RTC should set this when it is time to process scheduled
+         * tasks.
+         *
+         * The run loop and the sleep loop should check this variable to know
+         * when to process all scheduled tasks. You must set this variable in
+         * your RTC interrupt function.
+         */
+        static bool __shouldProcessScheduledTasks;
 
         /**
          * @brief Setup the RTC system with all register setting and interrupts

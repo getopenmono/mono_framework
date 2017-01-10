@@ -3,6 +3,7 @@
 
 #include "mono_power_management.h"
 #include "application_context_interface.h"
+#include "scheduled_task.h"
 #include <project.h>
 
 
@@ -69,6 +70,22 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
 
         if (__shouldWakeUp == false)
         {
+            if (IRTCSystem::__shouldProcessScheduledTasks)
+            {
+//                __disable_irq();
+//                powerUpMCUPeripherals();
+//                __enable_irq();
+                
+                //ScheduledTask::processScheduledTasks(true);
+                
+//                powerSubsystem.setPowerFence(true);
+//                powerSubsystem.powerOffUnused();
+//                
+//                __disable_irq();
+//                powerDownMCUPeripherals();
+//                __enable_irq();
+            }
+            
         }
     }
 

@@ -6,6 +6,8 @@
 #include <mbed_debug.h>
 #include <wait_api.h>
 #include <us_ticker_api.h>
+#include "rtc_interface.h"
+#include "scheduled_task.h"
 
 #ifdef DEVICE_SERIAL
 extern "C" {
@@ -62,9 +64,12 @@ void AppRunLoop::process()
 
     uint32_t tEnd = us_ticker_read();
 
-    //run scheduled tasks
+    //run dynamic tasks
     processDynamicTaskQueue();
 
+    // run scheduled tasks
+    ScheduledTask::processScheduledTasks();
+    
     uint32_t end = us_ticker_read();
 
     TouchSystemTime = tEnd - start;
