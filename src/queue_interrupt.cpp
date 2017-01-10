@@ -3,6 +3,7 @@
 #include "queue_interrupt.h"
 #include "application_context_interface.h"
 #include <us_ticker_api.h>
+#include <power_management_interface.h>
 
 using namespace mono;
 
@@ -15,6 +16,7 @@ QueueInterrupt::QueueInterrupt(PinName pin, PinMode mode) : mbed::InterruptIn(pi
     this->isHandled = true;
     this->debounce = false;
     this->debounceTimeoutUs = 30000;
+    this->wakeFromSleep = true;
 }
 
 QueueInterrupt::~QueueInterrupt()
@@ -54,6 +56,8 @@ void QueueInterrupt::_irq_rise_handler()
     {
         this->riseEvent = true;
         this->isHandled = false;
+        if (wakeFromSleep)
+            mono::power::IPowerManagement::__shouldWakeUp = true;
     }
 }
 
@@ -73,6 +77,8 @@ void QueueInterrupt::_irq_fall_handler()
     {
         this->fallEvent = true;
         this->isHandled = false;
+        if (wakeFromSleep)
+            mono::power::IPowerManagement::__shouldWakeUp = true;
     }
 }
 
@@ -82,6 +88,8 @@ void QueueInterrupt::debounceRiseHandler()
     {
         this->riseEvent = true;
         this->isHandled = false;
+        if (wakeFromSleep)
+            mono::power::IPowerManagement::__shouldWakeUp = true;
     }
 }
 
@@ -91,6 +99,9 @@ void QueueInterrupt::debounceFallHandler()
     {
         this->fallEvent = true;
         this->isHandled = false;
+        
+        if (wakeFromSleep)
+            mono::power::IPowerManagement::__shouldWakeUp = true;
     }
 }
 
@@ -161,4 +172,14 @@ void QueueInterrupt::deactivateQueueTaskHandler()
         IApplicationContext::Instance->RunLoop->removeDynamicTask(this);
         addedToRunLoop = false;
     }
+}
+
+bool QueueInterrupt::willInterruptSleep() const
+{
+    return wakeFromSleep;
+}
+
+void QueueInterrupt::setInterruptsSleep(bool wake)
+{
+    wakeFromSleep = wake;
 }

@@ -178,6 +178,16 @@ namespace mono { namespace power {
          */
         IPowerSubSystem *PowerSystem;
         
+        /**
+         * @brief This variable must be `true` before sleep mode is aborted
+         *
+         * @ref EnterSleep() must set this to `false`, you should set it to `true`
+         * to abort sleep mode and re-enter the run loop execution. @ref EnterSleep()
+         * will not *return* before this is set to `true`.
+         *
+         * **Note: The class @ref QueuedInterrupt will set this automatically!**
+         */
+        static bool __shouldWakeUp;
         
         /**
          * @brief Send Mono to sleep mode, and stop CPU execution.

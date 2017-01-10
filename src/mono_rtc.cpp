@@ -14,7 +14,6 @@ void rtc_interrupt(void)
     /* Clear OPPS interrupt status flag */
     CyPmReadStatus(CY_PM_ONEPPS_INT);
 
-    mono::power::MonoPowerManagement::__RTCFired = true;
     DateTime::incrementSystemClock();
 }
 }

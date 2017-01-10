@@ -44,6 +44,7 @@ namespace mono {
 
         bool addedToRunLoop, fallEvent, riseEvent, snapShot, deactivateUntilHandler, isHandled;
         bool debounce, debounceRiseRunning, debounceFallRunning;
+        bool wakeFromSleep;
         int debounceTimeoutUs;
         mbed::Timeout debounceRiseTimer, debounceFallTimer;
 
@@ -78,7 +79,7 @@ namespace mono {
          * If you want to do heavy calculations or loading in your interrupt
          * function, you might want to not queue up new interrupts while you
          * process a previous one.
-         * @param OPTIONAL: Set this to false, to *not* disable interrupts while processing. Default is `true`
+         * @param deactive OPTIONAL: Set this to false, to *not* disable interrupts while processing. Default is `true`
          */
         void DeactivateUntilHandled(bool deactive = true);
 
@@ -172,6 +173,23 @@ namespace mono {
          */
         bool Snapshot();
 
+        /**
+         * @brief Interrupt will abort sleep mode to run handler
+         *
+         * If interrupt fires during sleep mode, Mono will wake up to service
+         * the handler in the run loop
+         */
+        bool willInterruptSleep() const;
+        
+        /**
+         * @brief Set if this interrupt will wake Mono from sleep
+         *
+         * Set to `true` to wake from sleep and continue the run loop upon
+         * interrupts.
+         * @param wake `true` to enabled wake-from-sleep
+         */
+        void setInterruptsSleep(bool wake);
+        
         /** Attach a member function to call when a rising or falling edge occurs on the input
          *
          *  @param tptr pointer to the object to call the member function on

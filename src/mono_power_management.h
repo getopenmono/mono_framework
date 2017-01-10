@@ -47,7 +47,6 @@ namespace mono { namespace power {
         void EnterSleep() { EnterSleep(false); }
         void EnterSleep(bool skipAwarenessQueues);
 
-        static bool __RTCFired;
     };
     
 } }

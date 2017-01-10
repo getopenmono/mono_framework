@@ -3,7 +3,6 @@
 
 #include "mono_power_management.h"
 #include "application_context_interface.h"
-//#include "consoles.h"
 #include <project.h>
 
 
@@ -14,7 +13,7 @@ extern char serial_usbuart_is_powered;
 
 using namespace mono::power;
 
-bool MonoPowerManagement::__RTCFired = false;
+bool IPowerManagement::__shouldWakeUp = false;
 
 MonoPowerManagement::MonoPowerManagement()
 {
@@ -55,23 +54,18 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
     powerSubsystem.powerOffUnused();
     powerDownMCUPeripherals();
 
-    bool wakeup = false;
-    while(wakeup == false)
+    __shouldWakeUp = false;
+    while(__shouldWakeUp == false)
     {
-        wakeup = true; //wake up by defualt
         CyPmSaveClocks();
 
-        __RTCFired = false;
         CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_PICU | PM_SLEEP_SRC_CTW);
 
         CyPmRestoreClocks();
 
-        if (__RTCFired)
+        if (__shouldWakeUp == false)
         {
-            wakeup = false;
-            __RTCFired = false;
         }
-
     }
 
     powerUpMCUPeripherals();
