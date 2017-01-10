@@ -89,7 +89,6 @@ void AppRunLoop::processDynamicTaskQueue()
         return;
     }
 
-
     IRunLoopTask *task = taskQueueHead;
     while (task != NULL) {
         task->taskHandler();
@@ -99,7 +98,6 @@ void AppRunLoop::processDynamicTaskQueue()
             //debug("Removing task from dynamic queue!\r\n");
             removeTaskInQueue(task);
         }
-
 
         // we can still use the tasks next pointer,
         //  even if its not in the list anymore

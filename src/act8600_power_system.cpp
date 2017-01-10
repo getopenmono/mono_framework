@@ -272,12 +272,15 @@ void ACT8600PowerSystem::onSystemPowerOnReset()
 void ACT8600PowerSystem::onSystemEnterSleep()
 {
     setSystemMonitorInterrupt(false);
+    powerInterrupt.setInterruptsSleep(false);
 }
 
 extern char *debugData;
 
 void ACT8600PowerSystem::onSystemWakeFromSleep()
 {
+    powerInterrupt.setInterruptsSleep(true);
+
     // Enable at leat one regulator before checking VSYS OK state
     // For some reason ACT8600 needs at least one REG enabled before VSYS
     // can be OK at all!

@@ -72,18 +72,14 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
         {
             if (IRTCSystem::__shouldProcessScheduledTasks)
             {
-//                __disable_irq();
-//                powerUpMCUPeripherals();
-//                __enable_irq();
+                powerUpMCUPeripherals();
                 
-                //ScheduledTask::processScheduledTasks(true);
+                ScheduledTask::processScheduledTasks(true);
                 
 //                powerSubsystem.setPowerFence(true);
 //                powerSubsystem.powerOffUnused();
-//                
-//                __disable_irq();
-//                powerDownMCUPeripherals();
-//                __enable_irq();
+//
+                powerDownMCUPeripherals();
             }
             
         }
