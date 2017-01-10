@@ -35,8 +35,9 @@ ApplicationContext::ApplicationContext() : IApplicationContext(
     PWM_Start();
 
     //setup default user button handler
-    UserButton.DeactivateUntilHandled(); // dont queue up pushes
+    //UserButton.DeactivateUntilHandled(); // dont queue up pushes
     UserButton.setDebouncing(true);
+    UserButton.setInterruptsSleep(true);
     UserButton.fall<ApplicationContext>(this, &ApplicationContext::enterSleepMode);
 
     printf("\r\n");
@@ -90,12 +91,19 @@ void ApplicationContext::sleepForMs(uint32_t ms)
 
 void ApplicationContext::enterSleepMode()
 {
+    UserButton.fall<ApplicationContext>(this, &ApplicationContext::buttonWakeup);
+    
     this->application->monoWillGotoSleep();
 
     PowerManager->EnterSleep();
 
     this->application->monoWakeFromSleep();
 
+}
+
+void ApplicationContext::buttonWakeup()
+{
+    UserButton.fall<ApplicationContext>(this, &ApplicationContext::enterSleepMode);
 }
 
 void ApplicationContext::_softwareReset()

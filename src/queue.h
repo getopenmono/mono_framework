@@ -129,6 +129,11 @@ namespace mono {
         {
             return Queue::Exists((IQueueItem*) i);
         }
+        
+        bool Remove(Item *i)
+        {
+            return Queue::Remove((IQueueItem*) i);
+        }
 
     };
 

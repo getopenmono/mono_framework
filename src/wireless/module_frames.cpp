@@ -23,8 +23,8 @@ ModuleFrame::~ModuleFrame()
     {
         debug("freeing frame: 0x%x from queues...\r\n",commandId);
         Module *mod = Module::Instance();
-        mod->requestFrameQueue.Remove(this);
-        if (mod->responseFrameQueue.Remove(this))
+        mod->requestFrameQueue.Remove((ManagementFrame*)this);
+        if (mod->responseFrameQueue.Remove((ManagementFrame*)this))
         {
             warning("A Redpine response queue frame was freed! The communication will be out of sync!\r\n");
         }

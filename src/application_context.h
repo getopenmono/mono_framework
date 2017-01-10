@@ -46,6 +46,9 @@ namespace mono {
         ApplicationContext();
         
         void enterSleepMode();
+        
+        void buttonWakeup();
+        
         void sleepForMs(uint32_t ms);
         
         void resetOnUserButton();
