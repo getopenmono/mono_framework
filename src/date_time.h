@@ -222,6 +222,13 @@ namespace mono {
         void incrementDayOfMonth();
         void incrementMonth();
         void incrementYear();
+        
+        void decrementSecond();
+        void decrementMinute();
+        void decrementHour();
+        void decrementDayOfMonth();
+        void decrementMonth();
+        void decrementYear();
 
         inline uint8_t trim(uint8_t value, uint8_t min, uint8_t max);
 
