@@ -72,7 +72,6 @@ void ApplicationContext::setMonoApplication(mono::IApplication *monoApp)
     rtc.startRtc();
 
     monoApp->monoWakeFromReset();
-
 }
 
 void ApplicationContext::sleepForMs(uint32_t ms)
@@ -92,11 +91,13 @@ void ApplicationContext::sleepForMs(uint32_t ms)
 void ApplicationContext::enterSleepMode()
 {
     UserButton.fall<ApplicationContext>(this, &ApplicationContext::buttonWakeup);
-    
+
+    // user can overwrite button func here
     this->application->monoWillGotoSleep();
 
     PowerManager->EnterSleep();
 
+    // user can overwrite button func here
     this->application->monoWakeFromSleep();
 
 }

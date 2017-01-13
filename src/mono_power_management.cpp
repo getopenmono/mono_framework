@@ -14,6 +14,7 @@ extern char serial_usbuart_is_powered;
 using namespace mono::power;
 
 bool IPowerManagement::__shouldWakeUp = false;
+bool IPowerManagement::__busySleep = false;
 
 MonoPowerManagement::MonoPowerManagement()
 {
@@ -57,11 +58,14 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
     __shouldWakeUp = false;
     while(__shouldWakeUp == false)
     {
-        CyPmSaveClocks();
+        if (!__busySleep)
+        {
+            CyPmSaveClocks();
 
-        CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_PICU | PM_SLEEP_SRC_CTW);
+            CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_PICU | PM_SLEEP_SRC_CTW);
 
-        CyPmRestoreClocks();
+            CyPmRestoreClocks();
+        }
 
         if (__shouldWakeUp == false)
         {

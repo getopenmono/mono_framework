@@ -188,6 +188,20 @@ namespace mono { namespace power {
          * **Note: The class @ref QueuedInterrupt will set this automatically!**
          */
         static bool __shouldWakeUp;
+
+        /**
+         * @brief Global flag to indicate to not halt CPU during sleep mode.
+         * 
+         * Some processes might require hardware to run async under what is
+         * normally sleep mode, where hardware peripherals are halted.
+         *
+         * Set this flag to `true` to keep the the CPU awake inside the sleep
+         * mode loop. This is especially useful when handled debouncing of
+         * edge triggered interrupts.
+         *
+         * Note: You should keep this flag `false` to ensure power presevation
+         */
+        static bool __busySleep;
         
         /**
          * @brief Send Mono to sleep mode, and stop CPU execution.

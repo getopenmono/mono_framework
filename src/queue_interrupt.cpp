@@ -50,6 +50,10 @@ void QueueInterrupt::_irq_rise_handler()
 
     if (debounce)
     {
+        // The de-bounce timer only run when CPU is not halted in sleep mode
+        if (wakeFromSleep)
+            power::IPowerManagement::__busySleep = true;
+
         debounceRiseTimer.attach_us<QueueInterrupt>(this, &QueueInterrupt::debounceRiseHandler, debounceTimeoutUs);
     }
     else
@@ -71,6 +75,10 @@ void QueueInterrupt::_irq_fall_handler()
 
     if (debounce)
     {
+        // The de-bounce timer only run when CPU is not halted in sleep mode
+        if (wakeFromSleep)
+            power::IPowerManagement::__busySleep = true;
+
         debounceFallTimer.attach_us<QueueInterrupt>(this, &QueueInterrupt::debounceFallHandler, debounceTimeoutUs);
     }
     else
@@ -84,6 +92,10 @@ void QueueInterrupt::_irq_fall_handler()
 
 void QueueInterrupt::debounceRiseHandler()
 {
+    // allow the CPU to sleep again
+    if (wakeFromSleep)
+        power::IPowerManagement::__busySleep = false;
+
     if (this->read())
     {
         this->riseEvent = true;
@@ -95,6 +107,10 @@ void QueueInterrupt::debounceRiseHandler()
 
 void QueueInterrupt::debounceFallHandler()
 {
+    // allow the CPU to sleep again
+    if (wakeFromSleep)
+        power::IPowerManagement::__busySleep = false;
+
     if (!this->read())
     {
         this->fallEvent = true;
