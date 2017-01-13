@@ -2,3 +2,4 @@ build
 dist
 *.xcodeproj
 *DerivedData
+.DS_Store
