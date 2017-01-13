@@ -9,6 +9,7 @@ PowerSaver::PowerSaver(int dimTimeoutMs, int sleepTimeoutMs,
     dimTimer(dimTimeoutMs, true),
     sleepTimer(sleepTimeoutMs, true)
 {
+    enabled = true;
     dimBright = dimBrightness;
     fullBright = fullBrightness;
     
@@ -32,11 +33,13 @@ void PowerSaver::dimStep()
 
 void PowerSaver::startDimTimer()
 {
+    enabled = true;
     dimTimer.Start();
     sleepTimer.Stop();
 }
 void PowerSaver::startSleepTimer()
 {
+    enabled = true;
     sleepTimer.Start();
     dimTimer.Stop();
 }
@@ -51,16 +54,18 @@ void PowerSaver::undim()
     dimTimer.Stop();
     sleepTimer.Stop();
     IApplicationContext::Instance->DisplayController->setBrightness(fullBright);
-    dimTimer.Start();
+    startDimTimer();
 }
 
 void PowerSaver::deactivate()
 {
+    enabled = false;
     sleepTimer.Stop();
     dimTimer.Stop();
 }
 
 void PowerSaver::RespondTouchBegin(TouchEvent &)
 {
-    undim();
+    if (enabled)
+        undim();
 }
