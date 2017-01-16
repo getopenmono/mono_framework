@@ -102,12 +102,20 @@ bool Rect::contains(geo::Point &p) const
     return (p.X() >= this->x && p.X() <= this->X2() && p.Y() >= this->y && p.Y() <= this->Y2());
 }
 
-bool Rect::contains(const Rect &other) const
+bool Rect::contains(const Rect &other, bool equals) const
 {
-    if (other.X() > this->X() &&
-        other.Y() > this->Y() &&
-        other.X2()< this->X2()&&
-        other.Y2()< this->Y2())
+    if (equals &&
+        other.X() >= this->X() &&
+        other.Y() >= this->Y() &&
+        other.X2()<= this->X2()&&
+        other.Y2()<= this->Y2())
+    {
+        return true;
+    }
+    else if (other.X() > this->X() &&
+             other.Y() > this->Y() &&
+             other.X2()< this->X2()&&
+             other.Y2()< this->Y2())
         return true;
     else
         return false;

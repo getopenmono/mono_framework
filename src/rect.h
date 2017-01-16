@@ -108,7 +108,7 @@ namespace mono { namespace geo {
          */
         bool contains(class Point &p) const;
 
-        bool contains(Rect const &other) const;
+        bool contains(Rect const &other, bool equals = false) const;
 
         /**
          * Return this Rect cropped by the baundaries of another rect

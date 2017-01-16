@@ -7,6 +7,7 @@
 #include "view.h"
 #include "mn_string.h"
 #include <font_interface.h>
+#include <GFXfont.h>
 
 namespace mono { namespace ui {
 
@@ -105,6 +106,8 @@ namespace mono { namespace ui {
         String prevText;
 
         const MonoFont *currentFont;
+        const GFXfont *currentGfxFont;
+        
         uint8_t textSize;
         display::Color textColor;
         display::Color bgColor;
@@ -241,6 +244,7 @@ namespace mono { namespace ui {
          * to this method.
          */
         void setFont(MonoFont const &newFont);
+        void setFont(GFXfont const &font);
 
     public:
 

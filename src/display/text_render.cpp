@@ -124,6 +124,117 @@ void TextRender::drawChar(geo::Point position, char character, const MonoFont &f
     }
 }
 
+void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace)
+{
+    if (dispCtrl == 0)
+        return;
+    
+    dispCtrl->setWindow(rect.X(), rect.Y(), rect.Width(), rect.Height());
+    int cnt = 0;
+    char c = text[cnt];
+    mono::geo::Point offset = rect.Point();
+    GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
+    
+    if (glyph->xOffset < 0)
+        offset.setX(offset.X()+glyph->xOffset);
+    
+    while (c != '\0' && offset.X()+glyph->width <= rect.X2())
+    {
+        if (c == '\n')
+        {
+            offset.appendY(fontFace.yAdvance);
+            offset.setX(rect.X());
+        }
+        else if (c == ' ')
+        {
+            offset.appendX(glyph->xAdvance);
+        }
+        else
+        {
+            this->drawChar(offset, fontFace, glyph, rect);
+            offset.appendX(glyph->xAdvance);
+        }
+        
+        c = text[++cnt];
+        glyph = &fontFace.glyph[c - fontFace.first];
+    }
+}
+
+void TextRender::drawChar(geo::Point position, const GFXfont &gfxFont, const GFXglyph *glyph, geo::Rect const &bounds)
+{
+    uint8_t  *bitmap = (uint8_t *)gfxFont.bitmap;
+    
+    uint16_t bo = glyph->bitmapOffset;
+    uint8_t  w  = glyph->width,
+             h  = glyph->height;
+    int8_t   xo = glyph->xOffset,
+             yo = glyph->yOffset;
+    
+    mono::geo::Rect glyphBounds(position.X() + xo,
+                                position.Y() + glyph->height + yo,
+                                w, h);
+    
+    if (!bounds.contains(glyphBounds, true))
+        return;
+    
+    uint8_t  xx, yy, bits, bit = 0;
+    bool rePosCursor = false;
+    
+    for(yy=0; yy<h; yy++) {
+        
+        dispCtrl->setCursor(position.X() + xo, position.Y() + yy + (gfxFont.yAdvance + yo));
+        
+        for(xx=0; xx<w; xx++) {
+            if(!(bit++ & 7)) {
+                bits = bitmap[bo++];
+            }
+            if(bits & 0x80) {
+                //writePixel(255);
+                //dispCtrl->write(foregroundColor);
+                if (rePosCursor)
+                    dispCtrl->setCursor(position.X() + xo + xx,
+                                        position.Y() + yy + (gfxFont.yAdvance + yo));
+                dispCtrl->write(foregroundColor);
+                // (x+xo+xx, y+yo+yy, color);
+            }
+            else
+                rePosCursor = true;
+            
+            
+            bits <<= 1;
+        }
+    }
+}
+
+mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace)
+{
+    char *ptr = text.stringData;
+    int newLines = 1;
+    int currentLine = 0, longestLine = 0;
+    int lastXOffset = 0;
+
+    while (*ptr != '\0') {
+
+        if (*ptr == '\n')
+        {
+            newLines++;
+            currentLine = 0;
+        }
+
+        GFXglyph glyph = fontFace.glyph[*ptr - fontFace.first];
+        currentLine += glyph.xAdvance;
+        lastXOffset = glyph.xOffset;
+        
+        if (currentLine > longestLine)
+            longestLine = currentLine;
+
+        ptr++;
+    }
+
+    geo::Size dimensions(longestLine + lastXOffset,newLines*fontFace.yAdvance);
+    return dimensions;
+}
+
 void TextRender::writePixel(uint8_t intensity, bool bg)
 {
     Color c;

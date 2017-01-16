@@ -159,7 +159,16 @@ void TextLabelView::setText(mono::String text, bool resizeViewWidth)
 void TextLabelView::setFont(const MonoFont &newFont)
 {
     currentFont = &newFont;
+    currentGfxFont = 0;
+    
+    scheduleRepaint();
+}
 
+void TextLabelView::setFont(GFXfont const &font)
+{
+    currentGfxFont = &font;
+    currentFont = 0;
+    
     scheduleRepaint();
 }
 
@@ -214,7 +223,7 @@ void TextLabelView::repaint()
             c = text[++cnt];
         }
     }
-    else if (currentFont != 0)
+    else if (currentFont != 0 || currentGfxFont != 0)
     {
         if (!incrementalRepaint || prevText.Length() == 0 || prevText.Length() != text.Length())
         {
@@ -223,53 +232,130 @@ void TextLabelView::repaint()
             geo::Rect textRect(offset.X(),offset.Y(),   viewRect.X2()-offset.X(), viewRect.Y2()-offset.Y());
 
             display::TextRender tr(painter);
-            tr.drawInRect(textRect, text, *currentFont);
+            
+            if (currentGfxFont)
+                tr.drawInRect(textRect, text, *currentGfxFont);
+            else if (currentFont)
+                tr.drawInRect(textRect, text, *currentFont);
         }
         else
         {
             display::TextRender tr(painter);
 
-            uint32_t glyphIdx = 0;
-            uint32_t glyphWidth = this->currentFont->glyphWidth;
-            uint32_t glyphHeight = this->currentFont->glyphHeight;
+            uint32_t charIdx = 0;
+            uint32_t glyphXOffset = 0;
+            uint32_t glyphWidth;
+            if (currentFont)
+                glyphWidth = currentFont->glyphWidth;
+            
+            uint32_t glyphHeight;
+            
+            if (currentFont)
+                glyphHeight = currentFont->glyphHeight;
+            else if (currentGfxFont)
+                glyphHeight = currentGfxFont->yAdvance;
+            else
+                return;
+            
             uint32_t newlines = 0;
             uint32_t lineIdx = 0;
-            while(glyphIdx < text.Length() && glyphIdx < prevText.Length())
+            bool lineDirty = false;
+            while(charIdx < text.Length() && charIdx < prevText.Length())
             {
-                if (text[glyphIdx] == '\n')
+                
+                if (text[charIdx] == '\n')
                 {
                     newlines++;
                     lineIdx = 0;
+                    lineDirty = false;
                 }
 
-                if (text[glyphIdx] != prevText[glyphIdx])
+                GFXglyph gl;
+                if (currentGfxFont)
                 {
-                    uint32_t xOff = offset.X()+lineIdx*glyphWidth;
+                    gl = currentGfxFont->glyph[text[charIdx] - currentGfxFont->first];
+                    glyphWidth = gl.width;
+                }
+                
+                if (text[charIdx] != prevText[charIdx])
+                {
+                    uint32_t xOff = offset.X() + glyphXOffset;
                     uint32_t yOff = offset.Y()+newlines*glyphHeight;
+                    
+                    uint32_t prevGlyphWidth;
+                    if (currentGfxFont)
+                    {
+                        String remainder(text()+charIdx);
+                        String oldRemainder(prevText()+charIdx);
+                        
+                        geo::Size oldDim = tr.renderDimension(oldRemainder, *currentGfxFont);
+                        tr.setForeground(bgColor);
+                        tr.drawInRect(geo::Rect(xOff, yOff, oldDim.Width(), oldDim.Height()),
+                                      oldRemainder,
+                                      *currentGfxFont);
+                        tr.setForeground(textColor);
+                        
+                        geo::Rect txtRct(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
+                        tr.drawInRect(txtRct, remainder, *currentGfxFont);
+                        charIdx = text.Length();
+                        break;
+                        
+                        
+//                        GFXglyph prevGl = currentGfxFont->glyph[prevText[charIdx] - currentGfxFont->first];
+//                        
+//                        prevGlyphWidth = prevGl.width + prevGl.xOffset;;
+//                        tr.setForeground(bgColor);
+//                        tr.drawInRect(geo::Rect(xOff, yOff, prevGlyphWidth, glyphHeight),
+//                                      String::Format("%c",prevText[charIdx]),
+//                                      *currentGfxFont);
+//                        
+////                        painter.drawFillRect(xOff+prevGl.xOffset,
+////                                             yOff + glyphHeight + prevGl.yOffset,
+////                                             prevGlyphWidth, prevGl.height, true);
+//                        tr.setForeground(textColor);
+//                        glyphWidth += gl.xOffset;
+                    }
+                    else
+                        painter.drawFillRect(xOff, yOff, glyphWidth, glyphHeight, true);
+                    
                     geo::Rect glypsRct(xOff, yOff, glyphWidth, glyphHeight);
-
-                    painter.drawFillRect(glypsRct, true);
-
-                    String glyph = String::Format("%c",text[glyphIdx]);
-                    tr.drawInRect(glypsRct, glyph, *currentFont);
+                    String glyph = String::Format("%c",text[charIdx]);
+                    
+                    if (currentFont)
+                        tr.drawInRect(glypsRct, glyph, *currentFont);
+                    else if (currentGfxFont)
+                    {
+                        tr.drawInRect(glypsRct, glyph, *currentGfxFont);
+                    }
                 }
 
-                glyphIdx++;
+                if (currentGfxFont)
+                    glyphXOffset += gl.xAdvance;
+                else
+                    glyphXOffset += glyphWidth;
+                charIdx++;
                 lineIdx++;
             }
 
-            if (glyphIdx < text.Length())
+            if (charIdx < text.Length())
             {
                 uint32_t xOff = offset.X()+lineIdx*glyphWidth;
                 uint32_t yOff = offset.Y()+newlines*glyphHeight;
                 geo::Rect txtRct(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
 
-                String remainder(text()+glyphIdx);
-                tr.drawInRect(txtRct, remainder, *currentFont);
+                String remainder(text()+charIdx);
+                
+                if (currentFont)
+                    tr.drawInRect(txtRct, remainder, *currentFont);
+                else if (currentGfxFont)
+                    tr.drawInRect(txtRct, remainder, *currentGfxFont);
+                    
             }
         }
 
         // previous text is always the last painted text
         this->prevText = this->text;
     }
+    
+    painter.drawRect(viewRect);
 }
