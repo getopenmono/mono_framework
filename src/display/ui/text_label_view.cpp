@@ -79,7 +79,12 @@ uint16_t TextLabelView::TextPixelWidth() const
     else
     {
         display::TextRender tr(painter);
-        return tr.renderDimension(text, *currentFont).Width();
+        if (currentFont)
+            return tr.renderDimension(text, *currentFont).Width();
+        else if (currentGfxFont)
+            return tr.renderDimension(text, *currentGfxFont).Width();
+        else
+            return 0;
     }
 }
 
@@ -90,7 +95,12 @@ uint16_t TextLabelView::TextPixelHeight() const
     else
     {
         display::TextRender tr(painter);
-        return tr.renderDimension(text, *currentFont).Height();
+        if (currentFont)
+            return tr.renderDimension(text, *currentFont).Height();
+        else if (currentGfxFont)
+            return tr.renderDimension(text, *currentGfxFont).Height();
+        else
+            return 0;
     }
 }
 
@@ -357,5 +367,4 @@ void TextLabelView::repaint()
         this->prevText = this->text;
     }
     
-    painter.drawRect(viewRect);
 }
