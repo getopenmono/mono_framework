@@ -128,6 +128,8 @@ void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace
 {
     if (dispCtrl == 0)
         return;
+    if (text.Length() == 0)
+        return;
     
     dispCtrl->setWindow(rect.X(), rect.Y(), rect.Width(), rect.Height());
     int cnt = 0;
@@ -138,7 +140,7 @@ void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace
     if (glyph->xOffset < 0)
         offset.setX(offset.X()+glyph->xOffset);
     
-    while (c != '\0' && offset.X()+glyph->width <= rect.X2())
+    while (c != '\0' && offset.X()+glyph->width < rect.X2())
     {
         if (c == '\n')
         {
@@ -206,24 +208,37 @@ void TextRender::drawChar(geo::Point position, const GFXfont &gfxFont, const GFX
     }
 }
 
-mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace)
+mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace, bool characterHeight)
 {
     char *ptr = text.stringData;
     int newLines = 1;
     int currentLine = 0, longestLine = 0;
     int lastXOffset = 0;
+    int mostUnderBaseLine = 0;
+    int highestPoint = fontFace.yAdvance;
+    int lowestPoint = 0;
 
     while (*ptr != '\0') {
 
         if (*ptr == '\n')
         {
             newLines++;
+            mostUnderBaseLine = 0; // theres a new line, discard prev. lines undershoot
             currentLine = 0;
         }
 
         GFXglyph glyph = fontFace.glyph[*ptr - fontFace.first];
         currentLine += glyph.xAdvance;
         lastXOffset = glyph.xOffset;
+
+        if (highestPoint > -glyph.yOffset)
+            highestPoint = -glyph.yOffset;
+
+        if (lowestPoint < -glyph.yOffset + glyph.height)
+            lowestPoint = -glyph.yOffset + glyph.height;
+
+        if (glyph.height + glyph.yOffset > mostUnderBaseLine)
+            mostUnderBaseLine = glyph.height + glyph.yOffset;
         
         if (currentLine > longestLine)
             longestLine = currentLine;
@@ -231,7 +246,16 @@ mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace
         ptr++;
     }
 
-    geo::Size dimensions(longestLine + lastXOffset,newLines*fontFace.yAdvance);
+    if (lastXOffset < 0)
+        lastXOffset = -lastXOffset;
+
+    int height;
+    if (characterHeight)
+        height = lowestPoint - highestPoint;
+    else
+        height = newLines*fontFace.yAdvance+mostUnderBaseLine;
+
+    geo::Size dimensions(longestLine + lastXOffset, height);
     return dimensions;
 }
 

@@ -9,6 +9,7 @@
 using namespace mono::ui;
 
 __attribute__((weak)) const MonoFont *TextLabelView::StandardTextFont = &mono::display::PT_Mono_15;
+__attribute__((weak)) const GFXfont *TextLabelView::StandardGfxFont = 0;
 
 TextLabelView::TextLabelView(String txt) :
     textColor(StandardTextColor),
@@ -20,6 +21,8 @@ TextLabelView::TextLabelView(String txt) :
     this->setTextSize(2);
 
     viewRect.setSize( geo::Size(TextPixelWidth(), TextPixelHeight()) );
+    prevTextRct = viewRect;
+    currentGfxFont = StandardGfxFont;
 }
 
 TextLabelView::TextLabelView(const char *txt) :
@@ -32,6 +35,8 @@ TextLabelView::TextLabelView(const char *txt) :
     this->setTextSize(2);
 
     viewRect.setSize( geo::Size(TextPixelWidth(), TextPixelHeight()) );
+    prevTextRct = viewRect;
+    currentGfxFont = StandardGfxFont;
 }
 
 TextLabelView::TextLabelView(geo::Rect rct, String txt) :
@@ -43,6 +48,8 @@ TextLabelView::TextLabelView(geo::Rect rct, String txt) :
     currentFont = TextLabelView::StandardTextFont;
     this->text = txt;
     this->setTextSize(2);
+    prevTextRct = viewRect;
+    currentGfxFont = StandardGfxFont;
 }
 
 TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
@@ -54,6 +61,8 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
     currentFont = TextLabelView::StandardTextFont;
     this->text = txt;
     this->setTextSize(2);
+    prevTextRct = viewRect;
+    currentGfxFont = StandardGfxFont;
 }
 
 /// MARK: Getters
@@ -104,9 +113,25 @@ uint16_t TextLabelView::TextPixelHeight() const
     }
 }
 
-const MonoFont& TextLabelView::Font() const
+const MonoFont* TextLabelView::Font() const
 {
-    return *currentFont;
+    return currentFont;
+}
+
+const GFXfont* TextLabelView::GfxFont() const
+{
+    return currentGfxFont;
+}
+
+mono::geo::Size TextLabelView::TextDimension() const
+{
+    display::TextRender tr(painter);
+    if (currentFont)
+        return tr.renderDimension(text, *currentFont);
+    else if (currentGfxFont)
+        return tr.renderDimension(text, *currentGfxFont, true);
+    else
+        return geo::Size();
 }
 
 /// MARK: Setters
@@ -198,6 +223,7 @@ void TextLabelView::scheduleRepaint()
 void TextLabelView::repaint()
 {
     mono::geo::Point offset = this->viewRect.Point();
+    geo::Rect txtRct;
 
     switch (alignment) {
         case ALIGN_RIGHT:
@@ -235,18 +261,32 @@ void TextLabelView::repaint()
     }
     else if (currentFont != 0 || currentGfxFont != 0)
     {
-        if (!incrementalRepaint || prevText.Length() == 0 || prevText.Length() != text.Length())
+        if ((currentGfxFont && alignment == ALIGN_CENTER && text != prevText) ||
+            !incrementalRepaint ||
+            prevText.Length() == 0 ||
+            prevText.Length() != text.Length())
         {
-            View::painter.drawFillRect(this->viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
-
-            geo::Rect textRect(offset.X(),offset.Y(),   viewRect.X2()-offset.X(), viewRect.Y2()-offset.Y());
-
             display::TextRender tr(painter);
-            
+            painter.drawFillRect(prevTextRct, true);
+
+            txtRct = geo::Rect(offset.X(),offset.Y(), viewRect.X2()-offset.X(), viewRect.Y2()-offset.Y());
+
             if (currentGfxFont)
-                tr.drawInRect(textRect, text, *currentGfxFont);
+            {
+                geo::Size dim = tr.renderDimension(text, *currentGfxFont);
+                geo::Rect txtBounds(offset.X(), offset.Y(), dim.Width(), dim.Height());
+
+                //painter.setForegroundColor(display::BlueColor);
+                //painter.drawRect(txtBounds);
+                //painter.setForegroundColor(textColor);
+
+                tr.drawInRect(txtRct, text, *currentGfxFont);
+                prevTextRct = txtBounds;
+            }
             else if (currentFont)
-                tr.drawInRect(textRect, text, *currentFont);
+            {
+                tr.drawInRect(txtRct, text, *currentFont);
+            }
         }
         else
         {
@@ -269,7 +309,7 @@ void TextLabelView::repaint()
             
             uint32_t newlines = 0;
             uint32_t lineIdx = 0;
-            bool lineDirty = false;
+
             while(charIdx < text.Length() && charIdx < prevText.Length())
             {
                 
@@ -277,7 +317,6 @@ void TextLabelView::repaint()
                 {
                     newlines++;
                     lineIdx = 0;
-                    lineDirty = false;
                 }
 
                 GFXglyph gl;
@@ -292,7 +331,7 @@ void TextLabelView::repaint()
                     uint32_t xOff = offset.X() + glyphXOffset;
                     uint32_t yOff = offset.Y()+newlines*glyphHeight;
                     
-                    uint32_t prevGlyphWidth;
+                    //uint32_t prevGlyphWidth;
                     if (currentGfxFont)
                     {
                         String remainder(text()+charIdx);
@@ -303,10 +342,12 @@ void TextLabelView::repaint()
                         tr.drawInRect(geo::Rect(xOff, yOff, oldDim.Width(), oldDim.Height()),
                                       oldRemainder,
                                       *currentGfxFont);
+
                         tr.setForeground(textColor);
-                        
-                        geo::Rect txtRct(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
+                        txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
                         tr.drawInRect(txtRct, remainder, *currentGfxFont);
+                        geo::Size txtBnds = tr.renderDimension(remainder, *currentGfxFont);
+                        prevTextRct = geo::Rect(xOff, yOff, txtBnds.Width(), txtBnds.Height());
                         charIdx = text.Length();
                         break;
                         
@@ -333,10 +374,6 @@ void TextLabelView::repaint()
                     
                     if (currentFont)
                         tr.drawInRect(glypsRct, glyph, *currentFont);
-                    else if (currentGfxFont)
-                    {
-                        tr.drawInRect(glypsRct, glyph, *currentGfxFont);
-                    }
                 }
 
                 if (currentGfxFont)
@@ -351,7 +388,7 @@ void TextLabelView::repaint()
             {
                 uint32_t xOff = offset.X()+lineIdx*glyphWidth;
                 uint32_t yOff = offset.Y()+newlines*glyphHeight;
-                geo::Rect txtRct(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
+                txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
 
                 String remainder(text()+charIdx);
                 

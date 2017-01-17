@@ -100,10 +100,13 @@ namespace mono { namespace ui {
          */
         static const MonoFont *StandardTextFont;
 
+        static const GFXfont *StandardGfxFont;
+
     protected:
 
         String text;
         String prevText;
+        geo::Rect prevTextRct;
 
         const MonoFont *currentFont;
         const GFXfont *currentGfxFont;
@@ -195,7 +198,10 @@ namespace mono { namespace ui {
         uint16_t TextPixelWidth() const;
         uint16_t TextPixelHeight() const;
 
-        const MonoFont& Font() const;
+        const MonoFont* Font() const;
+        const GFXfont* GfxFont() const;
+
+        geo::Size TextDimension() const;
 
         // MARK: Setters
 

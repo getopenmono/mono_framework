@@ -117,7 +117,7 @@ namespace mono { namespace display {
          * The final width and height of a rendered text, with the defined font
          * face.
          */
-        geo::Size renderDimension(String text, const GFXfont &fontFace);
+        geo::Size renderDimension(String text, const GFXfont &fontFace, bool characterHeight = false);
 
 
         /// MARK: Accessors
