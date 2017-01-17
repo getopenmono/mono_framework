@@ -13,8 +13,8 @@ void ButtonView::initButton()
     textLabel.setAlignment(TextLabelView::ALIGN_CENTER);
     
     //align text horizontal center
-    uint16_t textHeight = textLabel.TextPixelHeight() - textLabel.Font().baselineOffset;
-    int hSpacing = viewRect.Height() - textHeight;
+    geo::Size dimen = textLabel.TextDimension();
+    int hSpacing = viewRect.Height() - dimen.Height();
     
     if (hSpacing > 0)
     {
