@@ -129,7 +129,7 @@ mono::geo::Size TextLabelView::TextDimension() const
     if (currentFont)
         return tr.renderDimension(text, *currentFont);
     else if (currentGfxFont)
-        return tr.renderDimension(text, *currentGfxFont, true);
+        return tr.renderDimension(text, *currentGfxFont, false);
     else
         return geo::Size();
 }
@@ -276,9 +276,9 @@ void TextLabelView::repaint()
                 geo::Size dim = tr.renderDimension(text, *currentGfxFont);
                 geo::Rect txtBounds(offset.X(), offset.Y(), dim.Width(), dim.Height());
 
-                //painter.setForegroundColor(display::BlueColor);
-                //painter.drawRect(txtBounds);
-                //painter.setForegroundColor(textColor);
+//                painter.setForegroundColor(display::BlueColor);
+//                painter.drawRect(txtBounds);
+//                painter.setForegroundColor(textColor);
 
                 tr.drawInRect(txtRct, text, *currentGfxFont);
                 prevTextRct = txtBounds;

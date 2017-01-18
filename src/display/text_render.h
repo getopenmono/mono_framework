@@ -43,7 +43,9 @@ namespace mono { namespace display {
 
         /** Render a single character */
         void drawChar(geo::Point position, char character, const MonoFont &font, geo::Rect const &boundingRect);
-        void drawChar(geo::Point position, const GFXfont &font, const GFXglyph *gfxGlyph, geo::Rect const &boundingRect);
+        void drawChar(geo::Point position, const GFXfont &font, const GFXglyph *gfxGlyph, geo::Rect const &boundingRect, int lineHeight);
+        
+        int calcUnderBaseline(String text, const GFXfont &font);
 
         /** Blend and emit a single pixel to the DisplayController. */
         void writePixel(uint8_t intensity, bool bg = false);
@@ -109,7 +111,7 @@ namespace mono { namespace display {
          * @param text The text string to render
          * @param fontFace A pointer the Adafruit GFX font to use
          */
-        void drawInRect(geo::Rect rect, String text, const GFXfont &fontFace);
+        void drawInRect(geo::Rect rect, String text, const GFXfont &fontFace, bool lineLayout = true);
 
         /**
          * @brief Return the resulting dimension / size of some rendered text
@@ -117,7 +119,7 @@ namespace mono { namespace display {
          * The final width and height of a rendered text, with the defined font
          * face.
          */
-        geo::Size renderDimension(String text, const GFXfont &fontFace, bool characterHeight = false);
+        geo::Size renderDimension(String text, const GFXfont &fontFace, bool lineLayout = true);
 
 
         /// MARK: Accessors

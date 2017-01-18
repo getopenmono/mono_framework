@@ -39,6 +39,7 @@
 #include <rect.h>
 #include <regex.h>
 #include <size.h>
+#include <text_render.h>
 #include <touch_system_interface.h>
 #include <power_saver.h>
 #include <date_time.h>

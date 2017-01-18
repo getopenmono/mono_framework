@@ -124,7 +124,7 @@ void TextRender::drawChar(geo::Point position, char character, const MonoFont &f
     }
 }
 
-void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace)
+void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace, bool lineLayout)
 {
     if (dispCtrl == 0)
         return;
@@ -140,7 +140,13 @@ void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace
     if (glyph->xOffset < 0)
         offset.setX(offset.X()+glyph->xOffset);
     
-    while (c != '\0' && offset.X()+glyph->width < rect.X2())
+    int lineHeight;
+    if (lineLayout)
+        lineHeight = fontFace.yAdvance;
+    else
+        lineHeight = this->renderDimension(text, fontFace, false).Height() - calcUnderBaseline(text, fontFace);
+    
+    while (c != '\0')
     {
         if (c == '\n')
         {
@@ -151,9 +157,9 @@ void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace
         {
             offset.appendX(glyph->xAdvance);
         }
-        else
+        else if (offset.X()+glyph->width <= rect.X2())
         {
-            this->drawChar(offset, fontFace, glyph, rect);
+            this->drawChar(offset, fontFace, glyph, rect, lineHeight);
             offset.appendX(glyph->xAdvance);
         }
         
@@ -162,7 +168,7 @@ void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace
     }
 }
 
-void TextRender::drawChar(geo::Point position, const GFXfont &gfxFont, const GFXglyph *glyph, geo::Rect const &bounds)
+void TextRender::drawChar(geo::Point position, const GFXfont &gfxFont, const GFXglyph *glyph, geo::Rect const &bounds, int lineHeight)
 {
     uint8_t  *bitmap = (uint8_t *)gfxFont.bitmap;
     
@@ -173,7 +179,7 @@ void TextRender::drawChar(geo::Point position, const GFXfont &gfxFont, const GFX
              yo = glyph->yOffset;
     
     mono::geo::Rect glyphBounds(position.X() + xo,
-                                position.Y() + glyph->height + yo,
+                                position.Y() + lineHeight + yo,
                                 w, h);
     
     if (!bounds.contains(glyphBounds, true))
@@ -183,8 +189,7 @@ void TextRender::drawChar(geo::Point position, const GFXfont &gfxFont, const GFX
     bool rePosCursor = false;
     
     for(yy=0; yy<h; yy++) {
-        
-        dispCtrl->setCursor(position.X() + xo, position.Y() + yy + (gfxFont.yAdvance + yo));
+        dispCtrl->setCursor(position.X() + xo, position.Y() + yy + lineHeight + glyph->yOffset);
         
         for(xx=0; xx<w; xx++) {
             if(!(bit++ & 7)) {
@@ -195,7 +200,7 @@ void TextRender::drawChar(geo::Point position, const GFXfont &gfxFont, const GFX
                 //dispCtrl->write(foregroundColor);
                 if (rePosCursor)
                     dispCtrl->setCursor(position.X() + xo + xx,
-                                        position.Y() + yy + (gfxFont.yAdvance + yo));
+                                        position.Y() + yy + lineHeight + glyph->yOffset);
                 dispCtrl->write(foregroundColor);
                 // (x+xo+xx, y+yo+yy, color);
             }
@@ -208,55 +213,78 @@ void TextRender::drawChar(geo::Point position, const GFXfont &gfxFont, const GFX
     }
 }
 
-mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace, bool characterHeight)
+mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace, bool lineLayout)
 {
     char *ptr = text.stringData;
     int newLines = 1;
     int currentLine = 0, longestLine = 0;
-    int lastXOffset = 0;
-    int mostUnderBaseLine = 0;
-    int highestPoint = fontFace.yAdvance;
-    int lowestPoint = 0;
+    int maxOverBase = 0;
+    int maxUnderBase = 0;
+    int lastAdvanceDiff = 0;
+    int bestAdvanceDiff = 0;
 
     while (*ptr != '\0') {
 
         if (*ptr == '\n')
         {
             newLines++;
-            mostUnderBaseLine = 0; // theres a new line, discard prev. lines undershoot
+            maxUnderBase = 0; // theres a new line, discard prev. lines undershoot
             currentLine = 0;
+            
+            if (lastAdvanceDiff > bestAdvanceDiff)
+                bestAdvanceDiff = lastAdvanceDiff;
+            
+            ptr++;
+            continue;
         }
 
         GFXglyph glyph = fontFace.glyph[*ptr - fontFace.first];
         currentLine += glyph.xAdvance;
-        lastXOffset = glyph.xOffset;
+        lastAdvanceDiff = glyph.xOffset + glyph.width - glyph.xAdvance;
 
-        if (highestPoint > -glyph.yOffset)
-            highestPoint = -glyph.yOffset;
-
-        if (lowestPoint < -glyph.yOffset + glyph.height)
-            lowestPoint = -glyph.yOffset + glyph.height;
-
-        if (glyph.height + glyph.yOffset > mostUnderBaseLine)
-            mostUnderBaseLine = glyph.height + glyph.yOffset;
+        if (maxOverBase < -glyph.yOffset)
+            maxOverBase = -glyph.yOffset;
+        if (maxUnderBase < glyph.height + glyph.yOffset)
+            maxUnderBase = glyph.height + glyph.yOffset;
         
-        if (currentLine > longestLine)
-            longestLine = currentLine;
+        if (currentLine + lastAdvanceDiff > longestLine)
+            longestLine = currentLine + lastAdvanceDiff;
 
         ptr++;
     }
 
-    if (lastXOffset < 0)
-        lastXOffset = -lastXOffset;
-
-    int height;
-    if (characterHeight)
-        height = lowestPoint - highestPoint;
-    else
-        height = newLines*fontFace.yAdvance+mostUnderBaseLine;
-
-    geo::Size dimensions(longestLine + lastXOffset, height);
+    int height, width;
+    if (!lineLayout) {
+        width = longestLine;
+        height = maxOverBase + maxUnderBase;
+    }
+    else {
+        if (lastAdvanceDiff > bestAdvanceDiff)
+            bestAdvanceDiff = lastAdvanceDiff;
+        
+        width = longestLine;
+        height = newLines*fontFace.yAdvance+maxUnderBase;
+    }
+    
+    geo::Size dimensions(width, height);
     return dimensions;
+}
+
+int TextRender::calcUnderBaseline(mono::String text, const GFXfont &font)
+{
+    char *ptr = text.stringData;
+    int maxUndershoot = 0;
+    
+    while (*ptr != '\0' && *ptr != '\n') {
+        GFXglyph glyph = font.glyph[*ptr - font.first];
+        
+        if (maxUndershoot < glyph.height + glyph.yOffset)
+            maxUndershoot = glyph.height + glyph.yOffset;
+        
+        ptr++;
+    }
+    
+    return maxUndershoot;
 }
 
 void TextRender::writePixel(uint8_t intensity, bool bg)
