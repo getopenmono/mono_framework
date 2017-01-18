@@ -7,7 +7,7 @@
 #include "view.h"
 #include "mn_string.h"
 #include <font_interface.h>
-#include <GFXfont.h>
+#include <gfxfont.h>
 
 namespace mono { namespace ui {
 
