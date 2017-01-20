@@ -90,6 +90,16 @@ namespace mono { namespace ui {
         };
 
         /**
+         * @brief The Vertical justification of the text, inside the labels @ref Rect
+         */
+        enum VerticalTextAlignment
+        {
+            ALIGN_TOP,      /**< Align the text at the top of the label */
+            ALIGN_MIDDLE,   /**< Align the text at in the middle of the label */
+            ALIGN_BOTTOM    /**< Align the text at the bottom of the label */
+        };
+
+        /**
          * @brief This is the default font for all TextLabelView's
          *
          * This points to the default Textlabel font. You can overwrite this in
@@ -115,6 +125,16 @@ namespace mono { namespace ui {
         display::Color textColor;
         display::Color bgColor;
         TextAlignment alignment;
+        VerticalTextAlignment vAlignment;
+        bool textMultiline;
+
+        /**
+         * @brief Check if the current text has newline characters
+         * 
+         * This runs O(n)
+         * @return `true` is newlines are found
+         */
+        bool isTextMultiline() const;
 
     public:
 
@@ -191,16 +211,31 @@ namespace mono { namespace ui {
          */
         uint8_t TextSize() const;
 
+        /** @brief Get the current color of the text */
         display::Color TextColor() const;
+
+        /** @brief Get the current horizontal text alignment */
         TextAlignment Alignment() const;
+
+        /** @brief Get the current vertical text alignment */
+        VerticalTextAlignment VerticalAlignment() const;
+
+        /** This indicate if the next repaint should only repaint differences */
         bool incrementalRepaint;
 
+        /** @brief Get the width of the current text dimension */
         uint16_t TextPixelWidth() const;
+
+        /** @brief Get the height of the current text dimension */
         uint16_t TextPixelHeight() const;
 
+        /** @brief If not NULL, then returns the current selected @ref MonoFont */
         const MonoFont* Font() const;
+
+        /** @brief If not NULL, then returns the current selected @ref GFXfont */
         const GFXfont* GfxFont() const;
 
+        /** @brief Returns the dimensions ( @ref Size ) of the text. */
         geo::Size TextDimension() const;
 
         // MARK: Setters
@@ -226,14 +261,17 @@ namespace mono { namespace ui {
          */
         void setBackgroundColor(display::Color col);
 
-        /** Set the text color */
+        /** @brief Set the text color */
         void setText(display::Color col);
 
-        /** Set the color behind the text */
+        /** @brief Set the color behind the text */
         void setBackground(display::Color col);
 
-        /** Controls text justification: center, right, left */
+        /** @brief Controls text justification: center, right, left */
         void setAlignment(TextAlignment align);
+
+        /** @brief Set the texts vertical alignment: top, middle or bottom */
+        void setAlignment(VerticalTextAlignment vAlign);
 
         void setText(char *text, bool resizeViewWidth = false);
         void setText(const char *txt, bool resizeViewWidth = false);
@@ -246,7 +284,7 @@ namespace mono { namespace ui {
          * Fonts are header files that you must include youself. Each header file
          * defines a font in a specific size.
          *
-         * The header file defines a gloabl `const` variable that you pass to
+         * The header file defines a global `const` variable that you pass to
          * to this method.
          */
         void setFont(MonoFont const &newFont);

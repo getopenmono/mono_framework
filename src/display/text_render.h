@@ -66,11 +66,32 @@ namespace mono { namespace display {
      */
     class TextRender
     {
+    public:
+
+        /** @brief The horizontal text alignment, when rendering inside rects */
+        enum HorizontalAlignment
+        {
+            ALIGN_LEFT,
+            ALIGN_CENTER,
+            ALIGN_RIGHT
+        };
+
+        /** @brief The horizontal text alignment, when rendering inside rects */
+        enum VerticalAlignmentType
+        {
+            ALIGN_TOP,
+            ALIGN_MIDDLE,
+            ALIGN_BOTTOM
+        };
+
     protected:
 
         IDisplayController *dispCtrl;
 
         Color foregroundColor, backgroundColor;
+
+        HorizontalAlignment hAlignment;
+        VerticalAlignmentType vAlignment;
 
         /** Render a single character */
         void drawChar(geo::Point position, char character, const MonoFont &font, geo::Rect const &boundingRect);
@@ -80,6 +101,8 @@ namespace mono { namespace display {
 
         /** Blend and emit a single pixel to the DisplayController. */
         void writePixel(uint8_t intensity, bool bg = false);
+
+        uint32_t remainingTextlineWidth(const GFXfont &font, const char *text);
 
     public:
 
@@ -176,6 +199,19 @@ namespace mono { namespace display {
         void setBackground(Color bg);
 
         /**
+         * @brief Sets the texts justification within the drawing rect
+         * @param align The alignment
+         */
+        void setAlignment(HorizontalAlignment align);
+
+
+        /**
+         * @brief Set the texts vertical alignment withnin the drawing rect
+         * @param vAlign The vertical alignment
+         */
+        void setAlignment(VerticalAlignmentType vAlign);
+
+        /**
          * @brief Get the current text color
          * 
          */
@@ -186,6 +222,12 @@ namespace mono { namespace display {
          * 
          */
         Color Background() const;
+
+        /** @brief Get the horizontal text alignment */
+        HorizontalAlignment Alignment() const;
+
+        /** @brief Get the vertical text alignment */
+        VerticalAlignmentType VerticalAlignment() const;
     };
 
 } }

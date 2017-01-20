@@ -11,6 +11,8 @@ TextRender::TextRender(IDisplayController *displayCtrl)
     this->dispCtrl = displayCtrl;
     foregroundColor = ui::View::StandardTextColor;
     backgroundColor = ui::View::StandardBackgroundColor;
+    hAlignment = ALIGN_LEFT;
+    vAlignment = ALIGN_MIDDLE;
 }
 
 TextRender::TextRender(IDisplayController *displayCtrl, Color foreground, Color background)
@@ -18,6 +20,8 @@ TextRender::TextRender(IDisplayController *displayCtrl, Color foreground, Color 
     this->dispCtrl = displayCtrl;
     foregroundColor = foreground;
     backgroundColor = background;
+    hAlignment = ALIGN_LEFT;
+    vAlignment = ALIGN_MIDDLE;
 }
 
 TextRender::TextRender(const DisplayPainter &painter)
@@ -25,6 +29,8 @@ TextRender::TextRender(const DisplayPainter &painter)
     dispCtrl = painter.DisplayController();
     foregroundColor = painter.ForegroundColor();
     backgroundColor = painter.BackgroundColor();
+    hAlignment = ALIGN_LEFT;
+    vAlignment = ALIGN_MIDDLE;
 }
 
 void TextRender::drawInRect(geo::Rect rect, String text, const MonoFont &fontFace)
@@ -42,7 +48,27 @@ void TextRender::drawInRect(geo::Rect rect, String text, const MonoFont &fontFac
         if (c == '\n')
         {
             offset.appendY(fontFace.glyphHeight);
-            offset.setX(rect.X());
+            switch (hAlignment) {
+                case ALIGN_LEFT:
+                    offset.setX(rect.X());
+                    break;
+                case ALIGN_CENTER:
+                {
+                    int remainder = text.Length() - cnt+1;
+                    if (rect.Width() > remainder*fontFace.glyphWidth)
+                        offset.setX( rect.X() + (rect.Width() - remainder*fontFace.glyphWidth) / 2 );
+                    break;
+                }
+                case ALIGN_RIGHT:
+                {
+                    int remainder = text.Length() - cnt+1;
+                    if (rect.Width() > remainder*fontFace.glyphWidth)
+                        offset.setX( rect.X() + (rect.Width() - remainder*fontFace.glyphWidth) );
+                    break;
+                }
+                default:
+                    break;
+            }
         }
         else if (c == ' ')
         {
@@ -134,24 +160,70 @@ void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace
     dispCtrl->setWindow(rect.X(), rect.Y(), rect.Width(), rect.Height());
     int cnt = 0;
     char c = text[cnt];
+    geo::Size dim = this->renderDimension(text, fontFace, lineLayout);
     mono::geo::Point offset = rect.Point();
     GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
     
     if (glyph->xOffset < 0)
         offset.setX(offset.X()+glyph->xOffset);
-    
+
+    if (dim.Height() < rect.Height())
+    {
+        switch (vAlignment) {
+            case ALIGN_MIDDLE:
+                offset.setY(offset.Y() + (rect.Height() - dim.Height())/2 );
+                break;
+            case ALIGN_BOTTOM:
+                offset.setY(offset.Y() + rect.Height() - dim.Height() );
+                break;
+            default:
+                break;
+        }
+    }
+
+    uint32_t textWidth = remainingTextlineWidth(fontFace, text.stringData+cnt);
+    if (dim.Width() < rect.Width())
+    {
+        switch (hAlignment) {
+            case ALIGN_CENTER:
+                offset.setX(rect.X() + (rect.Width() - textWidth)/2 );
+                break;
+            case ALIGN_RIGHT:
+                offset.setX(rect.X() + rect.Width() - textWidth );
+                break;
+            default:
+                break;
+        }
+    }
+
     int lineHeight;
     if (lineLayout)
         lineHeight = fontFace.yAdvance;
     else
-        lineHeight = this->renderDimension(text, fontFace, false).Height() - calcUnderBaseline(text, fontFace);
+        lineHeight = dim.Height() - calcUnderBaseline(text, fontFace);
     
     while (c != '\0')
     {
         if (c == '\n')
         {
             offset.appendY(fontFace.yAdvance);
+            // +1 to skip newline char
+            uint32_t textWidth = remainingTextlineWidth(fontFace, text.stringData+cnt+1);
             offset.setX(rect.X());
+
+            if (rect.Width() - textWidth > 0)
+            {
+                switch (hAlignment) {
+                    case ALIGN_CENTER:
+                        offset.setX(rect.X() + (rect.Width() - textWidth)/2 );
+                        break;
+                    case ALIGN_RIGHT:
+                        offset.setX(rect.X() + rect.Width() - textWidth );
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
         else if (c == ' ')
         {
@@ -298,6 +370,21 @@ void TextRender::writePixel(uint8_t intensity, bool bg)
     dispCtrl->write(c);
 }
 
+uint32_t TextRender::remainingTextlineWidth(const GFXfont &font, const char *text)
+{
+    uint32_t w = 0;
+    int lastAdvanceDiff;
+
+    while (*text != 0 && *text != '\n') {
+        GFXglyph glyph = font.glyph[*text - font.first];
+        w += glyph.xAdvance;
+        lastAdvanceDiff = glyph.xOffset + glyph.width - glyph.xAdvance;
+        text++;
+    }
+
+    return w + lastAdvanceDiff;
+}
+
 /// MARK: Accessors
 
 void TextRender::setForeground(Color fg)
@@ -308,4 +395,34 @@ void TextRender::setForeground(Color fg)
 void TextRender::setBackground(Color bg)
 {
     backgroundColor = bg;
+}
+
+void TextRender::setAlignment(TextRender::HorizontalAlignment align)
+{
+    hAlignment = align;
+}
+
+void TextRender::setAlignment(TextRender::VerticalAlignmentType vAlign)
+{
+    vAlignment = vAlign;
+}
+
+Color TextRender::Foreground() const
+{
+    return foregroundColor;
+}
+
+Color TextRender::Background() const
+{
+    return backgroundColor;
+}
+
+TextRender::HorizontalAlignment TextRender::Alignment() const
+{
+    return hAlignment;
+}
+
+TextRender::VerticalAlignmentType TextRender::VerticalAlignment() const
+{
+    return vAlignment;
 }
