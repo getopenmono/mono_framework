@@ -72,13 +72,13 @@ namespace mono {
 
         String& operator=(const String &str);
 
-        bool operator==(String const &other);
+        bool operator==(String const &other) const;
 
-        bool operator!=(String const &other);
+        bool operator!=(String const &other) const;
 
-        bool operator==(const char *other);
+        bool operator==(const char *other) const;
 
-        bool operator!=(const char *other);
+        bool operator!=(const char *other) const;
 
         char operator[](uint32_t pos) const;
 

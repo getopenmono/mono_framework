@@ -23,15 +23,46 @@ namespace mono { namespace display {
      * @ref IDisplayController that serves as a target for the text rendering.
      *
      * The TextRender does not include any Font definitions. When you render your
-     * text, you need to provide a pointer to the @ref MonoFont structure, that
-     * should by used as the rendered font.
+     * text, you need to provide a pointer to wither the @ref MonoFont structure,
+     * or a Adafruit compatible @ref GFXfont structure. One these is used as the
+     * rendered font.
+     *
+     * ### Monospaced MonoFonts
+     * 
+     * Mono has its own monospace-only font format @ref MonoFont
      *
      * This renderer has a palette like @ref DisplayPainter, and uses it the 
      * blend the semi-transparent pixels in the font anti-aliasing. The font 
      * bitmap defines pixel intensities, that are the foreground opacity.
      *
-     * The Font defines the text size and the anti-aliasing quality. Some fonts
+     * The MonoFont defines the text size and the anti-aliasing quality. Some fonts
      * has 2 bit pixels, others have 4 bit pixels.
+     *
+     * ### Adafruit GFXfonts
+     *
+     * TextRender can also work with Adafruits proportionally spaced fonts, that
+     * include many different styles: Sans, serif, plain, italic, bold and 
+     * combinations of these.
+     *
+     * This format is still bitmap based, but it does not used semi-transparent
+     * pixels to achieve anti-aliasing. The bitmaps are one bit per pixel.
+     *
+     * Because coherent glyphs might overlap each others bounding rects, this
+     * format does not draw text backgrounds. Since this will overwrite 
+     * overlapping areas of text glyphs.
+     *
+     * #### Line Layouts
+     *
+     * The text rendering has two modes: line layout or not. Line layout means
+     * a text line always has a fixed height: the line separation height. This
+     * is critically when rendering multiline text layouts. But single line text
+     * will appear off-centered in a vertically centered box. The reason is the
+     * line height is much higher than the visual center of the text glyphs.
+     *
+     * If you need to render a single line of text at the center of a box, you
+     * want to not use line layout mode. In this mode, text dimension height are
+     * the distance from the texts hightest to lowest point.
+     *
      */
     class TextRender
     {
@@ -97,6 +128,9 @@ namespace mono { namespace display {
          * 
          * The final width and height of a rendered text, with the defined font
          * face.
+         *
+         * @param text The text to calculate the dimensions of
+         * @param fontFace The font to use
          */
         geo::Size renderDimension(String text, const MonoFont &fontFace);
 
@@ -110,6 +144,7 @@ namespace mono { namespace display {
          * @param rect The rectangle to render in
          * @param text The text string to render
          * @param fontFace A pointer the Adafruit GFX font to use
+         * @param lineLayout Default: `true`, Render text as a multiline layout
          */
         void drawInRect(geo::Rect rect, String text, const GFXfont &fontFace, bool lineLayout = true);
 
@@ -118,6 +153,10 @@ namespace mono { namespace display {
          *
          * The final width and height of a rendered text, with the defined font
          * face.
+         *
+         * @param text The text to calculate the dimensions of
+         * @param fontFace The font to use
+         * @param lineLayout Default: `true`, use line layout or not
          */
         geo::Size renderDimension(String text, const GFXfont &fontFace, bool lineLayout = true);
 

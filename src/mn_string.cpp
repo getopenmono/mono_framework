@@ -126,7 +126,7 @@ String& String::operator=(const String &str)
     return *this;
 }
 
-bool String::operator==(const mono::String &other)
+bool String::operator==(const mono::String &other) const
 {
     if (this->stringData == 0 || other.stringData == 0)
         return false;
@@ -134,7 +134,7 @@ bool String::operator==(const mono::String &other)
     return strcmp(this->stringData, other.stringData) == 0 ? true : false;
 }
 
-bool String::operator!=(const mono::String &other)
+bool String::operator!=(const mono::String &other) const
 {
     if (this->stringData == 0 || other.stringData == 0)
         return false;
@@ -142,7 +142,7 @@ bool String::operator!=(const mono::String &other)
     return strcmp(this->stringData, other.stringData) == 0 ? false : true;
 }
 
-bool String::operator==(const char *other)
+bool String::operator==(const char *other) const
 {
     if (this->stringData == 0)
         return false;
@@ -150,7 +150,7 @@ bool String::operator==(const char *other)
     return strcmp(this->stringData, other) == 0 ? true : false;
 }
 
-bool String::operator!=(const char *other)
+bool String::operator!=(const char *other) const
 {
     if (this->stringData == 0)
         return false;
