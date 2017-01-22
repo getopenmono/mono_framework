@@ -95,7 +95,7 @@ namespace mono { namespace display {
 
         /** Render a single character */
         void drawChar(geo::Point position, char character, const MonoFont &font, geo::Rect const &boundingRect);
-        void drawChar(geo::Point position, const GFXfont &font, const GFXglyph *gfxGlyph, geo::Rect const &boundingRect, int lineHeight);
+        void drawChar(const geo::Point &position, const GFXfont &font, const GFXglyph *gfxGlyph, geo::Rect const &boundingRect, int lineHeight);
         
         int calcUnderBaseline(String text, const GFXfont &font);
 
@@ -169,7 +169,7 @@ namespace mono { namespace display {
          * @param fontFace A pointer the Adafruit GFX font to use
          * @param lineLayout Default: `true`, Render text as a multiline layout
          */
-        void drawInRect(geo::Rect rect, String text, const GFXfont &fontFace, bool lineLayout = true);
+        void drawInRect(const geo::Rect &rect, String text, const GFXfont &fontFace, bool lineLayout = true);
 
         /**
          * @brief Return the resulting dimension / size of some rendered text
@@ -183,6 +183,19 @@ namespace mono { namespace display {
          */
         geo::Size renderDimension(String text, const GFXfont &fontFace, bool lineLayout = true);
 
+        /**
+         * @brief Return the calculated offset of the text in the drawing Rect
+         *
+         * The offset is returned in absolute coords, _not_ the relative coords
+         * inside the drawing rect. The offset matters for text that is aligned
+         * other than left and top.
+         *
+         * @param rect The drawing Rect, that the text should be rendered inside
+         * @param text The text
+         * @param fontFace The GFXfont to use
+         * @param lineLayout Default: `true`, sets if lineLayout is used
+         */
+        geo::Rect renderInRect(const geo::Rect &rect, String text, const GFXfont &fontFace, bool lineLayout = true);
 
         /// MARK: Accessors
 

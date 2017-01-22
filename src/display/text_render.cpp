@@ -150,7 +150,7 @@ void TextRender::drawChar(geo::Point position, char character, const MonoFont &f
     }
 }
 
-void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace, bool lineLayout)
+void TextRender::drawInRect(const geo::Rect &rect, String text, const GFXfont &fontFace, bool lineLayout)
 {
     if (dispCtrl == 0)
         return;
@@ -160,41 +160,11 @@ void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace
     dispCtrl->setWindow(rect.X(), rect.Y(), rect.Width(), rect.Height());
     int cnt = 0;
     char c = text[cnt];
-    geo::Size dim = this->renderDimension(text, fontFace, lineLayout);
-    mono::geo::Point offset = rect.Point();
-    GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
     
-    if (glyph->xOffset < 0)
-        offset.setX(offset.X()+glyph->xOffset);
-
-    if (dim.Height() < rect.Height())
-    {
-        switch (vAlignment) {
-            case ALIGN_MIDDLE:
-                offset.setY(offset.Y() + (rect.Height() - dim.Height())/2 );
-                break;
-            case ALIGN_BOTTOM:
-                offset.setY(offset.Y() + rect.Height() - dim.Height() );
-                break;
-            default:
-                break;
-        }
-    }
-
-    uint32_t textWidth = remainingTextlineWidth(fontFace, text.stringData+cnt);
-    if (dim.Width() < rect.Width())
-    {
-        switch (hAlignment) {
-            case ALIGN_CENTER:
-                offset.setX(rect.X() + (rect.Width() - textWidth)/2 );
-                break;
-            case ALIGN_RIGHT:
-                offset.setX(rect.X() + rect.Width() - textWidth );
-                break;
-            default:
-                break;
-        }
-    }
+    geo::Rect offset = renderInRect(rect, text, fontFace, lineLayout);
+    geo::Rect dim = offset;
+    
+    GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
 
     int lineHeight;
     if (lineLayout)
@@ -240,7 +210,7 @@ void TextRender::drawInRect(geo::Rect rect, String text, const GFXfont &fontFace
     }
 }
 
-void TextRender::drawChar(geo::Point position, const GFXfont &gfxFont, const GFXglyph *glyph, geo::Rect const &bounds, int lineHeight)
+void TextRender::drawChar(const geo::Point &position, const GFXfont &gfxFont, const GFXglyph *glyph, geo::Rect const &bounds, int lineHeight)
 {
     uint8_t  *bitmap = (uint8_t *)gfxFont.bitmap;
     
@@ -340,6 +310,48 @@ mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace
     
     geo::Size dimensions(width, height);
     return dimensions;
+}
+
+mono::geo::Rect TextRender::renderInRect(const geo::Rect &rect, mono::String text, const GFXfont &fontFace, bool lineLayout)
+{
+    char c = text[0];
+    geo::Size dim = this->renderDimension(text, fontFace, lineLayout);
+    mono::geo::Point offset = rect.Point();
+    GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
+    
+    if (glyph->xOffset < 0)
+        offset.setX(offset.X()+glyph->xOffset);
+    
+    if (dim.Height() < rect.Height())
+    {
+        switch (vAlignment) {
+            case ALIGN_MIDDLE:
+                offset.setY(offset.Y() + (rect.Height() - dim.Height())/2 );
+                break;
+            case ALIGN_BOTTOM:
+                offset.setY(offset.Y() + rect.Height() - dim.Height() );
+                break;
+            default:
+                break;
+        }
+    }
+    
+    uint32_t textWidth = remainingTextlineWidth(fontFace, text.stringData);
+    if (dim.Width() < rect.Width())
+    {
+        switch (hAlignment) {
+            case ALIGN_CENTER:
+                offset.setX(rect.X() + (rect.Width() - textWidth)/2 );
+                break;
+            case ALIGN_RIGHT:
+                offset.setX(rect.X() + rect.Width() - textWidth );
+                break;
+            default:
+                break;
+        }
+    }
+    
+    return geo::Rect(offset, dim);
 }
 
 int TextRender::calcUnderBaseline(mono::String text, const GFXfont &font)

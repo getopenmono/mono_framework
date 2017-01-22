@@ -9,7 +9,7 @@ Rect::Rect(int x, int y, int width, int height) : geo::Point(x,y), geo::Size(wid
 {
 }
 
-Rect::Rect(geo::Point &p, geo::Size &s) : geo::Point(p), geo::Size(s)
+Rect::Rect(const geo::Point &p, const geo::Size &s) : geo::Point(p), geo::Size(s)
 {
 }
 

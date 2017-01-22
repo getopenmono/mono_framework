@@ -235,8 +235,8 @@ namespace mono { namespace ui {
         /** @brief If not NULL, then returns the current selected @ref GFXfont */
         const GFXfont* GfxFont() const;
 
-        /** @brief Returns the dimensions ( @ref Size ) of the text. */
-        geo::Size TextDimension() const;
+        /** @brief Returns the dimensions ( @ref Size and offset @ref Point ) of the text. */
+        geo::Rect TextDimension() const;
 
         // MARK: Setters
 

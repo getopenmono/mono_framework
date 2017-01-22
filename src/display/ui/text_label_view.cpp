@@ -145,15 +145,18 @@ const GFXfont* TextLabelView::GfxFont() const
     return currentGfxFont;
 }
 
-mono::geo::Size TextLabelView::TextDimension() const
+mono::geo::Rect TextLabelView::TextDimension() const
 {
     display::TextRender tr(painter);
+    tr.setAlignment((display::TextRender::HorizontalAlignment) alignment);
+    tr.setAlignment((display::TextRender::VerticalAlignmentType) vAlignment);
+    
     if (currentFont)
-        return tr.renderDimension(text, *currentFont);
+        return geo::Rect(geo::Point(0,0), tr.renderDimension(text, *currentFont));
     else if (currentGfxFont)
-        return tr.renderDimension(text, *currentGfxFont, textMultiline);
+        return tr.renderInRect(viewRect, text, *currentGfxFont, textMultiline);
     else
-        return geo::Size();
+        return geo::Rect();
 }
 
 /// MARK: Setters
@@ -253,45 +256,16 @@ void TextLabelView::scheduleRepaint()
 
 void TextLabelView::repaint()
 {
-    mono::geo::Point offset = this->viewRect.Point();
+    
     geo::Rect txtRct;
-    geo::Size dim = TextDimension();
-
-//    switch (alignment) {
-//        case ALIGN_RIGHT:
-//            offset.setX(viewRect.X() + viewRect.Width() - dim.Width());
-//            break;
-//        case ALIGN_CENTER:
-//            if (dim.Width() > viewRect.Width())
-//                break;
-//            offset.setX( viewRect.X() + ((viewRect.Width() / 2) - (dim.Width() / 2)) );
-//            break;
-//        case ALIGN_LEFT:
-//        default:
-//            break;
-//    }
-//
-//    switch (vAlignment) {
-//        case ALIGN_TOP:
-//            break;
-//        case ALIGN_MIDDLE:
-//            if (dim.Height() <=  viewRect.Height())
-//                offset.setY( viewRect.Y() + (viewRect.Height() - dim.Height()) / 2 );
-//            break;
-//        case ALIGN_BOTTOM:
-//            if (dim.Height() < viewRect.Height())
-//                offset.setY( viewRect.Y() + viewRect.Height() - dim.Height() );
-//            break;
-//        default:
-//            break;
-//    }
+    geo::Rect dim = TextDimension();
 
     painter.setBackgroundColor(bgColor);
     painter.setForegroundColor(TextColor());
 
     if (textSize == 1)
     {
-
+        mono::geo::Point offset = this->viewRect.Point();
         View::painter.drawFillRect(this->viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height(), true);
 
         int cnt = 0;
@@ -318,19 +292,14 @@ void TextLabelView::repaint()
             tr.setAlignment((display::TextRender::VerticalAlignmentType) vAlignment);
             painter.drawFillRect(prevTextRct, true);
             
-
-            txtRct = geo::Rect(offset.X(),offset.Y(), viewRect.X2()-offset.X(), viewRect.Y2()-offset.Y());
-
             if (currentGfxFont)
             {
-                geo::Rect txtBounds(offset.X(), offset.Y(), dim.Width(), dim.Height());
-
-                tr.drawInRect(txtRct, text, *currentGfxFont, textMultiline);
-                prevTextRct = txtBounds;
+                tr.drawInRect(viewRect, text, *currentGfxFont, textMultiline);
+                prevTextRct = dim;
             }
             else if (currentFont)
             {
-                tr.drawInRect(txtRct, text, *currentFont);
+                tr.drawInRect(viewRect, text, *currentFont);
             }
         }
         else
@@ -373,8 +342,8 @@ void TextLabelView::repaint()
                 
                 if (text[charIdx] != prevText[charIdx])
                 {
-                    uint32_t xOff = offset.X() + glyphXOffset;
-                    uint32_t yOff = offset.Y()+newlines*glyphHeight;
+                    uint32_t xOff = viewRect.X() + glyphXOffset;
+                    uint32_t yOff = viewRect.Y()+newlines*glyphHeight;
                     
                     //uint32_t prevGlyphWidth;
                     if (currentGfxFont)
@@ -418,8 +387,8 @@ void TextLabelView::repaint()
 
             if (charIdx < text.Length())
             {
-                uint32_t xOff = offset.X()+lineIdx*glyphWidth;
-                uint32_t yOff = offset.Y()+newlines*glyphHeight;
+                uint32_t xOff = viewRect.X()+lineIdx*glyphWidth;
+                uint32_t yOff = viewRect.Y()+newlines*glyphHeight;
                 txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
 
                 String remainder(text()+charIdx);
