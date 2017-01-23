@@ -57,9 +57,17 @@ namespace mono {
         ManagedPointer &operator=(const ManagedPointer &other)
         {
             //debug("mgrPtr assigning: 0x%x\r\n",other.content);
-            content = other.content;
-            refCount = other.refCount;
-            *refCount = *refCount + 1;
+            if (!other)
+            {
+                content =  0;
+                refCount = 0;
+            }
+            else
+            {
+                content = other.content;
+                refCount = other.refCount;
+                *refCount = *refCount + 1;
+            }
 
             return *this;
         }
@@ -138,6 +146,8 @@ namespace mono {
             if (content != NULL) {
                 (*refCount) = *refCount-1;
             }
+            else
+                return;
 
             if (*refCount <= 0)
             {
