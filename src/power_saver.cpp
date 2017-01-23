@@ -21,6 +21,9 @@ PowerSaver::PowerSaver(int dimTimeoutMs, int sleepTimeoutMs,
 
 void PowerSaver::sleepStep()
 {
+    if (!enabled)
+        return;
+
     int cur = IApplicationContext::Instance->DisplayController->Brightness();
     if (cur <= 0)
         IApplicationContext::EnterSleepMode();
@@ -33,6 +36,9 @@ void PowerSaver::sleepStep()
 
 void PowerSaver::dimStep()
 {
+    if (!enabled)
+        return;
+
     int cur = IApplicationContext::Instance->DisplayController->Brightness();
     if (cur <= dimBright)
         startSleepTimer();
@@ -45,6 +51,9 @@ void PowerSaver::dimStep()
 
 void PowerSaver::undimStep()
 {
+    if (!enabled)
+        return;
+
     int cur = IApplicationContext::Instance->DisplayController->Brightness();
     if (cur >= fullBright)
         startDimTimer();
