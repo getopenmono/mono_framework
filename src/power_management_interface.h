@@ -187,7 +187,7 @@ namespace mono { namespace power {
          *
          * **Note: The class @ref QueuedInterrupt will set this automatically!**
          */
-        static bool __shouldWakeUp;
+        static volatile bool __shouldWakeUp;
 
         /**
          * @brief Global flag to indicate to not halt CPU during sleep mode.
@@ -201,7 +201,7 @@ namespace mono { namespace power {
          *
          * Note: You should keep this flag `false` to ensure power presevation
          */
-        static bool __busySleep;
+        static volatile bool __busySleep;
         
         /**
          * @brief Send Mono to sleep mode, and stop CPU execution.

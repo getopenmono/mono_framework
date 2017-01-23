@@ -13,8 +13,8 @@ extern char serial_usbuart_is_powered;
 
 using namespace mono::power;
 
-bool IPowerManagement::__shouldWakeUp = false;
-bool IPowerManagement::__busySleep = false;
+volatile bool IPowerManagement::__shouldWakeUp = false;
+volatile bool IPowerManagement::__busySleep = false;
 
 MonoPowerManagement::MonoPowerManagement()
 {
