@@ -90,7 +90,7 @@ mono::geo::Size TextRender::renderDimension(String text, const MonoFont &fontFac
     int newLines = 1;
     int currentLine = 0, longestLine = 0;
 
-    while (*ptr != '\0') {
+    while (ptr != 0 && *ptr != '\0') {
 
         if (*ptr == '\n')
         {
@@ -166,6 +166,7 @@ void TextRender::drawInRect(const geo::Rect &rect, String text, const GFXfont &f
     
     GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
 
+    bool firstCharInLine = true;
     int lineHeight;
     if (lineLayout)
         lineHeight = fontFace.yAdvance;
@@ -176,6 +177,7 @@ void TextRender::drawInRect(const geo::Rect &rect, String text, const GFXfont &f
     {
         if (c == '\n')
         {
+            firstCharInLine = true;
             offset.appendY(fontFace.yAdvance);
             // +1 to skip newline char
             uint32_t textWidth = remainingTextlineWidth(fontFace, text.stringData+cnt+1);
@@ -201,10 +203,13 @@ void TextRender::drawInRect(const geo::Rect &rect, String text, const GFXfont &f
         }
         else if (offset.X()+glyph->width <= rect.X2())
         {
+            if (firstCharInLine)
+                offset.appendX( -glyph->xOffset);
             this->drawChar(offset, fontFace, glyph, rect, lineHeight);
             offset.appendX(glyph->xAdvance);
         }
-        
+
+        firstCharInLine = false;
         c = text[++cnt];
         glyph = &fontFace.glyph[c - fontFace.first];
     }
@@ -264,6 +269,8 @@ mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace
     int maxUnderBase = 0;
     int lastAdvanceDiff = 0;
     int bestAdvanceDiff = 0;
+    int firstCharOffset = 0;
+    bool isFirstChar = true;
 
     while (*ptr != '\0') {
 
@@ -272,6 +279,7 @@ mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace
             newLines++;
             maxUnderBase = 0; // theres a new line, discard prev. lines undershoot
             currentLine = 0;
+            isFirstChar = true;
             
             if (lastAdvanceDiff > bestAdvanceDiff)
                 bestAdvanceDiff = lastAdvanceDiff;
@@ -284,13 +292,19 @@ mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace
         currentLine += glyph.xAdvance;
         lastAdvanceDiff = glyph.xOffset + glyph.width - glyph.xAdvance;
 
+        if (isFirstChar)
+        {
+            firstCharOffset =  - glyph.xOffset;
+            isFirstChar = false;
+        }
+
         if (maxOverBase < -glyph.yOffset)
             maxOverBase = -glyph.yOffset;
         if (maxUnderBase < glyph.height + glyph.yOffset)
             maxUnderBase = glyph.height + glyph.yOffset;
         
-        if (currentLine + lastAdvanceDiff > longestLine)
-            longestLine = currentLine + lastAdvanceDiff;
+        if (currentLine + lastAdvanceDiff + firstCharOffset > longestLine)
+            longestLine = currentLine + lastAdvanceDiff + firstCharOffset;
 
         ptr++;
     }
@@ -319,8 +333,12 @@ mono::geo::Rect TextRender::renderInRect(const geo::Rect &rect, mono::String tex
     mono::geo::Point offset = rect.Point();
     GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
     
-    if (glyph->xOffset < 0)
-        offset.setX(offset.X()+glyph->xOffset);
+//    if (glyph->xOffset < 0)
+//    {
+//        //first character has negative offset, append to total width
+//        dim.setWidth(dim.Width() - glyph->xOffset);
+//    }
+
     
     if (dim.Height() < rect.Height())
     {
