@@ -342,7 +342,8 @@ int HttpPostFrame::payloadLength()
 
 void HttpPostFrame::dataPayload(uint8_t *data)
 {
-    memset(data, 0, this->payloadLength());
+    int payLength = this->payloadLength();
+    memset(data, 0, payLength);
 
     HttpReqFrameSnd *frm = (HttpReqFrameSnd*) data;
     frm->ip_version = 4;
@@ -367,8 +368,21 @@ void HttpPostFrame::dataPayload(uint8_t *data)
     memcpy(strPnt, extraHeader(), extraHeader.Length());
     strPnt += extraHeader.Length()+1;
 
+    int dataLen = requestDataLengthCallback.call();;
+
     if (requestDataCallback)
         requestDataCallback.call((char*)(strPnt));
+
+    strPnt += dataLen;
+
+    int remainder = payLength - (strPnt - (uint8_t*)frm);
+
+
+    if (remainder > 0)
+    {
+        debug("Padding packet with spaces (0x20) to align with 4-byte length!\r\n");
+        memset(strPnt, ' ', remainder);
+    }
 }
 
 
