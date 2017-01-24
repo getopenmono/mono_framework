@@ -128,6 +128,9 @@ void HttpPostClient::dnsComplete(INetworkRequest::CompletionEvent *evnt)
 
     if (postFrame != 0 && shouldPost)
     {
+        postFrame->requestDataLengthCallback = frameDataLengthHandler;
+        postFrame->requestDataCallback = frameDataHandler;
+        
         setState(IN_PROGRESS_STATE);
         postFrame->commitAsync();
     }
@@ -139,6 +142,9 @@ void HttpPostClient::post()
 
     if (hasFrameRequest())
     {
+        postFrame->requestDataLengthCallback = frameDataLengthHandler;
+        postFrame->requestDataCallback = frameDataHandler;
+
         setState(IN_PROGRESS_STATE);
         postFrame->commitAsync();
     }

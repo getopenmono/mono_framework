@@ -79,11 +79,13 @@ void PowerSaver::startSleepTimer()
 
 void PowerSaver::dim()
 {
+    enabled = true;
     dimStep();
 }
 
 void PowerSaver::undim()
 {
+    enabled = true;
     dimTimer.Stop();
     sleepTimer.Stop();
     //IApplicationContext::Instance->DisplayController->setBrightness(fullBright);

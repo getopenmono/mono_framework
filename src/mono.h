@@ -46,6 +46,7 @@
 
 #ifndef EMUNO
 #include <http_client.h>
+#include <http_post_client.h>
 #include <dns_resolver.h>
 #else
 #include <emuno.h>

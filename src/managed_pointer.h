@@ -57,6 +57,9 @@ namespace mono {
         ManagedPointer &operator=(const ManagedPointer &other)
         {
             //debug("mgrPtr assigning: 0x%x\r\n",other.content);
+            if (this->content != 0)
+                this->~ManagedPointer();
+            
             if (!other)
             {
                 content =  0;
@@ -75,6 +78,9 @@ namespace mono {
         ManagedPointer &operator=(ContentClass *contentPtr)
         {
             //debug("raw ptr to mgrPtr: 0x%x\r\n",contentPtr);
+            if (this->content != 0)
+                this->~ManagedPointer();
+
             if (contentPtr == NULL)
                 return *this;
 
