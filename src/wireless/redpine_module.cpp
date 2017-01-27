@@ -251,7 +251,8 @@ void Module::moduleEventHandler()
 
 void Module::onNetworkReady(ManagementFrame::FrameCompletionData *data)
 {
-    if (data->Context->commandId == ModuleFrame::SetIPParameters && joinFailed == false)
+    if (data->Context->commandId == ModuleFrame::SetIPParameters
+        && joinFailed == false && data->Success)
     {
         SetIpParametersFrame *ip = (SetIpParametersFrame*) data->Context;
 
@@ -267,6 +268,8 @@ void Module::onNetworkReady(ManagementFrame::FrameCompletionData *data)
             networkReadyHandler.call();
         }
     }
+    else
+        connectFailedHandler.call();
 }
 
 void Module::onJoinNetworkComplete(ManagementFrame::FrameCompletionData *data)
@@ -277,9 +280,11 @@ void Module::onJoinNetworkComplete(ManagementFrame::FrameCompletionData *data)
         {
             joinFailed = true;
             debug("Failed joining Network!\r\n");
+            connectFailedHandler.call();
         }
-        else
+        else {
             debug("Joined Wifi Network!\r\n");
+        }
     }
 }
 
