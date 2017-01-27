@@ -291,7 +291,7 @@ void TextLabelView::repaint()
             tr.setAlignment((display::TextRender::HorizontalAlignment)alignment);
             tr.setAlignment((display::TextRender::VerticalAlignmentType) vAlignment);
             painter.drawFillRect(prevTextRct, true);
-            
+
             if (currentGfxFont)
             {
                 tr.drawInRect(viewRect, text, *currentGfxFont, textMultiline);

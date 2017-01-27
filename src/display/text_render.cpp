@@ -232,7 +232,7 @@ void TextRender::drawChar(const geo::Point &position, const GFXfont &gfxFont, co
     if (!bounds.contains(glyphBounds, true))
         return;
     
-    uint8_t  xx, yy, bits, bit = 0;
+    uint8_t  xx, yy, bits = 0, bit = 0;
     bool rePosCursor = false;
     
     for(yy=0; yy<h; yy++) {
@@ -243,13 +243,10 @@ void TextRender::drawChar(const geo::Point &position, const GFXfont &gfxFont, co
                 bits = bitmap[bo++];
             }
             if(bits & 0x80) {
-                //writePixel(255);
-                //dispCtrl->write(foregroundColor);
                 if (rePosCursor)
                     dispCtrl->setCursor(position.X() + xo + xx,
                                         position.Y() + yy + lineHeight + glyph->yOffset);
                 dispCtrl->write(foregroundColor);
-                // (x+xo+xx, y+yo+yy, color);
             }
             else
                 rePosCursor = true;
@@ -404,7 +401,7 @@ void TextRender::writePixel(uint8_t intensity, bool bg)
 uint32_t TextRender::remainingTextlineWidth(const GFXfont &font, const char *text)
 {
     uint32_t w = 0;
-    int lastAdvanceDiff;
+    int lastAdvanceDiff  = 0;
 
     while (*text != 0 && *text != '\n') {
         GFXglyph glyph = font.glyph[*text - font.first];
