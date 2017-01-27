@@ -27,7 +27,7 @@ namespace mono {
      * executes once. If you wish to re-scedule the task at a new point in the 
      * future, use the method @ref reschedule.
      *
-     * ### Execution in Sleep Mode
+     * ## Execution in Sleep Mode
      *
      * You can opt-in to allow your task to run in sleep mode. This means Mono's
      * CPU wake up and executes your task's callback function. You enabled sleep
@@ -45,7 +45,7 @@ namespace mono {
      * Inside you callback function you can do small lightweight tasks, and when
      * your function returns Mono re-enter the sleep state.
      *
-     * #### Wake-up from a ScheduledTask
+     * ## Wake-up from a task
      *
      * If you want to wake Mono from sleep, you must indicate to the 
      * @ref IPowerManager that sleep mode should be exited. This is done by 
@@ -57,7 +57,7 @@ namespace mono {
      *
      * This will trigger a full wake-up, just as toggling the user button does.
      *
-     * ### RTC must run
+     * ## RTC must run
      *
      * Scheduled tasks _will not_ work if the RTC system is not started. This
      * system is automatically started on reset, so the system is enabled by
