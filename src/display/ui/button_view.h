@@ -113,10 +113,19 @@ namespace mono { namespace ui {
          * @brief Change the button fontface (font family and size)
          * 
          * You can change the buttons font to use a larger (or smaller) font.
+         *
+         * @deprecated Use the GfxFont variant
          */
         void setFont(MonoFont const &newFont);
 
-
+        /**
+         * @brief Change the buttons fontface (font family and size)
+         *
+         * You can change the buttons font to use a larger (or smaller) font.
+         *
+         * @param newFont The font face to render the text content with
+         */
+        void setFont(GFXfont const &newFont);
 
         /**
          * @brief Sets the border and text color

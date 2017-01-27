@@ -103,6 +103,11 @@ void ButtonView::setFont(MonoFont const &newFont)
     textLabel.setFont(newFont);
 }
 
+void ButtonView::setFont(const GFXfont &newFont)
+{
+    textLabel.setFont(newFont);
+}
+
 // colors
 void ButtonView::setBorder(Color c)
 {

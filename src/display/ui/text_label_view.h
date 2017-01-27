@@ -107,9 +107,20 @@ namespace mono { namespace ui {
          *
          * You can also overwrite it to use a less memory expensive
          * (lower quality) font face.
+         *
+         * @deprecated Use StandardGfxFont
          */
         static const MonoFont *StandardTextFont;
 
+        /**
+         * @brief This is the default font for all TextLabelView's
+         *
+         * This points to the default Textlabel font. You can overwrite this in
+         * your own code to change the default appearence of all TextLabels.
+         *
+         * You can also overwrite it to use a less memory expensive
+         * (lower quality) font face.
+         */
         static const GFXfont *StandardGfxFont;
 
     protected:
@@ -208,6 +219,8 @@ namespace mono { namespace ui {
          *
          * The text size will be phased out in coming releases. You control text
          * by changing the font.
+         *
+         * @deprecated Use specific font faces to control size
          */
         uint8_t TextSize() const;
 
@@ -248,6 +261,8 @@ namespace mono { namespace ui {
          *
          * If you set this to 1 the old font (very bulky) font will be used. Any
          * other value will load the new default font.
+         *
+         * @deprecated Use specific font faces to control text sizes
          */
         void setTextSize(uint8_t newSize);
 
@@ -273,9 +288,31 @@ namespace mono { namespace ui {
         /** @brief Set the texts vertical alignment: top, middle or bottom */
         void setAlignment(VerticalTextAlignment vAlign);
 
-        void setText(char *text, bool resizeViewWidth = false);
-        void setText(const char *txt, bool resizeViewWidth = false);
-        void setText(String text, bool resizeViewWidth = false);
+        /**
+         * @brief Change the text content of the Text label, and schedules repaint
+         * 
+         * This method updates the text that is rendered by the textlabel. It 
+         * automatically schedules an incremental (fast) repaint.
+         *
+         * @param text The C string text to render
+         */
+        void setText(const char *text);
+
+        /**
+         * @brief Change the text content of the Text label, and schedules repaint
+         *
+         * This method updates the text that is rendered by the textlabel. It
+         * automatically schedules an incremental (fast) repaint.
+         *
+         * @param text The Mono string text to render
+         */
+        void setText(String text);
+
+        /** @deprecated */
+        void setText(const char *txt, bool resizeViewWidth);
+
+        /** @deprecated */
+        void setText(String text, bool resizeViewWidth);
 
         /**
          * @brief Set a new font face on the label
@@ -286,11 +323,37 @@ namespace mono { namespace ui {
          *
          * The header file defines a global `const` variable that you pass to
          * to this method.
+         *
+         * @deprecated Use the Adafruit GfxFont version of this method
+         * @param newFont The mono-spaced to use with the textlabel
          */
         void setFont(MonoFont const &newFont);
+
+        /**
+         * @brief Set a new font face on the label
+         *
+         * You can pass any Adafruit @ref GfxFont to the label to change its appearence.
+         * Fonts are header files that you must include youself. Each header file
+         * defines a font in a specific size.
+         *
+         * The header file defines a global `const` variable that you pass to
+         * to this method.
+         */
         void setFont(GFXfont const &font);
 
     public:
+
+        /**
+         * @brief Repaints the view, using incremental repaints if possible
+         * 
+         * This method might be faster than @ref scheduleRepaint, since this
+         * repaint allows the text to be repainted incrementally. This means
+         * fast repaint of counters or fade animations.
+         *
+         * If you experience rendering errors, you should use the normal
+         * @ref scheduleRepaint method.
+         */
+        void scheduleFastRepaint();
 
         void scheduleRepaint();
 

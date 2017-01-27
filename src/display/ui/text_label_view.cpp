@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ptmono15.h>
 #include <text_render.h>
+#include <mbed_debug.h>
 
 using namespace mono::ui;
 
@@ -85,6 +86,7 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
 
 uint8_t TextLabelView::TextSize() const
 {
+    debug("TextLabelView::TextSuze is Deprecated!\r\n");
     return textSize;
 }
 
@@ -137,6 +139,7 @@ uint16_t TextLabelView::TextPixelHeight() const
 
 const MonoFont* TextLabelView::Font() const
 {
+    debug("TextLabelView::Font() is deprecated. Use GfxFont()!\r\n");
     return currentFont;
 }
 
@@ -162,22 +165,26 @@ mono::geo::Rect TextLabelView::TextDimension() const
 /// MARK: Setters
 void TextLabelView::setTextSize(uint8_t newSize)
 {
+    debug("TextLabelView::setSize is deprecated!\r\n");
     textSize = newSize;
 }
 
 void TextLabelView::setTextColor(display::Color col)
 {
+    debug("TextLabelView::setTextColor is deprecated! Use setText(Color)\r\n");
     setText(col);
 }
 
 void TextLabelView::setBackgroundColor(display::Color col)
 {
+    debug("TextLabelView::setBackgroundColor is deprecated! Use setBackground(Color)\r\n");
     setBackground(col);
 }
 
 void TextLabelView::setText(display::Color col)
 {
     textColor = col;
+    incrementalRepaint = false;
 }
 
 /** Set the color behind the text */
@@ -198,9 +205,15 @@ void TextLabelView::setAlignment(VerticalTextAlignment vAlign)
     incrementalRepaint = false;
 }
 
-void TextLabelView::setText(char *text, bool resizeViewWidth)
+void TextLabelView::setText(const char *text)
 {
-    this->setText(String(text), resizeViewWidth);
+    this->setText(text, false);
+}
+
+
+void TextLabelView::setText(mono::String text)
+{
+    this->setText(text, false);
 }
 
 void TextLabelView::setText(const char *txt, bool resizeViewWidth)
@@ -227,8 +240,10 @@ void TextLabelView::setText(mono::String text, bool resizeViewWidth)
 
 void TextLabelView::setFont(const MonoFont &newFont)
 {
+    debug("TextLabelView::setFont(): MonoFont's are deprecated, use GfxFonts!\r\n");
     currentFont = &newFont;
     currentGfxFont = 0;
+    incrementalRepaint = false;
     
     scheduleRepaint();
 }
@@ -237,6 +252,7 @@ void TextLabelView::setFont(GFXfont const &font)
 {
     currentGfxFont = &font;
     currentFont = 0;
+    incrementalRepaint = false;
     
     scheduleRepaint();
 }
@@ -290,7 +306,9 @@ void TextLabelView::repaint()
             display::TextRender tr(painter);
             tr.setAlignment((display::TextRender::HorizontalAlignment)alignment);
             tr.setAlignment((display::TextRender::VerticalAlignmentType) vAlignment);
-            painter.drawFillRect(prevTextRct, true);
+
+            if (prevText != text)
+                painter.drawFillRect(prevTextRct, true);
 
             if (currentGfxFont)
             {
@@ -308,7 +326,7 @@ void TextLabelView::repaint()
 
             uint32_t charIdx = 0;
             uint32_t glyphXOffset = 0;
-            uint32_t glyphWidth;
+            uint32_t glyphWidth = 0;
             if (currentFont)
                 glyphWidth = currentFont->glyphWidth;
             
