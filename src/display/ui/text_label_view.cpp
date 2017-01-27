@@ -3,14 +3,15 @@
 
 #include "text_label_view.h"
 #include <string.h>
-#include <ptmono15.h>
+#define PROGMEM
+#include <Fonts/FreeSans9pt7b.h>
 #include <text_render.h>
 #include <mbed_debug.h>
 
 using namespace mono::ui;
 
-__attribute__((weak)) const MonoFont *TextLabelView::StandardTextFont = &mono::display::PT_Mono_15;
-__attribute__((weak)) const GFXfont *TextLabelView::StandardGfxFont = 0;
+__attribute__((weak)) const MonoFont *TextLabelView::StandardTextFont = 0;
+__attribute__((weak)) const GFXfont *TextLabelView::StandardGfxFont = &FreeSans9pt7b;
 
 TextLabelView::TextLabelView(String txt) :
     textColor(StandardTextColor),
@@ -274,11 +275,60 @@ void TextLabelView::repaint()
 {
     
     geo::Rect txtRct;
-    geo::Rect dim = TextDimension();
 
     painter.setBackgroundColor(bgColor);
     painter.setForegroundColor(TextColor());
 
+    if (canUseIncrementalRepaint())
+    {
+        if (currentGfxFont)
+            repaintGfxIncremental(txtRct);
+        else if (currentFont)
+            repaintLegacyIncremental(txtRct);
+    }
+    else
+    {
+        if (textSize == 1 || currentFont)
+            repaintLegacy(txtRct);
+        else if (currentGfxFont)
+            repaintGfx(txtRct);
+    }
+
+    // previous text is always the last painted text
+    this->prevText = this->text;
+}
+
+bool TextLabelView::canUseIncrementalRepaint() const
+{
+    // old text render does not use incrementals
+    if (textSize == 1)
+        return false;
+    // centered proportial fonts cannot incremental repaint
+    if (currentGfxFont && alignment == ALIGN_CENTER && text != prevText)
+        return false;
+    if (prevText.Length() == 0)
+        return false;
+    if (prevText.Length() != text.Length())
+        return false;
+
+    return incrementalRepaint;
+}
+
+void TextLabelView::repaintGfx(geo::Rect &)
+{
+    display::TextRender tr(painter);
+    tr.setAlignment((display::TextRender::HorizontalAlignment)alignment);
+    tr.setAlignment((display::TextRender::VerticalAlignmentType) vAlignment);
+
+    if (prevText != text)
+        painter.drawFillRect(prevTextRct, true);
+
+    tr.drawInRect(viewRect, text, *currentGfxFont, textMultiline);
+    prevTextRct = TextDimension();
+}
+
+void TextLabelView::repaintLegacy(geo::Rect &)
+{
     if (textSize == 1)
     {
         mono::geo::Point offset = this->viewRect.Point();
@@ -296,133 +346,127 @@ void TextLabelView::repaint()
             c = text[++cnt];
         }
     }
-    else if (currentFont != 0 || currentGfxFont != 0)
+    else
     {
-        if ((currentGfxFont && alignment == ALIGN_CENTER && text != prevText) ||
-            !incrementalRepaint ||
-            prevText.Length() == 0 ||
-            prevText.Length() != text.Length())
+        display::TextRender tr(painter);
+        tr.setAlignment((display::TextRender::HorizontalAlignment)alignment);
+        tr.setAlignment((display::TextRender::VerticalAlignmentType) vAlignment);
+
+        if (prevText != text)
+            painter.drawFillRect(prevTextRct, true);
+
+        tr.drawInRect(viewRect, text, *currentFont);
+    }
+}
+
+void TextLabelView::repaintGfxIncremental(mono::geo::Rect &txtRct)
+{
+    display::TextRender tr(painter);
+    uint32_t charIdx = 0;
+    uint32_t glyphXOffset = 0;
+    uint32_t glyphWidth = 0;
+    uint32_t glyphHeight = currentGfxFont->yAdvance;
+
+    uint32_t newlines = 0;
+    uint32_t lineIdx = 0;
+
+    while(charIdx < text.Length() && charIdx < prevText.Length())
+    {
+        // jump to next line
+        if (text[charIdx] == '\n')
         {
-            display::TextRender tr(painter);
-            tr.setAlignment((display::TextRender::HorizontalAlignment)alignment);
-            tr.setAlignment((display::TextRender::VerticalAlignmentType) vAlignment);
-
-            if (prevText != text)
-                painter.drawFillRect(prevTextRct, true);
-
-            if (currentGfxFont)
-            {
-                tr.drawInRect(viewRect, text, *currentGfxFont, textMultiline);
-                prevTextRct = dim;
-            }
-            else if (currentFont)
-            {
-                tr.drawInRect(viewRect, text, *currentFont);
-            }
-        }
-        else
-        {
-            display::TextRender tr(painter);
-
-            uint32_t charIdx = 0;
-            uint32_t glyphXOffset = 0;
-            uint32_t glyphWidth = 0;
-            if (currentFont)
-                glyphWidth = currentFont->glyphWidth;
-            
-            uint32_t glyphHeight;
-            
-            if (currentFont)
-                glyphHeight = currentFont->glyphHeight;
-            else if (currentGfxFont)
-                glyphHeight = currentGfxFont->yAdvance;
-            else
-                return;
-            
-            uint32_t newlines = 0;
-            uint32_t lineIdx = 0;
-
-            while(charIdx < text.Length() && charIdx < prevText.Length())
-            {
-                
-                if (text[charIdx] == '\n')
-                {
-                    newlines++;
-                    lineIdx = 0;
-                }
-
-                GFXglyph gl;
-                if (currentGfxFont)
-                {
-                    gl = currentGfxFont->glyph[text[charIdx] - currentGfxFont->first];
-                    glyphWidth = gl.width;
-                }
-                
-                if (text[charIdx] != prevText[charIdx])
-                {
-                    uint32_t xOff = viewRect.X() + glyphXOffset;
-                    uint32_t yOff = viewRect.Y()+newlines*glyphHeight;
-                    
-                    //uint32_t prevGlyphWidth;
-                    if (currentGfxFont)
-                    {
-                        String remainder(text()+charIdx);
-                        String oldRemainder(prevText()+charIdx);
-                        
-                        geo::Size oldDim = tr.renderDimension(oldRemainder, *currentGfxFont, textMultiline);
-                        tr.setForeground(bgColor);
-                        tr.drawInRect(geo::Rect(xOff, yOff, oldDim.Width(), oldDim.Height()),
-                                      oldRemainder,
-                                      *currentGfxFont, textMultiline);
-
-                        tr.setForeground(textColor);
-                        txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
-                        tr.drawInRect(txtRct, remainder, *currentGfxFont, textMultiline);
-
-                        geo::Size txtBnds = tr.renderDimension(remainder, *currentGfxFont, textMultiline);
-                        prevTextRct = geo::Rect(xOff, yOff, txtBnds.Width(), txtBnds.Height());
-                        charIdx = text.Length();
-                        break;
-                    }
-                    else
-                        painter.drawFillRect(xOff, yOff, glyphWidth, glyphHeight, true);
-                    
-                    geo::Rect glypsRct(xOff, yOff, glyphWidth, glyphHeight);
-                    String glyph = String::Format("%c",text[charIdx]);
-                    
-                    if (currentFont)
-                        tr.drawInRect(glypsRct, glyph, *currentFont);
-                }
-
-                if (currentGfxFont)
-                    glyphXOffset += gl.xAdvance;
-                else
-                    glyphXOffset += glyphWidth;
-
-                charIdx++;
-                lineIdx++;
-            }
-
-            if (charIdx < text.Length())
-            {
-                uint32_t xOff = viewRect.X()+lineIdx*glyphWidth;
-                uint32_t yOff = viewRect.Y()+newlines*glyphHeight;
-                txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
-
-                String remainder(text()+charIdx);
-                
-                if (currentFont)
-                    tr.drawInRect(txtRct, remainder, *currentFont);
-                else if (currentGfxFont)
-                    tr.drawInRect(txtRct, remainder, *currentGfxFont);
-                    
-            }
+            newlines++;
+            lineIdx = 0;
         }
 
-        // previous text is always the last painted text
-        this->prevText = this->text;
+        GFXglyph gl = currentGfxFont->glyph[text[charIdx] - currentGfxFont->first];
+        glyphWidth = gl.width;
+
+        // is current char different - repaint
+        if (text[charIdx] != prevText[charIdx])
+        {
+            uint32_t xOff = viewRect.X() + glyphXOffset;
+            uint32_t yOff = viewRect.Y()+newlines*glyphHeight;
+
+            String remainder(text()+charIdx);
+            String oldRemainder(prevText()+charIdx);
+
+            geo::Size oldDim = tr.renderDimension(oldRemainder, *currentGfxFont, textMultiline);
+            tr.setForeground(bgColor);
+            tr.drawInRect(geo::Rect(xOff, yOff, oldDim.Width(), oldDim.Height()),
+                          oldRemainder,
+                          *currentGfxFont, textMultiline);
+
+            tr.setForeground(textColor);
+            txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
+            tr.drawInRect(txtRct, remainder, *currentGfxFont, textMultiline);
+
+            geo::Size txtBnds = tr.renderDimension(remainder, *currentGfxFont, textMultiline);
+            prevTextRct = geo::Rect(xOff, yOff, txtBnds.Width(), txtBnds.Height());
+            charIdx = text.Length();
+            break; // no now - every following chars are repainted
+        }
+
+        glyphXOffset += gl.xAdvance;
+        charIdx++;
+        lineIdx++;
+    }
+
+    if (charIdx < text.Length())
+    {
+        uint32_t xOff = viewRect.X()+lineIdx*glyphWidth;
+        uint32_t yOff = viewRect.Y()+newlines*glyphHeight;
+        txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
+
+        String remainder(text()+charIdx);
+        tr.drawInRect(txtRct, remainder, *currentGfxFont);
     }
     
+}
+
+void TextLabelView::repaintLegacyIncremental(geo::Rect &txtRct)
+{
+    display::TextRender tr(painter);
+
+    uint32_t charIdx = 0;
+    uint32_t glyphXOffset = 0;
+    uint32_t glyphWidth = currentFont->glyphWidth;
+    uint32_t glyphHeight = currentFont->glyphHeight;
+
+    uint32_t newlines = 0;
+    uint32_t lineIdx = 0;
+
+    while(charIdx < text.Length() && charIdx < prevText.Length())
+    {
+        if (text[charIdx] == '\n')
+        {
+            newlines++;
+            lineIdx = 0;
+        }
+
+        if (text[charIdx] != prevText[charIdx])
+        {
+            uint32_t xOff = viewRect.X() + glyphXOffset;
+            uint32_t yOff = viewRect.Y()+newlines*glyphHeight;
+
+            painter.drawFillRect(xOff, yOff, glyphWidth, glyphHeight, true);
+        }
+
+        glyphXOffset += glyphWidth;
+        charIdx++;
+        lineIdx++;
+    }
+
+    if (charIdx < text.Length())
+    {
+        uint32_t xOff = viewRect.X()+lineIdx*glyphWidth;
+        uint32_t yOff = viewRect.Y()+newlines*glyphHeight;
+        txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
+
+        String remainder(text()+charIdx);
+        tr.drawInRect(txtRct, remainder, *currentFont);
+    }
+
 }
 
 bool TextLabelView::isTextMultiline() const

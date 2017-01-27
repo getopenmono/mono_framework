@@ -147,6 +147,13 @@ namespace mono { namespace ui {
          */
         bool isTextMultiline() const;
 
+        void repaintGfx(geo::Rect &txtRct);
+        void repaintLegacy(geo::Rect &txtRct);
+        void repaintGfxIncremental(geo::Rect &txtRct);
+        void repaintLegacyIncremental(geo::Rect &txtRct);
+
+        bool canUseIncrementalRepaint() const;
+
     public:
 
         // MARK: Public Constructors
