@@ -38,7 +38,7 @@ namespace mono { namespace geo {
         /**
          * @brief Construct a rectangle from Point and Size objects
          */
-        Rect(Point &p, Size &s);
+        Rect(const Point &p, const Size &s);
 
         /**
          * @brief COnstruct an empty rectangle having position (0,0) and size (0,0)
@@ -108,7 +108,7 @@ namespace mono { namespace geo {
          */
         bool contains(class Point &p) const;
 
-        bool contains(Rect const &other) const;
+        bool contains(Rect const &other, bool equals = false) const;
 
         /**
          * Return this Rect cropped by the baundaries of another rect

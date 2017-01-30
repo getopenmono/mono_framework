@@ -11,6 +11,8 @@ TextRender::TextRender(IDisplayController *displayCtrl)
     this->dispCtrl = displayCtrl;
     foregroundColor = ui::View::StandardTextColor;
     backgroundColor = ui::View::StandardBackgroundColor;
+    hAlignment = ALIGN_LEFT;
+    vAlignment = ALIGN_MIDDLE;
 }
 
 TextRender::TextRender(IDisplayController *displayCtrl, Color foreground, Color background)
@@ -18,6 +20,8 @@ TextRender::TextRender(IDisplayController *displayCtrl, Color foreground, Color 
     this->dispCtrl = displayCtrl;
     foregroundColor = foreground;
     backgroundColor = background;
+    hAlignment = ALIGN_LEFT;
+    vAlignment = ALIGN_MIDDLE;
 }
 
 TextRender::TextRender(const DisplayPainter &painter)
@@ -25,6 +29,8 @@ TextRender::TextRender(const DisplayPainter &painter)
     dispCtrl = painter.DisplayController();
     foregroundColor = painter.ForegroundColor();
     backgroundColor = painter.BackgroundColor();
+    hAlignment = ALIGN_LEFT;
+    vAlignment = ALIGN_MIDDLE;
 }
 
 void TextRender::drawInRect(geo::Rect rect, String text, const MonoFont &fontFace)
@@ -42,7 +48,27 @@ void TextRender::drawInRect(geo::Rect rect, String text, const MonoFont &fontFac
         if (c == '\n')
         {
             offset.appendY(fontFace.glyphHeight);
-            offset.setX(rect.X());
+            switch (hAlignment) {
+                case ALIGN_LEFT:
+                    offset.setX(rect.X());
+                    break;
+                case ALIGN_CENTER:
+                {
+                    int remainder = text.Length() - cnt+1;
+                    if (rect.Width() > remainder*fontFace.glyphWidth)
+                        offset.setX( rect.X() + (rect.Width() - remainder*fontFace.glyphWidth) / 2 );
+                    break;
+                }
+                case ALIGN_RIGHT:
+                {
+                    int remainder = text.Length() - cnt+1;
+                    if (rect.Width() > remainder*fontFace.glyphWidth)
+                        offset.setX( rect.X() + (rect.Width() - remainder*fontFace.glyphWidth) );
+                    break;
+                }
+                default:
+                    break;
+            }
         }
         else if (c == ' ')
         {
@@ -64,7 +90,7 @@ mono::geo::Size TextRender::renderDimension(String text, const MonoFont &fontFac
     int newLines = 1;
     int currentLine = 0, longestLine = 0;
 
-    while (*ptr != '\0') {
+    while (ptr != 0 && *ptr != '\0') {
 
         if (*ptr == '\n')
         {
@@ -124,6 +150,243 @@ void TextRender::drawChar(geo::Point position, char character, const MonoFont &f
     }
 }
 
+void TextRender::drawInRect(const geo::Rect &rect, String text, const GFXfont &fontFace, bool lineLayout)
+{
+    if (dispCtrl == 0)
+        return;
+    if (text.Length() == 0)
+        return;
+    
+    dispCtrl->setWindow(rect.X(), rect.Y(), rect.Width(), rect.Height());
+    int cnt = 0;
+    char c = text[cnt];
+    
+    geo::Rect offset = renderInRect(rect, text, fontFace, lineLayout);
+    geo::Rect dim = offset;
+    
+    GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
+
+    bool firstCharInLine = true;
+    int lineHeight;
+    if (lineLayout)
+        lineHeight = fontFace.yAdvance;
+    else
+        lineHeight = dim.Height() - calcUnderBaseline(text, fontFace);
+    
+    while (c != '\0')
+    {
+        if (c == '\n')
+        {
+            firstCharInLine = true;
+            offset.appendY(fontFace.yAdvance);
+            // +1 to skip newline char
+            uint32_t textWidth = remainingTextlineWidth(fontFace, text.stringData+cnt+1);
+            offset.setX(rect.X());
+
+            if (rect.Width() - textWidth > 0)
+            {
+                switch (hAlignment) {
+                    case ALIGN_CENTER:
+                        offset.setX(rect.X() + (rect.Width() - textWidth)/2 );
+                        break;
+                    case ALIGN_RIGHT:
+                        offset.setX(rect.X() + rect.Width() - textWidth );
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        else if (c == ' ')
+        {
+            offset.appendX(glyph->xAdvance);
+        }
+        else if (offset.X()+glyph->width <= rect.X2())
+        {
+            if (firstCharInLine)
+                offset.appendX( -glyph->xOffset);
+            this->drawChar(offset, fontFace, glyph, rect, lineHeight);
+            offset.appendX(glyph->xAdvance);
+        }
+
+        firstCharInLine = false;
+        c = text[++cnt];
+        glyph = &fontFace.glyph[c - fontFace.first];
+    }
+}
+
+void TextRender::drawChar(const geo::Point &position, const GFXfont &gfxFont, const GFXglyph *glyph, geo::Rect const &bounds, int lineHeight)
+{
+    uint8_t  *bitmap = (uint8_t *)gfxFont.bitmap;
+    
+    uint16_t bo = glyph->bitmapOffset;
+    uint8_t  w  = glyph->width,
+             h  = glyph->height;
+    int8_t   xo = glyph->xOffset,
+             yo = glyph->yOffset;
+    
+    mono::geo::Rect glyphBounds(position.X() + xo,
+                                position.Y() + lineHeight + yo,
+                                w, h);
+    
+    if (!bounds.contains(glyphBounds, true))
+        return;
+    
+    uint8_t  xx, yy, bits = 0, bit = 0;
+    bool rePosCursor = false;
+    
+    for(yy=0; yy<h; yy++) {
+        dispCtrl->setCursor(position.X() + xo, position.Y() + yy + lineHeight + glyph->yOffset);
+        
+        for(xx=0; xx<w; xx++) {
+            if(!(bit++ & 7)) {
+                bits = bitmap[bo++];
+            }
+            if(bits & 0x80) {
+                if (rePosCursor)
+                    dispCtrl->setCursor(position.X() + xo + xx,
+                                        position.Y() + yy + lineHeight + glyph->yOffset);
+                dispCtrl->write(foregroundColor);
+            }
+            else
+                rePosCursor = true;
+            
+            
+            bits <<= 1;
+        }
+    }
+}
+
+mono::geo::Size TextRender::renderDimension(String text, const GFXfont &fontFace, bool lineLayout)
+{
+    char *ptr = text.stringData;
+    int newLines = 1;
+    int currentLine = 0, longestLine = 0;
+    int maxOverBase = 0;
+    int maxUnderBase = 0;
+    int lastAdvanceDiff = 0;
+    int bestAdvanceDiff = 0;
+    int firstCharOffset = 0;
+    bool isFirstChar = true;
+
+    while (*ptr != '\0') {
+
+        if (*ptr == '\n')
+        {
+            newLines++;
+            maxUnderBase = 0; // theres a new line, discard prev. lines undershoot
+            currentLine = 0;
+            isFirstChar = true;
+            
+            if (lastAdvanceDiff > bestAdvanceDiff)
+                bestAdvanceDiff = lastAdvanceDiff;
+            
+            ptr++;
+            continue;
+        }
+
+        GFXglyph glyph = fontFace.glyph[*ptr - fontFace.first];
+        currentLine += glyph.xAdvance;
+        lastAdvanceDiff = glyph.xOffset + glyph.width - glyph.xAdvance;
+
+        if (isFirstChar)
+        {
+            firstCharOffset =  - glyph.xOffset;
+            isFirstChar = false;
+        }
+
+        if (maxOverBase < -glyph.yOffset)
+            maxOverBase = -glyph.yOffset;
+        if (maxUnderBase < glyph.height + glyph.yOffset)
+            maxUnderBase = glyph.height + glyph.yOffset;
+        
+        if (currentLine + lastAdvanceDiff + firstCharOffset > longestLine)
+            longestLine = currentLine + lastAdvanceDiff + firstCharOffset;
+
+        ptr++;
+    }
+
+    int height, width;
+    if (!lineLayout) {
+        width = longestLine;
+        height = maxOverBase + maxUnderBase;
+    }
+    else {
+        if (lastAdvanceDiff > bestAdvanceDiff)
+            bestAdvanceDiff = lastAdvanceDiff;
+        
+        width = longestLine;
+        height = newLines*fontFace.yAdvance+maxUnderBase;
+    }
+    
+    geo::Size dimensions(width, height);
+    return dimensions;
+}
+
+mono::geo::Rect TextRender::renderInRect(const geo::Rect &rect, mono::String text, const GFXfont &fontFace, bool lineLayout)
+{
+//    char c = text[0];
+    geo::Size dim = this->renderDimension(text, fontFace, lineLayout);
+    mono::geo::Point offset = rect.Point();
+
+    //    GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
+//
+//    if (glyph->xOffset < 0)
+//    {
+//        //first character has negative offset, append to total width
+//        dim.setWidth(dim.Width() - glyph->xOffset);
+//    }
+
+    
+    if (dim.Height() < rect.Height())
+    {
+        switch (vAlignment) {
+            case ALIGN_MIDDLE:
+                offset.setY(offset.Y() + (rect.Height() - dim.Height())/2 );
+                break;
+            case ALIGN_BOTTOM:
+                offset.setY(offset.Y() + rect.Height() - dim.Height() );
+                break;
+            default:
+                break;
+        }
+    }
+    
+    //uint32_t textWidth = remainingTextlineWidth(fontFace, text.stringData);
+    if (dim.Width() < rect.Width())
+    {
+        switch (hAlignment) {
+            case ALIGN_CENTER:
+                offset.setX(rect.X() + (rect.Width() - dim.Width())/2 );
+                break;
+            case ALIGN_RIGHT:
+                offset.setX(rect.X() + rect.Width() - dim.Width() );
+                break;
+            default:
+                break;
+        }
+    }
+    
+    return geo::Rect(offset, dim);
+}
+
+int TextRender::calcUnderBaseline(mono::String text, const GFXfont &font)
+{
+    char *ptr = text.stringData;
+    int maxUndershoot = 0;
+    
+    while (*ptr != '\0' && *ptr != '\n') {
+        GFXglyph glyph = font.glyph[*ptr - font.first];
+        
+        if (maxUndershoot < glyph.height + glyph.yOffset)
+            maxUndershoot = glyph.height + glyph.yOffset;
+        
+        ptr++;
+    }
+    
+    return maxUndershoot;
+}
+
 void TextRender::writePixel(uint8_t intensity, bool bg)
 {
     Color c;
@@ -133,6 +396,21 @@ void TextRender::writePixel(uint8_t intensity, bool bg)
         c = foregroundColor.alphaBlend(intensity, backgroundColor);
 
     dispCtrl->write(c);
+}
+
+uint32_t TextRender::remainingTextlineWidth(const GFXfont &font, const char *text)
+{
+    uint32_t w = 0;
+    int lastAdvanceDiff  = 0;
+
+    while (*text != 0 && *text != '\n') {
+        GFXglyph glyph = font.glyph[*text - font.first];
+        w += glyph.xAdvance;
+        lastAdvanceDiff = glyph.xOffset + glyph.width - glyph.xAdvance;
+        text++;
+    }
+
+    return w + lastAdvanceDiff;
 }
 
 /// MARK: Accessors
@@ -145,4 +423,34 @@ void TextRender::setForeground(Color fg)
 void TextRender::setBackground(Color bg)
 {
     backgroundColor = bg;
+}
+
+void TextRender::setAlignment(TextRender::HorizontalAlignment align)
+{
+    hAlignment = align;
+}
+
+void TextRender::setAlignment(TextRender::VerticalAlignmentType vAlign)
+{
+    vAlignment = vAlign;
+}
+
+Color TextRender::Foreground() const
+{
+    return foregroundColor;
+}
+
+Color TextRender::Background() const
+{
+    return backgroundColor;
+}
+
+TextRender::HorizontalAlignment TextRender::Alignment() const
+{
+    return hAlignment;
+}
+
+TextRender::VerticalAlignmentType TextRender::VerticalAlignment() const
+{
+    return vAlignment;
 }

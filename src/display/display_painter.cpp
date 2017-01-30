@@ -132,10 +132,10 @@ void DisplayPainter::drawPixel(uint16_t x, uint16_t y, uint8_t intensity, bool b
 
 void DisplayPainter::drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool bg)
 {
-    drawVLine(x, y, y+height, bg);
-    drawVLine(x+width, y, y+height, bg);
-    drawHLine(x, x+width, y, bg);
-    drawHLine(x, x+width+1, y+height, bg);
+    drawVLine(x, y, y+height-1, bg);
+    drawVLine(x+width-1, y, y+height-1, bg);
+    drawHLine(x, x+width-1, y, bg);
+    drawHLine(x, x+width, y+height-1, bg);
 }
 
 void DisplayPainter::drawRect(geo::Rect const &rct, bool background)

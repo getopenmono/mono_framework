@@ -7,6 +7,7 @@
 #include "view.h"
 #include "mn_string.h"
 #include <font_interface.h>
+#include <gfxfont.h>
 
 namespace mono { namespace ui {
 
@@ -89,6 +90,29 @@ namespace mono { namespace ui {
         };
 
         /**
+         * @brief The Vertical justification of the text, inside the labels @ref Rect
+         */
+        enum VerticalTextAlignment
+        {
+            ALIGN_TOP,      /**< Align the text at the top of the label */
+            ALIGN_MIDDLE,   /**< Align the text at in the middle of the label */
+            ALIGN_BOTTOM    /**< Align the text at the bottom of the label */
+        };
+
+        /**
+         * @brief This is the default font for all TextLabelView's
+         *
+         * This points to the default Textlabel font. You can overwrite this in
+         * your own code to change the default appearence of all TextLabels.
+         *
+         * You can also overwrite it to use a less memory expensive
+         * (lower quality) font face.
+         *
+         * @deprecated Use StandardGfxFont
+         */
+        static const MonoFont *StandardTextFont;
+
+        /**
          * @brief This is the default font for all TextLabelView's
          *
          * This points to the default Textlabel font. You can overwrite this in
@@ -97,18 +121,38 @@ namespace mono { namespace ui {
          * You can also overwrite it to use a less memory expensive
          * (lower quality) font face.
          */
-        static const MonoFont *StandardTextFont;
+        static const GFXfont *StandardGfxFont;
 
     protected:
 
         String text;
         String prevText;
+        geo::Rect prevTextRct;
 
         const MonoFont *currentFont;
+        const GFXfont *currentGfxFont;
+        
         uint8_t textSize;
         display::Color textColor;
         display::Color bgColor;
         TextAlignment alignment;
+        VerticalTextAlignment vAlignment;
+        bool textMultiline;
+
+        /**
+         * @brief Check if the current text has newline characters
+         * 
+         * This runs O(n)
+         * @return `true` is newlines are found
+         */
+        bool isTextMultiline() const;
+
+        void repaintGfx(geo::Rect &txtRct);
+        void repaintLegacy(geo::Rect &txtRct);
+        void repaintGfxIncremental(geo::Rect &txtRct);
+        void repaintLegacyIncremental(geo::Rect &txtRct);
+
+        bool canUseIncrementalRepaint() const;
 
     public:
 
@@ -182,17 +226,37 @@ namespace mono { namespace ui {
          *
          * The text size will be phased out in coming releases. You control text
          * by changing the font.
+         *
+         * @deprecated Use specific font faces to control size
          */
         uint8_t TextSize() const;
 
+        /** @brief Get the current color of the text */
         display::Color TextColor() const;
+
+        /** @brief Get the current horizontal text alignment */
         TextAlignment Alignment() const;
+
+        /** @brief Get the current vertical text alignment */
+        VerticalTextAlignment VerticalAlignment() const;
+
+        /** This indicate if the next repaint should only repaint differences */
         bool incrementalRepaint;
 
+        /** @brief Get the width of the current text dimension */
         uint16_t TextPixelWidth() const;
+
+        /** @brief Get the height of the current text dimension */
         uint16_t TextPixelHeight() const;
 
-        const MonoFont& Font() const;
+        /** @brief If not NULL, then returns the current selected @ref MonoFont */
+        const MonoFont* Font() const;
+
+        /** @brief If not NULL, then returns the current selected @ref GFXfont */
+        const GFXfont* GfxFont() const;
+
+        /** @brief Returns the dimensions ( @ref Size and offset @ref Point ) of the text. */
+        geo::Rect TextDimension() const;
 
         // MARK: Setters
 
@@ -204,6 +268,8 @@ namespace mono { namespace ui {
          *
          * If you set this to 1 the old font (very bulky) font will be used. Any
          * other value will load the new default font.
+         *
+         * @deprecated Use specific font faces to control text sizes
          */
         void setTextSize(uint8_t newSize);
 
@@ -217,18 +283,43 @@ namespace mono { namespace ui {
          */
         void setBackgroundColor(display::Color col);
 
-        /** Set the text color */
+        /** @brief Set the text color */
         void setText(display::Color col);
 
-        /** Set the color behind the text */
+        /** @brief Set the color behind the text */
         void setBackground(display::Color col);
 
-        /** Controls text justification: center, right, left */
+        /** @brief Controls text justification: center, right, left */
         void setAlignment(TextAlignment align);
 
-        void setText(char *text, bool resizeViewWidth = false);
-        void setText(const char *txt, bool resizeViewWidth = false);
-        void setText(String text, bool resizeViewWidth = false);
+        /** @brief Set the texts vertical alignment: top, middle or bottom */
+        void setAlignment(VerticalTextAlignment vAlign);
+
+        /**
+         * @brief Change the text content of the Text label, and schedules repaint
+         * 
+         * This method updates the text that is rendered by the textlabel. It 
+         * automatically schedules an incremental (fast) repaint.
+         *
+         * @param text The C string text to render
+         */
+        void setText(const char *text);
+
+        /**
+         * @brief Change the text content of the Text label, and schedules repaint
+         *
+         * This method updates the text that is rendered by the textlabel. It
+         * automatically schedules an incremental (fast) repaint.
+         *
+         * @param text The Mono string text to render
+         */
+        void setText(String text);
+
+        /** @deprecated */
+        void setText(const char *txt, bool resizeViewWidth);
+
+        /** @deprecated */
+        void setText(String text, bool resizeViewWidth);
 
         /**
          * @brief Set a new font face on the label
@@ -237,12 +328,39 @@ namespace mono { namespace ui {
          * Fonts are header files that you must include youself. Each header file
          * defines a font in a specific size.
          *
-         * The header file defines a gloabl `const` variable that you pass to
+         * The header file defines a global `const` variable that you pass to
          * to this method.
+         *
+         * @deprecated Use the Adafruit GfxFont version of this method
+         * @param newFont The mono-spaced to use with the textlabel
          */
         void setFont(MonoFont const &newFont);
 
+        /**
+         * @brief Set a new font face on the label
+         *
+         * You can pass any Adafruit @ref GfxFont to the label to change its appearence.
+         * Fonts are header files that you must include youself. Each header file
+         * defines a font in a specific size.
+         *
+         * The header file defines a global `const` variable that you pass to
+         * to this method.
+         */
+        void setFont(GFXfont const &font);
+
     public:
+
+        /**
+         * @brief Repaints the view, using incremental repaints if possible
+         * 
+         * This method might be faster than @ref scheduleRepaint, since this
+         * repaint allows the text to be repainted incrementally. This means
+         * fast repaint of counters or fade animations.
+         *
+         * If you experience rendering errors, you should use the normal
+         * @ref scheduleRepaint method.
+         */
+        void scheduleFastRepaint();
 
         void scheduleRepaint();
 
