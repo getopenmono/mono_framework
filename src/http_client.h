@@ -74,8 +74,6 @@ namespace mono { namespace network {
             /** @brief Pointer to the originating @ref HttpClient object */
             HttpClient *Context;
 
-            //String HttpHeaderRaw;
-
             /** @brief The raw HTTP response chunk. More chunk might arrive later */
             String bodyChunk;
 
@@ -84,7 +82,6 @@ namespace mono { namespace network {
 
             HttpResponseData(HttpClient *cnxt) :
                 Context(cnxt),
-                HttpHeaderRaw(String()),
                 bodyChunk(String()),
                 Finished(false)
             {}
@@ -92,7 +89,6 @@ namespace mono { namespace network {
             HttpResponseData &operator=(const HttpResponseData &other)
             {
                 Context = other.Context;
-                HttpHeaderRaw = other.HttpHeaderRaw;
                 bodyChunk = other.bodyChunk;
                 Finished = other.Finished;
                 return *this;
