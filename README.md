@@ -1,6 +1,6 @@
 # Mono Framework
 
-[![Build Status](https://travis-ci.org/getopenmono/mono_framework.svg)](https://travis-ci.org/getopenmono/mono_framework) [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.txt)
+[![Build Status](https://travis-ci.org/getopenmono/mono_framework.svg?branch=master)](https://travis-ci.org/getopenmono/mono_framework) [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.txt)
 
 This is a framework for developing [Mono](http://openmono.com) applications.  For documentation on how to install and use this framework, see the [developer site](http://developer.openmono.com/).  If you want to generate the documentation, see [DOXYGEN.md](src/DOXYGEN.md).
 
