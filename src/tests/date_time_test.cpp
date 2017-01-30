@@ -8,8 +8,8 @@
 
 #define SLRE_DEBUG 1
 #define CATCH_CONFIG_MAIN
-#include "../../../../catch.hpp"
-#include "../../../src/date_time.h"
+#include "catch.hpp"
+#include "../date_time.h"
 
 using namespace mono;
 

@@ -8,9 +8,9 @@
 
 #define SLRE_DEBUG 1
 
-#include "../../catch.hpp"
-#include "../../../mn_string.h"
-#include "../../../regex.h"
+#include "catch.hpp"
+#include "../mn_string.h"
+#include "../regex.h"
 
 using mono::String;
 using mono::Regex;
