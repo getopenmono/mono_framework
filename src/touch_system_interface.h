@@ -39,12 +39,15 @@ namespace mono {
         TouchEvent lastTouchBegin;
         geo::Point lastTouchPosition;
         bool touchInProgress;
+        bool active;
         
         /**
-         * <# description #>
+         * @brief Run the system system handlers of the begin touch event
          *
-         * @brief <# brief desc #>
-         * @param <# param desc #>
+         * NOTE: You should not call this method manually. It is used by the sub-
+         * class of this interface.
+         *
+         * @param pos The begin event position on the screen
          */
         void runTouchBegin(geo::Point &pos)
         {
@@ -53,10 +56,12 @@ namespace mono {
         }
         
         /**
-         * <# description #>
+         * @brief Run the system system handlers of the move touch event
          *
-         * @brief <# brief desc #>
-         * @param <# param desc #>
+         * NOTE: You should not call this method manually. It is used by the sub-
+         * class of this interface.
+         *
+         * @param pos The move event position on the screen
          */
         void runTouchMove(geo::Point &pos)
         {
@@ -66,10 +71,12 @@ namespace mono {
         }
         
         /**
-         * <# description #>
+         * @brief Run the system system handlers of the end touch event
          *
-         * @brief <# brief desc #>
-         * @param <# param desc #>
+         * NOTE: You should not call this method manually. It is used by the sub-
+         * class of this interface.
+         *
+         * @param pos The end event position on the screen
          */
         void runTouchEnd(geo::Point &pos)
         {
@@ -81,28 +88,60 @@ namespace mono {
     public:
         
         /**
-         * <# description #>
-         *
          * @brief Initialize the touch system controller
+         *
+         * NOTE: This method is called by the current @ref IApplicationContext
+         * automatically upon reset. You should call this manually.
          */
         virtual void init() = 0;
         
         /**
-         * <# description #>
+         * @brief Sample the touch inputs and dispatch events if needed
          *
-         * @brief <# brief desc #>
+         * This @ref AppRunLoop calls this method automatically on each cycle.
+         * If you wish to limit the sample frequency, your subclass must
+         * manually abort some calls to this method.
+         *
+         * Note: Inactive touch systems must ignores calls to this method.
          */
         virtual void processTouchInput() = 0;
         
-        
+        /**
+         * @brief Sub-classes must convert corrdinates to screen pixels (X axis)
+         */
         virtual int ToScreenCoordsX(int touchPos, uint16_t screenWidth) = 0;
         
-        
+        /**
+         * @brief Sub-classes must convert corrdinates to screen pixels (Y axis)
+         */
         virtual int ToScreenCoordsY(int touchPos, uint16_t screenHeight) = 0;
-        
+
+        /**
+         * @brief Get the touch systems current calibration config.
+         * 
+         */
         virtual TouchCalibration CurrentCalibration() = 0;
 
+        /**
+         * @brief Set a new calibration config on the touch system
+         * 
+         */
         virtual void setCalibration(TouchCalibration &cal) = 0;
+
+        /**
+         * @brief Activate (enables) the touch system
+         */
+        virtual void activate() { active = true; }
+
+        /**
+         * @brief Deactivates (disables) the touch system
+         */
+        virtual void deactivate() { active = false; }
+
+        /**
+         * @brief Retuern `true` if touch system is active
+         */
+        virtual bool isActive() const { return active; }
     };
 
 }

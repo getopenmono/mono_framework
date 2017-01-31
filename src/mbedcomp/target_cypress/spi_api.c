@@ -29,8 +29,8 @@ struct spi_port_s spi_ports[3] =
 	{
         TFT_SPI_HARD_WIRE, TFT_SPI_CS, 8, 1,
         &SPI1_Start, &SPI1_Stop,
-        &SPI1_WriteTxData, &SPI1_ReadTxStatus,
-        &SPI1_GetRxBufferSize, &SPI1_ReadRxData
+        (void(*)(uint8_t))&SPI1_WriteTxData, &SPI1_ReadTxStatus, // typecast to silence warnings
+        &SPI1_GetRxBufferSize, (uint8_t(*)(void))&SPI1_ReadRxData // again here
     },
     {
         SD_SPI_HARD_WIRE, SD_SPI_CS, 8, 1,

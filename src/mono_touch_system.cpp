@@ -13,6 +13,7 @@ using namespace mono;
 
 MonoTouchSystem::MonoTouchSystem() : CalMinX(620), CalMinY(490), CalMaxX(2900),CalMaxY(3130)
 {
+    active = true;
 }
 
 void MonoTouchSystem::init()
@@ -30,7 +31,9 @@ void MonoTouchSystem::init()
 
 void MonoTouchSystem::processTouchInput()
 {
-    
+    if (!active)
+        return;
+
     if ((us_ticker_read() - lastTouchProcess) <= 10000)
         return;
     

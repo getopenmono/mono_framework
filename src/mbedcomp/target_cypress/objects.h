@@ -38,6 +38,12 @@ extern "C" {
         uint8_t (*SPI_ReadRxData)();
     };
 
+    struct analogin_s {
+        PinName hwPin;
+        char joinAmuxBusses;
+        uint32_t portRegister;
+        uint8_t portBitPattern;
+    };
 
     struct spi_s {
         int spiPortNum;
@@ -61,7 +67,7 @@ extern "C" {
         void (*USB_Stop)();
         uint8_t (*USB_GetConfiguration)();
         uint8_t (*USB_IsConfigurationChanged)();
-        void (*USB_CDC_Init)();
+        uint8_t (*USB_CDC_Init)();
         void (*USB_CDC_PutData)(const uint8_t *data, uint16_t len);
         void (*USB_CDC_PutChar)(char txDataByte);
         uint16_t (*USB_CDC_GetCount)();
