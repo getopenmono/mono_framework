@@ -68,6 +68,9 @@ namespace mono { namespace display {
     {
     public:
 
+        /** Function interface that for character drawing routines */
+        typedef void(*charDrawFunction)(geo::Point &position, char character, const GFXfont &font, geo::Rect const &boundRect, int lineHeight);
+
         /** @brief The horizontal text alignment, when rendering inside rects */
         enum HorizontalAlignment
         {
@@ -99,17 +102,6 @@ namespace mono { namespace display {
          * @deprecated Use the GfxFont method instead
          */
         void drawChar(geo::Point position, char character, const MonoFont &font, geo::Rect const &boundingRect);
-
-        /**
-         * @brief Render a single Adafruit GfxFont character
-         *
-         * @param position The point where the glyph is rendered
-         * @param font The Adafruit GfxFont to use
-         * @param gfxGlyph The specific glyph to render
-         * @param boundingRect The Rect that limits the render canvas (no paints beyond this Rect)
-         * @param lineHeight The glyph height offset, to align glyphs on the same baseline
-         */
-        void drawChar(const geo::Point &position, const GFXfont &font, const GFXglyph *gfxGlyph, geo::Rect const &boundingRect, int lineHeight);
 
         /**
          * @brief Calculated the maximum offset under the text baseline
@@ -174,6 +166,98 @@ namespace mono { namespace display {
         TextRender(const DisplayPainter &painter);
 
         /**
+         * @brief Layout the string in a rect, using af callback to handle characters
+         * 
+         * This method will parse a text string and trigger a callback for each 
+         * character, providing the position and allowed dimension of each 
+         * character.
+         *
+         * @param rect The rectangle to render in
+         * @param text The text string to render
+         * @param fontFace A pointer the Adafruit GFX font to use
+         * @param self A pointer to the callback method context object
+         * @param memptr A pointer to the callback method
+         * @param lineLayout Default: `true`, Render text as a multiline layout
+         */
+        template <typename Context>
+        void layoutInRect(geo::Rect rect,
+                          const String text,
+                          const GFXfont &fontFace,
+                          Context *self,
+                          void(Context::*memptr)(const geo::Point &position, const GFXfont &font, const GFXglyph *gfxGlyph, geo::Rect const &boundingRect, const int lineHeight),
+                          bool lineLayout = true)
+        {
+            if (dispCtrl == 0)
+                return;
+            if (text.Length() == 0)
+                return;
+
+            dispCtrl->setWindow(rect.X(), rect.Y(), rect.Width(), rect.Height());
+            int cnt = 0;
+            char c = text[cnt];
+
+            geo::Rect offset = renderInRect(rect, text, fontFace, lineLayout);
+            geo::Rect dim = offset;
+
+            GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
+
+            bool firstCharInLine = true;
+            int lineHeight;
+            if (lineLayout)
+                lineHeight = fontFace.yAdvance;
+            else
+                lineHeight = dim.Height() - calcUnderBaseline(text, fontFace);
+
+            while (c != '\0')
+            {
+                if (c == '\n')
+                {
+                    firstCharInLine = true;
+                    offset.appendY(fontFace.yAdvance);
+                    // +1 to skip newline char
+                    uint32_t textWidth = remainingTextlineWidth(fontFace, text.stringData+cnt+1);
+                    offset.setX(rect.X());
+
+                    if (rect.Width() - textWidth > 0)
+                    {
+                        switch (hAlignment) {
+                            case ALIGN_CENTER:
+                                offset.setX(rect.X() + (rect.Width() - textWidth)/2 );
+                                break;
+                            case ALIGN_RIGHT:
+                                offset.setX(rect.X() + rect.Width() - textWidth );
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                else if (c == ' ')
+                {
+                    offset.appendX(glyph->xAdvance);
+                }
+                else if (offset.X()+glyph->width <= rect.X2())
+                {
+                    if (firstCharInLine) {
+                        offset.appendX( -glyph->xOffset);
+                    }
+
+                    void (Context::**m)(const geo::Point &, const GFXfont &, const GFXglyph *, geo::Rect const &, const int) = reinterpret_cast<void(Context::**)(const geo::Point &, const GFXfont &, const GFXglyph *, geo::Rect const &, const int)>(&memptr);
+
+                    (self->**m)(offset, fontFace, glyph, rect, lineHeight);
+                    offset.appendX(glyph->xAdvance);
+                }
+                else
+                {
+                }
+                
+                firstCharInLine = false;
+                c = text[++cnt];
+                glyph = &fontFace.glyph[c - fontFace.first];
+            }
+        }
+
+        /**
          * @brief Renders a text string in a provided Rectangle
          * 
          * THis method paints / renders the text in bounding rectangle. The text
@@ -198,6 +282,17 @@ namespace mono { namespace display {
          * @param fontFace The font to use
          */
         geo::Size renderDimension(String text, const MonoFont &fontFace);
+
+        /**
+         * @brief Render a single Adafruit GfxFont character
+         *
+         * @param position The point where the glyph is rendered
+         * @param font The Adafruit GfxFont to use
+         * @param gfxGlyph The specific glyph to render
+         * @param boundingRect The Rect that limits the render canvas (no paints beyond this Rect)
+         * @param lineHeight The glyph height offset, to align glyphs on the same baseline
+         */
+        void drawChar(const geo::Point &position, const GFXfont &font, const GFXglyph *gfxGlyph, geo::Rect const &boundingRect, const int lineHeight);
 
         /**
          * @brief Renders a text string in a provided Rectangle

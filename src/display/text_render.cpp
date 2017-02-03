@@ -3,6 +3,7 @@
 
 #include "text_render.h"
 #include <view.h>
+#include <mbed_debug.h>
 
 using namespace mono::display;
 
@@ -150,69 +151,10 @@ void TextRender::drawChar(geo::Point position, char character, const MonoFont &f
     }
 }
 
-void TextRender::drawInRect(const geo::Rect &rect, String text, const GFXfont &fontFace, bool lineLayout)
+void TextRender::drawInRect(const geo::Rect &rect, const String text, const GFXfont &fontFace, bool lineLayout)
 {
-    if (dispCtrl == 0)
-        return;
-    if (text.Length() == 0)
-        return;
-    
-    dispCtrl->setWindow(rect.X(), rect.Y(), rect.Width(), rect.Height());
-    int cnt = 0;
-    char c = text[cnt];
-    
-    geo::Rect offset = renderInRect(rect, text, fontFace, lineLayout);
-    geo::Rect dim = offset;
-    
-    GFXglyph *glyph = &fontFace.glyph[c - fontFace.first];
-
-    bool firstCharInLine = true;
-    int lineHeight;
-    if (lineLayout)
-        lineHeight = fontFace.yAdvance;
-    else
-        lineHeight = dim.Height() - calcUnderBaseline(text, fontFace);
-    
-    while (c != '\0')
-    {
-        if (c == '\n')
-        {
-            firstCharInLine = true;
-            offset.appendY(fontFace.yAdvance);
-            // +1 to skip newline char
-            uint32_t textWidth = remainingTextlineWidth(fontFace, text.stringData+cnt+1);
-            offset.setX(rect.X());
-
-            if (rect.Width() - textWidth > 0)
-            {
-                switch (hAlignment) {
-                    case ALIGN_CENTER:
-                        offset.setX(rect.X() + (rect.Width() - textWidth)/2 );
-                        break;
-                    case ALIGN_RIGHT:
-                        offset.setX(rect.X() + rect.Width() - textWidth );
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-        else if (c == ' ')
-        {
-            offset.appendX(glyph->xAdvance);
-        }
-        else if (offset.X()+glyph->width <= rect.X2())
-        {
-            if (firstCharInLine)
-                offset.appendX( -glyph->xOffset);
-            this->drawChar(offset, fontFace, glyph, rect, lineHeight);
-            offset.appendX(glyph->xAdvance);
-        }
-
-        firstCharInLine = false;
-        c = text[++cnt];
-        glyph = &fontFace.glyph[c - fontFace.first];
-    }
+    this->layoutInRect<TextRender>(rect, text, fontFace,
+                                   this, &TextRender::drawChar, lineLayout);
 }
 
 void TextRender::drawChar(const geo::Point &position, const GFXfont &gfxFont, const GFXglyph *glyph, geo::Rect const &bounds, int lineHeight)
@@ -228,7 +170,7 @@ void TextRender::drawChar(const geo::Point &position, const GFXfont &gfxFont, co
     mono::geo::Rect glyphBounds(position.X() + xo,
                                 position.Y() + lineHeight + yo,
                                 w, h);
-    
+
     if (!bounds.contains(glyphBounds, true))
         return;
     

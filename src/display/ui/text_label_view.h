@@ -8,6 +8,7 @@
 #include "mn_string.h"
 #include <font_interface.h>
 #include <gfxfont.h>
+#include <text_render.h>
 
 namespace mono { namespace ui {
 
@@ -128,6 +129,9 @@ namespace mono { namespace ui {
         String text;
         String prevText;
         geo::Rect prevTextRct;
+        int incrementCharOffset;
+        int incrementCharPosition;
+        mono::display::TextRender *incrementTextRender;
 
         const MonoFont *currentFont;
         const GFXfont *currentGfxFont;
@@ -153,6 +157,8 @@ namespace mono { namespace ui {
         void repaintLegacyIncremental(geo::Rect &txtRct);
 
         bool canUseIncrementalRepaint() const;
+
+        void drawIncrementalChar(const geo::Point &position, const GFXfont &font, const GFXglyph *gfxGlyph, geo::Rect const &boundingRect, const int lineHeight);
 
     public:
 

@@ -29,6 +29,10 @@ TextLabelView::TextLabelView(String txt) :
 
     alignment = ALIGN_LEFT;
     vAlignment = ALIGN_MIDDLE;
+
+    incrementTextRender = 0;
+    incrementCharOffset = 0;
+    incrementCharPosition = 0;
 }
 
 TextLabelView::TextLabelView(const char *txt) :
@@ -47,6 +51,10 @@ TextLabelView::TextLabelView(const char *txt) :
 
     alignment = ALIGN_LEFT;
     vAlignment = ALIGN_MIDDLE;
+
+    incrementTextRender = 0;
+    incrementCharOffset = 0;
+    incrementCharPosition = 0;
 }
 
 TextLabelView::TextLabelView(geo::Rect rct, String txt) :
@@ -64,6 +72,10 @@ TextLabelView::TextLabelView(geo::Rect rct, String txt) :
 
     alignment = ALIGN_LEFT;
     vAlignment = ALIGN_MIDDLE;
+
+    incrementTextRender = 0;
+    incrementCharOffset = 0;
+    incrementCharPosition = 0;
 }
 
 TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
@@ -81,6 +93,10 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
 
     alignment = ALIGN_LEFT;
     vAlignment = ALIGN_MIDDLE;
+
+    incrementTextRender = 0;
+    incrementCharOffset = 0;
+    incrementCharPosition = 0;
 }
 
 /// MARK: Getters
@@ -306,6 +322,8 @@ bool TextLabelView::canUseIncrementalRepaint() const
     // centered proportial fonts cannot incremental repaint
     if (currentGfxFont && alignment == ALIGN_CENTER && text != prevText)
         return false;
+    if (currentGfxFont && alignment == ALIGN_RIGHT && text != prevText)
+        return false;
     if (prevText.Length() == 0)
         return false;
     if (prevText.Length() != text.Length())
@@ -359,69 +377,49 @@ void TextLabelView::repaintLegacy(geo::Rect &)
     }
 }
 
-void TextLabelView::repaintGfxIncremental(mono::geo::Rect &txtRct)
+void TextLabelView::drawIncrementalChar(const geo::Point &position, const GFXfont &font, const GFXglyph *gfxGlyph, const geo::Rect &boundingRect, const int lineHeight)
+{
+    // skip draw - since char is already present on screen
+    if (incrementCharPosition < incrementCharOffset) {
+        incrementCharPosition++;
+        return;
+    }
+
+    //draw the character
+    if (incrementTextRender)
+        incrementTextRender->drawChar(position, font, gfxGlyph, boundingRect, lineHeight);
+
+    incrementCharPosition++;
+}
+
+void TextLabelView::repaintGfxIncremental(mono::geo::Rect &)
 {
     display::TextRender tr(painter);
-    uint32_t charIdx = 0;
-    uint32_t glyphXOffset = 0;
-    uint32_t glyphWidth = 0;
-    uint32_t glyphHeight = currentGfxFont->yAdvance;
+    tr.setAlignment((display::TextRender::HorizontalAlignment)alignment);
+    tr.setAlignment((display::TextRender::VerticalAlignmentType) vAlignment);
 
-    uint32_t newlines = 0;
-    uint32_t lineIdx = 0;
+    uint32_t charIdx = 0;
 
     while(charIdx < text.Length() && charIdx < prevText.Length())
     {
-        // jump to next line
-        if (text[charIdx] == '\n')
-        {
-            newlines++;
-            lineIdx = 0;
-        }
-
-        GFXglyph gl = currentGfxFont->glyph[text[charIdx] - currentGfxFont->first];
-        glyphWidth = gl.width;
-
         // is current char different - repaint
         if (text[charIdx] != prevText[charIdx])
         {
-            uint32_t xOff = viewRect.X() + glyphXOffset;
-            uint32_t yOff = viewRect.Y()+newlines*glyphHeight;
-
-            String remainder(text()+charIdx);
-            String oldRemainder(prevText()+charIdx);
-
-            geo::Size oldDim = tr.renderDimension(oldRemainder, *currentGfxFont, textMultiline);
+            incrementCharPosition = 0;
+            incrementCharOffset = charIdx;
             tr.setForeground(bgColor);
-            tr.drawInRect(geo::Rect(xOff, yOff, oldDim.Width(), oldDim.Height()),
-                          oldRemainder,
-                          *currentGfxFont, textMultiline);
+            incrementTextRender = &tr;
+            tr.layoutInRect<TextLabelView>(viewRect, prevText, *currentGfxFont, this, &TextLabelView::drawIncrementalChar, textMultiline);
 
             tr.setForeground(textColor);
-            txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
-            tr.drawInRect(txtRct, remainder, *currentGfxFont, textMultiline);
+            incrementCharPosition = 0;
+            tr.layoutInRect(viewRect, text, *currentGfxFont, this, &TextLabelView::drawIncrementalChar, textMultiline);
 
-            geo::Size txtBnds = tr.renderDimension(remainder, *currentGfxFont, textMultiline);
-            prevTextRct = geo::Rect(xOff, yOff, txtBnds.Width(), txtBnds.Height());
-            charIdx = text.Length();
-            break; // no now - every following chars are repainted
+            return; // no now - every following chars are repainted
         }
 
-        glyphXOffset += gl.xAdvance;
         charIdx++;
-        lineIdx++;
     }
-
-    if (charIdx < text.Length())
-    {
-        uint32_t xOff = viewRect.X()+lineIdx*glyphWidth;
-        uint32_t yOff = viewRect.Y()+newlines*glyphHeight;
-        txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
-
-        String remainder(text()+charIdx);
-        tr.drawInRect(txtRct, remainder, *currentGfxFont);
-    }
-    
 }
 
 void TextLabelView::repaintLegacyIncremental(geo::Rect &txtRct)
