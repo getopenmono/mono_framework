@@ -8,6 +8,8 @@
 
 using namespace mono;
 
+bool IRTCSystem::__shouldProcessScheduledTasks = false;
+
 extern "C" {
 void rtc_interrupt(void)
 {
@@ -15,6 +17,7 @@ void rtc_interrupt(void)
     CyPmReadStatus(CY_PM_ONEPPS_INT);
 
     DateTime::incrementSystemClock();
+    IRTCSystem::__shouldProcessScheduledTasks = true;
 }
 }
 

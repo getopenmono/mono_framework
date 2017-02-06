@@ -135,6 +135,11 @@ DateTime DateTime::addSeconds(int seconds) const
             other.incrementSecond();
         }
     }
+    else if (seconds < 0) {
+        for (int s=0; s< -1*seconds; s++) {
+            other.decrementSecond();
+        }
+    }
 
     return other;
 }
@@ -146,6 +151,11 @@ DateTime DateTime::addMinutes(int minutes) const
     {
         for (int m=0; m<minutes; m++) {
             other.incrementMinute();
+        }
+    }
+    else if (minutes < 0) {
+        for (int m=0; m< -1*minutes; m++) {
+            other.decrementMinute();
         }
     }
 
@@ -161,6 +171,11 @@ DateTime DateTime::addHours(int hrs) const
             other.incrementHour();
         }
     }
+    else if (hrs < 0) {
+        for (int h=0; h< -1*hrs; h++) {
+            other.decrementHour();
+        }
+    }
 
     return other;
 }
@@ -172,6 +187,11 @@ DateTime DateTime::addDays(int days) const
     {
         for (int d=0; d<days; d++) {
             other.incrementDayOfMonth();
+        }
+    }
+    else if (days < 0) {
+        for (int d=0; d< -1*days; d++) {
+            other.decrementDayOfMonth();
         }
     }
 
@@ -190,7 +210,7 @@ DateTime DateTime::addDays(int days) const
 //
 //    return other;
 //}
-//
+
 //DateTime DateTime::addYears(int years) const
 //{
 //    DateTime other(*this);
@@ -230,12 +250,35 @@ bool DateTime::operator>(const mono::DateTime &other) const
     DateTime utcSelf = this->toUtcTime();
     DateTime utcOther = other.toUtcTime();
 
-    return  utcSelf.year > utcOther.year ||
-            utcSelf.month > utcOther.month ||
-            utcSelf.day > utcOther.day ||
-            utcSelf.hours > utcOther.hours ||
-            utcSelf.mins > utcOther.mins ||
-            utcSelf.secs > utcOther.secs;
+    if (utcSelf.year > utcOther.year)
+        return true;
+    else if (utcSelf.year < utcOther.year)
+        return false;
+    
+    if (utcSelf.month > utcOther.month)
+        return true;
+    else if (utcSelf.month < utcOther.month)
+        return false;
+    
+    if (utcSelf.day > utcOther.day)
+        return true;
+    else if (utcSelf.day < utcOther.day)
+        return false;
+    
+    if (utcSelf.hours > utcOther.hours)
+        return true;
+    else if (utcSelf.hours < utcOther.hours)
+        return false;
+    
+    if (utcSelf.mins > utcOther.mins)
+        return true;
+    else if (utcSelf.mins < utcOther.mins)
+        return false;
+    
+    if (utcSelf.secs > utcOther.secs)
+        return true;
+    else
+        return false; // secs must en less than other
 }
 
 bool DateTime::operator<(const mono::DateTime &other) const
@@ -243,12 +286,35 @@ bool DateTime::operator<(const mono::DateTime &other) const
     DateTime utcSelf = this->toUtcTime();
     DateTime utcOther = other.toUtcTime();
 
-    return  utcSelf.year < utcOther.year ||
-            utcSelf.month < utcOther.month ||
-            utcSelf.day < utcOther.day ||
-            utcSelf.hours < utcOther.hours ||
-            utcSelf.mins < utcOther.mins ||
-            utcSelf.secs < utcOther.secs;
+    if (utcSelf.year < utcOther.year)
+        return true;
+    else if (utcSelf.year > utcOther.year)
+        return false;
+    
+    if (utcSelf.month < utcOther.month)
+        return true;
+    else if (utcSelf.month > utcOther.month)
+        return false;
+    
+    if (utcSelf.day < utcOther.day)
+        return true;
+    else if (utcSelf.day > utcOther.day)
+        return false;
+    
+    if (utcSelf.hours < utcOther.hours)
+        return true;
+    else if (utcSelf.hours > utcOther.hours)
+        return false;
+    
+    if (utcSelf.mins < utcOther.mins)
+        return true;
+    else if (utcSelf.mins > utcOther.mins)
+        return false;
+    
+    if (utcSelf.secs < utcOther.secs)
+        return true;
+    else
+        return false; // secs must en less than other
 }
 
 bool DateTime::operator>=(const mono::DateTime &other) const
@@ -369,6 +435,67 @@ void DateTime::incrementMonth()
 void DateTime::incrementYear()
 {
     year++;
+    leapYear = isLeapYear(year);
+}
+
+void DateTime::decrementSecond()
+{
+    if (secs == 0) {
+        secs = 59;
+        decrementMinute();
+    }
+    else
+        secs--;
+        
+}
+
+void DateTime::decrementMinute()
+{
+    if (mins == 0)
+    {
+        mins = 59;
+        decrementHour();
+    }
+    else
+        mins--;
+}
+
+void DateTime::decrementHour()
+{
+    if (hours == 0) {
+        hours = 23;
+        decrementDayOfMonth();
+    }
+    else
+        hours--;
+}
+
+void DateTime::decrementDayOfMonth()
+{
+    if (day == 1) {
+        decrementMonth();
+        if (leapYear && month == 2)
+            day = 29;
+        else
+            day = DaysPerMonth[month];
+    }
+    else
+        day--;
+}
+
+void DateTime::decrementMonth()
+{
+    if (month == 1) {
+        month = 12;
+        decrementYear();
+    }
+    else
+        month--;
+}
+
+void DateTime::decrementYear()
+{
+    year--;
     leapYear = isLeapYear(year);
 }
 

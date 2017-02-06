@@ -2,3 +2,7 @@ build
 dist
 *.xcodeproj
 *DerivedData
+.DS_Store
+src/tests/build
+src/tests/buildlib
+src/tests/bin

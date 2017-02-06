@@ -161,6 +161,9 @@ namespace mono { namespace redpine {
 
         /** User can install a network ready event callback in this handler */
         mbed::FunctionPointer networkReadyHandler;
+        
+        /**  */
+        mbed::FunctionPointer connectFailedHandler;
 
         mbed::FunctionPointerArg1<void, StaticIPParams*> staticIPHandler;
 
@@ -277,6 +280,12 @@ namespace mono { namespace redpine {
         static void setNetworkReadyCallback(Owner *obj, void (Owner::*memPtr)(void))
         {
             Module::Instance()->networkReadyHandler.attach<Owner>(obj, memPtr);
+        }
+        
+        template <typename Owner>
+        static void setConnectFailedCallback(Owner *obj, void (Owner::*memPtr)(void))
+        {
+            Module::Instance()->connectFailedHandler.attach<Owner>(obj, memPtr);
         }
 
         template <typename Owner>

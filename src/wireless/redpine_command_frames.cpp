@@ -9,6 +9,8 @@
 
 using namespace mono::redpine;
 
+// MARK: Op. Mode Frame
+
 SetOperatingModeFrame::SetOperatingModeFrame(WifiOperModes mode) : ManagementFrame(ModuleFrame::SetOperatingMode)
 {
     this->length = sizeof(operModeFrameSnd);
@@ -35,7 +37,7 @@ void SetOperatingModeFrame::dataPayload(uint8_t *dataBuffer)
 }
 
 
-// BAND FRAME
+// MARK: BAND FRAME
 
 BandFrame::BandFrame() : ManagementFrame(ManagementFrame::Band)
 {
@@ -55,7 +57,7 @@ void BandFrame::dataPayload(uint8_t *dataBuffer)
 }
 
 
-// INIT FRAME
+// MARK: INIT FRAME
 
 InitFrame::InitFrame() : ManagementFrame(ManagementFrame::Init)
 {
@@ -76,7 +78,7 @@ void InitFrame::responsePayloadHandler(uint8_t *payloadBuffer)
     memcpy((void*)&this->response, payloadBuffer, sizeof(initFrameResponse));
 }
 
-// SCAN FRAME
+// MARK: SCAN FRAME
 
 
 ScanFrame::ScanFrame() : ManagementFrame(ManagementFrame::Scan)
@@ -118,7 +120,7 @@ void ScanFrame::responsePayloadHandler(uint8_t *dataBuffer)
 }
 
 
-// JOIN FRAME
+// MARK: JOIN FRAME
 
 JoinFrame::JoinFrame(String ssid, String pass, int secMode) : ManagementFrame(Join)
 {
@@ -144,7 +146,7 @@ void JoinFrame::dataPayload(uint8_t *dataBuffer)
 }
 
 
-// Set IP Parameters frame
+// MARK: Set IP Parameters frame
 
 SetIpParametersFrame::SetIpParametersFrame() : ManagementFrame(ManagementFrame::SetIPParameters)
 {
@@ -187,7 +189,7 @@ void SetIpParametersFrame::responsePayloadHandler(uint8_t *databuffer)
     memcpy(this->macAddress, resp->macAddr, 6);
 }
 
-// DNS RESOLUTE FRAME
+// MARK: DNS RESOLUTE FRAME
 
 DnsResolutionFrame::DnsResolutionFrame(String domainName) : ManagementFrame(DnsResolution)
 {
@@ -235,7 +237,7 @@ void DnsResolutionFrame::responsePayloadHandler(uint8_t *databuffer)
 }
 
 
-// HTTP GET Frame
+// MARK: HTTP GET Frame
 
 HttpGetFrame::HttpGetFrame(String host, String ipaddrs, String url, FILE *destFile, uint32_t httpPort) :
     ManagementFrame(HttpGet)
@@ -342,7 +344,8 @@ int HttpPostFrame::payloadLength()
 
 void HttpPostFrame::dataPayload(uint8_t *data)
 {
-    memset(data, 0, this->payloadLength());
+    int payLength = this->payloadLength();
+    memset(data, 0, payLength);
 
     HttpReqFrameSnd *frm = (HttpReqFrameSnd*) data;
     frm->ip_version = 4;
@@ -367,13 +370,26 @@ void HttpPostFrame::dataPayload(uint8_t *data)
     memcpy(strPnt, extraHeader(), extraHeader.Length());
     strPnt += extraHeader.Length()+1;
 
+    int dataLen = requestDataLengthCallback.call();;
+
     if (requestDataCallback)
         requestDataCallback.call((char*)(strPnt));
+
+    strPnt += dataLen;
+
+    int remainder = payLength - (strPnt - (uint8_t*)frm);
+
+
+    if (remainder > 0)
+    {
+        debug("Padding packet with spaces (0x20) to align with 4-byte length!\r\n");
+        memset(strPnt, ' ', remainder);
+    }
 }
 
 
 
-// SET POWER MODE FRAME
+// MARK: SET POWER MODE FRAME
 
 PowerModeFrame::PowerModeFrame(PowerModeFrame::PowerSaveModes saveMode, PowerModeFrame::UltraLowPowerModes powMode, bool dtimBeacon) : ManagementFrame(PowerSaveMode)
 {
@@ -391,7 +407,7 @@ void PowerModeFrame::dataPayload(uint8_t *data)
 
 
 
-// SET SLEEP TIMER FRAME
+// MARK: SET SLEEP TIMER FRAME
 
 SetSleepTimerFrame::SetSleepTimerFrame(uint16_t sleepSecs) : ManagementFrame(SleepTimer)
 {

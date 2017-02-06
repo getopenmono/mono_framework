@@ -39,11 +39,15 @@
 #include <rect.h>
 #include <regex.h>
 #include <size.h>
+#include <text_render.h>
 #include <touch_system_interface.h>
 #include <power_saver.h>
+#include <date_time.h>
+#include <scheduled_task.h>
 
 #ifndef EMUNO
 #include <http_client.h>
+#include <http_post_client.h>
 #include <dns_resolver.h>
 #else
 #include <emuno.h>

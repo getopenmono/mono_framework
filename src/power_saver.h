@@ -50,6 +50,8 @@ namespace mono {
         int fullBright;
         bool enabled;
         void dimStep();
+        void sleepStep();
+        void undimStep();
         
     public:
 
