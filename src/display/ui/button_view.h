@@ -56,7 +56,7 @@ namespace mono { namespace ui {
         
         bool isPressedDown;
         
-        Color borderColor;
+        Color borderColor, textColor;
         Color borderColorPressed;
         Color background;
         
@@ -128,14 +128,24 @@ namespace mono { namespace ui {
         void setFont(GFXfont const &newFont);
 
         /**
-         * @brief Sets the border and text color
+         * @brief Sets the border color
          *
          * This method will not schedule repaint! You must @ref scheduleRepaint
          * manually.
          *
-         * @param c The new border and text color
+         * @param c The new border color
          */
         void setBorder(Color c);
+        
+        /**
+         * @brief Sets the text color
+         *
+         * This method will not schedule repaint! You must @ref scheduleRepaint
+         * manually.
+         *
+         * @param c The new text color
+         */
+        void setText(Color c);
 
         /**
          * @brief Sets the highlight color (border & text)

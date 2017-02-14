@@ -153,6 +153,26 @@ namespace mono {
         bool operator<(const mono::DateTime &other) const;
         bool operator<=(const mono::DateTime &other) const;
 
+        // MARK: Accessors
+        
+        /** @brief Get the hour component */
+        uint8_t Hours() const;
+        
+        /** @brief Get the Minute component */
+        uint8_t Minutes() const;
+        
+        /** @brief Get the Seconds component */
+        uint8_t Seconds() const;
+        
+        /** @brief Get the day of month component */
+        uint8_t Days() const;
+        
+        /** @brief Get the month component */
+        uint8_t Month() const;
+        
+        /** @brief Get the year component */
+        uint16_t Year() const;
+        
         // MARK: Date / Time manipulation
 
         /**

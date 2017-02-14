@@ -23,22 +23,21 @@ void ButtonView::initButton()
     }
     
     isPressedDown = false;
+    textColor = StandardTextColor;
+    borderColor = StandardBorderColor;
+    borderColorPressed = StandardHighlightColor;
 }
 
 ButtonView::ButtonView() :
     ResponderView(),
-    textLabel(geo::Rect(), ""),
-    borderColor(StandardBorderColor),
-    borderColorPressed(StandardHighlightColor)
+    textLabel(geo::Rect(), "")
 {
     initButton();
 }
 
 ButtonView::ButtonView(geo::Rect rect, String text) :
     ResponderView(rect),
-    textLabel(geo::Rect(rect), text),
-    borderColor(StandardBorderColor),
-    borderColorPressed(StandardHighlightColor)
+    textLabel(geo::Rect(rect), text)
 {
     initButton();
 }
@@ -112,7 +111,11 @@ void ButtonView::setFont(const GFXfont &newFont)
 void ButtonView::setBorder(Color c)
 {
     borderColor = c;
-    textLabel.setTextColor(c);
+}
+
+void ButtonView::setText(Color c)
+{
+    textColor = c;
 }
 
 void ButtonView::setBackground(Color c)
@@ -136,7 +139,7 @@ const TextLabelView& ButtonView::TextLabel() const
 void ButtonView::repaint()
 {
     textLabel.incrementalRepaint = false;
-    textLabel.setTextColor( isPressedDown ? borderColorPressed : borderColor );
+    textLabel.setTextColor( isPressedDown ? borderColorPressed : textColor );
     textLabel.repaint();
     
     painter.setForegroundColor( isPressedDown ? borderColorPressed : borderColor );

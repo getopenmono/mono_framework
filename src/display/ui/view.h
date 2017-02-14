@@ -235,7 +235,7 @@ namespace mono {
          *
          * @brief Schedule this view for repaint at next display refresh
          */
-        void scheduleRepaint();
+        virtual void scheduleRepaint();
 
 
         /**

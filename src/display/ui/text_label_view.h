@@ -353,6 +353,13 @@ namespace mono { namespace ui {
          * to this method.
          */
         void setFont(GFXfont const &font);
+        
+        // MARK: Getters
+        
+        /**
+         * @brief Gets the content of the text label
+         */
+        String Text() const;
 
     public:
 

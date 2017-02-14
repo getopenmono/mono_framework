@@ -44,7 +44,7 @@ HttpPostClient::HttpPostClient(String anUrl, String headers)
         success = reg.Match(anUrl, caps, 4);
 
         if (!success) {
-            debug("url parse err");
+            debug("url parse err\r\n");
             lastErrorCode = URL_PARSE_ERROR;
             triggerQueuedErrorHandler();
             return;
