@@ -124,6 +124,38 @@ DateTime DateTime::toUtcTime() const
 
 }
 
+// MARK: Accessors
+
+uint8_t DateTime::Hours() const
+{
+    return hours;
+}
+
+uint8_t DateTime::Minutes() const
+{
+    return mins;
+}
+
+uint8_t DateTime::Seconds() const
+{
+    return secs;
+}
+
+uint8_t DateTime::Days() const
+{
+    return day;
+}
+
+uint8_t DateTime::Month() const
+{
+    return month;
+}
+
+uint16_t DateTime::Year() const
+{
+    return year;
+}
+
 // MARK: Date / Time manipulation
 
 DateTime DateTime::addSeconds(int seconds) const

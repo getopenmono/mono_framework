@@ -274,7 +274,14 @@ void TextLabelView::setFont(GFXfont const &font)
     scheduleRepaint();
 }
 
-/// MARK: Aux Functions
+// MARK: Getters
+
+mono::String TextLabelView::Text() const
+{
+    return text;
+}
+
+// MARK: Aux Functions
 
 void TextLabelView::scheduleRepaint()
 {
