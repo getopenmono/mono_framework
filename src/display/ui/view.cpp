@@ -131,6 +131,7 @@ void View::show()
 void View::hide()
 {
     visible = false;
+    isDirty = false;
     dirtyQueue.Remove(this);
 }
 

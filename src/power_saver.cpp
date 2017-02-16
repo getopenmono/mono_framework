@@ -12,6 +12,7 @@ PowerSaver::PowerSaver(int dimTimeoutMs, int sleepTimeoutMs,
     enabled = true;
     dimBright = dimBrightness;
     fullBright = fullBrightness;
+    stepDir = DIM_NONE;
     
     dimTimer.setCallback<PowerSaver>(this, &PowerSaver::dim);
     sleepTimer.setCallback<PowerSaver>(this, &PowerSaver::sleepStep);
@@ -21,7 +22,7 @@ PowerSaver::PowerSaver(int dimTimeoutMs, int sleepTimeoutMs,
 
 void PowerSaver::sleepStep()
 {
-    if (!enabled)
+    if (!enabled || stepDir != DIM_DOWN)
         return;
 
     int cur = IApplicationContext::Instance->DisplayController->Brightness();
@@ -36,7 +37,7 @@ void PowerSaver::sleepStep()
 
 void PowerSaver::dimStep()
 {
-    if (!enabled)
+    if (!enabled || stepDir != DIM_DOWN)
         return;
 
     int cur = IApplicationContext::Instance->DisplayController->Brightness();
@@ -51,7 +52,7 @@ void PowerSaver::dimStep()
 
 void PowerSaver::undimStep()
 {
-    if (!enabled)
+    if (!enabled || stepDir != DIM_UP)
         return;
 
     int cur = IApplicationContext::Instance->DisplayController->Brightness();
@@ -80,22 +81,23 @@ void PowerSaver::startSleepTimer()
 void PowerSaver::dim()
 {
     enabled = true;
+    stepDir = DIM_DOWN;
     dimStep();
 }
 
 void PowerSaver::undim()
 {
     enabled = true;
+    stepDir = DIM_UP;
     dimTimer.Stop();
     sleepTimer.Stop();
-    //IApplicationContext::Instance->DisplayController->setBrightness(fullBright);
-    //startDimTimer();
     undimStep();
 }
 
 void PowerSaver::deactivate()
 {
     enabled = false;
+    stepDir = DIM_NONE;
     sleepTimer.Stop();
     dimTimer.Stop();
 }

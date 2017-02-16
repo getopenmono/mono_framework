@@ -107,6 +107,12 @@ void ButtonView::setFont(const GFXfont &newFont)
     textLabel.setFont(newFont);
 }
 
+void ButtonView::setRect(geo::Rect r)
+{
+    View::setRect(r);
+    textLabel.setRect(r);
+}
+
 // colors
 void ButtonView::setBorder(Color c)
 {
@@ -139,7 +145,7 @@ const TextLabelView& ButtonView::TextLabel() const
 void ButtonView::repaint()
 {
     textLabel.incrementalRepaint = false;
-    textLabel.setTextColor( isPressedDown ? borderColorPressed : textColor );
+    textLabel.setText( isPressedDown ? borderColorPressed : textColor );
     textLabel.repaint();
     
     painter.setForegroundColor( isPressedDown ? borderColorPressed : borderColor );

@@ -45,10 +45,20 @@ namespace mono {
     class PowerSaver : public TouchResponder
     {
     protected:
+        
+        enum StepDirection
+        {
+            DIM_NONE,
+            DIM_UP,
+            DIM_DOWN
+        };
+        
         Timer dimTimer, sleepTimer;
         int dimBright;
         int fullBright;
         bool enabled;
+        StepDirection stepDir;
+        
         void dimStep();
         void sleepStep();
         void undimStep();
