@@ -175,6 +175,8 @@ namespace mono { namespace ui {
          */
         void setBackground(Color c);
 
+        void setRect(geo::Rect r);
+        
         /**
          * @brief Get a reference to the internal TextLabel object
          *

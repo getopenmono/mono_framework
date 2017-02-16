@@ -66,7 +66,7 @@ TextLabelView::TextLabelView(geo::Rect rct, String txt) :
     currentFont = TextLabelView::StandardTextFont;
     this->text = txt;
     this->textMultiline = isTextMultiline();
-    this->setTextSize(2);
+    textSize = 2;
     prevTextRct = viewRect;
     currentGfxFont = StandardGfxFont;
 
@@ -87,7 +87,7 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
     currentFont = TextLabelView::StandardTextFont;
     this->text = txt;
     this->textMultiline = isTextMultiline();
-    this->setTextSize(2);
+    textSize = 2;
     prevTextRct = viewRect;
     currentGfxFont = StandardGfxFont;
 
@@ -103,7 +103,7 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
 
 uint8_t TextLabelView::TextSize() const
 {
-    debug("TextLabelView::TextSuze is Deprecated!\r\n");
+    debug("TextLabelView::TextSize is Deprecated!\r\n");
     return textSize;
 }
 
