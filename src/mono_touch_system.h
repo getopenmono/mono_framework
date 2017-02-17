@@ -6,6 +6,7 @@
 
 #include <touch_system_interface.h>
 #include "power_aware_interface.h"
+#include "io/running_average_filter.h"
 
 extern "C" {
 #include <project.h>
@@ -25,7 +26,9 @@ namespace mono {
         
         /** Calibration maximum touch input */
         uint16_t CalMaxX, CalMaxY;
-        
+
+        io::RunningAverageFilter<4> xAvg, yAvg;
+
         geo::Point lastLastPosition;
         
         uint16_t sampleX();
