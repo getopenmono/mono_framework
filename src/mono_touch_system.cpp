@@ -11,7 +11,7 @@
 
 using namespace mono;
 
-MonoTouchSystem::MonoTouchSystem() : CalMinX(620), CalMinY(490), CalMaxX(2900),CalMaxY(3130)
+MonoTouchSystem::MonoTouchSystem() : CalMinX(370), CalMinY(300), CalMaxX(2980), CalMaxY(3280)
 {
     active = true;
 }
@@ -53,14 +53,17 @@ void MonoTouchSystem::processTouchInput()
             touchInProgress = false;
             runTouchEnd(lastLastPosition); // use last move position,
             // since touch input now is outside screen
+            xAvg.clear(lastLastPosition.X());
+            yAvg.clear(lastLastPosition.Y());
         }
     }
     else if (touchInProgress)
     {
-        geo::Point newPos = geo::Point(X,Y);
+        xAvg.append(X); yAvg.append(Y);
+        geo::Point newPos = geo::Point(xAvg.value(),yAvg.value());
         geo::Point diff = newPos - lastTouchPosition;
         uint32_t sqLength = diff.X()*diff.X() + diff.Y()*diff.Y();
-        
+
         if (sqLength > 2304) //approx 3 pixels move
         {
             lastLastPosition = lastTouchPosition;
@@ -75,6 +78,7 @@ void MonoTouchSystem::processTouchInput()
     {
         wait_ms(5);
         X = sampleX(); Y = sampleY();
+        xAvg.clear(X); yAvg.clear(Y);
         
         lastTouchPosition = geo::Point(X,Y);
         lastLastPosition = lastTouchPosition;
@@ -107,7 +111,7 @@ uint16_t MonoTouchSystem::sampleX()
         
         ADC_SAR_1_StartConvert();
         ADC_SAR_1_IsEndConversion(ADC_SAR_1_WAIT_FOR_RESULT);
-        
+
         samples += ADC_SAR_1_GetResult16();
     }
     
@@ -136,7 +140,7 @@ uint16_t MonoTouchSystem::sampleY()
         
         ADC_SAR_1_StartConvert();
         ADC_SAR_1_IsEndConversion(ADC_SAR_1_WAIT_FOR_RESULT);
-        
+
         samples += ADC_SAR_1_GetResult16();
     }
     

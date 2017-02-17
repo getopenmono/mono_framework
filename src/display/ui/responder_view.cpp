@@ -82,7 +82,7 @@ void ResponderView::ToScreenCoords(mono::TouchEvent *event)
     int x = event->TouchController->ToScreenCoordsX(event->Position.X(), DisplayWidth());
     event->Position.setX(x);
     
-    int y = event->TouchController->ToScreenCoordsX(event->Position.Y(), DisplayHeight());
+    int y = event->TouchController->ToScreenCoordsY(event->Position.Y(), DisplayHeight());
     event->Position.setY(y);
     
     event->IsScreenCoords = true;

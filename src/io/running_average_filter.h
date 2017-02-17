@@ -72,6 +72,11 @@ namespace mono { namespace io {
         {
             return filterData[indx];
         }
+
+        uint16_t length() const
+        {
+            return Length;
+        }
     };
 } }
 

@@ -20,14 +20,13 @@ void TouchCalibrateView::initialize()
     calStep = 0;
     activateTouchOnRepaint = false;
 
-    textHeader.setTextColor(display::SilverColor);
-    textHeader.setTextSize(2);
+    textHeader.setText(display::SilverColor);
     textHeader.setAlignment(TextLabelView::ALIGN_CENTER);
     textHeader.setBackgroundColor(backgroundColor);
 
     textLbl.setAlignment(TextLabelView::ALIGN_CENTER);
     textLbl.setTextSize(1);
-    textLbl.setTextColor(display::SilverColor);
+    textLbl.setText(display::SilverColor);
     textLbl.setBackgroundColor(backgroundColor);
 
     //align text horizontal center
