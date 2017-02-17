@@ -32,13 +32,11 @@ OnOffButtonView::OnOffButtonView(Rect rct) :
 
     buttonSeparation = 4;
     uint32_t subWidth = (rct.Width()-buttonSeparation)/2;
-    uint32_t yOff = rct.Y() + (rct.Height()/2 - onLbl.TextPixelHeight()/2);
-    uint32_t height = 18;//rct.Height() - (rct.Height()/2 - onLbl.TextPixelHeight()/2);
 
-    onLbl.setRect(geo::Rect(rct.X(), yOff, subWidth, height));
+    onLbl.setRect(geo::Rect(rct.X(), rct.Y(), subWidth, rct.Height()));
     onLbl.setAlignment(TextLabelView::ALIGN_CENTER);
 
-    offLbl.setRect(geo::Rect(rct.X()+buttonSeparation+subWidth, yOff, subWidth, height));
+    offLbl.setRect(geo::Rect(rct.X()+buttonSeparation+subWidth, rct.Y(), subWidth, rct.Height()));
     offLbl.setAlignment(TextLabelView::ALIGN_CENTER);
 }
 
@@ -152,9 +150,9 @@ void OnOffButtonView::repaint()
     //        onLbl.setTextColor(faded);
     //    }
     //    else
-    onLbl.setTextColor( isPressedDown ? highlightColor : borderColor );
+    onLbl.setText( isPressedDown ? highlightColor : borderColor );
 
-    offLbl.setTextColor( isPressedDown ? highlightColor : borderColor );
+    offLbl.setText( isPressedDown ? highlightColor : borderColor );
 
 
 

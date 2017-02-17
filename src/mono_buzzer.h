@@ -5,14 +5,19 @@
 #define mono_buzzer_hpp
 
 #include "buzzer_interface.h"
+#include <mbed.h>
 
 namespace mono { namespace sensor {
 
     class MonoBuzzer : public IBuzzer
     {
     protected:
-        static const uint8_t dutyCycle = 64;
-        static Timer *bTimer;
+        static const uint8_t dutyCycle = 6;
+        mbed::Timeout timer;
+
+        void buzzTimeout();
+        
+        void asyncCall();
 
     public:
 
