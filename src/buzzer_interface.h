@@ -4,7 +4,7 @@
 #ifndef buzzer_interface_h
 #define buzzer_interface_h
 
-#include <mn_timer.h>
+#include <mbed.h>
 #include <stdint.h>
 
 namespace mono { namespace sensor {
@@ -29,14 +29,27 @@ namespace mono { namespace sensor {
      */
     class IBuzzer
     {
+    protected:
+
+        /**
+         * @brief A Handler to call when buzzing finished
+         * 
+         * This member is setup when you provide a callback to the
+         * @ref buzzAsync methods. Your subclass must call this when
+         * buzzing ends.
+         */
+        mbed::FunctionPointer timeoutHandler;
+
     public:
+
+
 
         /**
          * @brief Buzz for a given period of time, then stop
          *
          * Sets the buzzer to emit a buzz for a defined number of milliseconds.
-         * Then stop. This method is asynchronous, so it return immediately. It
-         * relies on the run loop to mute the buzzer later in time.
+         * Then stop. This method is asynchronous, so it returns immediately. It
+         * relies on interrupts to mute the buzzer later in time.
          *
          * You should not call it multiple times in a row, since it behaves 
          * asynchronously. Instread use @ref Timer to schedule multiple beeps.
@@ -81,7 +94,7 @@ namespace mono { namespace sensor {
         void buzzAsync(uint32_t timeMs, Object *self, void(Object::*member)(void))
         {
             buzzAsync(timeMs);
-            Timer::callOnce<Object>(timeMs, self, member);
+            timeoutHandler.attach<Object>(self, member);
         }
 
         /**
@@ -109,7 +122,7 @@ namespace mono { namespace sensor {
         void buzzAsync(uint32_t timeMs, void(*function)(void))
         {
             buzzAsync(timeMs);
-            Timer::callOnce(timeMs, function);
+            timeoutHandler.attach(function);
         }
 
     };

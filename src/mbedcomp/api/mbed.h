@@ -12,6 +12,7 @@
 #include "Serial.h"
 #include "SPI.h"
 #include "Ticker.h"
+#include "Timeout.h"
 #include "us_ticker_api.h"
 #include "wait_api.h"
 //#include "FileSystemLike.h"

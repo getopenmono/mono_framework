@@ -3,10 +3,11 @@
 
 #include "mono_buzzer.h"
 #include <project.h>
+#include "async.h"
+
+#include "application_context.h"
 
 using namespace mono::sensor;
-
-mono::Timer *MonoBuzzer::bTimer = 0;
 
 MonoBuzzer::MonoBuzzer()
 {
@@ -17,21 +18,28 @@ void MonoBuzzer::buzzKill()
 {
     PWM_WriteCompare2(0);
 
-    if (bTimer != 0)
-    {
-        bTimer->Stop();
-        bTimer = 0;
-    }
-
+    //stop any running timer
+    timer.detach();
 }
 
 void MonoBuzzer::buzzAsync(uint32_t timeMs)
 {
-    if (bTimer != 0)
-    {
-        bTimer->Stop();
-    }
-
     PWM_WriteCompare2(dutyCycle);
-    bTimer = Timer::callOnce<MonoBuzzer>(timeMs, this, &MonoBuzzer::buzzKill);
+    
+    timer.attach_us<MonoBuzzer>(this, &MonoBuzzer::buzzTimeout, timeMs*1000);
+}
+
+void MonoBuzzer::buzzTimeout()
+{
+    buzzKill();
+    
+    if (timeoutHandler)
+        async<MonoBuzzer>(this, &MonoBuzzer::asyncCall);
+}
+
+void MonoBuzzer::asyncCall()
+{
+    timeoutHandler.call();
+    timeoutHandler.attach(0);
+    timeoutHandler.attach<MonoBuzzer>(0, 0);
 }
