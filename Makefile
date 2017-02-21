@@ -41,6 +41,7 @@ MONO_INCLUDES_REL = . \
 					display/ili9225g \
 					display/ui \
 					display/Fonts \
+					display/icons \
 					io \
 					wireless \
 					media \
@@ -80,7 +81,7 @@ MKDIR=mkdir
 MONOPROG=monoprog
 ELFTOOL='C:\Program Files (x86)\Cypress\PSoC Creator\3.1\PSoC Creator\bin\cyelftool.exe'
 INCS = -I . $(addprefix -I, $(MONO_INCLUDES) $(MBED_INCLUDES) $(INCLUDE_DIR))
-CDEFS= #-DMONO_DISP_CTRL_HX8340
+CDEFS= 
 ASDEFS=
 AS_FLAGS = -c -g -Wall -mcpu=cortex-m3 -mthumb -mthumb-interwork -march=armv7-m
 CC_FLAGS = -c -g -Wall -mcpu=cortex-m3 -mthumb $(OPTIMIZATION) -mthumb-interwork -fno-common -fmessage-length=0 -ffunction-sections -fdata-sections -march=armv7-m
@@ -101,6 +102,9 @@ all: $(MONO_FRAMEWORK)
 
 .PHONY: release
 release: all
+	@echo "-- ! --"
+	@echo "Icons must be converted to header files, remember to set that up in the build system!"
+	@exit 1
 	@echo "Copying to release folder..."
 	$(MKDIR) -p $(RELEASE_DIR)/mono/include
 	$(COPY) $(MONO_FRAMEWORK) $(RELEASE_DIR)/mono
