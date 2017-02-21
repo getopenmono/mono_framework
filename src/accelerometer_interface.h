@@ -68,10 +68,12 @@ namespace mono { namespace sensor {
     protected:
 
         // NOTE: Should we have these here?
+#ifndef EMUNO
         virtual bool readRegister(uint8_t regAddr, uint8_t *data) = 0;
         virtual bool readRegister(uint8_t regAddr, uint16_t *data) = 0;
 
         virtual bool writeRegister(uint8_t regAddr, uint8_t data) = 0;
+#endif
     };
 
 } }
