@@ -3,13 +3,13 @@
 
 using namespace mono::ui;
 
-SceneController::Scene() : View()
+SceneController::SceneController() : View()
 {
     viewRect = geo::Rect(geo::Point(0,0), DisplaySize());
     backColor = StandardBackgroundColor;
 }
 
-SceneController::Scene(const geo::Rect &rect) : View(rect)
+SceneController::SceneController(const geo::Rect &rect) : View(rect)
 {
     backColor = StandardBackgroundColor;
 }

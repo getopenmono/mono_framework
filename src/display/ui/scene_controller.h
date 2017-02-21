@@ -7,14 +7,15 @@
 #include <FunctionPointer.h>
 
 namespace mono { namespace ui {
-    
+
+    // should inherit from a view interfcae - since not really a view
     class SceneController : public View
     {
     protected:
         
         std::list<View*> childviewList;
         display::Color backColor;
-        mbed::FunctionPointerArg1<void, const Scene&> showHandler, hideHandler;
+        mbed::FunctionPointerArg1<void, const SceneController&> showHandler, hideHandler;
         mbed::FunctionPointer dismissHandler;
         
     public:
@@ -39,13 +40,13 @@ namespace mono { namespace ui {
         void setBackground(display::Color color);
         
         template <typename Context>
-        void setShowCallback(Context *cnxt, void(Context::*memptr)(const Scene&))
+        void setShowCallback(Context *cnxt, void(Context::*memptr)(const SceneController&))
         {
             showHandler.attach(cnxt, memptr);
         }
         
         template <typename Context>
-        void setHideCallback(Context *cnxt, void(Context::*memptr)(const Scene&))
+        void setHideCallback(Context *cnxt, void(Context::*memptr)(const SceneController&))
         {
             hideHandler.attach(cnxt, memptr);
         }
