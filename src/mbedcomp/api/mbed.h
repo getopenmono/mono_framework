@@ -1,5 +1,6 @@
 #include "AnalogIn.h"
 #include "CallChain.h"
+#include "CircularBuffer.h"
 #include "DigitalIn.h"
 #include "DigitalInOut.h"
 #include "DigitalOut.h"
