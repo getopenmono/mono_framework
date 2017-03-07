@@ -322,6 +322,8 @@ HttpGetFrame::~HttpGetFrame()
     //debug("dealloc HttpGetFrame\r\n");
 }
 
+
+
 // MARK: HTTP POST FRAME
 
 HttpPostFrame::HttpPostFrame(String hostname, String serverIp, String Url, FILE *destFile, uint32_t serverPort) :
@@ -385,6 +387,54 @@ void HttpPostFrame::dataPayload(uint8_t *data)
         debug("Padding packet with spaces (0x20) to align with 4-byte length!\r\n");
         memset(strPnt, ' ', remainder);
     }
+}
+
+
+
+// MARK: OPEN SOCKET FRAME
+
+OpenSocketFrame::OpenSocketFrame() : ManagementFrame(SocketCreate)
+{
+    this->responsePayload = true;
+}
+
+OpenSocketFrame::OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t localPort, uint16_t remotePort) : ManagementFrame(SocketCreate)
+{
+    this->responsePayload = true;
+
+    this->frameData.ip_version = 4;
+    frameData.socketType = TCP_SSL_CLIENT;
+    frameData.moduleSocket = localPort;
+    frameData.destSocket = remotePort;
+
+    memcpy((void*)frameData.destIPaddr.ipv4_address, ipAddress, 4);
+
+    frameData.max_count = 0;
+    frameData.tos = 0;
+    frameData.ssl_ws_enable = 0;
+    frameData.ssl_ciphers = 0;
+}
+
+void OpenSocketFrame::dataPayload(uint8_t *data)
+{
+    memcpy((void*)data, (void*)&frameData, sizeof(socketFrameSnd));
+
+}
+
+void OpenSocketFrame::responsePayloadHandler(uint8_t *data)
+{
+    printf("Response:\t\n");
+    memdump(data, sizeof(socketFrameRcv));
+
+    struct socketFrameRcv *revc = (struct socketFrameRcv*) data;
+    printf("SocDesc: %u\n\tMss: %u\t\nWindow: %lu\t\n",revc->socketDescriptor, revc->mss, revc->window_size);
+
+    this->lastResponseParsed = true;
+}
+
+int OpenSocketFrame::payloadLength()
+{
+    return sizeof(socketFrameSnd);
 }
 
 

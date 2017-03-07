@@ -12,12 +12,10 @@
 #include <queue_interrupt.h>
 #include <mn_timer.h>
 #include <mn_digital_out.h>
-
 #include "spi_commands.h"
 #include "module_frames.h"
-
 #include <power_aware_interface.h>
-
+#include <managed_pointer.h>
 
 #include <stdint.h>
 
@@ -120,7 +118,15 @@ namespace mono { namespace redpine {
 //        virtual void taskHandler() = 0;
         
     public:
-        
+
+        /** Structure to describe the data payload pointer and length for Data frame payloads */
+        struct DataPayload {
+            uint8_t *data;
+            uint16_t length;
+        };
+
+        typedef mbed::FunctionPointerArg1<void, const struct DataPayload&> DataPayloadHandler;
+
         /** 
          * Defines the communication protocol version to use.
          * Redpine change the way FrameDescriptor headers return frame length in
@@ -210,7 +216,20 @@ namespace mono { namespace redpine {
          * @return `true` on success, `false` otherwise.
          */
         virtual bool readManagementFrameResponse(ManagementFrame &request) = 0;
-        
+
+        /**
+         * @brief Read a pending frame a Data frame.
+         * 
+         * Data frame arrive out-of-order with anything else. Also, we expect that
+         * they deliver data to any open socket. This method read the data from
+         * the module and call the @ref DataPayloadHandler function provided.
+         * This function then takes care of the actual data payload!
+         *
+         * @param payloadHandler A reference the data payload callback handler
+         * @return `true`on succs, `false` otherwise
+         */
+        virtual bool readDataFrame(DataPayloadHandler &payloadHandler) = 0;
+
         /**
          * Internal function to read from a memory address. This is used when
          * communicating with the Redpine Modules Bootloader.
@@ -262,7 +281,7 @@ namespace mono { namespace redpine {
     };
     
     
-    
+    // MARK: SPI Communication
     
     
     /**
@@ -278,7 +297,7 @@ namespace mono { namespace redpine {
         {
             SPI_HOST_INTR   /**< SPI Interrupt occured register */
         };
-        
+
         
     protected:
         mbed::SPI *spi;
@@ -401,6 +420,8 @@ namespace mono { namespace redpine {
         bool readManagementFrame(ManagementFrame &frame);
         
         bool readManagementFrameResponse(ManagementFrame &request);
+
+        bool readDataFrame(DataPayloadHandler &payloadHandler);
         
         bool writeFrame(ManagementFrame *frame);
         
