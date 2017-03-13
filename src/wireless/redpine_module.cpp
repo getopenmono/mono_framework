@@ -255,10 +255,6 @@ void Module::moduleEventHandler()
 void Module::handleDataPayload(ModuleCommunication::DataPayload const &payload)
 {
     //we expect all incoming data frame as a socket receiving data
-    printf("Got data payload length: %i\t\n",payload.length);
-
-    memdump(payload.data, payload.length);
-
     OpenSocketFrame::recvFrameTcp *socketRecv = (OpenSocketFrame::recvFrameTcp*) payload.data;
     printf("SD: %i, len: %lu, data: %s\t\n",socketRecv->recvSocket, socketRecv->recvBufLen, socketRecv->recvDataBuf);
 }

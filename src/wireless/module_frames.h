@@ -84,6 +84,7 @@ namespace mono { namespace redpine {
             SocketCreate        = 0x42, /**<  */
             SocketClose         = 0x43, /**<  */
             DnsResolution       = 0x44, /**< DNS Resolution lookup command */
+            QueryFirmware       = 0x49, /**< Query the modules firmware version */
             HttpGet             = 0x51, /**< HTTP Client, GET request */
             HttpPost            = 0x52, /**< HTTP Client, POST request */
             WakeFromSleep       = 0xCD,

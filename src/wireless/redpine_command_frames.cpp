@@ -424,10 +424,9 @@ void OpenSocketFrame::dataPayload(uint8_t *data)
 void OpenSocketFrame::responsePayloadHandler(uint8_t *data)
 {
     printf("Response:\t\n");
-    memdump(data, sizeof(socketFrameRcv));
 
     struct socketFrameRcv *revc = (struct socketFrameRcv*) data;
-    printf("SocDesc: %u\n\tMss: %u\t\nWindow: %lu\t\n",revc->socketDescriptor, revc->mss, revc->window_size);
+    printf("SocDesc: %u\n\tPort: %u\t\n",revc->socketDescriptor, revc->moduleSocket);
 
     this->lastResponseParsed = true;
 }
@@ -437,6 +436,23 @@ int OpenSocketFrame::payloadLength()
     return sizeof(socketFrameSnd);
 }
 
+// MARK: QUERY FIRMWARE
+
+QueryFirmwareFrame::QueryFirmwareFrame() : ManagementFrame(QueryFirmware)
+{
+    this->responsePayload = true;
+    this->length = 0;
+}
+
+void QueryFirmwareFrame::responsePayloadHandler(uint8_t *payloadBuffer)
+{
+    QueryFirmwareFrame::rsi_qryFwversionFrameRecv *recv = (QueryFirmwareFrame::rsi_qryFwversionFrameRecv*) payloadBuffer;
+
+    memdump(payloadBuffer, sizeof(rsi_qryFwversionFrameRecv));
+    String firm((char*)recv->fwversion, 20);
+
+    responseCb.call(firm);
+}
 
 
 // MARK: SET POWER MODE FRAME

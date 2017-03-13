@@ -755,7 +755,10 @@ namespace mono { namespace redpine {
 
         int payloadLength();
     };
-    
+
+
+    // MARK: HTTP POST FRAME
+
     class HttpPostFrame : public HttpGetFrame
     {
     public:
@@ -775,7 +778,24 @@ namespace mono { namespace redpine {
         int payloadLength();
     };
 
-    
+    // MARK: Query Firm
+
+    class QueryFirmwareFrame : public ManagementFrame
+    {
+    public:
+
+        mbed::FunctionPointerArg1<void, mono::String> responseCb;
+
+        typedef struct {
+            uint8 fwversion[20];
+        } rsi_qryFwversionFrameRecv;
+
+        QueryFirmwareFrame();
+
+        void responsePayloadHandler(uint8_t *payloadBuffer);
+
+    };
+
     /**
      * Command to set the module into one of 5 power saving modes. Some modes is
      * used while connected to an AP, other are full sleep modes, where module is

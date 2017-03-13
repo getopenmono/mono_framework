@@ -51,10 +51,10 @@ SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead, uint1
 {
     this->firmwareVersion = fwVer;
 
-    if (firmwareVersion == 0xab15) {
-        this->length = (frmHead.totalBytes + 3) & (~3); // old protocol 1.5
-    }
-    else
+//    if (firmwareVersion == 0xab15) {
+//        this->length = (frmHead.totalBytes + 3) & (~3); // old protocol 1.5
+//    }
+//    else
         this->length = ((frmHead.totalBytes - 4) + 3) & (~3); // -4 needed for version 1.6
 
     this->ownsMemory = true;
@@ -85,13 +85,14 @@ SPIReceiveDataBuffer& SPIReceiveDataBuffer::operator<<(mbed::SPI *spi)
     while (this->bytesToRead > 0)
     {
         buf = spi->write(0);
+        mono::defaultSerial.printf("0x%X ", buf);
         //set LSByte on index 0, and MSByte on index 3
         *writePtr = (buf & 0xFF)<<24 | (buf & 0xFF00)<<8 | (buf & 0xFF0000)>>8 | (buf&0xFF000000)>>24;
 
         bytesToRead -= 4;
         writePtr++; // increment 4 bytes
     }
-
+    mono::defaultSerial.printf("\r\n");
     spi->format(8);
 
     return *this;
@@ -225,7 +226,7 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     cmd1.TransferLength = CommandC1::FOUR_BYTES; // ignored
 
     CommandC2 cmd2;
-    cmd2.DataGranularity = CommandC2::THIRTYTWO_BITMODE;
+    cmd2.DataGranularity = CommandC2::EIGHT_BITMODE;
     cmd2.RegisterSelect = 0; // ignored
 
     int status = sendC1C2(cmd1, cmd2);
@@ -254,7 +255,8 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     //receive frame head 4-bytes
     spi->format(8);
 
-    uint8_t readBuf[4];
+    uint16_t frmDesc[2];
+    char *readBuf = (char*) frmDesc;
     setChipSelect(true);
     readBuf[0] = spi->write(0);
     readBuf[1] = spi->write(0);
@@ -262,35 +264,16 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     readBuf[3] = spi->write(0);
     setChipSelect(false);
 
-//    setChipSelect(true);
-//    *((int*)readBuf) = spi->write(0);
-//    setChipSelect(false);
-    
-    printf("Header: 0x%x 0x%x 0x%x 0x%x\r\n",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
-
-    spi->format(8);
-
-    // convert number to the current architecture endian
-    // (module send as little-endian)
-//    if (InterfaceVersion == 0xab15)
-//        buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8); // old version where protocol is different
-//    else
-        buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8) - 4; // version 1.6 needs this
-
-    buffer->totalBytes = readBuf[3] | readBuf[2] << 8;
+    buffer->dummyBytes = frmDesc[1] - 4;
+    buffer->totalBytes = frmDesc[0];
 
     return true;
 }
 
 bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, SPIReceiveDataBuffer &buffer)
 {
-    // this is big-endian
-    uint32_t frameLength;
-//    if (this->InterfaceVersion == 0xab15)
-//        frameLength = frameHeader.dummyBytes + frameHeader.totalBytes; // old firmware version
-//    else
-        frameLength = frameHeader.dummyBytes + frameHeader.totalBytes - 4; // version 1.6 needs this
-
+    uint32_t frameLength = frameHeader.totalBytes - 4 - frameHeader.dummyBytes;
+    
     //align 4-byte granularity, by AND with 0b111111100
     int readLength = (frameLength + 3) & (~3);
 
@@ -304,7 +287,7 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     c1.TransferLength = CommandC1::ONE_BYTE; // ignored
 
     CommandC2 c2;
-    c2.DataGranularity = CommandC2::THIRTYTWO_BITMODE;
+    c2.DataGranularity = CommandC2::EIGHT_BITMODE;
     c2.RegisterSelect = 0; // ignored
 
     // send the commands to read a frame
@@ -317,7 +300,7 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     spiCommandC3 c3 = readLength & 0xFF; // lower byte
     spiCommandC4 c4 = (readLength & 0xFF00) >> 8; // upper byte
 
-    //mono::defaultSerial.printf("Frm read, length: 0x%x\r\n",readLength);
+    //mono::defaultSerial.printf("Frm read, length: %i\r\n",readLength);
 
     setChipSelect(true);
     // send read-length
@@ -348,24 +331,22 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     }
 
     //raed the real data bytes
-    if (buffer.length < readLength - frameHeader.dummyBytes)
+    if (buffer.length < readLength)
     {
         mono::defaultSerial.printf("Module frame read failed: Receive buffer too small!\r\n");
         return false;
     }
 
-    spi->format(32);
-
-    buffer.bytesToRead = readLength - frameHeader.dummyBytes;
+    buffer.bytesToRead = readLength;
 
     setChipSelect(true);
-    buffer << spi;
+    uint8_t *ptr = buffer.buffer;
+    while (readLength > ptr - buffer.buffer) {
+        *ptr = spi->write(0);
+        ptr++;
+    }
+
     setChipSelect(false);
-
-    spi->format(8);
-
-    //mono::defaultSerial.printf("Raw frm body:\r\n");
-    //mono::memdump(buffer.buffer, buffer.length);
 
     return true;
 }
@@ -667,7 +648,7 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
         return false;
     }
 
-    printf("frm head: 0x%x dummy, 0x%x total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
+    //printf("frm head: %i dummy, %i total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
 
     //alloc memory for incoming frame
     SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
@@ -732,7 +713,7 @@ bool ModuleSPICommunication::readDataFrame(DataPayloadHandler &payloadHandler)
         return false;
     }
 
-    mono::defaultSerial.printf("frm head: 0x%x dummy, 0x%x total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
+    //mono::defaultSerial.printf("frm head: %i dummy, %i total\n\r", frmHead.dummyBytes,frmHead.totalBytes);
 
     //alloc memory for incoming frame
     SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
