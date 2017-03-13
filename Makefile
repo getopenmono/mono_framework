@@ -32,7 +32,8 @@ MONO_OBJECTS =	$(patsubst %.c,%.o,$(wildcard $(FRAMEWORK_PATH)/*.c)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/display/ili9225g/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/wireless/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/media/*.cpp)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/io/*.cpp))
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/io/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/net/*.cpp)) 
 
 MONO_INCLUDES_REL = . \
 					display \
@@ -41,7 +42,8 @@ MONO_INCLUDES_REL = . \
 					display/Fonts \
 					io \
 					wireless \
-					media
+					media \
+					net
 
 MONO_INCLUDES =	$(foreach PATH, $(MONO_INCLUDES_REL), $(FRAMEWORK_PATH)/$(PATH))
 

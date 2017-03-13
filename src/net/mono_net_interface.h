@@ -8,7 +8,18 @@ namespace mono { namespace net {
 
     class MonoNetInterface {
     public:
-        virtual void createClientSocket(uint8_t ip[], uint16_t port, bool isUdp = false) = 0;
+
+        // MARK: Internal Types & Classes
+
+        class SocketContext {
+        public:
+            virtual void _onCreate(uint32_t descriptor, uint16_t localPort) = 0;
+            virtual void _onData(const char *data, uint32_t length, uint8_t fromIp[], uint16_t fromPort) = 0;
+        };
+
+        // MARK: Public Action Methods
+
+        virtual void createClientSocket(SocketContext *cnxt, uint8_t ip[], uint16_t destPort, uint16_t localPort, bool isUdp = false) = 0;
 
         virtual void createServerSocket(uint16_t port, bool isUdp = false) = 0;
 
@@ -18,8 +29,10 @@ namespace mono { namespace net {
 
         virtual void handleDisconnectEvent() = 0;
 
-        virtual void writeData(const char *data, uint32_t length, uint32_t sockDesc) = 0;
+        virtual bool writeData(const char *data, uint32_t length, uint32_t sockDesc, uint16_t destPort, bool isUdp = false) = 0;
 
+
+        // MARK: Static members
 
         static MonoNetInterface *CurrentInterface;
     };

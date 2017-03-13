@@ -144,9 +144,6 @@ namespace mono { namespace redpine {
 
         bool joinFailed;
 
-        /** List of callback handlers associated with a socket descriptor */
-        mbed::FunctionPointerArg1<void, void *> activeSockets[10];
-
         /** The communication interface used by the module */
         ModuleCommunication *comIntf;
 
@@ -208,11 +205,28 @@ namespace mono { namespace redpine {
 
     public:
 
+        /*
+         * @brief A pointer to the data frame payload handler
+         *
+         * A network subsystem should set this variable, to allow the module
+         * to handle data frames.
+         */
+        ModuleCommunication::DataPayloadHandler *defaultDataFramePayloadHandler;
+
+        /**
+         * @brief The default handler for async incoming management frames
+         *
+         * Such frames are power, socket connect and disconnect events.
+         */
+        mbed::FunctionPointerArg1<bool, ManagementFrame *> *asyncManagementFrameHandler;
+
         /**
          * Callback function installed into the CommunicationInterface interrupt
          * callback listener.
          */
         void moduleEventHandler();
+
+        bool sendDataFrame(const char *dataPayload, uint32_t length);
 
         /**
          * Obtain a reference to the singleton module object

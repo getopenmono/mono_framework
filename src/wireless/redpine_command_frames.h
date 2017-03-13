@@ -738,14 +738,33 @@ namespace mono { namespace redpine {
                 uint8_t     ipv6_address[16];
             } fromIPaddr;
             uint8_t recvDataOffsetBuf[RxDataOffsetTcpV4];
-            uint8_t recvDataBuf[TcpMaxPayloadSize];
+            char recvDataBuf[TcpMaxPayloadSize];
         } recvFrameTcp;
+
+        static const uint8_t TxDataOffsetUdp = 16;
+
+        typedef struct {
+            uint16_t   ip_version;
+            uint16_t   socketDescriptor;
+            uint32_t   sendBufLen;
+            uint16_t   sendDataOffsetSize;
+            uint16_t   destPort;
+            union{
+                uint8_t ipv4_address[4];
+                uint8_t ipv6_address[16];
+            } destIPaddr;
+            uint8_t sendDataOffsetBuf[TxDataOffsetUdp];
+            char sendDataBuf[UdpMaxPayloadSize];
+        } rsi_frameSend;
 
     protected:
 
         struct socketFrameSnd frameData;
+
     public:
-        
+
+        mbed::FunctionPointerArg1<void, const socketFrameRcv*> createdHandler;
+
         OpenSocketFrame();
         OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t localPort, uint16_t remotePort);
 

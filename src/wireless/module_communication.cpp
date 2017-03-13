@@ -351,7 +351,7 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     return true;
 }
 
-int ModuleSPICommunication::spiWrite(uint8_t *data, int byteLength, bool thirtyTwoBitMode)
+int ModuleSPICommunication::spiWrite(const char *data, int byteLength, bool thirtyTwoBitMode)
 {
     if (thirtyTwoBitMode)
     {
@@ -749,7 +749,7 @@ bool ModuleSPICommunication::readDataFrame(DataPayloadHandler &payloadHandler)
     return true;
 }
 
-bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
+bool ModuleSPICommunication::writeRawFrame(const char *rawFrame)
 {
     //see if there is room in the module input buffer
     uint8_t regval = readRegister(SPI_HOST_INTR);
@@ -759,11 +759,6 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
         debug("Cannot write frame to module, input buffer is full!\r\n");
         return false;
     }
-
-    mgmtFrameRaw rawFrame;
-    frame->rawFrameFormat(&rawFrame);
-
-    // Write the command / mgmt frame
 
     CommandC1 cmd1;
     cmd1.CommandType = CommandC1::READ_WRITE;
@@ -778,15 +773,13 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     c2.RegisterSelect = 0; // ignored
 
     int statusCode = sendC1C2(cmd1, c2);
-    //int statusCode = sendC1C2(0x7c, 0x40);
-
     if (statusCode != CMD_SUCCESS)
     {
         debug("Failed to write frame to module, error status: 0x%x\r\n", statusCode);
         return false;
     }
 
-    spiCommandC3 c3 = frame->size & 0xFF; // lower byte
+    spiCommandC3 c3 = 16 & 0xFF; // lower bytes
     spiCommandC4 c4 = 0; // upper byte
 
     // send write-length
@@ -802,29 +795,30 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     }
 
     // write the mgmt/cmd frame
-    statusCode = spiWrite((uint8_t*)&rawFrame, sizeof(rawFrame));
+    statusCode = spiWrite(rawFrame, 16);
 
-
-    if (frame->payloadLength() <= 0)
+    if (statusCode != CMD_SUCCESS)
     {
-        return true;
-    }
-
-    // write the data frame with payload
-    // the size of 872 comes from redpines documentation of POST data,
-    // but this size might be too large for embedded memory sizes
-    uint8_t payloadBuffer[872];
-    memset(payloadBuffer, 0, 872);
-
-    if (frame->payloadLength() > 872)
-    {
-        debug("Frame payload data is too large! More than 300 bytes!\r\n");
+        debug("Failed to send raw frame to module, got response: 0x%x\r\n",statusCode);
         return false;
     }
 
-    frame->dataPayload(payloadBuffer);
+    return true;
+}
 
-    bool success = writePayloadData(payloadBuffer, frame->payloadLength());
+bool ModuleSPICommunication::writeDataFrame(const char *data, uint32_t length)
+{
+    dataFrameRaw frame;
+    memset(&frame, 0, sizeof(dataFrameRaw));
+    frame.LengthType = length | (0x50 << 8); // 0x50 for data frame type
+
+    bool success = writeRawFrame((char*)&frame);
+    if (!success)
+    {
+        return false;
+    }
+
+    success = writePayloadData(data, length);
 
     if (!success)
     {
@@ -834,7 +828,46 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     return true;
 }
 
-bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength)
+bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
+{
+    mgmtFrameRaw rawFrame;
+    frame->rawFrameFormat(&rawFrame);
+
+    bool success = writeRawFrame((char*)&rawFrame);
+
+    if (!success)
+        return false;
+
+    if (frame->payloadLength() <= 0)
+    {
+        return true;
+    }
+
+    // write the data frame with payload
+    // the size of 872 comes from redpines documentation of POST data,
+    // but this size might be too large for embedded memory sizes
+    char payloadBuffer[872];
+    memset(payloadBuffer, 0, 872);
+
+    if (frame->payloadLength() > 872)
+    {
+        debug("Frame payload data is too large! More than 300 bytes!\r\n");
+        return false;
+    }
+
+    frame->dataPayload((uint8_t*)payloadBuffer);
+
+    success = writePayloadData(payloadBuffer, frame->payloadLength());
+
+    if (!success)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool ModuleSPICommunication::writePayloadData(const char *data, uint16_t byteLength)
 {
     if (byteLength != (byteLength & ~3))
     {

@@ -19,7 +19,7 @@ namespace mono { namespace net {
     protected:
 
         mbed::FunctionPointerArg1<void, const void *> didWriteHandler;
-        mbed::FunctionPointerArg1<void, const DataBuffer> dataHandler;
+        mbed::FunctionPointerArg1<void, const DataBuffer &> dataHandler;
 
     public:
 
@@ -29,7 +29,7 @@ namespace mono { namespace net {
          * The data will eventually be written to the socket, and you
          * will receive a callback on the @ref didWriteHandler
          */
-        virtual void write(const char *data, const void *context = 0) = 0;
+        virtual bool write(const char *data, uint32_t length, const void *context = 0) = 0;
 
         /**
          * @brief Set the callback function for the *data-was-written* event
@@ -46,7 +46,7 @@ namespace mono { namespace net {
          * 
          */
         template <typename Context>
-        void setDataCallback(Context *cntxt, void(Context::*memptr)(const DataBuffer))
+        void setDataCallback(Context *cntxt, void(Context::*memptr)(const DataBuffer&))
         {
             dataHandler.attach<Context>(cntxt, memptr);
         }

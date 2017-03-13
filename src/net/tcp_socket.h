@@ -8,7 +8,7 @@
 
 namespace mono { namespace net {
 
-    class TcpSocket : ISocket {
+    class TcpSocket : public ISocket, MonoNetInterface::SocketContext {
     public:
         enum SocketState {
             SCK_READY,          /**< Socket is setup and ready to connect */
@@ -20,12 +20,15 @@ namespace mono { namespace net {
 
     protected:
         mbed::FunctionPointer connectHandler, disconnectHandler;
+        mbed::FunctionPointerArg1<void, SocketState> stateHandler;
 
         Ip4Address destination;
-        uint32_t destPort;
-        uint32_t localPort;
+        uint16_t destPort;
+        uint16_t localPort;
         SocketState state;
         uint32_t socketDescriptor;
+
+        void setState(SocketState newState, bool triggerCallback = true);
 
     public:
 
@@ -33,9 +36,13 @@ namespace mono { namespace net {
 
         TcpSocket(Ip4Address address, uint16_t port);
 
-
         bool connect();
 
+        virtual bool write(const char *data, uint32_t length, const void *context = 0);
+
+        SocketState State() const;
+
+        Ip4Address Destination() const;
 
         // MARK: Callback setters
 
@@ -58,6 +65,19 @@ namespace mono { namespace net {
         {
             disconnectHandler.attach<Context>(cnxt, memptr);
         }
+
+        template <typename Context>
+        void setStateChangeCallback(Context *cnxt, void(Context::*memptr)(SocketState))
+        {
+            stateHandler.attach<Context>(cnxt, memptr);
+        }
+
+
+        // MARK: Internal HAL interface methods (event handlers)
+
+        virtual void _onCreate(uint32_t descriptor, uint16_t localPort);
+
+        virtual void _onData(const char *data, uint32_t length, uint8_t fromIp[], uint16_t fromPort);
 
     };
 

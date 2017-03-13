@@ -429,6 +429,8 @@ void OpenSocketFrame::responsePayloadHandler(uint8_t *data)
     printf("SocDesc: %u\n\tPort: %u\t\n",revc->socketDescriptor, revc->moduleSocket);
 
     this->lastResponseParsed = true;
+
+    createdHandler.call(revc);
 }
 
 int OpenSocketFrame::payloadLength()

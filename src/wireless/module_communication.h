@@ -230,6 +230,8 @@ namespace mono { namespace redpine {
          */
         virtual bool readDataFrame(DataPayloadHandler &payloadHandler) = 0;
 
+        virtual bool writeDataFrame(const char *data, uint32_t length) = 0;
+
         /**
          * Internal function to read from a memory address. This is used when
          * communicating with the Redpine Modules Bootloader.
@@ -270,7 +272,7 @@ namespace mono { namespace redpine {
          * @param byteLength The length of the data in bytes
          * @return `true` upon success, `false` otherwise.
          */
-        virtual bool writePayloadData(uint8_t *data, uint16_t byteLength) = 0;
+        virtual bool writePayloadData(const char *data, uint16_t byteLength) = 0;
         
         /**
          * Interrupt callback function, called by the communication interface.
@@ -371,7 +373,7 @@ namespace mono { namespace redpine {
          * @param thirtyTwoBitFormat Set this to `true` to use 32-bit mode, default is `false`
          * @return the last read value on the SPI bus
          */
-        int spiWrite(uint8_t *data, int byteLength, bool thirtyTwoBitFormat = false);
+        int spiWrite(const char *data, int byteLength, bool thirtyTwoBitFormat = false);
         
         /**
          * Sets the SPI chip select for the module. This must be called before 
@@ -422,10 +424,14 @@ namespace mono { namespace redpine {
         bool readManagementFrameResponse(ManagementFrame &request);
 
         bool readDataFrame(DataPayloadHandler &payloadHandler);
+
+        bool writeDataFrame(const char *data, uint32_t length);
         
         bool writeFrame(ManagementFrame *frame);
-        
-        bool writePayloadData(uint8_t *data, uint16_t byteLength);
+
+        bool writeRawFrame(const char *rawFrame);
+        bool writePayloadData(const char *data, uint16_t byteLength);
+
 
         // MARK: Power Aware Interface
 

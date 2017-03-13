@@ -166,6 +166,13 @@ bool Module::IsNetworkReady()
     return self->networkInitialized && self->joinFailed == false;
 }
 
+bool Module::sendDataFrame(const char *dataPayload, uint32_t length)
+{
+    if (networkInitialized)
+        return this->comIntf->writeDataFrame(dataPayload, length);
+    else
+        return false;
+}
 
 /// MARK: PRIVATE METHODS
 
@@ -181,12 +188,10 @@ void Module::moduleEventHandler()
         {
             //handle a response for any pending request
             ManagementFrame *respFrame = responseFrameQueue.Peek();
-            if (respFrame == NULL)
+            if (respFrame == 0 && defaultDataFramePayloadHandler != 0)
             {
                 debug("nothing on request queue, trying as data frame...\r\n");
-                ModuleCommunication::DataPayloadHandler handler;
-                handler.attach<Module>(this, &Module::handleDataPayload);
-                bool success = comIntf->readDataFrame(handler);
+                bool success = comIntf->readDataFrame(*defaultDataFramePayloadHandler);
 
                 if (!success)
                 {
@@ -196,7 +201,6 @@ void Module::moduleEventHandler()
             else
             {
                 debug("resp frame cmd id: 0x%x\r\n",respFrame->commandId);
-                //memdump(reqFrame, sizeof(mono::redpine::HttpGetFrame));
 
                 bool success = this->comIntf->readManagementFrameResponse(*respFrame);
 
@@ -232,7 +236,7 @@ void Module::moduleEventHandler()
         if (responseFrameQueue.Length() == 0 && requestFrameQueue.Length() > 0)
         {
             ManagementFrame *request = requestFrameQueue.Dequeue();
-            //debug("Sending Mgmt request 0x%x\r\n",request->commandId);
+            debug("Sending Mgmt request 0x%x\r\n",request->commandId);
             bool success = request->writeFrame();
 
             if (!success)
@@ -254,7 +258,7 @@ void Module::moduleEventHandler()
 
 void Module::handleDataPayload(ModuleCommunication::DataPayload const &payload)
 {
-    //we expect all incoming data frame as a socket receiving data
+    //we expect all incoming data frame as a socket receiving  data
     OpenSocketFrame::recvFrameTcp *socketRecv = (OpenSocketFrame::recvFrameTcp*) payload.data;
     printf("SD: %i, len: %lu, data: %s\t\n",socketRecv->recvSocket, socketRecv->recvBufLen, socketRecv->recvDataBuf);
 }
