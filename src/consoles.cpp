@@ -22,8 +22,8 @@ void mono::memdump(void *ptr, uint32_t length)
 
     char *byte = (char*) ptr;
     for (unsigned int i=0; i<length; i++) {
-        snprintf(buffer, 32, "0x%x ",byte[i]);
-        defaultSerial.printf((strlen(buffer)==4?"%s ":"%s"),buffer);
+        defaultSerial.printf("0x%02X ",byte[i]);
+        //defaultSerial.printf((strlen(buffer)==4?"%s ":"%s"),buffer);
         if ((i+1) % 8 == 0) {
             defaultSerial.printf(" : %i\r\n",i+1);
         }
