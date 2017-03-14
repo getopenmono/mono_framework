@@ -741,7 +741,8 @@ namespace mono { namespace redpine {
             char recvDataBuf[TcpMaxPayloadSize];
         } recvFrameTcp;
 
-        static const uint8_t TxDataOffsetUdp = 16;
+        static const uint8_t TxDataOffsetTcp = 56;
+        static const uint8_t TxDataOffsetUdp = 44;
 
         typedef struct {
             uint16_t   ip_version;
@@ -753,8 +754,7 @@ namespace mono { namespace redpine {
                 uint8_t ipv4_address[4];
                 uint8_t ipv6_address[16];
             } destIPaddr;
-            uint8_t sendDataOffsetBuf[TxDataOffsetUdp];
-            char sendDataBuf[UdpMaxPayloadSize];
+            char *sendDataBuf;
         } rsi_frameSend;
 
     protected:
@@ -767,6 +767,42 @@ namespace mono { namespace redpine {
 
         OpenSocketFrame();
         OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t localPort, uint16_t remotePort);
+
+        void dataPayload(uint8_t *data);
+
+        void responsePayloadHandler(uint8_t *data);
+
+        int payloadLength();
+    };
+
+    // MARK: Close socket
+
+    class CloseSocketFrame : public ManagementFrame
+    {
+    public:
+        /** Socket close command request structure */
+        typedef struct rsi_req_socket_close_s
+        {
+            uint16_t   socket_id;   /**< socket that will be closed */
+            uint16_t   port_number;
+            
+        } rsi_req_socket_close;
+
+        //** socket close command response structure */
+        typedef struct rsi_rsp_socket_close_s
+        {
+            uint16_t   socket_id;       /**< socket that was closed */
+            uint32_t   sent_bytes_count;
+            
+        } rsi_rsp_socket_close;
+
+        rsi_req_socket_close rawPayload;
+
+        mbed::FunctionPointerArg1<void, const rsi_rsp_socket_close*> closedHandler;
+
+        CloseSocketFrame();
+
+        CloseSocketFrame(uint32_t descriptor, uint16_t port);
 
         void dataPayload(uint8_t *data);
 

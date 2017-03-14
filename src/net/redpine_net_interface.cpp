@@ -1,6 +1,7 @@
 
 #include <redpine_module.h>
 #include "redpine_net_interface.h"
+#include <consoles.h>
 
 using namespace mono::redpine;
 
@@ -12,9 +13,9 @@ mono::net::MonoNetInterface::SocketContext* RedpineSocketInterface::activeSocket
 
 void RedpineSocketInterface::Command::frameCompleted(ManagementFrame::FrameCompletionData *data)
 {
-    if (!data->Success)
+    if (!data->Success && cnxt != 0)
     {
-        printf("Command (Id: 0x%X) failed with error: 0x%X\r\n", data->Context->commandId, data->Context->status);
+        cnxt->_onError(SocketContext::CONNECT_ERROR);
     }
 
     delete frame;
@@ -27,6 +28,16 @@ void RedpineSocketInterface::Command::openFrameResponse(const OpenSocketFrame::s
     {
         RedpineSocketInterface::activeSockets[recv->socketDescriptor - 1] = cnxt;
         cnxt->_onCreate(recv->socketDescriptor, recv->moduleSocket);
+    }
+}
+
+void RedpineSocketInterface::Command::closeFrameResponse(const CloseSocketFrame::rsi_rsp_socket_close *recv)
+{
+    RedpineSocketInterface::activeSockets[recv->socket_id - 1] = 0;
+
+    if (cnxt != 0)
+    {
+        cnxt->_onClose(recv->socket_id, recv->sent_bytes_count);
     }
 }
 
@@ -61,14 +72,6 @@ void RedpineSocketInterface::createServerSocket(uint16_t port, bool isUdp)
 
 }
 
-void RedpineSocketInterface::handleDataFrames(ModuleCommunication::DataPayload const &payload)
-{
-    OpenSocketFrame::recvFrameTcp *dataPayload = (OpenSocketFrame::recvFrameTcp*) payload.data;
-    handleIncomingData(dataPayload->recvDataBuf, dataPayload->recvBufLen,
-                       dataPayload->recvSocket, dataPayload->fromIPaddr.ipv4_address,
-                       dataPayload->fromPortNum);
-}
-
 void RedpineSocketInterface::handleIncomingData(const char *data, uint32_t length,
                                                 uint32_t sockDesc, uint8_t fromIp[],
                                                 uint16_t fromPort)
@@ -99,23 +102,59 @@ void RedpineSocketInterface::handleDisconnectEvent()
 
 }
 
-bool RedpineSocketInterface::writeData(const char *data, uint32_t length, uint32_t sockDesc, uint16_t destPort, bool isUdp)
+bool RedpineSocketInterface::writeData(const char *data, uint32_t length, uint32_t sockDesc, uint8_t ipAddr[], uint16_t destPort, bool isUdp)
 {
-    OpenSocketFrame::rsi_frameSend frame;
-    memset(&frame, 0, sizeof(OpenSocketFrame::rsi_frameSend));
-
+    uint32_t frmHeaderSize;
     if (isUdp)
-    {
-
-    }
+        frmHeaderSize = OpenSocketFrame::TxDataOffsetUdp;
     else
-    {
-        frame.ip_version = 4;
-        frame.socketDescriptor = sockDesc;
-        frame.sendBufLen = length;
-        memcpy(frame.sendDataBuf, data, length);
-        frame.destPort = destPort;
-    }
+        frmHeaderSize = OpenSocketFrame::TxDataOffsetTcp;
 
-    return Module::Instance()->sendDataFrame((char*)&frame, length);
+    uint32_t totalSize = frmHeaderSize + length;
+    OpenSocketFrame::rsi_frameSend *frame = (OpenSocketFrame::rsi_frameSend*) malloc(totalSize);
+    memset(frame, 0, totalSize);
+
+    frame->ip_version = 4;
+    frame->socketDescriptor = sockDesc;
+    frame->sendBufLen = length;
+    frame->sendDataOffsetSize = frmHeaderSize;
+    frame->destPort = destPort;
+    memcpy(frame->destIPaddr.ipv4_address, ipAddr, 4);
+    memcpy(((char*)frame)+frmHeaderSize, data, length);
+
+    bool success = Module::Instance()->sendDataFrame((char*)frame, totalSize);
+    free(frame);
+
+    return success;
 }
+
+void RedpineSocketInterface::closeSocket(SocketContext *cnxt, uint32_t sockDesc, uint16_t destPort)
+{
+    Command *cmd = new Command();
+    cmd->cnxt = cnxt;
+
+    CloseSocketFrame *closeFrm = new CloseSocketFrame(sockDesc, destPort);
+    closeFrm->setCompletionCallback<Command>(cmd, &Command::frameCompleted);
+    closeFrm->closedHandler.attach<Command>(cmd, &Command::closeFrameResponse);
+    cmd->frame = closeFrm;
+
+    closeFrm->commitAsync();
+}
+
+// MARL: Redpine module HAL event interface
+
+void RedpineSocketInterface::handleDataFrames(ModuleCommunication::DataPayload const &payload)
+{
+    OpenSocketFrame::recvFrameTcp *dataPayload = (OpenSocketFrame::recvFrameTcp*) payload.data;
+
+    handleIncomingData(dataPayload->recvDataBuf, dataPayload->recvBufLen,
+                       dataPayload->recvSocket, dataPayload->fromIPaddr.ipv4_address,
+                       dataPayload->fromPortNum);
+}
+
+
+
+
+
+
+

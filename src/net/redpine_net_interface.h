@@ -26,6 +26,8 @@ namespace mono { namespace redpine {
 
             void openFrameResponse(const OpenSocketFrame::socketFrameRcv *);
 
+            void closeFrameResponse(const CloseSocketFrame::rsi_rsp_socket_close*);
+
         };
 
         // members
@@ -47,7 +49,9 @@ namespace mono { namespace redpine {
 
         void handleDisconnectEvent();
 
-        bool writeData(const char *data, uint32_t length, uint32_t sockDesc,  uint16_t destPort, bool isUdp = false);
+        bool writeData(const char *data, uint32_t length, uint32_t sockDesc,  uint8_t ipAddr[], uint16_t destPort, bool isUdp = false);
+
+        void closeSocket(SocketContext *cnxt, uint32_t sockDesc, uint16_t destPort);
 
         // MARK: HAL methods
 

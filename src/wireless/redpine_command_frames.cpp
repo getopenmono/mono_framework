@@ -438,6 +438,34 @@ int OpenSocketFrame::payloadLength()
     return sizeof(socketFrameSnd);
 }
 
+// MARK: Close Socket FRAME
+
+CloseSocketFrame::CloseSocketFrame() : ManagementFrame(SocketClose) {}
+CloseSocketFrame::CloseSocketFrame(uint32_t descriptor, uint16_t port) : ManagementFrame(SocketClose)
+{
+    responsePayload = true;
+    rawPayload.socket_id = descriptor;
+    rawPayload.port_number = port;
+}
+
+void CloseSocketFrame::dataPayload(uint8_t *data)
+{
+    memcpy(data, &rawPayload, sizeof(rawPayload));
+}
+
+void CloseSocketFrame::responsePayloadHandler(uint8_t *data)
+{
+    rsi_rsp_socket_close *resp = (rsi_rsp_socket_close*) data;
+    closedHandler.call(resp);
+
+    lastResponseParsed = true;
+}
+
+int CloseSocketFrame::payloadLength()
+{
+    return sizeof(rawPayload);
+}
+
 // MARK: QUERY FIRMWARE
 
 QueryFirmwareFrame::QueryFirmwareFrame() : ManagementFrame(QueryFirmware)

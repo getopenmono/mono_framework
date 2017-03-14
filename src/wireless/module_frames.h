@@ -8,8 +8,7 @@
 #include <queue.h>
 
 namespace mono { namespace redpine {
-    
-    
+
     /**
      * Management Frame structure as sent from/to the module
      * This frame type deliver commands and status information to and from
@@ -38,7 +37,14 @@ namespace mono { namespace redpine {
         uint8_t  reserved[13];  /**< Reserved for future use */
     } dataFrameRaw;
     
-    
+
+    typedef union RawFrameHeaderU {
+            uint16_t LengthType;    /**< LSB is the frame data length, MSB is always 0x40 on mgmt and 0x50 on data frames */
+            mgmtFrameRaw MgmtFrame;
+            dataFrameRaw DataFrame;
+    } RawFrameHeader;
+
+
     /**
      * A generic frame that is used to communicate which the module
      * Subclasses of this will represent data or management frames.

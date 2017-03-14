@@ -1,6 +1,7 @@
 
 #include "tcp_socket.h"
 #include <stdio.h>
+#include <mbed_debug.h>
 
 using namespace mono::net;
 
@@ -41,12 +42,20 @@ bool TcpSocket::connect()
     return true;
 }
 
+void TcpSocket::close()
+{
+    if (state != SCK_CONNECTED)
+        return;
+
+    MonoNetInterface::CurrentInterface->closeSocket(this, socketDescriptor, destPort);
+}
+
 bool TcpSocket::write(const char *data, uint32_t length, const void *)
 {
     if (state != SCK_CONNECTED)
         return false;
 
-    return MonoNetInterface::CurrentInterface->writeData(data, length, socketDescriptor, destPort, false);
+    return MonoNetInterface::CurrentInterface->writeData(data, length, socketDescriptor, destination.addr, destPort, false);
 }
 
 TcpSocket::SocketState TcpSocket::State() const
@@ -63,7 +72,6 @@ Ip4Address TcpSocket::Destination() const
 
 void TcpSocket::_onCreate(uint32_t descriptor, uint16_t localPort)
 {
-    printf("on socket create: %li\r\n", descriptor);
     socketDescriptor = descriptor;
     this->localPort = localPort;
 
@@ -73,12 +81,27 @@ void TcpSocket::_onCreate(uint32_t descriptor, uint16_t localPort)
 
 void TcpSocket::_onData(const char *data, uint32_t length, uint8_t *fromIp, uint16_t fromPort)
 {
-    printf("on data event!\r\n");
-
     DataBuffer buffer;
     buffer.data = data;
     buffer.length = length;
 
     dataHandler.call(buffer);
+}
+
+void TcpSocket::_onClose(uint32_t descriptor, uint32_t sentBytes)
+{
+    SocketState old = state;
+    setState(SCK_DISCONNECTED);
+
+    if (old != SCK_DISCONNECTED)
+        disconnectHandler.call();
+}
+
+void TcpSocket::_onError(SocketError err)
+{
+    debug("Socket (%i) failed with error: %i\r\n", socketDescriptor, err);
+    setState(SCK_CONNECT_ERROR);
+
+    errorHandler.call();
 }
 

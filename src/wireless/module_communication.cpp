@@ -215,6 +215,11 @@ bool ModuleSPICommunication::waitForStartToken(bool thirtyTwoBitMode)
     return false;
 }
 
+bool ModuleSPICommunication::readFrameHead(RawFrameHeader *rawHeader)
+{
+    return true;
+}
+
 bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *buffer)
 {
     CommandC1 cmd1;

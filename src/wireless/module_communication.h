@@ -188,7 +188,18 @@ namespace mono { namespace redpine {
          * present.
          */
         virtual bool interruptActive() = 0;
-        
+
+        /**
+         * @brief Read the frame header (the first 16 bytes)
+         * 
+         * Use this to probe what kind of frame is coming from the module
+         * and read the frame payload later using the dedicated methods.
+         *
+         * @param rawHeader A pointer to the pre-alloced memory to hold the header
+         * @return True on read success, false otherwise
+         */
+        virtual bool readFrameHead(RawFrameHeader *rawHeader) = 0;
+
         /**
          * Read the first available frame from the modules input queue
          * This function should be called when you are sure there is data pending
@@ -418,7 +429,9 @@ namespace mono { namespace redpine {
         bool pollInputQueue();
         
         bool interruptActive();
-        
+
+        bool readFrameHead(RawFrameHeader *rawHeader);
+
         bool readManagementFrame(ManagementFrame &frame);
         
         bool readManagementFrameResponse(ManagementFrame &request);

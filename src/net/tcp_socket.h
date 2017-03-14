@@ -19,7 +19,7 @@ namespace mono { namespace net {
         };
 
     protected:
-        mbed::FunctionPointer connectHandler, disconnectHandler;
+        mbed::FunctionPointer connectHandler, disconnectHandler, errorHandler;
         mbed::FunctionPointerArg1<void, SocketState> stateHandler;
 
         Ip4Address destination;
@@ -37,6 +37,8 @@ namespace mono { namespace net {
         TcpSocket(Ip4Address address, uint16_t port);
 
         bool connect();
+
+        void close();
 
         virtual bool write(const char *data, uint32_t length, const void *context = 0);
 
@@ -72,12 +74,22 @@ namespace mono { namespace net {
             stateHandler.attach<Context>(cnxt, memptr);
         }
 
+        template <typename Context>
+        void setErrorCallback(Context *cnxt, void(Context::*memptr)(void))
+        {
+            errorHandler.attach<Context>(cnxt, memptr);
+        }
+
 
         // MARK: Internal HAL interface methods (event handlers)
 
         virtual void _onCreate(uint32_t descriptor, uint16_t localPort);
 
         virtual void _onData(const char *data, uint32_t length, uint8_t fromIp[], uint16_t fromPort);
+
+        virtual void _onClose(uint32_t descriptor, uint32_t sentBytes);
+
+        virtual void _onError(SocketError err);
 
     };
 
