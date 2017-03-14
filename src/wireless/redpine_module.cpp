@@ -9,6 +9,16 @@
 
 using namespace mono::redpine;
 
+
+// MARK: Async frame conext
+
+AsyncFrameContext::AsyncFrameContext(const ManagementFrame &frm, const DataReceiveBuffer &buf, const char *pld) :
+    frame(frm),
+    RawBuffer(buf),
+    payload(pld)
+{
+}
+
 /** Construct the module */
 Module Module::moduleSingleton;
 
@@ -82,7 +92,9 @@ bool Module::initialize(ModuleCommunication *commInterface)
     }
 
     ManagementFrame frame;
-    success = self->comIntf->readManagementFrame(frame);
+    DataReceiveBuffer buffer;
+    success = self->comIntf->readFrame(buffer);
+    success |= self->comIntf->readManagementFrame(buffer, frame);
 
     if (!success)
     {
@@ -188,10 +200,33 @@ void Module::moduleEventHandler()
         {
             //handle a response for any pending request
             ManagementFrame *respFrame = responseFrameQueue.Peek();
+            DataReceiveBuffer buffer;
             if (respFrame == 0 && defaultDataFramePayloadHandler != 0)
             {
-                debug("nothing on request queue, trying as data frame...\r\n");
-                bool success = comIntf->readDataFrame(*defaultDataFramePayloadHandler);
+                debug("nothing on request queue, probing frame...\r\n");
+                bool success = comIntf->readFrame(buffer);
+
+                if (success && comIntf->bufferIsDataFrame(buffer))
+                {
+                    debug("parsing as as data frame...\r\n");
+                    success = comIntf->readDataFrame(buffer, *defaultDataFramePayloadHandler);
+                }
+                else if (success && comIntf->bufferIsMgmtFrame(buffer))
+                {
+                    debug("parsing as as async mgmt frame...\r\n");
+                    ManagementFrame resp;
+                    success = comIntf->readManagementFrame(buffer, resp);
+                    if (success && asyncManagementFrameHandler != 0)
+                    {
+                        asyncManagementFrameHandler->call(resp);
+                        if (resp.responsePayload)
+                        {
+                            resp.responsePayloadHandler(buffer.buffer+resp.size);
+                        }
+                    }
+
+
+                }
 
                 if (!success)
                 {
@@ -201,8 +236,12 @@ void Module::moduleEventHandler()
             else
             {
                 debug("resp frame cmd id: 0x%x\r\n",respFrame->commandId);
+                bool success = comIntf->readFrame(buffer);
 
-                bool success = this->comIntf->readManagementFrameResponse(*respFrame);
+                if (success)
+                {
+                    success = this->comIntf->readManagementFrameResponse(buffer, *respFrame);
+                }
 
                 if (!success) {
                     responseFrameQueue.Remove(respFrame);
@@ -236,7 +275,10 @@ void Module::moduleEventHandler()
         if (responseFrameQueue.Length() == 0 && requestFrameQueue.Length() > 0)
         {
             ManagementFrame *request = requestFrameQueue.Dequeue();
+
             debug("Sending Mgmt request 0x%x\r\n",request->commandId);
+
+
             bool success = request->writeFrame();
 
             if (!success)
@@ -318,7 +360,8 @@ void Module::handleSleepWakeUp()
     if (comIntf->pollInputQueue())
     {
         ManagementFrame frame;
-        comIntf->readManagementFrame(frame);
+        DataReceiveBuffer buffer;
+        comIntf->readManagementFrame(buffer, frame);
 
         if (frame.commandId == ManagementFrame::WakeFromSleep)
         {

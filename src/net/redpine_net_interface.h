@@ -56,6 +56,8 @@ namespace mono { namespace redpine {
         // MARK: HAL methods
 
         void handleDataFrames(ModuleCommunication::DataPayload const &payload);
+
+        void handleAsyncMgmtFrames(const ManagementFrame &mgmt);
     };
 
 } }

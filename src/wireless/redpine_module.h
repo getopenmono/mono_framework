@@ -131,6 +131,15 @@ namespace mono { namespace redpine {
             Network *networks;              /**< List of results */
         };
 
+        class AsyncFrameContext
+        {
+            const ManagementFrame &frame;
+            const DataReceiveBuffer &RawBuffer;
+            const char *payload;
+
+            AsyncFrameContext(const ManagementFrame &, const DataReceiveBuffer &, const char *pld);
+        };
+
     protected:
 
         /** The only instantiation of the module class */
@@ -218,7 +227,7 @@ namespace mono { namespace redpine {
          *
          * Such frames are power, socket connect and disconnect events.
          */
-        mbed::FunctionPointerArg1<bool, ManagementFrame *> *asyncManagementFrameHandler;
+        mbed::FunctionPointerArg1<bool, const AsyncFrameContext &> *asyncManagementFrameHandler;
 
         /**
          * Callback function installed into the CommunicationInterface interrupt

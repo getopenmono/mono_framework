@@ -34,8 +34,15 @@ namespace mono { namespace redpine {
      */
     class DataReceiveBuffer
     {
+    protected:
+
+        void alloc(int len);
+
     public:
-        
+
+        /** Whould free memory buffer on dealloc */
+        int *refCount;
+
         /** The pointer to the buffer */
         uint8_t *buffer;
         
@@ -50,6 +57,16 @@ namespace mono { namespace redpine {
          * to read.
          */
         int bytesToRead;
+
+        DataReceiveBuffer();
+
+        DataReceiveBuffer(int size);
+
+        DataReceiveBuffer(const DataReceiveBuffer &other);
+
+        DataReceiveBuffer &operator=(const DataReceiveBuffer &other);
+
+        ~DataReceiveBuffer();
     };
     
     
@@ -61,9 +78,6 @@ namespace mono { namespace redpine {
     class SPIReceiveDataBuffer : public DataReceiveBuffer
     {
     public:
-        
-        /** Whould free memory buffer on dealloc */
-        bool ownsMemory;
         
         /** The protocol version used by the RP firmware */
         uint16_t firmwareVersion;
@@ -97,7 +111,7 @@ namespace mono { namespace redpine {
          */
         SPIReceiveDataBuffer& operator<<(mbed::SPI *spi);
         
-        ~SPIReceiveDataBuffer();
+
     };
     
     
@@ -198,7 +212,7 @@ namespace mono { namespace redpine {
          * @param rawHeader A pointer to the pre-alloced memory to hold the header
          * @return True on read success, false otherwise
          */
-        virtual bool readFrameHead(RawFrameHeader *rawHeader) = 0;
+        virtual bool readFrame(DataReceiveBuffer &rawFrame) = 0;
 
         /**
          * Read the first available frame from the modules input queue
@@ -207,7 +221,7 @@ namespace mono { namespace redpine {
          * @param frame A reference to management frame placeholder object
          * @return True on success, false otherwise
          */
-        virtual bool readManagementFrame(ManagementFrame &frame) = 0;
+        virtual bool readManagementFrame(DataReceiveBuffer &buffer, ManagementFrame &frame) = 0;
         
         /**
          * Read a pending frame from the module, and interpret it as a response
@@ -226,7 +240,7 @@ namespace mono { namespace redpine {
          * @param request A reference to the request frame, that is awaiting a response
          * @return `true` on success, `false` otherwise.
          */
-        virtual bool readManagementFrameResponse(ManagementFrame &request) = 0;
+        virtual bool readManagementFrameResponse(DataReceiveBuffer &buffer, ManagementFrame &request) = 0;
 
         /**
          * @brief Read a pending frame a Data frame.
@@ -239,7 +253,7 @@ namespace mono { namespace redpine {
          * @param payloadHandler A reference the data payload callback handler
          * @return `true`on succs, `false` otherwise
          */
-        virtual bool readDataFrame(DataPayloadHandler &payloadHandler) = 0;
+        virtual bool readDataFrame(DataReceiveBuffer &buffer, DataPayloadHandler &payloadHandler) = 0;
 
         virtual bool writeDataFrame(const char *data, uint32_t length) = 0;
 
@@ -430,13 +444,13 @@ namespace mono { namespace redpine {
         
         bool interruptActive();
 
-        bool readFrameHead(RawFrameHeader *rawHeader);
+        bool readFrame(DataReceiveBuffer &rawFrame);
 
-        bool readManagementFrame(ManagementFrame &frame);
+        bool readManagementFrame(DataReceiveBuffer &buffer, ManagementFrame &frame);
         
-        bool readManagementFrameResponse(ManagementFrame &request);
+        bool readManagementFrameResponse(DataReceiveBuffer &buffer, ManagementFrame &request);
 
-        bool readDataFrame(DataPayloadHandler &payloadHandler);
+        bool readDataFrame(DataReceiveBuffer &buffer, DataPayloadHandler &payloadHandler);
 
         bool writeDataFrame(const char *data, uint32_t length);
         

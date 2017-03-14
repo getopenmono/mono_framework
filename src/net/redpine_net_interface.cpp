@@ -18,7 +18,6 @@ void RedpineSocketInterface::Command::frameCompleted(ManagementFrame::FrameCompl
         cnxt->_onError(SocketContext::CONNECT_ERROR);
     }
 
-    delete frame;
     delete this;
 }
 
@@ -62,6 +61,7 @@ void RedpineSocketInterface::createClientSocket(SocketContext *cnxt,
     OpenSocketFrame *openFrm = new OpenSocketFrame(OpenSocketFrame::TCP_SSL_CLIENT, ip, localPort, destPort);
     openFrm->setCompletionCallback<Command>(cmd, &Command::frameCompleted);
     openFrm->createdHandler.attach<Command>(cmd, &Command::openFrameResponse);
+    openFrm->autoReleaseWhenParsed = true;
     cmd->frame = openFrm;
 
     openFrm->commitAsync();
@@ -136,6 +136,7 @@ void RedpineSocketInterface::closeSocket(SocketContext *cnxt, uint32_t sockDesc,
     CloseSocketFrame *closeFrm = new CloseSocketFrame(sockDesc, destPort);
     closeFrm->setCompletionCallback<Command>(cmd, &Command::frameCompleted);
     closeFrm->closedHandler.attach<Command>(cmd, &Command::closeFrameResponse);
+    closeFrm->autoReleaseWhenParsed = true;
     cmd->frame = closeFrm;
 
     closeFrm->commitAsync();
@@ -153,7 +154,13 @@ void RedpineSocketInterface::handleDataFrames(ModuleCommunication::DataPayload c
 }
 
 
-
+void RedpineSocketInterface::handleAsyncMgmtFrames(const ManagementFrame &mgmt)
+{
+    if (mgmt.commandId == ModuleFrame::SocketClose)
+    {
+        printf("socket close");
+    }
+}
 
 
 
