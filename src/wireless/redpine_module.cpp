@@ -300,9 +300,10 @@ bool Module::initAsyncFrame(const DataReceiveBuffer &buffer, ManagementFrame **f
         case ModuleFrame::SocketClose:
         case ModuleFrame::AsyncSckTerminated:
             *frame = new CloseSocketFrame(raw);
-            (*frame)->autoReleaseWhenParsed = true;
             break;
         case ModuleFrame::AsyncTcpConnect:
+            *frame = new AsyncTcpClientConnect(raw);
+            break;
         case ModuleFrame::AsyncConnAcceptReq:
         default:
             debug("Redpine rx command (0x%X) not supported!\r\n", raw->CommandId);
@@ -311,6 +312,7 @@ bool Module::initAsyncFrame(const DataReceiveBuffer &buffer, ManagementFrame **f
             break;
     }
 
+    (*frame)->autoReleaseWhenParsed = true;
     return true;
 }
 

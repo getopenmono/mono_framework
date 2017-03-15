@@ -18,6 +18,7 @@ namespace mono { namespace net {
             };
 
             virtual void _onCreate(uint32_t descriptor, uint16_t localPort) = 0;
+            virtual void _onConnectEstablish(uint32_t descriptor, const uint8_t fromIp[], uint16_t fromPort, uint16_t localPort) {};
             virtual void _onData(const char *data, uint32_t length, uint8_t fromIp[], uint16_t fromPort) = 0;
             virtual void _onClose(uint32_t descriptor, uint32_t sentBytes) = 0;
             virtual void _onError(SocketError err) = 0;
@@ -27,13 +28,13 @@ namespace mono { namespace net {
 
         virtual void createClientSocket(SocketContext *cnxt, uint8_t ip[], uint16_t destPort, uint16_t localPort, bool isUdp = false) = 0;
 
-        virtual void createServerSocket(uint16_t port, bool isUdp = false) = 0;
+        virtual void createServerSocket(SocketContext *cnxt, uint16_t port, uint8_t maxConnections = 10, bool isUdp = false) = 0;
 
         virtual void handleIncomingData(const char *data, uint32_t length, uint32_t sockDesc, uint8_t fromIp[], uint16_t fromPort) = 0;
 
         virtual void handleConnectEvent(uint32_t sockDesc) = 0;
 
-        virtual bool writeData(const char *data, uint32_t length, uint32_t sockDesc, uint8_t ipAddr[], uint16_t destPort, bool isUdp = false) = 0;
+        virtual bool writeData(const char *data, uint32_t length, uint32_t sockDesc, const uint8_t ipAddr[], uint16_t destPort, bool isUdp = false) = 0;
 
         virtual void closeSocket(SocketContext *cnxt, uint32_t sockDesc, uint16_t destPort) = 0;
 

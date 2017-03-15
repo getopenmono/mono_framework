@@ -15,13 +15,19 @@ namespace mono { namespace net {
 
         Ip4Address();
 
-        Ip4Address(uint8_t addr[]);
+        Ip4Address(const uint8_t addr[]);
 
         Ip4Address(const char *ipaddress);
 
         Ip4Address(const mono::String ipaddress);
 
+        Ip4Address(const Ip4Address &other);
+
+        Ip4Address &operator=(const Ip4Address &other);
+
         mono::String toString() const;
+
+        bool operator==(const Ip4Address &other) const;
 
     };
 

@@ -766,13 +766,41 @@ namespace mono { namespace redpine {
         mbed::FunctionPointerArg1<void, const socketFrameRcv*> createdHandler;
 
         OpenSocketFrame();
-        OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t localPort, uint16_t remotePort);
+        OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t localPort, uint16_t remotePort, uint8_t maxConnections = 0);
 
         void dataPayload(uint8_t *data);
 
         void responsePayloadHandler(uint8_t *data);
 
         int payloadLength();
+    };
+
+    // MARK: Async TCP (Client) Connection Estanlished
+
+    class AsyncTcpClientConnect : public ManagementFrame
+    {
+    public:
+        /** LTCP socket establish request structure */
+        typedef struct rsi_rsp_ltcp_est_s
+        {
+            uint16_t  ip_version;
+            uint16_t  socket_id;            /**< socket handle */
+            uint16_t  dest_port;            /**< remote port number */
+            union{
+                uint8_t   ipv4_address[4];
+                uint8_t   ipv6_address[16];
+            } dest_ip_addr;
+            uint16_t  mss;                  /**< remote peer MSS size */
+            uint32_t  window_size;          /**< remote peer Window size */
+            uint16_t  src_port_num;         /**< source port number */
+            
+        } rsi_rsp_ltcp_est;
+
+        mbed::FunctionPointerArg1<void, const rsi_rsp_ltcp_est*> respHandler;
+
+        AsyncTcpClientConnect(mgmtFrameRaw *raw);
+
+        void responsePayloadHandler(uint8_t *data);
     };
 
     // MARK: Close socket

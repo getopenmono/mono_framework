@@ -398,18 +398,18 @@ OpenSocketFrame::OpenSocketFrame() : ManagementFrame(SocketCreate)
     this->responsePayload = true;
 }
 
-OpenSocketFrame::OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t localPort, uint16_t remotePort) : ManagementFrame(SocketCreate)
+OpenSocketFrame::OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t localPort, uint16_t remotePort, uint8_t maxConnections) : ManagementFrame(SocketCreate)
 {
     this->responsePayload = true;
 
     this->frameData.ip_version = 4;
-    frameData.socketType = TCP_SSL_CLIENT;
+    frameData.socketType = type;
     frameData.moduleSocket = localPort;
     frameData.destSocket = remotePort;
 
     memcpy((void*)frameData.destIPaddr.ipv4_address, ipAddress, 4);
 
-    frameData.max_count = 0;
+    frameData.max_count = maxConnections;
     frameData.tos = 0;
     frameData.ssl_ws_enable = 0;
     frameData.ssl_ciphers = 0;
@@ -436,6 +436,19 @@ void OpenSocketFrame::responsePayloadHandler(uint8_t *data)
 int OpenSocketFrame::payloadLength()
 {
     return sizeof(socketFrameSnd);
+}
+
+// MARK: Async TCP (Client) Connection Estanlished
+
+AsyncTcpClientConnect::AsyncTcpClientConnect(mgmtFrameRaw *raw) :  ManagementFrame(raw)
+{
+    responsePayload = true;
+}
+
+void AsyncTcpClientConnect::responsePayloadHandler(uint8_t *data)
+{
+    rsi_rsp_ltcp_est *resp = (rsi_rsp_ltcp_est*) data;
+    respHandler.call(resp);
 }
 
 // MARK: Close Socket FRAME

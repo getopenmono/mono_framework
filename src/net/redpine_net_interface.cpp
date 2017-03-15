@@ -69,9 +69,19 @@ void RedpineSocketInterface::createClientSocket(SocketContext *cnxt,
     openFrm->commitAsync();
 }
 
-void RedpineSocketInterface::createServerSocket(uint16_t port, bool isUdp)
+void RedpineSocketInterface::createServerSocket(SocketContext *cnxt, uint16_t port, uint8_t maxConnections, bool isUdp)
 {
+    Command *cmd = new Command();
+    cmd->cnxt = cnxt;
 
+    uint8_t ip[4] = {0,0,0,0};
+    OpenSocketFrame *openFrm = new OpenSocketFrame(OpenSocketFrame::TCP_SSL_SERVER, ip, port, port, maxConnections);
+    openFrm->setCompletionCallback<Command>(cmd, &Command::frameCompleted);
+    openFrm->createdHandler.attach<Command>(cmd, &Command::openFrameResponse);
+    openFrm->autoReleaseWhenParsed = true;
+    cmd->frame = openFrm;
+
+    openFrm->commitAsync();
 }
 
 void RedpineSocketInterface::handleIncomingData(const char *data, uint32_t length,
@@ -95,13 +105,22 @@ void RedpineSocketInterface::handleConnectEvent(uint32_t sockDesc)
 }
 
 
-bool RedpineSocketInterface::writeData(const char *data, uint32_t length, uint32_t sockDesc, uint8_t ipAddr[], uint16_t destPort, bool isUdp)
+bool RedpineSocketInterface::writeData(const char *data, uint32_t length, uint32_t sockDesc, const uint8_t ipAddr[], uint16_t destPort, bool isUdp)
 {
     uint32_t frmHeaderSize;
     if (isUdp)
         frmHeaderSize = OpenSocketFrame::TxDataOffsetUdp;
     else
         frmHeaderSize = OpenSocketFrame::TxDataOffsetTcp;
+
+    int extraAlignmentPadding = 0;
+    if (length != (length & ~3))
+    {
+        int newLength = (length + 3) & (~3);
+        extraAlignmentPadding = newLength - length;
+        length = newLength;
+        debug("padding %i to 4-byte byte-align data\r\n", extraAlignmentPadding);
+    }
 
     uint32_t totalSize = frmHeaderSize + length;
     OpenSocketFrame::rsi_frameSend *frame = (OpenSocketFrame::rsi_frameSend*) malloc(totalSize);
@@ -113,7 +132,7 @@ bool RedpineSocketInterface::writeData(const char *data, uint32_t length, uint32
     frame->sendDataOffsetSize = frmHeaderSize;
     frame->destPort = destPort;
     memcpy(frame->destIPaddr.ipv4_address, ipAddr, 4);
-    memcpy(((char*)frame)+frmHeaderSize, data, length);
+    memcpy(((char*)frame)+frmHeaderSize, data, length - extraAlignmentPadding);
 
     bool success = Module::Instance()->sendDataFrame((char*)frame, totalSize);
     free(frame);
@@ -149,19 +168,27 @@ void RedpineSocketInterface::handleDataFrames(ModuleCommunication::DataPayload c
 
 bool RedpineSocketInterface::handleAsyncMgmtFrames(ManagementFrame *frame)
 {
-    if (frame->commandId == ModuleFrame::AsyncSckTerminated)
-    {
-        CloseSocketFrame *closeFrm = (CloseSocketFrame*) frame;
-        closeFrm->closedHandler.attach(this, &RedpineSocketInterface::handleCloseSocketFrame);
-
-        return true;
+    switch (frame->commandId) {
+        case ModuleFrame::SocketClose:
+        case ModuleFrame::AsyncSckTerminated:
+        {
+            CloseSocketFrame *closeFrm = (CloseSocketFrame*) frame;
+            closeFrm->closedHandler.attach(this, &RedpineSocketInterface::handleCloseSocketFrame);
+            break;
+        }
+        case ModuleFrame::AsyncTcpConnect:
+        {
+            AsyncTcpClientConnect *connFrm = (AsyncTcpClientConnect*) frame;
+            connFrm->respHandler.attach(this, &RedpineSocketInterface::handleConnectSocketFrame);
+            break;
+        }
+        default:
+            debug("RP interface cannot handle this commandid: 0x%x\r\n", frame->commandId);
+            return false;
+            break;
     }
-    else
-    {
-        debug("RP interface cannot handle this commandid: 0x%x\r\n", frame->commandId);
 
-        return false;
-    }
+    return true;
 }
 
 void RedpineSocketInterface::handleCloseSocketFrame(const CloseSocketFrame::rsi_rsp_socket_close *resp)
@@ -176,6 +203,16 @@ void RedpineSocketInterface::handleCloseSocketFrame(const CloseSocketFrame::rsi_
     activeSockets[resp->socket_id - 1] = 0;
 }
 
+void RedpineSocketInterface::handleConnectSocketFrame(const AsyncTcpClientConnect::rsi_rsp_ltcp_est *resp)
+{
+    SocketContext *cnxt = activeSockets[resp->socket_id - 1];
+    if (cnxt == 0)
+    {
+        return;
+    }
+
+    cnxt->_onConnectEstablish(resp->socket_id, resp->dest_ip_addr.ipv4_address, resp->dest_port, resp->src_port_num);
+}
 
 
 
