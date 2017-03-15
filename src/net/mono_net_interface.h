@@ -33,8 +33,6 @@ namespace mono { namespace net {
 
         virtual void handleConnectEvent(uint32_t sockDesc) = 0;
 
-        virtual void handleDisconnectEvent() = 0;
-
         virtual bool writeData(const char *data, uint32_t length, uint32_t sockDesc, uint8_t ipAddr[], uint16_t destPort, bool isUdp = false) = 0;
 
         virtual void closeSocket(SocketContext *cnxt, uint32_t sockDesc, uint16_t destPort) = 0;

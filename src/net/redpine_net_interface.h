@@ -34,6 +34,7 @@ namespace mono { namespace redpine {
 
         static SocketContext *activeSockets[MaxAllowedSockets];
         ModuleCommunication::DataPayloadHandler dataFrameHandler;
+        mbed::FunctionPointerArg1<bool, ManagementFrame*> asyncFrameHandler;
 
         // MARK: interface methods
 
@@ -47,8 +48,6 @@ namespace mono { namespace redpine {
 
         void handleConnectEvent(uint32_t sockDesc);
 
-        void handleDisconnectEvent();
-
         bool writeData(const char *data, uint32_t length, uint32_t sockDesc,  uint8_t ipAddr[], uint16_t destPort, bool isUdp = false);
 
         void closeSocket(SocketContext *cnxt, uint32_t sockDesc, uint16_t destPort);
@@ -57,7 +56,9 @@ namespace mono { namespace redpine {
 
         void handleDataFrames(ModuleCommunication::DataPayload const &payload);
 
-        void handleAsyncMgmtFrames(const ManagementFrame &mgmt);
+        bool handleAsyncMgmtFrames(ManagementFrame *frame);
+
+        void handleCloseSocketFrame(const CloseSocketFrame::rsi_rsp_socket_close *resp);
     };
 
 } }

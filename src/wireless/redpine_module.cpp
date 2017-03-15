@@ -10,15 +10,6 @@
 using namespace mono::redpine;
 
 
-// MARK: Async frame conext
-
-AsyncFrameContext::AsyncFrameContext(const ManagementFrame &frm, const DataReceiveBuffer &buf, const char *pld) :
-    frame(frm),
-    RawBuffer(buf),
-    payload(pld)
-{
-}
-
 /** Construct the module */
 Module Module::moduleSingleton;
 
@@ -188,6 +179,24 @@ bool Module::sendDataFrame(const char *dataPayload, uint32_t length)
 
 /// MARK: PRIVATE METHODS
 
+bool Module::discardIfNeeded(ManagementFrame *respFrame)
+{
+    responseFrameQueue.Remove(respFrame);
+    respFrame->triggerCompletionHandler();
+
+    if (respFrame->autoReleaseWhenParsed)
+    {
+        //debug("deleting resp frame 0x%x!\r\n",respFrame->commandId);
+        delete respFrame;
+        return true;
+    }
+    else
+    {
+        debug("leaving frame 0x%x\r\n",respFrame->commandId);
+        return false;
+    }
+}
+
 void Module::moduleEventHandler()
 {
 
@@ -214,17 +223,19 @@ void Module::moduleEventHandler()
                 else if (success && comIntf->bufferIsMgmtFrame(buffer))
                 {
                     debug("parsing as as async mgmt frame...\r\n");
-                    ManagementFrame resp;
-                    success = comIntf->readManagementFrame(buffer, resp);
+                    ManagementFrame *resp;
+                    success = initAsyncFrame(buffer, &resp);
                     if (success && asyncManagementFrameHandler != 0)
                     {
                         asyncManagementFrameHandler->call(resp);
-                        if (resp.responsePayload)
+                        if (resp->responsePayload)
                         {
-                            resp.responsePayloadHandler(buffer.buffer+resp.size);
+                            resp->responsePayloadHandler(buffer.buffer+resp->size);
                         }
                     }
 
+                    if (success)
+                        discardIfNeeded(resp);
 
                 }
 
@@ -244,29 +255,14 @@ void Module::moduleEventHandler()
                 }
 
                 if (!success) {
-                    responseFrameQueue.Remove(respFrame);
                     debug("failed to handle incoming response for resp queue head\r\n");
                     respFrame->status = 1;
-                    respFrame->triggerCompletionHandler();
+                    discardIfNeeded(respFrame);
                 }
                 else if (respFrame->lastResponseParsed)
                 {
-                    //debug("Frame (0x%x): last response parsed!\r\n",respFrame->commandId);
-                    responseFrameQueue.Remove(respFrame);
-                    respFrame->triggerCompletionHandler();
-
-                    if (respFrame->autoReleaseWhenParsed)
-                    {
-                        //debug("deleting resp frame 0x%x!\r\n",respFrame->commandId);
-                        delete respFrame;
-                    }
-                    else
-                    {
-                        debug("leaving frame 0x%x\r\n",respFrame->commandId);
-                    }
-
+                    discardIfNeeded(respFrame);
                 }
-
             }
 
         }
@@ -276,8 +272,7 @@ void Module::moduleEventHandler()
         {
             ManagementFrame *request = requestFrameQueue.Dequeue();
 
-            debug("Sending Mgmt request 0x%x\r\n",request->commandId);
-
+            //debug("Sending Mgmt request 0x%x\r\n",request->commandId);
 
             bool success = request->writeFrame();
 
@@ -296,6 +291,27 @@ void Module::moduleEventHandler()
             responseFrameQueue.Enqueue(request);
         }
     }
+}
+
+bool Module::initAsyncFrame(const DataReceiveBuffer &buffer, ManagementFrame **frame)
+{
+    mgmtFrameRaw *raw = (mgmtFrameRaw*) buffer.buffer;
+    switch (raw->CommandId) {
+        case ModuleFrame::SocketClose:
+        case ModuleFrame::AsyncSckTerminated:
+            *frame = new CloseSocketFrame(raw);
+            (*frame)->autoReleaseWhenParsed = true;
+            break;
+        case ModuleFrame::AsyncTcpConnect:
+        case ModuleFrame::AsyncConnAcceptReq:
+        default:
+            debug("Redpine rx command (0x%X) not supported!\r\n", raw->CommandId);
+            frame = 0;
+            return false;
+            break;
+    }
+
+    return true;
 }
 
 void Module::handleDataPayload(ModuleCommunication::DataPayload const &payload)

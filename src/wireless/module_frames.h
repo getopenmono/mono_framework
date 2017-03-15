@@ -101,6 +101,8 @@ namespace mono { namespace redpine {
         enum RxCommandIds
         {
             AsyncConnAcceptReq  = 0x30, /**< Async connection accept request from remote wfd device */
+            AsyncTcpConnect     = 0x61, /**< Async TCP Socket Connection Established */
+            AsyncSckTerminated  = 0x62, /**< Async Socket Remote Terminate */
             CardReady           = 0x89 /**< Card Ready command, when module is initialized and ready */
         };
         

@@ -804,6 +804,8 @@ namespace mono { namespace redpine {
 
         CloseSocketFrame(uint32_t descriptor, uint16_t port);
 
+        CloseSocketFrame(mgmtFrameRaw *raw);
+
         void dataPayload(uint8_t *data);
 
         void responsePayloadHandler(uint8_t *data);

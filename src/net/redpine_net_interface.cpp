@@ -45,8 +45,10 @@ void RedpineSocketInterface::Command::closeFrameResponse(const CloseSocketFrame:
 RedpineSocketInterface::RedpineSocketInterface()
 {
     dataFrameHandler.attach<RedpineSocketInterface>(this, &RedpineSocketInterface::handleDataFrames);
+    asyncFrameHandler.attach<RedpineSocketInterface>(this, &RedpineSocketInterface::handleAsyncMgmtFrames);
 
     Module::Instance()->defaultDataFramePayloadHandler = &dataFrameHandler;
+    Module::Instance()->asyncManagementFrameHandler = &asyncFrameHandler;
 
     memset(activeSockets, 0, sizeof(SocketContext*)*MaxAllowedSockets);
 }
@@ -78,17 +80,12 @@ void RedpineSocketInterface::handleIncomingData(const char *data, uint32_t lengt
 {
     if (sockDesc < 1)
     {
-        debug("Redpine module provided socket descriptor less than 1, ignoring!\r\n");
         return;
     }
     if (RedpineSocketInterface::activeSockets[sockDesc - 1] != 0)
     {
         SocketContext *socket = RedpineSocketInterface::activeSockets[sockDesc - 1];
         socket->_onData(data, length, fromIp, fromPort);
-    }
-    else
-    {
-        debug("non existing socket %d!\r\n", sockDesc);
     }
 }
 
@@ -97,10 +94,6 @@ void RedpineSocketInterface::handleConnectEvent(uint32_t sockDesc)
 
 }
 
-void RedpineSocketInterface::handleDisconnectEvent()
-{
-
-}
 
 bool RedpineSocketInterface::writeData(const char *data, uint32_t length, uint32_t sockDesc, uint8_t ipAddr[], uint16_t destPort, bool isUdp)
 {
@@ -154,13 +147,35 @@ void RedpineSocketInterface::handleDataFrames(ModuleCommunication::DataPayload c
 }
 
 
-void RedpineSocketInterface::handleAsyncMgmtFrames(const ManagementFrame &mgmt)
+bool RedpineSocketInterface::handleAsyncMgmtFrames(ManagementFrame *frame)
 {
-    if (mgmt.commandId == ModuleFrame::SocketClose)
+    if (frame->commandId == ModuleFrame::AsyncSckTerminated)
     {
-        printf("socket close");
+        CloseSocketFrame *closeFrm = (CloseSocketFrame*) frame;
+        closeFrm->closedHandler.attach(this, &RedpineSocketInterface::handleCloseSocketFrame);
+
+        return true;
+    }
+    else
+    {
+        debug("RP interface cannot handle this commandid: 0x%x\r\n", frame->commandId);
+
+        return false;
     }
 }
+
+void RedpineSocketInterface::handleCloseSocketFrame(const CloseSocketFrame::rsi_rsp_socket_close *resp)
+{
+    SocketContext *cnxt = activeSockets[resp->socket_id - 1];
+    if (cnxt == 0)
+    {
+        return;
+    }
+
+    cnxt->_onClose(resp->socket_id, resp->sent_bytes_count);
+    activeSockets[resp->socket_id - 1] = 0;
+}
+
 
 
 

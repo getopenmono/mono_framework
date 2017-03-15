@@ -441,12 +441,18 @@ int OpenSocketFrame::payloadLength()
 // MARK: Close Socket FRAME
 
 CloseSocketFrame::CloseSocketFrame() : ManagementFrame(SocketClose) {}
+CloseSocketFrame::CloseSocketFrame(mgmtFrameRaw *raw) : ManagementFrame(raw)
+{
+    responsePayload = true;
+}
 CloseSocketFrame::CloseSocketFrame(uint32_t descriptor, uint16_t port) : ManagementFrame(SocketClose)
 {
     responsePayload = true;
     rawPayload.socket_id = descriptor;
     rawPayload.port_number = port;
 }
+
+
 
 void CloseSocketFrame::dataPayload(uint8_t *data)
 {
