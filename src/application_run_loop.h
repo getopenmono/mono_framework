@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 #include <application_run_loop_task_interface.h>
-#include "mn_digital_out.h"
+#include <mn_digital_out.h>
 
 namespace mono {
     

@@ -45,7 +45,7 @@ namespace mono { namespace power {
         
     
         /**
-         * You must override this method. It gets called right after the system
+         * You can override this method. It gets called right after the system
          * power on for the first time, or after a reset condition.
          *
          * Use this method to setup / initialize components and data structures.
@@ -53,10 +53,10 @@ namespace mono { namespace power {
          *
          * @brief Called when the system powers on after a reset
          */
-        virtual void onSystemPowerOnReset() = 0;
+        virtual void onSystemPowerOnReset() { };
         
         /**
-         * You must override this method to get sleep notifications. Before the
+         * You can override this method to get sleep notifications. Before the
          * CPU stop executing intructions and goes into low power sleep mode,
          * this method gets called.
          *
@@ -70,7 +70,7 @@ namespace mono { namespace power {
          *
          * @brief Called right before the MCU goes into sleep mode
          */
-        virtual void onSystemEnterSleep() = 0;
+        virtual void onSystemEnterSleep() { };
         
         /**
          * <# description #>
@@ -80,10 +80,10 @@ namespace mono { namespace power {
          * @param <# param desc #>
          * @returns <# return desc #>
          */
-        virtual void onSystemWakeFromSleep() = 0;
+        virtual void onSystemWakeFromSleep() { };
         
         
-        virtual void OnSystemBatteryLow() = 0;
+        virtual void OnSystemBatteryLow() { };
     };
     
     
