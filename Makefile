@@ -25,6 +25,7 @@ MBED_INCLUDES_REL =	api \
 
 MBED_INCLUDES = $(foreach PATH, $(MBED_INCLUDES_REL), $(MBED_PATH)/$(PATH))
 
+
 MONO_OBJECTS =	$(patsubst %.c,%.o,$(wildcard $(FRAMEWORK_PATH)/*.c)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/display/*.cpp)) \
@@ -32,7 +33,8 @@ MONO_OBJECTS =	$(patsubst %.c,%.o,$(wildcard $(FRAMEWORK_PATH)/*.c)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/display/ili9225g/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/wireless/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/media/*.cpp)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/io/*.cpp))
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/io/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/sensors/*.cpp))
 
 MONO_INCLUDES_REL = . \
 					display \
@@ -41,7 +43,8 @@ MONO_INCLUDES_REL = . \
 					display/Fonts \
 					io \
 					wireless \
-					media
+					media \
+					sensors
 
 MONO_INCLUDES =	$(foreach PATH, $(MONO_INCLUDES_REL), $(FRAMEWORK_PATH)/$(PATH))
 
@@ -87,8 +90,7 @@ LDSCRIPT = -T $(LINKER_SCRIPT)
 LD_FLAGS = -g -mcpu=cortex-m3 -mthumb -march=armv7-m -fno-rtti -Wl,--gc-sections -specs=nano.specs
 LD_SYS_LIBS = -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 COPY_FLAGS = -j .text -j .eh_frame -j .rodata -j .ramvectors -j .noinit -j .data -j .bss -j .stack -j .heap -j .cyloadablemeta
-
-
+	
 # Makro for using newlines in rules.
 define \n
 
