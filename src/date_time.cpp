@@ -108,6 +108,31 @@ String DateTime::toDateString() const
     return String::Format("%04d-%02d-%02d",year,month,day);
 }
 
+uint32_t DateTime::toJulianDayNumber() const
+{
+    if (type == LOCAL_TIME_ZONE) return toUtcTime().toJulianDayNumber();
+
+    // this formula is from https://en.wikipedia.org/wiki/Julian_day
+    uint32_t a = (14 - month) / 12;
+    uint32_t y = year + 4800 - a;
+    uint32_t m = month + 12 * a - 3;
+    uint32_t jdn = day + (153 * m + 2) / 5
+        + 365 * y + (y / 4) - (y / 100) + (y / 400) - 32045;
+
+    return jdn;
+}
+
+uint32_t DateTime::toUnixTime() const
+{
+    if (type == LOCAL_TIME_ZONE) return toUtcTime().toUnixTime();
+
+    uint32_t jdn = toJulianDayNumber();
+    uint32_t hms = hours * 3600 + mins * 60 + secs;
+    uint32_t unix_time = (jdn - 2440588) * 86400 + hms;
+
+    return unix_time;
+}
+
 bool DateTime::isValid() const
 {
     return month > 0;
