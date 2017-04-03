@@ -8,6 +8,7 @@
 #include <us_ticker_api.h>
 #include "rtc_interface.h"
 #include "scheduled_task.h"
+#include <consoles.h>
 
 #ifdef DEVICE_SERIAL
 extern "C" {

@@ -5,6 +5,7 @@
 #define date_time_h
 
 #include <stdint.h>
+#include <time.h>
 #include "mn_string.h"
 
 namespace mono {
@@ -72,6 +73,38 @@ namespace mono {
          * 
          */
         DateTime();
+        
+        /**
+         * @brief Create a DateTime from the a libc simple time
+         *
+         * This constructor takes a standard lic time variable and create a 
+         * calendar DateTime object from that. It uses the systems timezone,
+         * and libc systems time stamp to calendar conversion.
+         *
+         * You can set the optional argument `localTimeZone` to `false` to force
+         * the *DateTime* to be created in UTC time, instead of system time.
+         *
+         * Times is converted to a date in the Gregorian calendar.
+         *
+         * @param t The libc simple time stamp
+         * @param localTimeZone Optional: Use the systems timezone in convertion
+         */
+        DateTime(const time_t t, bool localTimeZone = true);
+        
+        /**
+         * @brief Create a DateTime from the a libc broken-down time struct
+         *
+         * This constructor takes a standard libc broken-downtime variable 
+         * and creates a calendar DateTime object from that. It uses the 
+         * timezone present in libc structure.
+         *
+         * You can set the optional argument `localTimeZone` to `false` to force
+         * the *DateTime* to be created in UTC time, instead of system time.
+         *
+         * @param brokentime The libc simple broken-down calendar time
+         * @param localTimeZone Optional: Use the systems timezone in convertion
+         */
+        DateTime(const tm *brokentime, bool localTimeZone = true);
 
         /**
          * @brief Construct a DateTime object with a given date and time
@@ -134,6 +167,19 @@ namespace mono {
         uint32_t toUnixTime() const;
 
         /**
+         * @brief Return a libc broken-down time/date compnents
+         * 
+         * This uses the default timezone of the local systems time zone
+         */
+        struct tm toBrokenDownUnixTime() const;
+        
+        /**
+         * @brief Returns the libc style timestamp (simple time)
+         *
+         */
+        time_t toUnixTime2() const;
+
+        /**
          * @brief Return `true` if the DateTime is valid
          * 
          * Invalid date object is contructed by the default constructor
@@ -155,19 +201,19 @@ namespace mono {
 
         // MARK: Accessors
         
-        /** @brief Get the hour component */
+        /** @brief Get the hour component, from 0 to 23 */
         uint8_t Hours() const;
         
-        /** @brief Get the Minute component */
+        /** @brief Get the Minute component, from 0 to 59 */
         uint8_t Minutes() const;
         
-        /** @brief Get the Seconds component */
+        /** @brief Get the Seconds component, from 0 to 59 */
         uint8_t Seconds() const;
         
-        /** @brief Get the day of month component */
+        /** @brief Get the day of month component, first day of month is 1. */
         uint8_t Days() const;
         
-        /** @brief Get the month component */
+        /** @brief Get the month component, January is 1, December 12 */
         uint8_t Month() const;
         
         /** @brief Get the year component */
@@ -210,6 +256,17 @@ namespace mono {
          * @return The new DateTime object with days added
          */
         DateTime addDays(int days) const;
+        
+        /**
+         * @brief Return a new object with the Unix simple time component added
+         *
+         * The provided pointer to a unix time is added to the existing DateTime
+         * and the result is returned as a new object.
+         *
+         * @param t The unix simple time to add
+         * @return The new DateTime object with the time interval added
+         */
+        DateTime addTime(const time_t *t) const;
 
 //        DateTime addMonths(int months) const;
 //        DateTime addYears(int years) const;
@@ -272,11 +329,15 @@ namespace mono {
          */
         static int LocalTimeZoneHourOffset;
 
+#ifndef TEST_CASE
+        
         /**
          * @brief Set a new system DateTime
          */
         static void setSystemDateTime(DateTime dt);
 
+#endif
+        
         /**
          * @brief Get the current DateTime from the system RTC clock
          */
@@ -287,6 +348,7 @@ namespace mono {
          * DateTime. You should not call this manually.
          */
         static void incrementSystemClock();
+
     };
 
 }

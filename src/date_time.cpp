@@ -35,6 +35,43 @@ DateTime::DateTime()
     type = UNKNOWN_TIME_ZONE;
 }
 
+DateTime::DateTime(time_t t, bool localTime)
+{
+    *this = DateTime(localtime(&t), localTime);
+}
+
+DateTime::DateTime(const tm *brokendown, bool localTime)
+{
+    secs = brokendown->tm_sec;
+    mins = brokendown->tm_min;
+    hours = brokendown->tm_hour;
+    day = brokendown->tm_mday;
+    month = brokendown->tm_mon + 1;
+    year = brokendown->tm_year + 1900;
+    leapYear = isLeapYear(year);
+    type = localTime ? LOCAL_TIME_ZONE : UTC_TIME_ZONE;
+    
+#ifdef EMUNO
+    if (!localTime)
+    {
+        //Emuno uses gnu or darwin libc that includes tm_fmoff property
+        int hourOffset = brokendown->tm_gmtoff / (60*60);
+        *this = this->addHours(-hourOffset);
+    }
+#endif
+    /*
+    int hourOffset = brokendown->tm_gmtoff / (60*60);
+    if (hourOffset == 0)
+    {
+        type = UTC_TIME_ZONE;
+    }
+    else
+    {
+        type = LOCAL_TIME_ZONE;
+    }
+     */
+}
+
 DateTime::DateTime(uint16_t years, uint8_t months, uint8_t days,
                    uint8_t hours, uint8_t minutes, uint8_t seconds, TimeTypes zone)
 {
@@ -133,6 +170,26 @@ uint32_t DateTime::toUnixTime() const
     return unix_time;
 }
 
+struct tm DateTime::toBrokenDownUnixTime() const
+{
+    struct tm cmp;
+    cmp.tm_year = year - 1900;
+    cmp.tm_mon = month - 1;
+    cmp.tm_mday = day;
+    cmp.tm_hour = hours;
+    cmp.tm_min = mins;
+    cmp.tm_sec = secs;
+    cmp.tm_isdst = -1;
+    
+    return cmp;
+}
+
+time_t DateTime::toUnixTime2() const
+{
+    struct tm comps = this->toBrokenDownUnixTime();
+    return mktime(&comps);
+}
+
 bool DateTime::isValid() const
 {
     return month > 0;
@@ -142,8 +199,11 @@ DateTime DateTime::toUtcTime() const
 {
     if (type == UTC_TIME_ZONE)
         return *this;
-    else if (type == LOCAL_TIME_ZONE)
-        return DateTime(year, month, day, hours+LocalTimeZoneHourOffset, mins, secs, UTC_TIME_ZONE);
+    else if (type == LOCAL_TIME_ZONE) {
+        DateTime dt(*this);
+        dt.type = UTC_TIME_ZONE;
+        return dt.addHours(-LocalTimeZoneHourOffset);
+    }
     else
         return *this;
 
@@ -253,6 +313,11 @@ DateTime DateTime::addDays(int days) const
     }
 
     return other;
+}
+
+DateTime DateTime::addTime(const time_t *t) const
+{
+    return DateTime(*t + this->toUnixTime(), type == LOCAL_TIME_ZONE);
 }
 
 //DateTime DateTime::addMonths(int months) const
@@ -582,6 +647,8 @@ DateTime DateTime::now()
     return systemDateTimeClock;
 }
 
+#ifndef TEST_CASE
+
 void DateTime::setSystemDateTime(mono::DateTime dt)
 {
     if (IApplicationContext::Instance->RTC)
@@ -592,3 +659,5 @@ void DateTime::setSystemDateTime(mono::DateTime dt)
     if (IApplicationContext::Instance->RTC)
         IApplicationContext::Instance->RTC->startRtc();
 }
+
+#endif
