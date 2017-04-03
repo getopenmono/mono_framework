@@ -123,6 +123,15 @@ namespace mono {
          */
         String toDateString() const;
 
+        /**
+         * @brief Return Julian day number of the DateTime
+         */
+        uint32_t toJulianDayNumber() const;
+
+        /**
+         * @brief Return Unix time of the DateTime
+         */
+        uint32_t toUnixTime() const;
 
         /**
          * @brief Return `true` if the DateTime is valid
