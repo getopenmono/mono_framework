@@ -10,10 +10,10 @@
 namespace mono { namespace geo {
 
     /**
-     * Class representing a point in a 2D cartisian coordinate system
-     * The point has no width or height, omly an x-coordinate and a y-coordinate
+     * Representation of a point in a 2D cartisian coordinate system.
+     * The point has no width or height, only an x-coordinate and a y-coordinate.
      *
-     * This class defines the coordinates, as well as method to manipulate the
+     * This class defines the coordinates, as well as methods to manipulate the
      * point. Also functions for geometrical calculus is present.
      */
     class Point
