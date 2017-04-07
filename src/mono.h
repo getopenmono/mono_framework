@@ -33,6 +33,7 @@
 #include <mn_digital_out.h>
 #include <mn_string.h>
 #include <mn_timer.h>
+#include <mono_battery.h>
 #include <point.h>
 #include <queue.h>
 #include <queue_interrupt.h>
