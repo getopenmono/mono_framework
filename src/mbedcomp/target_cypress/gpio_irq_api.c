@@ -189,11 +189,11 @@ void gpio_irq_set(gpio_irq_t *obj, gpio_irq_event event, uint32_t enable) {
     if (!enable)
         CY_SET_REG8(obj->inttypeReg, 0x0);
     else if (event == IRQ_RISE)
-        CY_SET_REG8(obj->inttypeReg, 0x01);
+        CY_SET_REG8(obj->inttypeReg, CY_GET_REG5(obj->inttypeReg) | 0x01);
     else if (event == IRQ_FALL)
-        CY_SET_REG8(obj->inttypeReg, 0x02);
+        CY_SET_REG8(obj->inttypeReg, CY_GET_REG5(obj->inttypeReg) | 0x02);
     else if (event == (IRQ_FALL | IRQ_RISE))
-        CY_SET_REG8(obj->inttypeReg, 0x03);
+        CY_SET_REG8(obj->inttypeReg, CY_GET_REG5(obj->inttypeReg) | 0x03);
     else
         debug("Did not set any interrupt handler type!\r\n");
 
