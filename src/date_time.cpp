@@ -59,17 +59,6 @@ DateTime::DateTime(const tm *brokendown, bool localTime)
         *this = this->addHours(-hourOffset);
     }
 #endif
-    /*
-    int hourOffset = brokendown->tm_gmtoff / (60*60);
-    if (hourOffset == 0)
-    {
-        type = UTC_TIME_ZONE;
-    }
-    else
-    {
-        type = LOCAL_TIME_ZONE;
-    }
-     */
 }
 
 DateTime::DateTime(uint16_t years, uint8_t months, uint8_t days,
@@ -135,6 +124,11 @@ String DateTime::toISO8601() const
     return String::Format("%04d-%02d-%02dT%02d:%02d:%02d%s",year,month,day,hours,mins,secs,timeZone);
 }
 
+String DateTime::toRFC1123() const
+{
+    return toUtcTime().toString("%a, %d %b %Y %H:%M:%S GMT");
+}
+
 String DateTime::toTimeString() const
 {
     return String::Format("%02d:%02d:%02d",hours,mins,secs);
@@ -184,10 +178,23 @@ struct tm DateTime::toBrokenDownUnixTime() const
     return cmp;
 }
 
-time_t DateTime::toUnixTime2() const
+time_t DateTime::toLibcUnixTime() const
 {
     struct tm comps = this->toBrokenDownUnixTime();
     return mktime(&comps);
+}
+
+String DateTime::toString(const char *format) const
+{
+    time_t ut = toLibcUnixTime();
+    struct tm comps;
+    localtime_r(&ut, &comps);
+    char buffer[80];
+    size_t len = strftime(buffer, 80, format, &comps);
+    String result(len+1);
+    strftime(result.stringData, len, format, &comps);
+
+    return result;
 }
 
 bool DateTime::isValid() const

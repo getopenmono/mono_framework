@@ -168,5 +168,37 @@ SCENARIO("DateTime and calendar works")
             DateTime d3 = DateTime::fromISO8601(dateStr3);
             //printf("D3: %s\n", d3.toString()());
         }
+
+        WHEN("we format datetime with libc")
+        {
+            time_t now;
+            struct tm comps;
+            time(&now);
+            localtime_r(&now, &comps);
+            DateTime dtNow(now);
+            char buffer[100];
+
+            strftime(buffer, 100, "%a, %d %b %Y %H:%M:%S GMT", &comps);
+            String other = dtNow.toString("%a, %d %b %Y %H:%M:%S GMT");
+
+            printf("libc: %s == dt: %s\n", buffer, other());
+            REQUIRE(strcmp(buffer, other()) == 0);
+        }
+
+        WHEN("we get a RFC 1123 formatted date and time")
+        {
+            time_t now;
+            struct tm comps;
+            time(&now);
+            time_t utcNow = now + timezone - (daylight != 0 ? 60*60 : 0);
+            localtime_r(&utcNow, &comps);
+            DateTime dtNow(now, false);
+
+            char buffer[80];
+            strftime(buffer, 80, "%a, %d %b %Y %H:%M:%S GMT", &comps);
+            String rfcTime = dtNow.toRFC1123();
+            printf("libc: %s == dt: %s\n", buffer, rfcTime());
+            REQUIRE(strcmp(buffer, rfcTime()) == 0);
+        }
     }
 }
