@@ -1,6 +1,7 @@
 #!/bin/bash
 
 EMUNO_DIR=../../emuno
+BITBUCKET_HOST=bitbucket.org
 EMUNO_URL="https://$BITB_USERNAME@bitbucket.org/openmono/emuno.git"
 EMUNO_SSH="git@bitbucket.org:openmono/emuno.git"
 
@@ -11,12 +12,13 @@ if [[ ! -d $EMUNO_DIR ]]; then
 	
 	if [[ $BITB_SSH_KEY ]]; then
 		echo "using SSH key"
-		CUR=`pwd`
-		echo "$BITB_SSH_KEY" > bitbucket.key
-		chmod 600 bitbucket.key
+		echo "$BITB_SSH_KEY" > bitbucket_key
+		chmod 400 bitbucket_key
 		DEST=`basename $EMUNO_DIR`
-		ssh-agent bash -c "ssh-add bitbucket.key; git clone $EMUNO_SSH $DEST"
-		rm bitbucket.key
+		mkdir -p ~/.ssh
+		ssh-keyscan $BITBUCKET_HOST >> ~/.ssh/known_hosts
+		ssh-agent bash -c "ssh-add bitbucket_key; git clone $EMUNO_SSH $DEST"
+		rm bitbucket_key
 	elif [[ $BITB_USERNAME ]]; then
 		echo "using interactive login, with: $BITB_USERNAME"
 		git clone $EMUNO_URL `basename $EMUNO_DIR`

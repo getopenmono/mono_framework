@@ -1,5 +1,5 @@
-CXX=clang++
-CC=clang
+CXX=g++
+CC=gcc
 FRM_DIR=../src
 EMUNO_DIR=../../emuno
 OPTIMIZATION=0
