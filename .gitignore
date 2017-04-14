@@ -7,3 +7,4 @@ src/tests/build
 src/tests/buildlib
 src/tests/bin
 src/display/icons
+test/docker_run.sh

@@ -11,4 +11,5 @@ CMD export PATH=$PATH:$HOME/gcc-arm-none-eabi-5_2-2015q4/bin && \
   echo "Using branch: $BRANCH" && \
   git clone -b $BRANCH https://github.com/getopenmono/mono_framework.git && \
   cd mono_framework && \
-  make release
+  make release && \
+  cd test && bash suite.sh
