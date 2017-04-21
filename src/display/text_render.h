@@ -232,10 +232,6 @@ namespace mono { namespace display {
                         }
                     }
                 }
-                else if (c == ' ')
-                {
-                    offset.appendX(glyph->xAdvance);
-                }
                 else if (offset.X()+glyph->width <= rect.X2())
                 {
                     if (firstCharInLine) {

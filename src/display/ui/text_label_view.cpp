@@ -422,6 +422,7 @@ void TextLabelView::repaintGfxIncremental(mono::geo::Rect &)
             incrementCharPosition = 0;
             tr.layoutInRect(viewRect, text, *currentGfxFont, this, &TextLabelView::drawIncrementalChar, textMultiline);
 
+            prevTextRct = TextDimension();
             return; // no now - every following chars are repainted
         }
 
