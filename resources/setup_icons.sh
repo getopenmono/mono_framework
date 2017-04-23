@@ -33,7 +33,7 @@ if hash qmake; then
 	qmake && \
 	make && \
 	cd .. && \
-	sed -i .bak s@IMGICON=img2icon@IMGICON=./img2icon/img2icon@ $MKFILE && \
+	sed --in-place=bak s@IMGICON=img2icon@IMGICON=./img2icon/img2icon@ $MKFILE && \
 	echo "SUCCESS: You can run icons makefile" && \
 	exit 0
 	exit 1
