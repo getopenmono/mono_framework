@@ -41,7 +41,6 @@ MONO_INCLUDES_REL = . \
 					display/ili9225g \
 					display/ui \
 					display/Fonts \
-					display/icons \
 					io \
 					wireless \
 					media \
