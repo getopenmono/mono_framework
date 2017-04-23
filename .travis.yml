@@ -20,6 +20,7 @@ install:
 - export PATH=$PATH:$GCC_DIR/bin
 before_script:
 - make clean
+- bash resources/setup_icons.sh resources/icons.mk
 script:
 - echo Building on $TRAVIS_OS_NAME...
 - make release

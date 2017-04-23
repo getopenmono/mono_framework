@@ -102,9 +102,9 @@ all: $(MONO_FRAMEWORK)
 
 .PHONY: release
 release: all
-	@echo "-- ! --"
-	@echo "Icons must be converted to header files, remember to set that up in the build system!"
-	@exit 1
+	# @echo "-- ! --"
+	# @echo "Icons must be converted to header files, remember to set that up in the build system!"
+	# @exit 1
 	@echo "Copying to release folder..."
 	$(MKDIR) -p $(RELEASE_DIR)/mono/include
 	$(COPY) $(MONO_FRAMEWORK) $(RELEASE_DIR)/mono
@@ -112,6 +112,8 @@ release: all
 	$(COPY) $(CYPRESS_LIB) $(RELEASE_DIR)/mono
 	$(COPY) $(MBED_LIB) $(RELEASE_DIR)/mono
 	$(COPY) -r $(BUILD_DIR)/include/. $(RELEASE_DIR)/mono/include
+	@echo "Converting icon files..."
+	make -C resources -f icons.mk all
 
 $(BUILD_DIR):
 	@echo "creating build directory"
@@ -156,6 +158,11 @@ $(CYPRESS_LIB):
 $(MBED_LIB):
 	@echo "Building mbed library..."
 	@make -C $(MBED_PATH)
+
+.PHONY:
+icons:
+	@echo "Converting icon files..."
+	make -C resources -f icons.mk all
 
 clean:
 	$(RRM) $(BUILD_DIR)
