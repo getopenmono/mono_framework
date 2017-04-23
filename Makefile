@@ -162,6 +162,7 @@ $(MBED_LIB):
 .PHONY:
 icons:
 	@echo "Converting icon files..."
+	
 	make -C resources -f icons.mk all
 
 clean:
