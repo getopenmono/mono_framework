@@ -15,12 +15,22 @@ if hash qmake; then
 	echo "Qt dev tools are installed, will try to build img2icon..."
 	
 	MKFILE=icons.mk
+	DIST=../dist
 	if [[ $# > 0 ]]; then
 		MKFILE=$1
 	fi
 	
 	if [[ ! -f $MKFILE ]]; then
 		echo "Cannot find icons makefile at $MKFILE"
+		exit 1
+	fi
+	
+	if [[ $# > 1 ]]; then
+		DIST=$2
+	fi
+	
+	if [[ -d $DIST ]]; then
+		echo "ERROR: Destination dir does not exist: $DIST"
 		exit 1
 	fi
 	
