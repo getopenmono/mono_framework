@@ -1,8 +1,8 @@
-DIST=dist
+DIST=../dist
 SOURCE_DIR=icons
-TARGET_DIR=../$(DIST)/mono/include/display/icons
+TARGET_DIR=$(DIST)/mono/include/display/icons
 
-IMGICON=./img2icon/img2icon
+IMGICON=img2icon
 MKDIR=mkdir
 
 SOURCE_ICONS=$(wildcard $(SOURCE_DIR)/*.png)
