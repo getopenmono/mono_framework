@@ -39,11 +39,12 @@ if hash qmake; then
 			exit 1
 		fi
 	fi
+	PWD=`pwd`
 	cd img2icon && \
 	qmake && \
 	make && \
 	cd .. && \
-	sed --in-place=bak s@IMGICON=img2icon@IMGICON=./img2icon/img2icon@ $MKFILE && \
+	sed --in-place=bak s@IMGICON=img2icon@IMGICON=$(PWD)/img2icon/img2icon@ $MKFILE && \
 	sed --in-place=bak "s@DIST=../dist@DIST=$DIST@" $MKFILE && \
 	echo "SUCCESS: You can run icons makefile" && \
 	exit 0
