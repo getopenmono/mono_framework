@@ -187,7 +187,7 @@ namespace mono {
             Timer *timer = new Timer(delayMs, true);
             timer->setCallback<Owner>(obj, memPtr);
             timer->autoRelease = true;
-            timer->Start();
+            timer->start();
             
             return timer;
         }
@@ -210,7 +210,7 @@ namespace mono {
             Timer *timer = new Timer(delayMs, true);
             timer->setCallback(memPtr);
             timer->autoRelease = true;
-            timer->Start();
+            timer->start();
 
             return timer;
         }

@@ -116,7 +116,7 @@ namespace mono { namespace ui {
          *
          * @deprecated Use the GfxFont variant
          */
-        void setFont(MonoFont const &newFont);
+        void setFont(MonoFont const &newFont) __DEPRECATED("Use the method of same name, but provide a GfxFont","setFont");
 
         /**
          * @brief Change the buttons fontface (font family and size)

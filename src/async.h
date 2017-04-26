@@ -69,7 +69,7 @@ namespace mono {
      * not be valid at that point. Normally you can only expect the pointer to
      * be valid in the same stack frame, as it was created.
      *
-     * @param method A pointer to the C function.
+     * @param cFunction A pointer to the C function.
      * @return A pointer to the @ref Timer object that will execute the async call
      */
     inline Timer* async(void(*cFunction)(void))

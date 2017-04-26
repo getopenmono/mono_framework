@@ -255,7 +255,7 @@ namespace mono { namespace ui {
         uint16_t TextPixelHeight() const;
 
         /** @brief If not NULL, then returns the current selected @ref MonoFont */
-        const MonoFont* Font() const;
+        const MonoFont* Font() const __DEPRECATED("Old MonoFont system is being outphased","GfxFont");
 
         /** @brief If not NULL, then returns the current selected @ref GFXfont */
         const GFXfont* GfxFont() const;

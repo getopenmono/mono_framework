@@ -4,17 +4,17 @@
 
 using namespace mono::ui;
 
-SceneController::SceneController()
+SceneController::SceneController() :
+    viewRect(geo::Rect(geo::Point(0,0), View::DisplaySize())),
+    background(viewRect)
 {
-    viewRect = geo::Rect(geo::Point(0,0), View::DisplaySize());
-    backColor = View::StandardBackgroundColor;
     visible = false;
 }
 
-SceneController::SceneController(const geo::Rect &rect)
+SceneController::SceneController(const geo::Rect &rect) :
+    viewRect(rect),
+    background(rect)
 {
-    viewRect = rect;
-    backColor = View::StandardBackgroundColor;
     visible = false;
 }
 
@@ -37,12 +37,12 @@ void SceneController::requestDismiss()
 
 mono::display::Color SceneController::BackgroundColor() const
 {
-    return backColor;
+    return background.Color();
 }
 
 void SceneController::setBackground(display::Color color)
 {
-    backColor = color;
+    background.setBackgroundColor(color);
 }
 
 // MARK: ViewALike states
@@ -57,6 +57,7 @@ void SceneController::show()
     if (Visible())
         return;
     
+    background.show();
     visible = true;
     for(std::list<IViewALike*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
     {
@@ -77,14 +78,14 @@ void SceneController::hide()
         (*it)->hide();
     }
     
+    background.hide();
     hideHandler.call(*this);
 }
 
 void SceneController::scheduleRepaint()
 {
-    //paint it back
-    //painter.setBackgroundColor(backColor);
-    //painter.drawFillRect(viewRect, true);
+    //paint it black?
+    background.scheduleRepaint();
     
     for(std::list<IViewALike*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
     {
@@ -94,7 +95,7 @@ void SceneController::scheduleRepaint()
 
 // MARK: ViewALike area & position
 
-void SceneController::setRect(mono::geo::Rect const &rct)
+void SceneController::setRect(mono::geo::Rect rct)
 {
     viewRect = rct;
 }

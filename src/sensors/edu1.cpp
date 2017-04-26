@@ -15,7 +15,7 @@ Edu1::Edu1() :
     setJackTip3V3();
     
     timer.setCallback<Edu1>(this, &Edu1::requestSensorReading);
-    timer.Start();
+    timer.start();
 }
 
 // MARK: Protected Methods
@@ -34,7 +34,7 @@ void Edu1::turnOffJackTip()
 
 void Edu1::readDone()
 {
-    timer.Stop();
+    timer.stop();
 }
 
 void Edu1::requestSensorReading()
@@ -51,7 +51,7 @@ int Edu1::Read()
 
 int Edu1::ReadMilliCelcius()
 {
-    timer.Start();
+    timer.start();
     dht::SensorType type = dht::guessSensorType(buffer, 5);
     if (type == dht::DHT11)
         return dht::dht11::getTemperatureC(buffer, 5) * 1000;

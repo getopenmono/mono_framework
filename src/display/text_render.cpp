@@ -77,7 +77,10 @@ void TextRender::drawInRect(geo::Rect rect, String text, const MonoFont &fontFac
         }
         else
         {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
             this->drawChar(offset, c, fontFace, rect);
+#pragma GCC diagnostic pop
             offset.appendX(fontFace.glyphWidth);
         }
 

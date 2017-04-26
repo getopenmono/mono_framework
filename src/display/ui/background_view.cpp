@@ -11,6 +11,12 @@ BackgroundView::BackgroundView (display::Color color)
 {
 }
 
+BackgroundView::BackgroundView(geo::Rect const &rect, display::Color color) :
+    View(rect),
+    bgColor(color)
+{
+}
+
 void BackgroundView::setBackgroundColor (display::Color color)
 {
     bgColor = color;

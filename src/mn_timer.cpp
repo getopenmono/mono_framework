@@ -81,7 +81,7 @@ void Timer::setInterval(uint32_t newIntervalMs)
     {
         stop();
         interval = newIntervalMs;
-        Start();
+        start();
     }
     else
         interval = newIntervalMs;

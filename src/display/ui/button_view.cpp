@@ -100,7 +100,10 @@ void ButtonView::setText(mono::String txt)
 
 void ButtonView::setFont(MonoFont const &newFont)
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     textLabel.setFont(newFont);
+#pragma GCC diagnostic pop
 }
 
 void ButtonView::setFont(const GFXfont &newFont)
