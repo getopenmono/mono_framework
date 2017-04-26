@@ -23,8 +23,8 @@ services: docker
 script:
 - echo Building on $TRAVIS_OS_NAME...
 # - make release
-- docker build -t mnfrmdev test/
-- docker run mnfrmdev
+- docker pull stoffera/monofrm
+- docker run stoffera/monofrm
 notifications:
   slack:
     on_success: change

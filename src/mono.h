@@ -20,9 +20,11 @@
 #include <display/ui/button_view.h>
 #include <display/ui/console_view.h>
 #include <display/ui/graph_view.h>
+#include <display/ui/icon_view.h>
 #include <display/ui/image_view.h>
 #include <display/ui/progress_bar_view.h>
 #include <display/ui/responder_view.h>
+#include <display/ui/scene_controller.h>
 #include <display/ui/status_indicator_view.h>
 #include <display/ui/text_label_view.h>
 #include <display/ui/touch_calibrator.h>
