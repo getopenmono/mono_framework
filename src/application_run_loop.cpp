@@ -19,6 +19,8 @@ extern char serial_usbuart_is_powered;
 
 using namespace mono;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 AppRunLoop::AppRunLoop() : userBtn(SW_USER, 1, PullUp)
 {
     runLoopActive = true;
@@ -28,17 +30,20 @@ AppRunLoop::AppRunLoop() : userBtn(SW_USER, 1, PullUp)
     taskQueueHead = NULL;
     firstDtrRun = true;
 }
+#pragma GCC diagnostic pop
 
 void AppRunLoop::exec()
 {
     //debug("mono enter run loop!\r\n");
 
     checkUsbUartState();
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     while (runLoopActive) {
 
         process();
     }
+#pragma GCC diagnostic pop
 
     //debug("run loop terminated!");
 }
@@ -223,5 +228,8 @@ void AppRunLoop::setResetOnUserButton(bool roub)
 
 void AppRunLoop::quit()
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     runLoopActive = false;
+#pragma GCC diagnostic pop
 }
