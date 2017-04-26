@@ -40,7 +40,7 @@ TextLabelView::TextLabelView(const char *txt) :
     bgColor(StandardBackgroundColor)
 {
     this->incrementalRepaint = false;
-    currentFont = TextLabelView::StandardTextFont;
+    currentFont = 0;
     this->text = txt;
     this->textMultiline = isTextMultiline();
     this->setTextSize(2);
@@ -63,7 +63,7 @@ TextLabelView::TextLabelView(geo::Rect rct, String txt) :
     bgColor(StandardBackgroundColor)
 {
     this->incrementalRepaint = false;
-    currentFont = TextLabelView::StandardTextFont;
+    currentFont = 0;
     this->text = txt;
     this->textMultiline = isTextMultiline();
     textSize = 2;
@@ -84,7 +84,7 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
     bgColor(StandardBackgroundColor)
 {
     this->incrementalRepaint = false;
-    currentFont = TextLabelView::StandardTextFont;
+    currentFont = 0;
     this->text = txt;
     this->textMultiline = isTextMultiline();
     textSize = 2;
@@ -103,7 +103,6 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
 
 uint8_t TextLabelView::TextSize() const
 {
-    debug("TextLabelView::TextSize is Deprecated!\r\n");
     return textSize;
 }
 
@@ -224,35 +223,30 @@ void TextLabelView::setAlignment(VerticalTextAlignment vAlign)
 
 void TextLabelView::setText(const char *text)
 {
-    this->setText(text, false);
+    this->setText(text);
 }
 
 
 void TextLabelView::setText(mono::String text)
 {
-    this->setText(text, false);
-}
-
-void TextLabelView::setText(const char *txt, bool resizeViewWidth)
-{
-    this->setText(String(txt), resizeViewWidth);
-}
-
-void TextLabelView::setText(mono::String text, bool resizeViewWidth)
-{
-    this->text = String(text);
+    this->text = text;
     this->textMultiline = isTextMultiline();
-
-    if (resizeViewWidth)
-    {
-        viewRect.setWidth(TextPixelWidth());
-    }
-
+    
     if (isDirty)
         return;
-
+    
     scheduleRepaint();
     incrementalRepaint = true;
+}
+
+void TextLabelView::setText(const char *txt, bool)
+{
+    this->setText(String(txt));
+}
+
+void TextLabelView::setText(mono::String text, bool)
+{
+    this->setText(text);
 }
 
 void TextLabelView::setFont(const MonoFont &newFont)

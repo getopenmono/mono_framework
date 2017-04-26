@@ -4,6 +4,7 @@
 #ifndef text_render_h
 #define text_render_h
 
+#include <deprecated.h>
 #include "display_controller_interface.h"
 #include "display_painter.h"
 #include "font_interface.h"
@@ -101,7 +102,7 @@ namespace mono { namespace display {
          *
          * @deprecated Use the GfxFont method instead
          */
-        void drawChar(geo::Point position, char character, const MonoFont &font, geo::Rect const &boundingRect);
+        void drawChar(geo::Point position, char character, const MonoFont &font, geo::Rect const &boundingRect) __DEPRECATED("Use the similar method that takes a GfxFont type", "drawChar");
 
         /**
          * @brief Calculated the maximum offset under the text baseline
@@ -265,7 +266,7 @@ namespace mono { namespace display {
          * @param text The text string to render
          * @param fontFace A pointer the fontface to use
          */
-        void drawInRect(geo::Rect rect, String text, const MonoFont &fontFace);
+        void drawInRect(geo::Rect rect, String text, const MonoFont &fontFace) __DEPRECATED("Use the similar method, thatb uses GfxFont instead", "drawInRect");
 
         /**
          * @brief Return the resulting dimension / size of some rendered text
@@ -277,7 +278,7 @@ namespace mono { namespace display {
          * @param text The text to calculate the dimensions of
          * @param fontFace The font to use
          */
-        geo::Size renderDimension(String text, const MonoFont &fontFace);
+        geo::Size renderDimension(String text, const MonoFont &fontFace) __DEPRECATED("Use the similar method, thatb uses GfxFont instead", "renderDimension");
 
         /**
          * @brief Render a single Adafruit GfxFont character
