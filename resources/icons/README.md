@@ -1,6 +1,6 @@
 # Icons for Mono Framework
 
-**We have included a bsic set of free icons to use in your Mono apps.**
+**We have included a basic set of free icons to use in your Mono apps.**
 
 ## Credits
 
