@@ -14,13 +14,13 @@
 
 using namespace mono::io;
 
-/// MARK: Private contructor
+// MARK: Private contructor
 
 Serial::Serial(PinName tx, PinName rx) : mbed::Serial(tx, rx)
 {
 }
 
-/// MARK: Public Constructor
+// MARK: Public Constructor
 Serial::Serial() : mbed::Serial(USBTX, USBRX)
 {
 }

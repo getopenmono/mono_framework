@@ -7,7 +7,7 @@
 
 using namespace mono::ui;
 
-/// MARK: Conructors
+// MARK: Conructors
 
 void ButtonView::initButton()
 {
@@ -52,7 +52,7 @@ borderColorPressed(StandardHighlightColor)
     initButton();
 }
 
-/// MARK: Touch Handlers
+// MARK: Touch Handlers
 
 void ButtonView::TouchBegin(mono::TouchEvent &)
 {
@@ -91,7 +91,7 @@ void ButtonView::TouchEnd(mono::TouchEvent &event)
         scheduleRepaint();
 }
 
-/// MARK: Accessors
+// MARK: Accessors
 
 void ButtonView::setText(mono::String txt)
 {

@@ -10,7 +10,7 @@ AbstractButtonView::AbstractButtonView() : ResponderView() {}
 AbstractButtonView::AbstractButtonView(geo::Rect rct) : ResponderView(rct) {}
 
 
-/// MARK: Touch Handlers
+// MARK: Touch Handlers
 
 void AbstractButtonView::TouchBegin(mono::TouchEvent &)
 {

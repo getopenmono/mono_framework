@@ -110,7 +110,7 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
     incrementCharPosition = 0;
 }
 
-/// MARK: Getters
+// MARK: Getters
 
 uint8_t TextLabelView::TextSize() const
 {
@@ -196,7 +196,7 @@ mono::geo::Rect TextLabelView::TextDimension() const
 #pragma GCC diagnostic pop
 }
 
-/// MARK: Setters
+// MARK: Setters
 void TextLabelView::setTextSize(uint8_t newSize)
 {
     debug("TextLabelView::setSize is deprecated!\r\n");

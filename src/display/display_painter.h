@@ -108,7 +108,7 @@ namespace mono { namespace display {
             this->displayRefreshHandler.attach(function);
         }
 
-        /// MARK: Color Accessors
+        // MARK: Color Accessors
 
         /**
          * @brief Set the painters foreground pencil color

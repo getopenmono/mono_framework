@@ -187,7 +187,7 @@ namespace mono { namespace ui {
             }
         }
         
-        /// MARK: Auxilliary methods
+        // MARK: Auxilliary methods
         
         void setCursor(geo::Point pos)
         {

@@ -7,7 +7,7 @@
 using namespace mono::geo;
 
 
-/// MARK: Contructors
+// MARK: Contructors
 
 Circle::Circle() : Point()
 {
@@ -25,7 +25,7 @@ Circle::Circle(int x, int y, uint32_t radius) : Point(x,y)
 }
 
 
-/// MARK: GETTERS
+// MARK: GETTERS
 
 uint32_t Circle::Radius() const
 {

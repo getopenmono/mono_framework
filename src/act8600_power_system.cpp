@@ -261,7 +261,7 @@ ACT8600PowerSystem::SystemVoltageLevels ACT8600PowerSystem::SystemVoltageThresho
     return (SystemVoltageLevels) (data & SYSLEV);
 }
 
-/// MARK: POWER AWARE SYSTEM METHODS
+// MARK: POWER AWARE SYSTEM METHODS
 
 void ACT8600PowerSystem::onSystemPowerOnReset()
 {
@@ -314,7 +314,7 @@ void ACT8600PowerSystem::onSystemWakeFromSleep()
     setSystemMonitorInterrupt(true);
 }
 
-/// MARK: Protected Methods
+// MARK: Protected Methods
 
 
 void ACT8600PowerSystem::enableFaultMask(bool enable)
@@ -449,7 +449,7 @@ void ACT8600PowerSystem::systemInterrupts(uint32_t diff)
 
 }
 
-/// MARK: READ / WRITE REGISTERS
+// MARK: READ / WRITE REGISTERS
 
 bool ACT8600PowerSystem::readRegister(int8_t regAddr, uint8_t *regData)
 {

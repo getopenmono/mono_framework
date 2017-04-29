@@ -5,7 +5,7 @@
 
 using namespace mono::display;
 
-/// MARK: Public contructors
+// MARK: Public contructors
 
 Color::Color()
 {
@@ -29,7 +29,7 @@ Color::Color(uint8_t R, uint8_t G, uint8_t B)
             ((B >> 3) & 0x1F);
 }
 
-/// MARK: Getters
+// MARK: Getters
 
 uint8_t Color::Red() const
 {
@@ -44,7 +44,7 @@ uint8_t Color::Blue() const
     return (value << 3) & 0xF8;
 }
 
-/// MARK: Misc
+// MARK: Misc
 
 uint8_t* Color::BytePointer()
 {
@@ -113,7 +113,7 @@ mono::String Color::toString() const
     return String::Format("(%u, %u, %u)", Red(), Green(), Blue());
 }
 
-/// MARK: Operator overloads
+// MARK: Operator overloads
 
 uint16_t Color::operator=(Color col)
 {

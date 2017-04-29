@@ -61,7 +61,7 @@ bool StatusIndicatorView::State() const
     return state;
 }
 
-/// MARK: Auxilliaries
+// MARK: Auxilliaries
 
 void StatusIndicatorView::repaint()
 {

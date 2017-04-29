@@ -11,16 +11,16 @@ namespace mono { namespace io {
      * @brief A low pass filtered analog input pin.
      *
      * This is a class built upon the standard 
-     * [`mbed::AnalogIn`](https://developer.mbed.org/handbook/AnalogIn)
-     * class, that include moving average low pass filtering.
+     * [mbed::AnalogIn](https://developer.mbed.org/handbook/AnalogIn)
+     * class, that include running average low pass filtering.
      *
      * ## Filtered analog inputs
      *
      * In almost all cases you should low pass filter an incoming analog signal,
      * to remove high frequency noise. This class is a convenient way to do
-     * that. It uses the @ref MovingAverageFilter to filter all incoming samples.
+     * that. It uses the @ref RunningAverageFilter to filter all incoming samples.
      *
-     * Just like the @ref MovingAverageFilter, this class is templated with the
+     * Just like the @ref RunningAverageFilter, this class is templated with the
      * length of the low pass filter.
      *
      * ## Example
@@ -33,7 +33,7 @@ namespace mono { namespace io {
      * uint16_t filteredSample = input.rea_u16();
      * @endcode
      *
-     * @see MovingAverageFilter
+     * @see RunningAverageFilter
      */
     template <uint16_t depth>
     class FilteredAnalogIn : public mbed::AnalogIn, public RunningAverageFilter<depth>

@@ -8,7 +8,7 @@
 
 using namespace mono::io;
 
-/// MARK: Public static methods
+// MARK: Public static methods
 
 bool File::exists(String path)
 {
@@ -81,7 +81,7 @@ bool File::appendLine(String text, String path, const char *lineDelimiter)
     return appendString(String::Format("%s%s",text(),lineDelimiter), path);
 }
 
-/// MARK: Protected Static Methods
+// MARK: Protected Static Methods
 
 bool File::writeString(mono::String text, FILE *file)
 {

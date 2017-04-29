@@ -10,6 +10,14 @@
 
 namespace mono { namespace io {
     
+    /**
+     * @brief A clooection of static methods relating to File I/O
+     *
+     * This class contains a convenient handful of static methods to do common 
+     * file operations. These methods abstract away the crude API's of *libc*'s
+     * `stdio.h` functions.
+     *
+     */
     class File
     {
     protected:

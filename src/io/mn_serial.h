@@ -18,10 +18,13 @@ namespace mono { namespace io {
      * `mbed::Serial` class.
      *
      * ## Restrictions
+     *
      * This Serial class will communicate with the USBUART only when the USB 
      * power is connected. All data consumed by the class, then the USB power is
      * absent, is ignored.
      *
+     * To see how you use the Serial port, please refer to the [mbed
+     * documentation](https://developer.mbed.org/handbook/Serial)
      *
      */
     class Serial : public mbed::Serial

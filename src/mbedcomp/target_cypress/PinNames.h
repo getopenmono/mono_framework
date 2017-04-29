@@ -24,7 +24,7 @@ typedef enum {
 typedef enum {
     HARD_WIRED,
     
-    /// MARK: Auxillary pins
+    // MARK: Auxillary pins
     SW_USER = CYREG_PRT5_PC4,               /**< User button pin, active low */
     USER_SW = SW_USER,                      /**< User button pin, active low */
     BUZZER = CYREG_PRT5_PC3,                /**< Buzzer PWM signal pin */
@@ -35,7 +35,7 @@ typedef enum {
     VAUX_SEL = EXPANSION_3V3_ENABLE,        /**< Enable 3.3V on HIGH , LOW is 5V. */
     TFT_RP_nRESET = CYREG_PRT2_PC0,         /**< Reset both TFT and wireless module. Active low. */
 
-    /// MARK: Redpine wireless pins
+    // MARK: Redpine wireless pins
     RP_SPI_HARD_WIRE,               /**< Enum for the wireless module SPI */
     RP_SPI_CLK = RP_SPI_HARD_WIRE,              
     RP_SPI_MOSI = RP_SPI_HARD_WIRE,
@@ -45,21 +45,21 @@ typedef enum {
     RP_INTERRUPT = CYREG_PRT2_PC4,  /**< Wireless module interrupt on data, input! */
     RP_INT = RP_INTERRUPT,          /**< Wireless module interrupt on data, input! */
     
-    /// MARK: SD Card SPI pins
+    // MARK: SD Card SPI pins
     SD_SPI_HARD_WIRE,               /**< Enum for SD card SPI pins */
     SD_SPI_CLK = SD_SPI_HARD_WIRE,
     SD_SPI_MOSI = SD_SPI_HARD_WIRE,
     SD_SPI_MISO = SD_SPI_HARD_WIRE,
     SD_SPI_CS = SD_SPI_HARD_WIRE,   /**< SD Card chip select, hard wired in firmware. */
 
-    /// MARK: Display SPI pins
+    // MARK: Display SPI pins
     TFT_SPI_HARD_WIRE,
     TFT_SPI_CLK = TFT_SPI_HARD_WIRE,
     TFT_SPI_MOSI = TFT_SPI_HARD_WIRE,
     TFT_SPI_MISO = TFT_SPI_HARD_WIRE,
     TFT_SPI_CS = TFT_SPI_HARD_WIRE,
     
-    /// MARK: Display pins
+    // MARK: Display pins
     TFT_LED_PWR = CYREG_PRT5_PC1,           /**< TFT LED backlight PWM pin */
     TFT_REGISTER_SELECT = CYREG_PRT2_PC3,   /**< TFT cmd/data select pin. Only for 8-bit SPI mode. */
     TFT_RESET = CYREG_PRT2_PC0,             /**< Active low reset signal for TFT. Shared with wifi module */
@@ -72,16 +72,16 @@ typedef enum {
     TFT_TOUCH_X2 = CYREG_PRT1_PC2,  /**< TFT touch input X2 */
     TFT_LED = TFT_LED_PWR,          /**< TFT LED backlight PWM pin */
 
-    /// MARK: Public touch input pins
+    // MARK: Public touch input pins
     T_Xn = TFT_TOUCH_X1,   /**< Display touch input X- */
     T_Xp = TFT_TOUCH_X2,   /**< Display touch input X+ */
     T_Yn = TFT_TOUCH_Y1,   /**< Display touch input Y- */
     T_Yp = TFT_TOUCH_Y2,   /**< Display touch input Y+ */
 
-    /// MARK: Accelerometer pins
+    // MARK: Accelerometer pins
     ACCL_INT1 = CYREG_PRT12_PC0,/**< The interrupt signal from the acceleromter */
 
-    /// MARK: Mini jack connector and arduino pins
+    // MARK: Mini jack connector and arduino pins
     J_TIP   = CYREG_PRT12_PC3,  /**< Pin is shared between JC_TIP and @ref D9 */
     J_RING1 = CYREG_PRT0_PC2,   /**< Pin is shared between JC_RING1 and @ref D10 */
     J_RING2 = CYREG_PRT0_PC1,   /**< Pin is shared between JC_RING2 and @ref D11 */
@@ -93,7 +93,7 @@ typedef enum {
 
     nIRQ = CYREG_PRT5_PC2,      /**< The active low interrupt signal from the power sub system */
 
-    /// MARK: Arduino Digital pins
+    // MARK: Arduino Digital pins
     D0 = CYREG_PRT4_PC0,    /**< D0 on Shield Adaptor */
     D1 = CYREG_PRT4_PC1,    /**< D1 on Shield Adaptor */
     D2 = CYREG_PRT4_PC2,    /**< D2 on Shield Adaptor */
@@ -112,7 +112,7 @@ typedef enum {
     D12 = CYREG_PRT0_PC5,   /**< D12 on Shield Adaptor */
     D13 = CYREG_PRT0_PC6,   /**< D13 on Shield Adaptor */
     
-    /// MARK: Arduino Analog pins
+    // MARK: Arduino Analog pins
     A0 = CYREG_PRT3_PC2,    /**< A0 on Shield Adaptor */
     A1 = CYREG_PRT3_PC1,    /**< A1 on Shield Adaptor */
     A2 = CYREG_PRT3_PC0,    /**< A2 on Shield Adaptor */
@@ -120,7 +120,7 @@ typedef enum {
     A4 = CYREG_PRT3_PC4,    /**< A4 on Shield Adaptor */
     A5 = CYREG_PRT3_PC5,    /**< A5 on Shield Adaptor */
 
-    /// MARK: USB Pseudo pins
+    // MARK: USB Pseudo pins
     USBTX,
     USBRX,
     STDIO_UART_TX = USBTX,

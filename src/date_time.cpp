@@ -639,7 +639,7 @@ uint8_t DateTime::trim(uint8_t value, uint8_t min, uint8_t max)
     return value;
 }
 
-/// MARK: STATIC SYSTEM DATETIME
+// MARK: STATIC SYSTEM DATETIME
 
 int DateTime::LocalTimeZoneHourOffset = 0;
 DateTime DateTime::systemDateTimeClock = DateTime(1970, 1, 1, 0, 0, 0, DateTime::UTC_TIME_ZONE);

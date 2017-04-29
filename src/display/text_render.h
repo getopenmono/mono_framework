@@ -331,7 +331,7 @@ namespace mono { namespace display {
          */
         geo::Rect renderInRect(const geo::Rect &rect, String text, const GFXfont &fontFace, bool lineLayout = true);
 
-        /// MARK: Accessors
+        // MARK: Accessors
 
         /**
          * @brief Set the text color

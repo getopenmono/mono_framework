@@ -31,7 +31,7 @@ namespace mono { namespace power {
             
         }
         
-        /// mark: Methods to override
+        // MARK: Methods to override
         
         /**
          * @brief Callback for notification of power going down (hardware being)
@@ -51,7 +51,7 @@ namespace mono { namespace power {
          */
         virtual void PowerCameUp() {};
         
-        /// mark: Standard implemented methods
+        // MARK: Standard implemented methods
         
         /**
          * @brief Returns `true` if the power is avialable

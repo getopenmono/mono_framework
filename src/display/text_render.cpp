@@ -358,7 +358,7 @@ uint32_t TextRender::remainingTextlineWidth(const GFXfont &font, const char *tex
     return w + lastAdvanceDiff;
 }
 
-/// MARK: Accessors
+// MARK: Accessors
 
 void TextRender::setForeground(Color fg)
 {
