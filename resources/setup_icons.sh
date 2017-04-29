@@ -2,7 +2,7 @@
 
 # This script tests whether or not the img2icon compiler i present.
 # If it is not, it will check for Qt dev. env. and try to download and build it!
-
+MKFILE_TEMPLATE=icons.mk.tmp
 GIT_REPO="https://github.com/getopenmono/img2icon.git"
 
 if hash img2icon 2>/dev/null; then
@@ -14,9 +14,14 @@ echo "ISSUE: img2icon compiler does not exists in PATH"
 if hash qmake; then
 	echo "Qt dev tools are installed, will try to build img2icon..."
 
-	MKFILE=icons.mk
+	MKFILE=${MKFILE_TEMPLATE%.*}
 	if [[ $# > 0 ]]; then
 		MKFILE=$1
+	else
+		if [[ ! -f $MKFILE && -f $MKFILE_TEMPLATE ]]; then
+			echo "Creating $MKFILE from template..."
+			cp $MKFILE_TEMPLATE $MKFILE
+		fi
 	fi
 
 	if [[ ! -f $MKFILE ]]; then
@@ -42,7 +47,7 @@ if hash qmake; then
 		qmake && \
 		make && \
 		cd .. && \
-		sed -i bak "s@IMGICON=img2icon@IMGICON=$PWD/img2icon/img2icon@" $MKFILE && \
+		sed -i bak "s@IMGICON=.*img2icon@IMGICON=$PWD/img2icon/img2icon@" $MKFILE && \
 		sed -i bak "s@DIST=../dist@DIST=$DIST@" $MKFILE && \
 		echo "SUCCESS: You can run icons makefile" && \
 		exit 0
