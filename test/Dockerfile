@@ -10,9 +10,11 @@ RUN export GCC_DIR="$HOME/gcc-arm-none-eabi-5_2-2015q4" && \
 ENV BRANCH master
 ENV RUNTEST false
 CMD export PATH=$PATH:$HOME/gcc-arm-none-eabi-5_2-2015q4/bin && \
+  if [ $TRAVIS_BRANCH ]; then BRANCH=$TRAVIS_BRANCH; fi && \
   echo "Using branch: $BRANCH" && \
   git clone -b $BRANCH https://github.com/getopenmono/mono_framework.git && \
   cd mono_framework && \
+  if [ $TRAVIS_COMMIT ]; then echo "Using commit: $TRAVIS_COMMIT"; git checkout -qf $TRAVIS_COMMIT; fi && \
   bash resources/setup_icons.sh resources/icons.mk.tmp dist && \
   make release; \
   bash -c "if [ $RUNTEST == \"true\" ]; then echo \"Running test cases...\"; cd test && bash suite.sh; fi"
