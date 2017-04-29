@@ -13,6 +13,6 @@ CMD export PATH=$PATH:$HOME/gcc-arm-none-eabi-5_2-2015q4/bin && \
   echo "Using branch: $BRANCH" && \
   git clone -b $BRANCH https://github.com/getopenmono/mono_framework.git && \
   cd mono_framework && \
-  bash resources/setup_icons.sh resources/icons.mk dist && \
+  bash resources/setup_icons.sh resources/icons.mk.tmp dist && \
   make release; \
   bash -c "if [ $RUNTEST == \"true\" ]; then echo \"Running test cases...\"; cd test && bash suite.sh; fi"

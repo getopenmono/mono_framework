@@ -14,19 +14,19 @@ echo "ISSUE: img2icon compiler does not exists in PATH"
 if hash qmake; then
 	echo "Qt dev tools are installed, will try to build img2icon..."
 
-	MKFILE=${MKFILE_TEMPLATE%.*}
 	if [[ $# > 0 ]]; then
-		MKFILE=$1
-	else
-		if [[ ! -f $MKFILE && -f $MKFILE_TEMPLATE ]]; then
-			echo "Creating $MKFILE from template..."
-			cp $MKFILE_TEMPLATE $MKFILE
-		fi
+		MKFILE_TEMPLATE=$1
 	fi
-
-	if [[ ! -f $MKFILE ]]; then
-		echo "Cannot find icons makefile at $MKFILE"
+	
+	if [[ ! -f $MKFILE_TEMPLATE ]]; then
+		echo "Cannot find icons template makefile at $MKFILE_TEMPLATE"
 		exit 1
+	fi
+	
+	MKFILE=${MKFILE_TEMPLATE%.*}
+	if [[ ! -f $MKFILE ]]; then
+		echo "Creating $MKFILE from template..."
+		cp $MKFILE_TEMPLATE $MKFILE
 	fi
 
 	DIST=../dist
