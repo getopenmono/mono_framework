@@ -43,15 +43,31 @@ if hash qmake; then
 		fi
 	fi
 	PWD=`pwd`
-	cd img2icon && \
-		qmake && \
-		make && \
-		cd .. && \
-		sed -ibak "s@IMGICON=.*img2icon@IMGICON=$PWD/img2icon/img2icon@" $MKFILE && \
-		sed -ibak "s@DIST=../dist@DIST=$DIST@" $MKFILE && \
-		echo "SUCCESS: You can run icons makefile" && \
-		exit 0
-
+	sed -ibak "s@IMGICON=.*img2icon@IMGICON=$PWD/img2icon/img2icon@" $MKFILE && \
+	sed -ibak "s@DIST=../dist@DIST=$DIST@" $MKFILE
+	if [ ! $? ]; then
+		echo "ERROR: Failed to replace paths in icons makefile template!"
+		exit 1
+	fi
+	
+	if [[ $# > 2 && $3 == "win" ]]; then
+		echo "Building for Windows with MSVC++ toolchain..."
+		cd img2icon && \
+			qmake -tp vc && \
+			MSBuild.exe img2icon.vcxproj //p:Configuration=Release && \
+			cd .. && \
+			echo "SUCCESS: You can run icons makefile" && \
+			exit 0
+	else
+		cd img2icon && \
+			qmake && \
+			make && \
+			cd .. && \
+			echo "SUCCESS: You can run icons makefile" && \
+			exit 0
+	fi
+	
+	echo "ERROR: Compile error!"
 	exit 1
 fi
 
