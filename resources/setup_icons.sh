@@ -54,9 +54,9 @@ if hash qmake; then
 		echo "Building for Windows with MSVC++ toolchain..."
 		cd img2icon && \
 			qmake -tp vc && \
-			MSBuild.exe img2icon.vcxproj //p:Configuration=Release && \
-			sed -ibak "s@IMGICON=.*img2icon@IMGICON=$PWD/img2icon/release/img2icon.exe@" $MKFILE 
+			MSBuild.exe img2icon.vcxproj //p:Configuration=Release && \ 
 			cd .. && \
+			sed -ibak "s@IMGICON=.*img2icon@IMGICON=$PWD/img2icon/release/img2icon.exe@" $MKFILE && \
 			echo "SUCCESS: You can run icons makefile" && \
 			exit 0
 	else
