@@ -29,9 +29,18 @@ Timer::Timer(uint32_t intervalMs, bool snglShot)
     autoRelease = false;
 }
 
-Timer::Timer(const Timer &timer) {}
+Timer::Timer(const Timer &other)
+{
+    singleShot = false; // this is singleShot property for task loop
+    this->timerSingleShot = other.timerSingleShot;
+    this->interval = other.interval;
+    this->running = false;
+    this->interruptDidFire = false;
+    this->autoRelease = other.autoRelease;
+    this->handler = other.handler;
+}
 
-Timer& Timer::operator=(const mono::Timer &timer) { return *this; }
+Timer& Timer::operator=(const mono::Timer &) { return *this; }
 
 // MARK: Public Methods
 

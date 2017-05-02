@@ -14,7 +14,7 @@
 namespace mono { namespace ui {
 
     /**
-     * @brief A logical grouping of views, that together is a scenery
+     * @brief A logical grouping of views, that together promise a scene
      *
      * Scenes are a group of views that together represent a UI. The scene
      * enables you to @ref hide, @ref show and repaint all the views at once.
