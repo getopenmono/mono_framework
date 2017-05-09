@@ -16,7 +16,7 @@ QueueInterrupt::QueueInterrupt(PinName pin, PinMode mode) : mbed::InterruptIn(pi
     this->isHandled = true;
     this->debounce = false;
     this->debounceTimeoutUs = 30000;
-    this->wakeFromSleep = true;
+    this->wakeFromSleep = false;
 }
 
 QueueInterrupt::~QueueInterrupt()

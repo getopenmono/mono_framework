@@ -149,6 +149,8 @@ namespace mono {
          * @return `true` if the object was found and removed, `false` otherwise. 
          */
         bool removeDynamicTask(IRunLoopTask *task);
+
+        int taskCount() const;
         
         /**
          * @brief Sets the *Reset on User Button* mode
