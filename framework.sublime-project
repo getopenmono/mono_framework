@@ -15,7 +15,7 @@
   ]
 , "folders":
   [ { "path": "."
-    , "folder_exclude_patterns": ["build","release","unittest.dSYM"]
+    , "folder_exclude_patterns": ["build","dist","release","unittest.dSYM"]
     , "file_exclude_patterns": ["*.elf","*.map"]
     }
   ]
