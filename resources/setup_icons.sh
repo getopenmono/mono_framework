@@ -32,6 +32,7 @@ if hash qmake; then
 	DIST=../dist
 	if [[ $# > 1 ]]; then
 		DIST=$2
+		echo "Using custom destination: $DIST"
 	fi
 	if [[ ! -d $DIST ]]; then
 		mkdir -p $DIST
