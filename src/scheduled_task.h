@@ -163,6 +163,15 @@ namespace mono {
          * it yourself.
          */
         static void processScheduledTasks(bool isSleeping = false);
+
+        /**
+         * @brief Returns `true` if there are scheduling tasks pending for 
+         * processing.
+         *
+         * This means a running task has timed out, and are ready to have its 
+         * handler called.
+         */
+        static bool pendingScheduledTasks();
     };
 }
 

@@ -70,15 +70,14 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
 
         if (__shouldWakeUp == false)
         {
-            if (IRTCSystem::__shouldProcessScheduledTasks)
+            if (IRTCSystem::__shouldProcessScheduledTasks && ScheduledTask::pendingScheduledTasks())
             {
                 powerUpMCUPeripherals();
                 
                 ScheduledTask::processScheduledTasks(true);
-                
-//                powerSubsystem.setPowerFence(true);
-//                powerSubsystem.powerOffUnused();
-//
+
+                //TODO: ensure the power fence is active here! (preferebly without using the I2C)
+
                 powerDownMCUPeripherals();
             }
             
