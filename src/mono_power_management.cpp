@@ -70,7 +70,7 @@ void MonoPowerManagement::EnterSleep(bool skipAwarenessQueues)
 
         if (__shouldWakeUp == false)
         {
-            if (IRTCSystem::__shouldProcessScheduledTasks && ScheduledTask::pendingScheduledTasks())
+            if (IRTCSystem::__shouldProcessScheduledTasks && ScheduledTask::pendingScheduledTasks(true))
             {
                 powerUpMCUPeripherals();
                 

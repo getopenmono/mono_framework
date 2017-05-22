@@ -168,10 +168,13 @@ namespace mono {
          * @brief Returns `true` if there are scheduling tasks pending for 
          * processing.
          *
-         * This means a running task has timed out, and are ready to have its 
-         * handler called.
+         * This means a running task has timed out and are ready to have its
+         * handler called. tasks with no callback handler are not regarded as
+         * pending.
+         *
+         * @param inSleep If this static method is called from inside sleep mode, set to `true`
          */
-        static bool pendingScheduledTasks();
+        static bool pendingScheduledTasks(bool inSleep = false);
     };
 }
 

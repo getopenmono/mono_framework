@@ -8,12 +8,12 @@ GenericQueue<ScheduledTask> ScheduledTask::queue;
 
 ScheduledTask::ScheduledTask()
 {
-    runInSleep = true;
+    runInSleep = false;
 }
 
 ScheduledTask::ScheduledTask(const DateTime &scheduledTime)
 {
-    runInSleep = true;
+    runInSleep = false;
     time = scheduledTime;
 }
 
@@ -99,7 +99,7 @@ void ScheduledTask::processScheduledTasks(bool inSleep)
     }
 }
 
-bool ScheduledTask::pendingScheduledTasks()
+bool ScheduledTask::pendingScheduledTasks(bool inSleep)
 {
     ScheduledTask *task = ScheduledTask::queue.Peek();
 
@@ -108,7 +108,7 @@ bool ScheduledTask::pendingScheduledTasks()
 
     while (task != 0)
     {
-        if (task->isDue())
+        if (task->isDue() && task->handler && (inSleep == false || task->willRunInSleep() == true))
             return true;
 
         task = queue.Next(task);
