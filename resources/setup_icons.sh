@@ -60,14 +60,15 @@ if hash qmake; then
 			cd .. && \
 			sed -ibak "s@IMGICON=.*img2icon@IMGICON=$PWD/img2icon/release/img2icon.exe@" $MKFILE && \
 			echo "SUCCESS: You can run icons makefile" && \
-			exit 0
+			cat $MKFILE && \
+			exit 0 || exit 1
 	else
 		cd img2icon && \
 			qmake && \
 			make && \
 			cd .. && \
 			echo "SUCCESS: You can run icons makefile" && \
-			exit 0
+			exit 0 || exit 1
 	fi
 	
 	echo "ERROR: Compile error!"
