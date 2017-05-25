@@ -42,7 +42,16 @@ if hash qmake; then
 		if ! git clone $GIT_REPO; then
 			exit 1
 		fi
+	else
+		echo "img2icon repo already exists, clean & update repo..."
+		cd img2icon && \
+		git reset --hard && \
+		git clean -fXd && \
+		git checkout && \
+		git pull && \
+		cd .. || exit 1
 	fi
+	
 	PWD=`pwd`
 	sed -ibak "s@IMGICON=.*img2icon@IMGICON=$PWD/img2icon/img2icon@" $MKFILE && \
 	sed -ibak "s@DIST=../dist@DIST=$DIST@" $MKFILE
