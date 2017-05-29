@@ -16,6 +16,12 @@ Install version 5 of the [ARM GCC Embedded toolchain](https://launchpad.net/gcc-
 ## Building
 
 Run
+
+```
+$ bash resources/setup_icons.sh resources/icons.mk.tmp 
+```
+
+Run
 ```
 $ make release
 ```
