@@ -17,7 +17,7 @@ CMD export PATH=$PATH:$HOME/gcc-arm-none-eabi-5_2-2015q4/bin && \
   git clone -b $BRANCH https://github.com/getopenmono/mono_framework.git && \
   cd mono_framework && \
   if [ $TRAVIS_COMMIT ]; then echo "Using commit: $TRAVIS_COMMIT"; git checkout -qf $TRAVIS_COMMIT; fi && \
-  bash resources/setup_icons.sh resources/icons.mk.tmp dist && \
+  bash resources/setup_icons.sh resources/icons.mk.tmp && \
   make release -j || make release; \
   bash -c "if [ $RUNTEST == \"true\" ]; then echo \"Running test cases...\"; cd test && bash suite.sh; fi"; \
   bash -c "if [ $DEPLOY == \"true\" -a -d dist -a -d $DEPLOY_TARGET ]; then echo \"Copy artifacts to $DEPLOY_TARGET\"; cp -r dist/* $DEPLOY_TARGET; fi"

@@ -23,8 +23,8 @@ services: docker
 script:
 - echo Building on $TRAVIS_OS_NAME...
 # - make release
-- docker pull stoffera/monofrm
-- docker run -e BRANCH=$TRAVIS_BRANCH -e TRAVIS_COMMIT=$TRAVIS_COMMIT stoffera/monofrm
+- docker pull monolit/monofrm
+- docker run -e BRANCH=$TRAVIS_BRANCH -e TRAVIS_COMMIT=$TRAVIS_COMMIT monolit/monofrm
 notifications:
   slack:
     on_success: change
