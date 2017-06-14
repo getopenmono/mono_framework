@@ -22,12 +22,15 @@ void TouchCalibrateView::initialize()
 
     textHeader.setText(display::SilverColor);
     textHeader.setAlignment(TextLabelView::ALIGN_CENTER);
-    textHeader.setBackgroundColor(backgroundColor);
+    textHeader.setBackground(backgroundColor);
 
     textLbl.setAlignment(TextLabelView::ALIGN_CENTER);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     textLbl.setTextSize(1);
+#pragma GCC diagnostic pop
     textLbl.setText(display::SilverColor);
-    textLbl.setBackgroundColor(backgroundColor);
+    textLbl.setBackground(backgroundColor);
 
     //align text horizontal center
     uint16_t textHeight = textHeader.TextPixelHeight();

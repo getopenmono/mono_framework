@@ -33,6 +33,9 @@ void MonoTouchSystem::processTouchInput()
 {
     if (!active)
         return;
+    
+    if (TouchResponder::FirstResponder() == 0)
+        return;
 
     if ((us_ticker_read() - lastTouchProcess) <= 10000)
         return;

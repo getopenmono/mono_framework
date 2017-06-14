@@ -63,6 +63,17 @@ namespace mono { namespace ui {
         BackgroundView(display::Color color = StandardBackgroundColor);
 
         /**
+         * @brief Construct a BackgroundView with a specific position and size
+         *
+         * If you need at solid color (as background) in a confined space on
+         * the screen, then you can use this constructor.
+         *
+         * @param rect The position and size of the view
+         * @param color An optional color, default is @ref StandardBackgroundColor
+         */
+        BackgroundView(geo::Rect const &rect, display::Color color = StandardBackgroundColor);
+        
+        /**
          * @brief Sets a new background color on the view.
          * 
          * Set a new background color on the view. If the view is shared between

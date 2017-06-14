@@ -842,7 +842,7 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     // write the data frame with payload
     // the size of 872 comes from redpines documentation of POST data,
     // but this size might be too large for embedded memory sizes
-    char payloadBuffer[872];
+    uint8_t payloadBuffer[872];
     memset(payloadBuffer, 0, 872);
 
     if (frame->payloadLength() > 872)

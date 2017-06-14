@@ -17,6 +17,9 @@ namespace mono { namespace io {
      * The additional function is the possibility to change the pin drive mode, such
      * that it does not need to be strong drive (CMOS). This class allows you to
      * set the mode to `PullUp` / `PullDown` / `OpenDrain`.
+     *
+     * To see how you use the `DigitalOut` class, please refer to the [mbed
+     * documentation page](https://developer.mbed.org/handbook/DigitalOut)
      */
     class DigitalOut : public mbed::DigitalOut
     {

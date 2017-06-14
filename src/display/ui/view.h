@@ -8,6 +8,7 @@
 #include <rect.h>
 #include "touch_system_interface.h"
 #include "queue.h"
+#include <view_alike.h>
 
 namespace mono {
     class IApplicationContext;
@@ -35,7 +36,7 @@ namespace mono {
      *
      * @see ResponderView
      */
-        class View : public IQueueItem
+        class View : public IViewALike, public IQueueItem
     {
         friend class mono::IApplicationContext;
         friend class Animator;

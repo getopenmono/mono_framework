@@ -29,13 +29,22 @@ Timer::Timer(uint32_t intervalMs, bool snglShot)
     autoRelease = false;
 }
 
-Timer::Timer(const Timer &timer) {}
+Timer::Timer(const Timer &other)
+{
+    singleShot = false; // this is singleShot property for task loop
+    this->timerSingleShot = other.timerSingleShot;
+    this->interval = other.interval;
+    this->running = false;
+    this->interruptDidFire = false;
+    this->autoRelease = other.autoRelease;
+    this->handler = other.handler;
+}
 
-Timer& Timer::operator=(const mono::Timer &timer) { return *this; }
+Timer& Timer::operator=(const mono::Timer &) { return *this; }
 
 // MARK: Public Methods
 
-void Timer::Start()
+void Timer::start()
 {
     if (handler == false)
         return;
@@ -50,19 +59,27 @@ void Timer::Start()
         interruptDidFire = true;
 }
 
-void Timer::Stop()
+void Timer::Start() {
+    start();
+}
+
+void Timer::stop()
 {
     running = false;
     IApplicationContext::Instance->RunLoop->removeDynamicTask(this);
     ticker.detach();
 }
 
-bool Timer::Running()
+void Timer::Stop() {
+    stop();
+}
+
+bool Timer::Running() const
 {
     return running;
 }
 
-bool Timer::SingleShot()
+bool Timer::SingleShot() const
 {
     return timerSingleShot;
 }
@@ -71,9 +88,9 @@ void Timer::setInterval(uint32_t newIntervalMs)
 {
     if (running)
     {
-        Stop();
+        stop();
         interval = newIntervalMs;
-        Start();
+        start();
     }
     else
         interval = newIntervalMs;
@@ -88,7 +105,7 @@ void Timer::taskHandler()
     {
         if (timerSingleShot)
         {
-            Stop();
+            stop();
             die = true;
         }
         
@@ -114,7 +131,7 @@ Timer::~Timer()
     //CyGlobalIntDisable;
     if (running)
     {
-        Stop();
+        stop();
     }
     //CyGlobalIntEnable;
 }

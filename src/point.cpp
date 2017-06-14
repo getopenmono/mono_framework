@@ -62,7 +62,7 @@ void Point::appendY(int addY)
 
 uint32_t Point::Abs() const
 {
-    return sqrtf(powf(this->x, 2)+powf(this->y, 2));
+    return sqrtf(this->x*this->x + this->y*this->y);
 }
 
 bool mono::geo::operator==(mono::geo::Point &p1, mono::geo::Point &p2)

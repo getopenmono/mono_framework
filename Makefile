@@ -25,6 +25,7 @@ MBED_INCLUDES_REL =	api \
 
 MBED_INCLUDES = $(foreach PATH, $(MBED_INCLUDES_REL), $(MBED_PATH)/$(PATH))
 
+
 MONO_OBJECTS =	$(patsubst %.c,%.o,$(wildcard $(FRAMEWORK_PATH)/*.c)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/display/*.cpp)) \
@@ -33,7 +34,8 @@ MONO_OBJECTS =	$(patsubst %.c,%.o,$(wildcard $(FRAMEWORK_PATH)/*.c)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/wireless/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/media/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/io/*.cpp)) \
-				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/net/*.cpp)) 
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/net/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/sensors/*.cpp))
 
 MONO_INCLUDES_REL = . \
 					display \
@@ -43,7 +45,8 @@ MONO_INCLUDES_REL = . \
 					io \
 					wireless \
 					media \
-					net
+					net \
+					sensors
 
 MONO_INCLUDES =	$(foreach PATH, $(MONO_INCLUDES_REL), $(FRAMEWORK_PATH)/$(PATH))
 
@@ -79,7 +82,7 @@ MKDIR=mkdir
 MONOPROG=monoprog
 ELFTOOL='C:\Program Files (x86)\Cypress\PSoC Creator\3.1\PSoC Creator\bin\cyelftool.exe'
 INCS = -I . $(addprefix -I, $(MONO_INCLUDES) $(MBED_INCLUDES) $(INCLUDE_DIR))
-CDEFS= #-DMONO_DISP_CTRL_HX8340
+CDEFS= 
 ASDEFS=
 AS_FLAGS = -c -g -Wall -mcpu=cortex-m3 -mthumb -mthumb-interwork -march=armv7-m
 CC_FLAGS = -c -g -Wall -mcpu=cortex-m3 -mthumb $(OPTIMIZATION) -mthumb-interwork -fno-common -fmessage-length=0 -ffunction-sections -fdata-sections -march=armv7-m
@@ -89,8 +92,7 @@ LDSCRIPT = -T $(LINKER_SCRIPT)
 LD_FLAGS = -g -mcpu=cortex-m3 -mthumb -march=armv7-m -fno-rtti -Wl,--gc-sections -specs=nano.specs
 LD_SYS_LIBS = -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 COPY_FLAGS = -j .text -j .eh_frame -j .rodata -j .ramvectors -j .noinit -j .data -j .bss -j .stack -j .heap -j .cyloadablemeta
-
-
+	
 # Makro for using newlines in rules.
 define \n
 
@@ -101,6 +103,9 @@ all: $(MONO_FRAMEWORK)
 
 .PHONY: release
 release: all
+	# @echo "-- ! --"
+	# @echo "Icons must be converted to header files, remember to set that up in the build system!"
+	# @exit 1
 	@echo "Copying to release folder..."
 	$(MKDIR) -p $(RELEASE_DIR)/mono/include
 	$(COPY) $(MONO_FRAMEWORK) $(RELEASE_DIR)/mono
@@ -108,6 +113,8 @@ release: all
 	$(COPY) $(CYPRESS_LIB) $(RELEASE_DIR)/mono
 	$(COPY) $(MBED_LIB) $(RELEASE_DIR)/mono
 	$(COPY) -r $(BUILD_DIR)/include/. $(RELEASE_DIR)/mono/include
+	@echo "Converting icon files..."
+	make -C resources -f icons.mk all
 
 $(BUILD_DIR):
 	@echo "creating build directory"
@@ -152,6 +159,12 @@ $(CYPRESS_LIB):
 $(MBED_LIB):
 	@echo "Building mbed library..."
 	@make -C $(MBED_PATH)
+
+.PHONY:
+icons:
+	@echo "Converting icon files..."
+	
+	make -C resources -f icons.mk all
 
 clean:
 	$(RRM) $(BUILD_DIR)

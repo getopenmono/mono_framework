@@ -4,6 +4,7 @@
 #ifndef mn_timer_h
 #define mn_timer_h
 
+#include <deprecated.h>
 #include <mbed.h>
 #include "application_run_loop_task_interface.h"
 
@@ -115,22 +116,28 @@ namespace mono {
          *
          * **Note**: You must set a callback handler, before starting the timer.
          */
-        void Start();
+        void start();
+        
+        /** @deprecated Use non-capitalized version instead */
+        void Start() __DEPRECATED("Capitalized method calls syntax is being obsolted", "start");
         
         /**
          * @brief Stop the timer, any pending callback will not be executed
          */
-        void Stop();
+        void stop();
+        
+        /** @deprecated Use non-capitalized version instead */
+        void Stop() __DEPRECATED("Capitalized method calls syntax is being obsolted", "stop");
         
         /**
          * See if the timer is single shot.
          */
-        bool SingleShot();
+        bool SingleShot() const;
         
         /**
          * See if the timer is currently running
          */
-        bool Running();
+        bool Running() const;
         
         /**
          * @brief Set a new timer interval
@@ -180,7 +187,7 @@ namespace mono {
             Timer *timer = new Timer(delayMs, true);
             timer->setCallback<Owner>(obj, memPtr);
             timer->autoRelease = true;
-            timer->Start();
+            timer->start();
             
             return timer;
         }
@@ -203,7 +210,7 @@ namespace mono {
             Timer *timer = new Timer(delayMs, true);
             timer->setCallback(memPtr);
             timer->autoRelease = true;
-            timer->Start();
+            timer->start();
 
             return timer;
         }

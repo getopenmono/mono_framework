@@ -29,10 +29,36 @@ const uint8_t DateTime::DaysPerMonth[13] =
 
 DateTime::DateTime()
 {
-    secs = mins = hours = day = month -1;
+    secs = mins = hours = day = month = -1;
     year = 1970;
     
     type = UNKNOWN_TIME_ZONE;
+}
+
+DateTime::DateTime(time_t t, bool localTime)
+{
+    *this = DateTime(localtime(&t), localTime);
+}
+
+DateTime::DateTime(const tm *brokendown, bool localTime)
+{
+    secs = brokendown->tm_sec;
+    mins = brokendown->tm_min;
+    hours = brokendown->tm_hour;
+    day = brokendown->tm_mday;
+    month = brokendown->tm_mon + 1;
+    year = brokendown->tm_year + 1900;
+    leapYear = isLeapYear(year);
+    type = localTime ? LOCAL_TIME_ZONE : UTC_TIME_ZONE;
+    
+#ifdef EMUNO
+    if (!localTime)
+    {
+        //Emuno uses gnu or darwin libc that includes tm_fmoff property
+        int hourOffset = brokendown->tm_gmtoff / (60*60);
+        *this = this->addHours(-hourOffset);
+    }
+#endif
 }
 
 DateTime::DateTime(uint16_t years, uint8_t months, uint8_t days,
@@ -98,6 +124,11 @@ String DateTime::toISO8601() const
     return String::Format("%04d-%02d-%02dT%02d:%02d:%02d%s",year,month,day,hours,mins,secs,timeZone);
 }
 
+String DateTime::toRFC1123() const
+{
+    return toUtcTime().toString("%a, %d %b %Y %H:%M:%S GMT");
+}
+
 String DateTime::toTimeString() const
 {
     return String::Format("%02d:%02d:%02d",hours,mins,secs);
@@ -106,6 +137,64 @@ String DateTime::toTimeString() const
 String DateTime::toDateString() const
 {
     return String::Format("%04d-%02d-%02d",year,month,day);
+}
+
+uint32_t DateTime::toJulianDayNumber() const
+{
+    if (type == LOCAL_TIME_ZONE) return toUtcTime().toJulianDayNumber();
+
+    // this formula is from https://en.wikipedia.org/wiki/Julian_day
+    uint32_t a = (14 - month) / 12;
+    uint32_t y = year + 4800 - a;
+    uint32_t m = month + 12 * a - 3;
+    uint32_t jdn = day + (153 * m + 2) / 5
+        + 365 * y + (y / 4) - (y / 100) + (y / 400) - 32045;
+
+    return jdn;
+}
+
+uint32_t DateTime::toUnixTime() const
+{
+    if (type == LOCAL_TIME_ZONE) return toUtcTime().toUnixTime();
+
+    uint32_t jdn = toJulianDayNumber();
+    uint32_t hms = hours * 3600 + mins * 60 + secs;
+    uint32_t unix_time = (jdn - 2440588) * 86400 + hms;
+
+    return unix_time;
+}
+
+struct tm DateTime::toBrokenDownUnixTime() const
+{
+    struct tm cmp;
+    cmp.tm_year = year - 1900;
+    cmp.tm_mon = month - 1;
+    cmp.tm_mday = day;
+    cmp.tm_hour = hours;
+    cmp.tm_min = mins;
+    cmp.tm_sec = secs;
+    cmp.tm_isdst = -1;
+    
+    return cmp;
+}
+
+time_t DateTime::toLibcUnixTime() const
+{
+    struct tm comps = this->toBrokenDownUnixTime();
+    return mktime(&comps);
+}
+
+String DateTime::toString(const char *format) const
+{
+    time_t ut = toLibcUnixTime();
+    struct tm comps;
+    localtime_r(&ut, &comps);
+    char buffer[80];
+    size_t len = strftime(buffer, 80, format, &comps);
+    String result(len+1);
+    strftime(result.stringData, len, format, &comps);
+
+    return result;
 }
 
 bool DateTime::isValid() const
@@ -117,8 +206,11 @@ DateTime DateTime::toUtcTime() const
 {
     if (type == UTC_TIME_ZONE)
         return *this;
-    else if (type == LOCAL_TIME_ZONE)
-        return DateTime(year, month, day, hours+LocalTimeZoneHourOffset, mins, secs, UTC_TIME_ZONE);
+    else if (type == LOCAL_TIME_ZONE) {
+        DateTime dt(*this);
+        dt.type = UTC_TIME_ZONE;
+        return dt.addHours(-LocalTimeZoneHourOffset);
+    }
     else
         return *this;
 
@@ -228,6 +320,11 @@ DateTime DateTime::addDays(int days) const
     }
 
     return other;
+}
+
+DateTime DateTime::addTime(const time_t *t) const
+{
+    return DateTime(*t + this->toUnixTime(), type == LOCAL_TIME_ZONE);
 }
 
 //DateTime DateTime::addMonths(int months) const
@@ -542,7 +639,7 @@ uint8_t DateTime::trim(uint8_t value, uint8_t min, uint8_t max)
     return value;
 }
 
-/// MARK: STATIC SYSTEM DATETIME
+// MARK: STATIC SYSTEM DATETIME
 
 int DateTime::LocalTimeZoneHourOffset = 0;
 DateTime DateTime::systemDateTimeClock = DateTime(1970, 1, 1, 0, 0, 0, DateTime::UTC_TIME_ZONE);
@@ -557,6 +654,8 @@ DateTime DateTime::now()
     return systemDateTimeClock;
 }
 
+#ifndef TEST_CASE
+
 void DateTime::setSystemDateTime(mono::DateTime dt)
 {
     if (IApplicationContext::Instance->RTC)
@@ -567,3 +666,5 @@ void DateTime::setSystemDateTime(mono::DateTime dt)
     if (IApplicationContext::Instance->RTC)
         IApplicationContext::Instance->RTC->startRtc();
 }
+
+#endif

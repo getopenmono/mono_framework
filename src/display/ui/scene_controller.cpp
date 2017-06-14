@@ -1,55 +1,33 @@
 
 #include "scene_controller.h"
+#include <view.h>
 
 using namespace mono::ui;
 
-SceneController::SceneController() : View()
+SceneController::SceneController() :
+    viewRect(geo::Rect(geo::Point(0,0), View::DisplaySize())),
+    background(viewRect)
 {
-    viewRect = geo::Rect(geo::Point(0,0), DisplaySize());
-    backColor = StandardBackgroundColor;
+    visible = false;
 }
 
-SceneController::SceneController(const geo::Rect &rect) : View(rect)
+SceneController::SceneController(const geo::Rect &rect) :
+    viewRect(rect),
+    background(rect)
 {
-    backColor = StandardBackgroundColor;
+    visible = false;
 }
 
-void SceneController::addView(const View &child)
+// MARK: Scene methods
+
+void SceneController::addView(const IViewALike &child)
 {
-    childviewList.push_back((View*)&child);
+    childviewList.push_back((IViewALike*)&child);
 }
 
-void SceneController::removeView(const View &child)
+void SceneController::removeView(const IViewALike &child)
 {
-    childviewList.remove((View*)&child);
-}
-
-void SceneController::show()
-{
-    if (Visible())
-        return;
-    
-    View::show();
-    for(std::list<View*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
-    {
-        (*it)->show();
-    }
-    
-    showHandler.call(*this);
-}
-
-void SceneController::hide()
-{
-    if (!Visible())
-        return;
-    
-    View::hide();
-    for(std::list<View*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
-    {
-        (*it)->hide();
-    }
-    
-    hideHandler.call(*this);
+    childviewList.remove((IViewALike*)&child);
 }
 
 void SceneController::requestDismiss()
@@ -57,24 +35,83 @@ void SceneController::requestDismiss()
     dismissHandler.call();
 }
 
-void SceneController::repaint()
+mono::display::Color SceneController::BackgroundColor() const
 {
-    //paint it back
-    painter.setBackgroundColor(backColor);
-    painter.drawFillRect(viewRect, true);
-    
-    for(std::list<View*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
+    return background.Color();
+}
+
+void SceneController::setBackground(display::Color color)
+{
+    background.setBackgroundColor(color);
+}
+
+// MARK: ViewALike states
+
+bool  SceneController::Visible() const
+{
+    return visible;
+}
+
+void SceneController::show()
+{
+    if (Visible())
+        return;
+
+    background.show();
+    visible = true;
+
+    for(std::list<IViewALike*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
+    {
+        (*it)->show();
+    }
+
+    showHandler.call(*this);
+}
+
+void SceneController::hide()
+{
+    if (!Visible())
+        return;
+
+    visible = false;
+    for(std::list<IViewALike*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
+    {
+        (*it)->hide();
+    }
+
+    background.hide();
+    hideHandler.call(*this);
+}
+
+void SceneController::scheduleRepaint()
+{
+    //paint it black?
+    background.scheduleRepaint();
+
+    for(std::list<IViewALike*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
     {
         (*it)->scheduleRepaint();
     }
 }
 
-mono::display::Color SceneController::BackgroundColor() const
+// MARK: ViewALike area & position
+
+void SceneController::setRect(mono::geo::Rect rct)
 {
-    return backColor;
+    viewRect = rct;
 }
 
-void SceneController::setBackground(display::Color color)
+const mono::geo::Rect& SceneController::ViewRect() const
 {
-    backColor = color;
+    return viewRect;
+}
+
+mono::geo::Point& SceneController::Position()
+{
+    return viewRect;
+}
+
+mono::geo::Size& SceneController::Size()
+{
+    return viewRect;
 }

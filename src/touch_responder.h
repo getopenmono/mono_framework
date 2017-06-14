@@ -42,20 +42,25 @@ namespace mono {
         friend class ITouchSystem;
     protected:
         static GenericQueue<TouchResponder> ResponderChain;
-        static TouchResponder* FirstResponder();
 
     public:
-
+        
+        /**
+         * @brief Get the top of the responder queue, the first to handle touch
+         *
+         * If there are no objects reponding to touch, this will return `NULL`
+         */
+        static TouchResponder* FirstResponder();
+        
         static void RunResponderChainTouchBegin(TouchEvent &event);
         static void RunResponderChainTouchEnd(TouchEvent &event);
         static void RunResponderChainTouchMove(TouchEvent &event);
-
+        
         /**
          * @brief Create a new responder object that receives touch input.
          *
          * Upon creation, this object is automatically inserted into the
          * responder chain, to receive touch input events.
-         *
          *
          */
         TouchResponder();

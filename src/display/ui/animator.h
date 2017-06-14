@@ -9,8 +9,9 @@
 
 namespace mono { namespace ui {
     
+    // __DEPRECATED("Animator class is no longer maintained, and does not work!", "")
     /**
-     * @deprecated
+     * @deprecated Class is no longer maintained, and does not work
      */
     class Animator : public IRunLoopTask
     {

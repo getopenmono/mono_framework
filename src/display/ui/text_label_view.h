@@ -4,6 +4,7 @@
 #ifndef __mono__text_label_view__
 #define __mono__text_label_view__
 
+#include <deprecated.h>
 #include "view.h"
 #include "mn_string.h"
 #include <font_interface.h>
@@ -111,7 +112,7 @@ namespace mono { namespace ui {
          *
          * @deprecated Use StandardGfxFont
          */
-        static const MonoFont *StandardTextFont;
+        static const MonoFont *StandardTextFont __DEPRECATED("use the similar variable of the GfxFontType", "StandardGfxFont");
 
         /**
          * @brief This is the default font for all TextLabelView's
@@ -228,14 +229,12 @@ namespace mono { namespace ui {
         // MARK: Getters
 
         /**
-         * @deprecated Use the @ref Font accessor instead
-         *
          * The text size will be phased out in coming releases. You control text
          * by changing the font.
          *
-         * @deprecated Use specific font faces to control size
+         * @deprecated Font sizes are controlled by the bitmap font set by the font property
          */
-        uint8_t TextSize() const;
+        uint8_t TextSize() const __DEPRECATED("Font sizes are controlled by the bitmap font set by the font property","setFont");
 
         /** @brief Get the current color of the text */
         display::Color TextColor() const;
@@ -256,7 +255,7 @@ namespace mono { namespace ui {
         uint16_t TextPixelHeight() const;
 
         /** @brief If not NULL, then returns the current selected @ref MonoFont */
-        const MonoFont* Font() const;
+        const MonoFont* Font() const __DEPRECATED("Old MonoFont system is being outphased","GfxFont");
 
         /** @brief If not NULL, then returns the current selected @ref GFXfont */
         const GFXfont* GfxFont() const;
@@ -267,27 +266,25 @@ namespace mono { namespace ui {
         // MARK: Setters
 
         /**
-         * @deprecated Use the @ref setFont accessor instead
-         *
          * We will phase out this attribute in the coming releases. To change
          * the font size you should rely on the font face.
          *
          * If you set this to 1 the old font (very bulky) font will be used. Any
          * other value will load the new default font.
          *
-         * @deprecated Use specific font faces to control text sizes
+         * @deprecated ont sizes are controlled by the bitmap font set by the font property
          */
-        void setTextSize(uint8_t newSize);
+        void setTextSize(uint8_t newSize) __DEPRECATED("Font sizes are controlled by the bitmap font set by the font property","setFont");
 
         /**
          * @deprecated Name will change. Use @ref setText
          */
-        void setTextColor(display::Color col);
+        void setTextColor(display::Color col) __DEPRECATED("Use the new method, with out the color-postfix","setText");
 
         /**
          * @deprecated Name will change. Use @ref setBackground
          */
-        void setBackgroundColor(display::Color col);
+        void setBackgroundColor(display::Color col) __DEPRECATED("Use the new method, with out the color-postfix","setBackground");
 
         /** @brief Set the text color */
         void setText(display::Color col);
@@ -322,10 +319,10 @@ namespace mono { namespace ui {
         void setText(String text);
 
         /** @deprecated */
-        void setText(const char *txt, bool resizeViewWidth);
+        void setText(const char *txt, bool resizeViewWidth) __DEPRECATED("the textLabel crops overflowing text", "setText");
 
         /** @deprecated */
-        void setText(String text, bool resizeViewWidth);
+        void setText(String text, bool resizeViewWidth) __DEPRECATED("the textLabel crops overflowing text", "setText");
 
         /**
          * @brief Set a new font face on the label
@@ -340,7 +337,7 @@ namespace mono { namespace ui {
          * @deprecated Use the Adafruit GfxFont version of this method
          * @param newFont The mono-spaced to use with the textlabel
          */
-        void setFont(MonoFont const &newFont);
+        void setFont(MonoFont const &newFont) __DEPRECATED("The MonoFont system types are being out phased", "setFont");
 
         /**
          * @brief Set a new font face on the label

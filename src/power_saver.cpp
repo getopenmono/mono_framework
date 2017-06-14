@@ -68,14 +68,14 @@ void PowerSaver::undimStep()
 void PowerSaver::startDimTimer()
 {
     enabled = true;
-    dimTimer.Start();
-    sleepTimer.Stop();
+    dimTimer.start();
+    sleepTimer.stop();
 }
 void PowerSaver::startSleepTimer()
 {
     enabled = true;
-    sleepTimer.Start();
-    dimTimer.Stop();
+    sleepTimer.start();
+    dimTimer.stop();
 }
 
 void PowerSaver::dim()
@@ -89,8 +89,8 @@ void PowerSaver::undim()
 {
     enabled = true;
     stepDir = DIM_UP;
-    dimTimer.Stop();
-    sleepTimer.Stop();
+    dimTimer.stop();
+    sleepTimer.stop();
     undimStep();
 }
 
@@ -98,8 +98,8 @@ void PowerSaver::deactivate()
 {
     enabled = false;
     stepDir = DIM_NONE;
-    sleepTimer.Stop();
-    dimTimer.Stop();
+    sleepTimer.stop();
+    dimTimer.stop();
 }
 
 void PowerSaver::RespondTouchBegin(TouchEvent &)

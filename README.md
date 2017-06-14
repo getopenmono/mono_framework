@@ -1,6 +1,6 @@
 # Mono Framework
 
-[![Build Status](https://travis-ci.org/getopenmono/mono_framework.svg)](https://travis-ci.org/getopenmono/mono_framework) [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.txt)
+[![Build Status](https://travis-ci.org/getopenmono/mono_framework.svg?branch=master)](https://travis-ci.org/getopenmono/mono_framework) [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.txt) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/getopenmono/mono_framework?branch=master&svg=true "AppVeyor Build Status")](https://ci.appveyor.com/project/stoffera/mono_framework)
 
 This is a framework for developing [Mono](http://openmono.com) applications.  For documentation on how to install and use this framework, see the [developer site](http://developer.openmono.com/).  If you want to generate the documentation, see [DOXYGEN.md](src/DOXYGEN.md).
 
@@ -14,6 +14,12 @@ Install version 5 of the [ARM GCC Embedded toolchain](https://launchpad.net/gcc-
 * Windows: `C:/openmono/gcc-arm-none-eabi-5_2-2015q4/bin`
 
 ## Building
+
+Run
+
+```
+$ bash resources/setup_icons.sh resources/icons.mk.tmp 
+```
 
 Run
 ```

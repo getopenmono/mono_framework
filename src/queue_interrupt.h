@@ -16,6 +16,7 @@ namespace mono {
      * falling or both edges.
      *
      * ### Queued interrupts
+     *
      * In Mono framework a queued interrupt is handled inside the normal
      * execution context, and not the hardware interrupt routine. In embedded
      * programming it is good practice not to do any real work, inside the hardware
@@ -29,6 +30,7 @@ namespace mono {
      * routines you assign to QueueInterrupt!
      *
      * ### Latency
+     *
      * The run loop might handle the interrupt callback some time after it occur,
      * if it is busy doing other stuff. THerefore you cannot expect to have your
      * callback executed the instant the interrupt fires. (If you need that use

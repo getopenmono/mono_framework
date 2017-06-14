@@ -8,6 +8,7 @@
 #include <us_ticker_api.h>
 #include "rtc_interface.h"
 #include "scheduled_task.h"
+#include <consoles.h>
 
 #ifdef DEVICE_SERIAL
 extern "C" {
@@ -18,6 +19,8 @@ extern char serial_usbuart_is_powered;
 
 using namespace mono;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 AppRunLoop::AppRunLoop() : userBtn(SW_USER, 1, PullUp)
 {
     runLoopActive = true;
@@ -27,17 +30,20 @@ AppRunLoop::AppRunLoop() : userBtn(SW_USER, 1, PullUp)
     taskQueueHead = NULL;
     firstDtrRun = true;
 }
+#pragma GCC diagnostic pop
 
 void AppRunLoop::exec()
 {
     //debug("mono enter run loop!\r\n");
 
     checkUsbUartState();
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     while (runLoopActive) {
 
         process();
     }
+#pragma GCC diagnostic pop
 
     //debug("run loop terminated!");
 }
@@ -119,7 +125,10 @@ bool AppRunLoop::addDynamicTask(mono::IRunLoopTask *task)
         IRunLoopTask *item = taskQueueHead;
         while (item->nextTask != NULL)
         {
-            item = item->nextTask;
+            if (item == task)
+                return false;
+            else
+                item = item->nextTask;
         }
 
         item->nextTask = task;
@@ -161,6 +170,18 @@ void AppRunLoop::removeTaskInQueue(IRunLoopTask *item)
 
     if (taskQueueHead == item)
         taskQueueHead = item->nextTask;
+}
+
+int AppRunLoop::taskCount() const
+{
+    int cnt = 0;
+    IRunLoopTask *task = taskQueueHead;
+    while(task != 0) {
+        cnt++;
+        task = task->nextTask;
+    }
+
+    return cnt;
 }
 
 void AppRunLoop::checkUsbUartState()
@@ -222,5 +243,8 @@ void AppRunLoop::setResetOnUserButton(bool roub)
 
 void AppRunLoop::quit()
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     runLoopActive = false;
+#pragma GCC diagnostic pop
 }

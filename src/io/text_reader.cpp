@@ -6,7 +6,7 @@
 using namespace mono;
 using namespace mono::io;
 
-/// MARK: Contructors
+// MARK: Contructors
 
 TextReader::TextReader(String path) : _filePointer(0), _filePath(path)
 {
@@ -44,7 +44,7 @@ bool TextReader::IsOpen()
         return true;
 }
 
-/// MARK: Read line methods
+// MARK: Read line methods
 
 String TextReader::readLine()
 {

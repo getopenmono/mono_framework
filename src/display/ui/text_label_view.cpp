@@ -18,11 +18,14 @@ TextLabelView::TextLabelView(String txt) :
     bgColor(StandardBackgroundColor)
 {
     this->incrementalRepaint = false;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     currentFont = TextLabelView::StandardTextFont;
+
     this->text = txt;
     this->textMultiline = isTextMultiline();
     this->setTextSize(2);
-
+#pragma GCC diagnostic pop
     viewRect.setSize( geo::Size(TextPixelWidth(), TextPixelHeight()) );
     prevTextRct = viewRect;
     currentGfxFont = StandardGfxFont;
@@ -40,11 +43,13 @@ TextLabelView::TextLabelView(const char *txt) :
     bgColor(StandardBackgroundColor)
 {
     this->incrementalRepaint = false;
-    currentFont = TextLabelView::StandardTextFont;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    currentFont = StandardTextFont;
     this->text = txt;
     this->textMultiline = isTextMultiline();
     this->setTextSize(2);
-
+#pragma GCC diagnostic pop
     viewRect.setSize( geo::Size(TextPixelWidth(), TextPixelHeight()) );
     prevTextRct = viewRect;
     currentGfxFont = StandardGfxFont;
@@ -63,10 +68,13 @@ TextLabelView::TextLabelView(geo::Rect rct, String txt) :
     bgColor(StandardBackgroundColor)
 {
     this->incrementalRepaint = false;
-    currentFont = TextLabelView::StandardTextFont;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    currentFont = StandardTextFont;
     this->text = txt;
     this->textMultiline = isTextMultiline();
     textSize = 2;
+#pragma GCC diagnostic pop
     prevTextRct = viewRect;
     currentGfxFont = StandardGfxFont;
 
@@ -84,10 +92,13 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
     bgColor(StandardBackgroundColor)
 {
     this->incrementalRepaint = false;
-    currentFont = TextLabelView::StandardTextFont;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    currentFont = StandardTextFont;
     this->text = txt;
     this->textMultiline = isTextMultiline();
     textSize = 2;
+#pragma GCC diagnostic pop
     prevTextRct = viewRect;
     currentGfxFont = StandardGfxFont;
 
@@ -99,11 +110,10 @@ TextLabelView::TextLabelView(geo::Rect rct, const char *txt) :
     incrementCharPosition = 0;
 }
 
-/// MARK: Getters
+// MARK: Getters
 
 uint8_t TextLabelView::TextSize() const
 {
-    debug("TextLabelView::TextSize is Deprecated!\r\n");
     return textSize;
 }
 
@@ -124,6 +134,8 @@ TextLabelView::VerticalTextAlignment TextLabelView::VerticalAlignment() const
 
 uint16_t TextLabelView::TextPixelWidth() const
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     if (textSize == 1)
         return text.Length()*5*TextSize()+TextSize()+1;
     else
@@ -136,10 +148,13 @@ uint16_t TextLabelView::TextPixelWidth() const
         else
             return 0;
     }
+#pragma GCC diagnostic pop
 }
 
 uint16_t TextLabelView::TextPixelHeight() const
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     if (textSize == 1)
         return 7*TextSize()+1;
     else
@@ -152,11 +167,11 @@ uint16_t TextLabelView::TextPixelHeight() const
         else
             return 0;
     }
+#pragma GCC diagnostic pop
 }
 
 const MonoFont* TextLabelView::Font() const
 {
-    debug("TextLabelView::Font() is deprecated. Use GfxFont()!\r\n");
     return currentFont;
 }
 
@@ -170,16 +185,18 @@ mono::geo::Rect TextLabelView::TextDimension() const
     display::TextRender tr(painter);
     tr.setAlignment((display::TextRender::HorizontalAlignment) alignment);
     tr.setAlignment((display::TextRender::VerticalAlignmentType) vAlignment);
-    
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     if (currentFont)
         return geo::Rect(geo::Point(0,0), tr.renderDimension(text, *currentFont));
     else if (currentGfxFont)
         return tr.renderInRect(viewRect, text, *currentGfxFont, textMultiline);
     else
         return geo::Rect();
+#pragma GCC diagnostic pop
 }
 
-/// MARK: Setters
+// MARK: Setters
 void TextLabelView::setTextSize(uint8_t newSize)
 {
     debug("TextLabelView::setSize is deprecated!\r\n");
@@ -224,29 +241,13 @@ void TextLabelView::setAlignment(VerticalTextAlignment vAlign)
 
 void TextLabelView::setText(const char *text)
 {
-    this->setText(text, false);
+    this->setText(String(text));
 }
-
 
 void TextLabelView::setText(mono::String text)
 {
-    this->setText(text, false);
-}
-
-void TextLabelView::setText(const char *txt, bool resizeViewWidth)
-{
-    this->setText(String(txt), resizeViewWidth);
-}
-
-void TextLabelView::setText(mono::String text, bool resizeViewWidth)
-{
-    this->text = String(text);
+    this->text = text;
     this->textMultiline = isTextMultiline();
-
-    if (resizeViewWidth)
-    {
-        viewRect.setWidth(TextPixelWidth());
-    }
 
     if (isDirty)
         return;
@@ -255,13 +256,23 @@ void TextLabelView::setText(mono::String text, bool resizeViewWidth)
     incrementalRepaint = true;
 }
 
+void TextLabelView::setText(const char *txt, bool)
+{
+    this->setText(String(txt));
+}
+
+void TextLabelView::setText(mono::String text, bool)
+{
+    this->setText(text);
+}
+
 void TextLabelView::setFont(const MonoFont &newFont)
 {
     debug("TextLabelView::setFont(): MonoFont's are deprecated, use GfxFonts!\r\n");
     currentFont = &newFont;
     currentGfxFont = 0;
     incrementalRepaint = false;
-    
+
     scheduleRepaint();
 }
 
@@ -270,7 +281,7 @@ void TextLabelView::setFont(GFXfont const &font)
     currentGfxFont = &font;
     currentFont = 0;
     incrementalRepaint = false;
-    
+
     scheduleRepaint();
 }
 
@@ -296,7 +307,7 @@ void TextLabelView::scheduleRepaint()
 
 void TextLabelView::repaint()
 {
-    
+
     geo::Rect txtRct;
 
     painter.setBackgroundColor(bgColor);
@@ -362,6 +373,8 @@ void TextLabelView::repaintLegacy(geo::Rect &)
         int cnt = 0;
         char c = text[cnt];
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         View::painter.setTextSize(TextSize());
 
 
@@ -370,6 +383,7 @@ void TextLabelView::repaintLegacy(geo::Rect &)
             offset.appendX(TextSize()*5+TextSize()-1);
             c = text[++cnt];
         }
+#pragma GCC diagnostic pop
     }
     else
     {
@@ -379,8 +393,10 @@ void TextLabelView::repaintLegacy(geo::Rect &)
 
         if (prevText != text)
             painter.drawFillRect(prevTextRct, true);
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         tr.drawInRect(viewRect, text, *currentFont);
+#pragma GCC diagnostic pop
     }
 }
 
@@ -422,6 +438,7 @@ void TextLabelView::repaintGfxIncremental(mono::geo::Rect &)
             incrementCharPosition = 0;
             tr.layoutInRect(viewRect, text, *currentGfxFont, this, &TextLabelView::drawIncrementalChar, textMultiline);
 
+            prevTextRct = TextDimension();
             return; // no now - every following chars are repainted
         }
 
@@ -469,7 +486,10 @@ void TextLabelView::repaintLegacyIncremental(geo::Rect &txtRct)
         txtRct = geo::Rect(xOff, yOff, viewRect.X2() - xOff, viewRect.Y2() - yOff);
 
         String remainder(text()+charIdx);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         tr.drawInRect(txtRct, remainder, *currentFont);
+#pragma GCC diagnostic pop
     }
 
 }

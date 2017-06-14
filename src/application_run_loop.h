@@ -6,7 +6,8 @@
 #include <stdint.h>
 
 #include <application_run_loop_task_interface.h>
-#include "mn_digital_out.h"
+#include <mn_digital_out.h>
+#include <deprecated.h>
 
 namespace mono {
     
@@ -27,13 +28,13 @@ namespace mono {
     protected:
         
         /**
-         * As long as this i `true` the stadard run loop will run
+         * As long as this is `true` the stadard run loop will run
          * 
-         * If set to `false`, the run loop will exit, and mono might will enter
-         * a low power state.
-         * TODO: power safe modes and run loops?
+         * If set to `false`, the run loop will exit and `main()` will return,
+         * which you should absolutely **not** do!.
+         * @deprecated Will be removed in future releases, run loop must be always on
          */
-        bool runLoopActive;
+        bool runLoopActive __DEPRECATED("Will be removed in future releases","");
         
         /**
          * The last seen serial DTR value. Reset can only happen in transitions.
@@ -64,7 +65,7 @@ namespace mono {
         
         io::DigitalOut userBtn;
         
-        /** Process a single iteratio of the run loop */
+        /** Process a single iteration of the run loop */
         void process();
 
         /** read the UART DTR state if possible */
@@ -148,6 +149,8 @@ namespace mono {
          * @return `true` if the object was found and removed, `false` otherwise. 
          */
         bool removeDynamicTask(IRunLoopTask *task);
+
+        int taskCount() const;
         
         /**
          * @brief Sets the *Reset on User Button* mode
@@ -163,8 +166,9 @@ namespace mono {
          * Application events and more will stop working
          * 
          * You should use this, if you use your own embedded run loops.
+         * @deprecated This method will be removed, because it is harmful
          */
-        void quit();
+        void quit() __DEPRECATED("Will be removed in future releases","");
     };
     
 }

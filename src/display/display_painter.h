@@ -108,7 +108,7 @@ namespace mono { namespace display {
             this->displayRefreshHandler.attach(function);
         }
 
-        /// MARK: Color Accessors
+        // MARK: Color Accessors
 
         /**
          * @brief Set the painters foreground pencil color
@@ -141,7 +141,7 @@ namespace mono { namespace display {
         /**
          * @brief Turn on/off anti-aliased line drawing.
          *
-         * You can enable or disable anti-aliased drawing if you need nicer 
+         * You can enable or disable anti-aliased drawing if you need nicer
          * graphics or faster rendering. Anti-aliasing smoothes lines edges, that
          * can otherwise appear jagged.
          *
@@ -219,7 +219,7 @@ namespace mono { namespace display {
         void drawPixel(uint16_t x, uint16_t y, uint8_t intensity, bool background = false);
 
         /**
-         * Paints a filled rectangle in the actuive foreground color. Coordinates
+         * Paints a filled rectangle in the active foreground color. Coordinates
          * a defining the point of the rectangles upper left corner and are given
          * in screen coordinates. (Absolute coordinates)
          *

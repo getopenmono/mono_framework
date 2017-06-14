@@ -39,7 +39,7 @@ namespace mono { namespace display {
 
 
 
-        /// MARK: Constructors
+        // MARK: Constructors
 
 
         Color();
@@ -50,7 +50,7 @@ namespace mono { namespace display {
 
         Color(uint8_t R, uint8_t G, uint8_t B);
 
-        /// MARK: Getters
+        // MARK: Getters
 
         /** Return 8-bit red color component */
         uint8_t Red() const;
@@ -96,7 +96,7 @@ namespace mono { namespace display {
          */
         mono::String toString() const;
 
-        /// MARK: Operator overloads
+        // MARK: Operator overloads
 
         uint16_t operator=(Color col);
 

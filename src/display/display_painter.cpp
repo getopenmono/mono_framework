@@ -30,7 +30,7 @@ DisplayPainter::~DisplayPainter()
 //        displayCtrl->RemoveRefreshCallback(&displayRefreshHandler);
 }
 
-/// MARK: Color Accessors
+// MARK: Color Accessors
 
 void DisplayPainter::setForegroundColor(Color color)
 {
@@ -52,7 +52,7 @@ Color DisplayPainter::BackgroundColor() const
     return backgroundColor;
 }
 
-/// MARK: Anti-aliasing Accessors
+// MARK: Anti-aliasing Accessors
 
 void DisplayPainter::useAntialiasedDrawing(bool enable)
 {
@@ -64,7 +64,7 @@ bool DisplayPainter::IsAntialiasedDrawing()
     return antiAliasing;
 }
 
-/// MARK: Pencil Property Accessors
+// MARK: Pencil Property Accessors
 
 uint8_t DisplayPainter::LineWidth() const
 {
@@ -86,7 +86,7 @@ void DisplayPainter::setTextSize(uint8_t size)
     textSize = size;
 }
 
-/// MARK: Painting Canvas Info Accessors
+// MARK: Painting Canvas Info Accessors
 
 uint16_t DisplayPainter::CanvasWidth() const
 {
@@ -103,7 +103,7 @@ IDisplayController* DisplayPainter::DisplayController() const
     return displayCtrl;
 }
 
-/// MARK: Drawing methods
+// MARK: Drawing methods
 
 void DisplayPainter::drawPixel(uint16_t x, uint16_t y, bool bg)
 {
@@ -128,7 +128,7 @@ void DisplayPainter::drawPixel(uint16_t x, uint16_t y, uint8_t intensity, bool b
     displayCtrl->write(c);
 }
 
-/// MARK: Rects
+// MARK: Rects
 
 void DisplayPainter::drawRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, bool bg)
 {
@@ -160,7 +160,7 @@ void DisplayPainter::drawFillRect(geo::Rect const &rct, bool background)
     drawFillRect(rct.X(), rct.Y(), rct.Width(), rct.Height(), background);
 }
 
-/// MARK: Lines
+// MARK: Lines
 
 void DisplayPainter::drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, bool bg)
 {
@@ -317,7 +317,7 @@ void DisplayPainter::drawHLine(uint16_t x1, uint16_t x2, uint16_t y, bool bg)
     }
 }
 
-/// MARK: Simple Characters
+// MARK: Simple Characters
 
 void DisplayPainter::drawChar(uint16_t x, uint16_t y, char character)
 {
@@ -362,7 +362,7 @@ void DisplayPainter::drawChar(uint16_t x, uint16_t y, char character)
     }
 }
 
-/// MARK: Circles
+// MARK: Circles
 
 void DisplayPainter::drawCircle(uint16_t x0, uint16_t y0, uint16_t r, bool color)
 {
@@ -443,7 +443,7 @@ void DisplayPainter::fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t
     }
 }
 
-/// MARK: Simple Helper Methods
+// MARK: Simple Helper Methods
 
 void DisplayPainter::swap(uint16_t &a, uint16_t &b)
 {

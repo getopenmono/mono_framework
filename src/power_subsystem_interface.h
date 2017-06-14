@@ -89,7 +89,7 @@ namespace mono { namespace power {
          *
          * @param active `true` will cut the power, `false` will power the peripherals
          */
-        virtual void setPowerFence(bool active) {}
+        virtual void setPowerFence(bool) {}
 
         /**
          * @brief Get the current charge status for the attached battery
