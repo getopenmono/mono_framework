@@ -1,3 +1,5 @@
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef icon_view_h
 #define icon_view_h
@@ -9,7 +11,7 @@ using mono::display::Color;
 using mono::display::MonoIcon;
 
 namespace mono { namespace ui {
-    
+
     /**
      * @brief A view that display a bitmap icon
      *
@@ -25,7 +27,7 @@ namespace mono { namespace ui {
      * technique allows icon to be semi-transparent over a background.
      *
      * The default values for foreground color are the @ref View static variable
-     * @ref StandardBorderColor. SImialr the default background is 
+     * @ref StandardBorderColor. SImialr the default background is
      * @ref StandardBackgroundColor
      *
      * ## System  icons
@@ -86,25 +88,25 @@ namespace mono { namespace ui {
      * @see mono::display::MonoIcon
      */
     class IconView : public View {
-        
+
         const MonoIcon *icon;
         Color foreground;
         Color background;
-        
+
     public:
-        
+
         /**
          * @brief Contruct an empty icon view, with no icon and zero dimensions
          */
         IconView();
-        
+
         /**
          * @brief Construct an icon view with an icon and position offset
          *
          * You provide the offset position (not the @ref Rect) to the view and
          * the global variable for the icon object.
          *
-         * The views rect (its dimensions) is calculated fro the icon you 
+         * The views rect (its dimensions) is calculated fro the icon you
          * provide.
          *
          * **Remember:** to include the header file for the icon you wish to use
@@ -113,34 +115,40 @@ namespace mono { namespace ui {
          * @param icon The reference to the global icon object
          */
         IconView(const geo::Point &position, const MonoIcon &icon);
-        
+
         // MARK: Accessors
-        
+
         /**
          * @brief Set the foreground color for the icon
          * @param c The color to use as foreground
          */
         void setForeground(Color c);
-        
+
         /**
          * @brief Set the background blending color for the icon
          * @param c The color to use as background
          */
         void setBackground(Color c);
-        
+
+        /**
+         * @brief Replace the existing icon with a new one
+         * @param ocon replacement
+         */
+        void setIcon(const MonoIcon *icon);
+
         /**
          * @brief Get the current foreground color
          */
         Color Foreground() const;
-        
+
         /**
          * @brief Get the current background blening color
          */
         Color Background() const;
-        
+
         void repaint();
     };
-    
+
 } }
 
 #endif /* icon_view_hpp */
