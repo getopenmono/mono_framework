@@ -5,10 +5,10 @@ services: docker
 script:
   - echo Building on $TRAVIS_OS_NAME for $TRAVIS_BRANCH...
   - docker pull monolit/monofrm
-  - if [ $TRAVIS_BRANCH == "protest" ]; then DEPLOY=true; else DEPLOY=false; fi
+  - if [ $TRAVIS_BRANCH == "production" ]; then DEPLOY=true; else DEPLOY=false; fi
   - mkdir artifacts
   - docker run -e BRANCH=$TRAVIS_BRANCH -e TRAVIS_COMMIT=$TRAVIS_COMMIT -e DEPLOY=$DEPLOY -v `pwd`/artifacts:/Desktop monolit/monofrm
-  - if [ $TRAVIS_BRANCH == "protest" ]; then tar -czvf mono_frm.tgz . -C artifacts && ls -l; fi
+  - if [ $TRAVIS_BRANCH == "production" ]; then tar -czvf mono_frm.tgz . -C artifacts && ls -l; fi
 notifications:
   email: false
   slack:
@@ -21,5 +21,6 @@ deploy:
     secure: hTZ+WvrAaO+MaBrUbmX49vs2A+RTLMjfMSDdvLZY832v6rsDy3Mu2JzK8d3rEcKEHi6zljbts3aE/V9tVyQBj5Jh1QiH5CyQxo6dgYdxYS1d41ipdEEJ6lFe+aWjf7O+NnyCL3gXGr07kmzCoAMImC06OPwPx24ciKo/IwVnl8IbIiPGB1cs46DuCRh+W2dX0mRmJJRr6SK4L7zVB0btQRsmMMzZ1CsYz1PJr35T5glauFvc/E9BaMrHstFuER6T3yWAInlG/bq0crciaJn6dT1WoaqeD35j4FUrQX5FEDcADuxhcY4tI7Bo1BPE6i1c+5azpCXSZLSq6zn577BXCLSF3tRrN1yNC0uEhr8WWcqJVFuR+prlIIl+d5ihPMqS0/dHykou5XNiveHiAY6WKT9JWjLCGFOibj9Z13w9Dgr77BswPhLaZXnysg8pVR6FsYqKecgUXKq1pyOnHqJIB/AHKQfDJpaLcFl1vFuRZHQ3wSTAsTkEkowWs2uTctAJNrukVnZcCCu1wjia5iUiOQV26zewpXoxmigSFLW5ViBat2yRc/i6M049Uk1XQcOqxRgUheLhekrvw47Uqvkac/xVdHaOxJFSCW9BM11/HY39mCMfKSYYCqgvJWLBNEjlHKhP/5i1aSLm8ko7QxAhuRjfbq9GV+R4mjqjSudyXDk=
   file: mono_frm.tgz
   on:
-    branch: protest
+    condition: $TRAVIS_BRANCH = "production"
+    tags: true
     repo: getopenmono/mono_framework
