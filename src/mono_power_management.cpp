@@ -152,7 +152,7 @@ void MonoPowerManagement::setupMCUPeripherals()
     CY_SET_REG8(CYREG_PRT6_DM2, 0x00);
 
     // set all PORT 12 (misc. to res high impedance)
-    // set J_TIP to Res. PullDown
+    // set J_TIP to Res. PullDown (to consume leak cur. from VBUS)
     CY_SET_REG8(CYREG_PRT12_DM0, 0x08);
     CY_SET_REG8(CYREG_PRT12_DM1, 0x08);
     CY_SET_REG8(CYREG_PRT12_DM2, 0x00);
@@ -164,10 +164,15 @@ void MonoPowerManagement::setupMCUPeripherals()
     // SW USER must be weak pull up in sleep!
     CyPins_SetPinDriveMode(USER_SW, CY_PINS_DM_RES_UP);
 
-    // Vaux must be strong low in sleep! (Turns off Vaux power)
-    mbed::DigitalOut vauxEn(VAUX_EN, 0);
-    // VauxSel must set to 3V3 in sleep mode
-    mbed::DigitalOut vauxSel(VAUX_SEL, 1);
+
+    // In sleep we need to keep the RTC running (which is powered to VAUX)
+    // Therefore, we set VAUX to the VBOOST, to provide power to the RTC
+    // We put res. pull down on JTIP to avoid leakage currents from VBUS.
+
+    // Vaux must be strong high in sleep! (Turns on Vaux power)
+    mbed::DigitalOut vauxEn(VAUX_EN, 1);
+    // VauxSel must set to BOOST in sleep mode
+    mbed::DigitalOut vauxSel(VAUX_SEL, 0);
 
     //Power INT res pull up in sleep - so the power interrupt still works
     CyPins_SetPinDriveMode(nIRQ, CY_PINS_DM_RES_UP);
