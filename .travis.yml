@@ -1,5 +1,6 @@
 language: cpp
 sudo: required
+dist: trusty
 services: docker
 script:
   - echo Building on $TRAVIS_OS_NAME for $TRAVIS_BRANCH...
