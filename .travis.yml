@@ -8,7 +8,7 @@ script:
   - if [ $TRAVIS_BRANCH == "protest" ]; then DEPLOY=true; else DEPLOY=false; fi
   - mkdir artifacts
   - docker run -e BRANCH=$TRAVIS_BRANCH -e TRAVIS_COMMIT=$TRAVIS_COMMIT -e DEPLOY=$DEPLOY -v `pwd`/artifacts:/Desktop monolit/monofrm
-  - if [ $TRAVIS_BRANCH == "protest" ]; then tar -czvf mono_frm.tgz artifacts -C artifacts && ls -l; fi
+  - if [ $TRAVIS_BRANCH == "protest" ]; then tar -czvf mono_frm.tgz . -C artifacts && ls -l; fi
 notifications:
   email: false
   slack:
