@@ -1,31 +1,22 @@
 language: cpp
-sudo: false
+sudo: required
 services: docker
-# addons:
-#   apt:
-#     packages: libc6-i386
-# cache:
-#   directories:
-#   - "$HOME/gcc-arm-none-eabi-5_2-2015q4"
-# compiler:
-# - gcc
-# before_install:
-# - sudo apt-get update -qq
-# install:
-# - export GCC_DIR=$HOME/gcc-arm-none-eabi-5_2-2015q4
-# - export GCC_ARCHIVE=$HOME/gcc-arm-none-eabi-5_2-2015q4-20151219-linux.tar.bz2
-# - export GCC_URL=https://launchpad.net/gcc-arm-embedded/5.0/5-2015-q4-major/+download/gcc-arm-none-eabi-5_2-2015q4-20151219-linux.tar.bz2
-# - if [ ! -e $GCC_DIR/bin/arm-none-eabi-g++ ]; then wget $GCC_URL -O $GCC_ARCHIVE;
-#   tar xfj $GCC_ARCHIVE -C $HOME; fi
-# - export PATH=$PATH:$GCC_DIR/bin
-# before_script:
-# - make clean
 script:
-- echo Building on $TRAVIS_OS_NAME...
-# - make release
-- docker pull monolit/monofrm
-- docker run -e BRANCH=$TRAVIS_BRANCH -e TRAVIS_COMMIT=$TRAVIS_COMMIT monolit/monofrm
+  - echo Building on $TRAVIS_OS_NAME for $TRAVIS_BRANCH...
+  - docker pull monolit/monofrm
+  - if [ $TRAVIS_BRANCH == "protest" ]; then DEPLOY=true; else DEPLOY=false; fi
+  - mkdir artifacts
+  - docker run -e BRANCH=$TRAVIS_BRANCH -e TRAVIS_COMMIT=$TRAVIS_COMMIT -e DEPLOY=$DEPLOY -v `pwd`/artifacts:/Desktop monolit/monofrm
+  - if [ $TRAVIS_BRANCH == "protest" ]; then cd artifacts && tar -czvf mono_frm.tgz .; fi
 notifications:
   slack:
     on_success: change
     secure: QfyynbScr/yRSuIdM2EeSgCmGrUzTlMw0NTItkg39HCdpk9T3Gyd2bAMuADwvi9Q+dZJApkiFzg9oSzhNabik80oQeq9tgiro6djyY/ZLkqu2wzpT9P+SjBU7XZyPVZB+Hn37M08fdc9o5vss6Wyl1V7SgoNpqQalL5ek6RRFQC0AsY7atI1c8wVrWnMQhHK+YMkUf7/OhlodaPYiqWU/U7vt6gCVBB4cvEMJqkK6gGzfOSKYM7YrP3JxXXCzNiBL3DdiFHsJ2O6x/6mT4OJ3kZApklUsAtERGqbYouTEsVmC5raxUFOMzG9GSqIzYo6bM7y0od4lp+iQAnvtWjj32IM2v4nMnA+MoDLtJa2TKwarCjEo+JDcBls6nuVg+Z+FrTQL1UVBMAZ8qGz21Qor2arpIXGz0wqgOxsI0q6IneqCvFPUFlRQs7YV+15umYdW2SymxXgw20tcKKyZWaC1Oow3JxTFH5M42A/M0NHUOfJMYMUPbaGpdX5Zm7xk3q9vJI24T3+1o7JfjjNzw5gAzrzJOGCD/N+3AV9BOySULgvY7CjUrVoGoM7GNu8kNQj6r7NkkJh7hJQEccfO9Of74oTjp9mZ7/qYgZnWXRHnO17yLlIWpLL3/IAVt24jMNunhfFrQJmN3e08K4oNTjdTD4WQB576wRNW16B9xm/wRM=
+deploy:
+  provider: releases
+  api_key:
+    secure: hTZ+WvrAaO+MaBrUbmX49vs2A+RTLMjfMSDdvLZY832v6rsDy3Mu2JzK8d3rEcKEHi6zljbts3aE/V9tVyQBj5Jh1QiH5CyQxo6dgYdxYS1d41ipdEEJ6lFe+aWjf7O+NnyCL3gXGr07kmzCoAMImC06OPwPx24ciKo/IwVnl8IbIiPGB1cs46DuCRh+W2dX0mRmJJRr6SK4L7zVB0btQRsmMMzZ1CsYz1PJr35T5glauFvc/E9BaMrHstFuER6T3yWAInlG/bq0crciaJn6dT1WoaqeD35j4FUrQX5FEDcADuxhcY4tI7Bo1BPE6i1c+5azpCXSZLSq6zn577BXCLSF3tRrN1yNC0uEhr8WWcqJVFuR+prlIIl+d5ihPMqS0/dHykou5XNiveHiAY6WKT9JWjLCGFOibj9Z13w9Dgr77BswPhLaZXnysg8pVR6FsYqKecgUXKq1pyOnHqJIB/AHKQfDJpaLcFl1vFuRZHQ3wSTAsTkEkowWs2uTctAJNrukVnZcCCu1wjia5iUiOQV26zewpXoxmigSFLW5ViBat2yRc/i6M049Uk1XQcOqxRgUheLhekrvw47Uqvkac/xVdHaOxJFSCW9BM11/HY39mCMfKSYYCqgvJWLBNEjlHKhP/5i1aSLm8ko7QxAhuRjfbq9GV+R4mjqjSudyXDk=
+  file: artifacts/mono_frm.tgz
+  on:
+    branch: protest
+    repo: getopenmono/mono_framework
