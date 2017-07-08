@@ -21,6 +21,8 @@ Run
 $ bash resources/setup_icons.sh resources/icons.mk.tmp 
 ```
 
+(If you have problems with XCode, you might need to run `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.)
+
 Run
 ```
 $ make release
