@@ -365,7 +365,10 @@ namespace mono { namespace redpine {
         
         
     public:
-        
+
+        /** Initialize invalid SPI communication */
+        ModuleSPICommunication();
+
         /** 
          * Create a communication class, and assign a SPI hardware interface
          * 

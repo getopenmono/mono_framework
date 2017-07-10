@@ -108,6 +108,14 @@ SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
 
 // MARK: Module SPI Communication
 
+ModuleSPICommunication::ModuleSPICommunication() :
+    spiChipSelect(NC),
+    resetLine(NC),
+    spiInterrupt(NC)
+{
+
+}
+
 ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) :
     spiChipSelect(chipSelect, 1),
     resetLine(resetPin, 1),
