@@ -18,71 +18,71 @@ ResponderView::ResponderView(geo::Rect rect) : View(rect)
     touchActive = false;
 }
 
-void ResponderView::TouchBegin(mono::TouchEvent &event)
+void ResponderView::touchBegin(mono::TouchEvent &event)
 {
 }
 
-void ResponderView::TouchEnd(mono::TouchEvent &event)
+void ResponderView::touchEnd(mono::TouchEvent &event)
 {
 }
 
-void ResponderView::TouchMove(mono::TouchEvent &event)
+void ResponderView::touchMove(mono::TouchEvent &event)
 {
 }
 
-void ResponderView::RespondTouchBegin(mono::TouchEvent &event)
+void ResponderView::respondTouchBegin(mono::TouchEvent &event)
 {
     if (!event.IsScreenCoords)
     {
-        this->ToScreenCoords(&event);
+        this->toScreenCoords(&event);
     }
     
     if (this->viewRect.contains(event.Position))
     {
         touchActive = true;
-        TouchBegin(event);
+        touchBegin(event);
         event.handled = true;
     }
     
 }
 
-void ResponderView::RespondTouchMove(mono::TouchEvent &event)
+void ResponderView::respondTouchMove(mono::TouchEvent &event)
 {
     
     if (touchActive)
     {
         if (!event.IsScreenCoords)
         {
-            this->ToScreenCoords(&event);
+            this->toScreenCoords(&event);
         }
         
-        TouchMove(event);
+        touchMove(event);
         event.handled = true;
     }
     
 }
 
-void ResponderView::RespondTouchEnd(mono::TouchEvent &event)
+void ResponderView::respondTouchEnd(mono::TouchEvent &event)
 {
     
     if (touchActive == true)
     {
         if (!event.IsScreenCoords) {
-            this->ToScreenCoords(&event);
+            this->toScreenCoords(&event);
         }
         
-        TouchEnd(event);
+        touchEnd(event);
         event.handled = true;
         touchActive = false;
     }
 }
 
-void ResponderView::ToScreenCoords(mono::TouchEvent *event)
+void ResponderView::toScreenCoords(mono::TouchEvent *event)
 {
-    int x = event->TouchController->ToScreenCoordsX(event->Position.X(), DisplayWidth());
+    int x = event->TouchController->toScreenCoordsX(event->Position.X(), DisplayWidth());
     event->Position.setX(x);
     
-    int y = event->TouchController->ToScreenCoordsY(event->Position.Y(), DisplayHeight());
+    int y = event->TouchController->toScreenCoordsY(event->Position.Y(), DisplayHeight());
     event->Position.setY(y);
     
     event->IsScreenCoords = true;

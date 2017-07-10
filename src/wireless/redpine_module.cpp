@@ -339,7 +339,7 @@ void Module::onSystemWakeFromSleep()
 
 }
 
-void Module::OnSystemBatteryLow()
+void Module::onSystemBatteryLow()
 {
 
 }

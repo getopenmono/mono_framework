@@ -153,13 +153,13 @@ uint16_t MonoTouchSystem::sampleY()
     return samples / 8;
 }
 
-int MonoTouchSystem::ToScreenCoordsX(int touchPos, uint16_t screenWidth)
+int MonoTouchSystem::toScreenCoordsX(int touchPos, uint16_t screenWidth)
 {
     const uint16_t factor = (1024*screenWidth/(CalMaxX-CalMinX));
     return ((touchPos-CalMinX) * factor) >> 10;
 }
 
-int MonoTouchSystem::ToScreenCoordsY(int touchPos, uint16_t screenHeight)
+int MonoTouchSystem::toScreenCoordsY(int touchPos, uint16_t screenHeight)
 {
     const uint16_t factor = (1024*screenHeight/(CalMaxY-CalMinY));
     return ((touchPos-CalMinY) * factor) >> 10;
@@ -193,7 +193,7 @@ void MonoTouchSystem::onSystemWakeFromSleep()
 
 }
 
-void MonoTouchSystem::OnSystemBatteryLow()
+void MonoTouchSystem::onSystemBatteryLow()
 {
     
 }

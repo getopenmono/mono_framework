@@ -165,6 +165,11 @@ char String::operator[](uint32_t pos) const
 
 char* String::operator()() const
 {
+    return CString();
+}
+
+char* String::CString() const
+{
     return this->stringData;
 }
 

@@ -196,7 +196,7 @@ namespace mono { namespace redpine {
 
         void onSystemWakeFromSleep();
 
-        void OnSystemBatteryLow();
+        void onSystemBatteryLow();
 
     public:
 

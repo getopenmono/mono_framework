@@ -415,7 +415,7 @@ namespace mono { namespace redpine {
         virtual void onSystemPowerOnReset();
         virtual void onSystemEnterSleep();
         virtual void onSystemWakeFromSleep();
-        virtual void OnSystemBatteryLow();
+        virtual void onSystemBatteryLow();
     };
     
 }}

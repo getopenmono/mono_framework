@@ -4,6 +4,7 @@
 #include "touch_responder.h"
 #include <stdio.h>
 #include "consoles.h"
+#include <deprecated.h>
 
 #include <mbed_debug.h>
 
@@ -16,15 +17,15 @@ TouchResponder::TouchResponder()
     activate();
 }
 
-void TouchResponder::RespondTouchBegin(mono::TouchEvent &event)
+void TouchResponder::respondTouchBegin(mono::TouchEvent &event)
 {
 }
 
-void TouchResponder::RespondTouchMove(mono::TouchEvent &event)
+void TouchResponder::respondTouchMove(mono::TouchEvent &event)
 {
 }
 
-void TouchResponder::RespondTouchEnd(mono::TouchEvent &event)
+void TouchResponder::respondTouchEnd(mono::TouchEvent &event)
 {
 }
 
@@ -38,7 +39,7 @@ void TouchResponder::deactivate()
     ResponderChain.remove(this);
 }
 
-void TouchResponder::RunResponderChainTouchBegin(mono::TouchEvent &event)
+void TouchResponder::runResponderChainTouchBegin(mono::TouchEvent &event)
 {
     if (ResponderChain.peek() == NULL)
     {
@@ -49,7 +50,7 @@ void TouchResponder::RunResponderChainTouchBegin(mono::TouchEvent &event)
     TouchResponder *res = ResponderChain.peek();
 
     while (res != NULL) {
-        res->RespondTouchBegin(event);
+        res->respondTouchBegin(event);
 
         if (event.handled)
             return;
@@ -58,7 +59,7 @@ void TouchResponder::RunResponderChainTouchBegin(mono::TouchEvent &event)
     }
 }
 
-void TouchResponder::RunResponderChainTouchEnd(mono::TouchEvent &event)
+void TouchResponder::runResponderChainTouchEnd(mono::TouchEvent &event)
 {
     if (ResponderChain.peek() == NULL)
     {
@@ -69,7 +70,7 @@ void TouchResponder::RunResponderChainTouchEnd(mono::TouchEvent &event)
 
     while (res != NULL) {
 
-        res->RespondTouchEnd(event);
+        res->respondTouchEnd(event);
 
         if (event.handled)
             return;
@@ -78,7 +79,7 @@ void TouchResponder::RunResponderChainTouchEnd(mono::TouchEvent &event)
     }
 }
 
-void TouchResponder::RunResponderChainTouchMove(mono::TouchEvent &event)
+void TouchResponder::runResponderChainTouchMove(mono::TouchEvent &event)
 {
     if (ResponderChain.peek() == NULL)
     {
@@ -89,7 +90,7 @@ void TouchResponder::RunResponderChainTouchMove(mono::TouchEvent &event)
 
     while (res != NULL) {
 
-        res->RespondTouchMove(event);
+        res->respondTouchMove(event);
 
         res = ResponderChain.next(res);
     }

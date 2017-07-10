@@ -53,9 +53,9 @@ namespace mono {
          */
         static TouchResponder* FirstResponder();
         
-        static void RunResponderChainTouchBegin(TouchEvent &event);
-        static void RunResponderChainTouchEnd(TouchEvent &event);
-        static void RunResponderChainTouchMove(TouchEvent &event);
+        static void runResponderChainTouchBegin(TouchEvent &event);
+        static void runResponderChainTouchEnd(TouchEvent &event);
+        static void runResponderChainTouchMove(TouchEvent &event);
         
         /**
          * @brief Create a new responder object that receives touch input.
@@ -66,9 +66,14 @@ namespace mono {
          */
         TouchResponder();
 
-        virtual void RespondTouchBegin(TouchEvent &event);
-        virtual void RespondTouchMove(TouchEvent &event);
-        virtual void RespondTouchEnd(TouchEvent &event);
+        virtual void respondTouchBegin(TouchEvent &event);
+        virtual void RespondTouchBegin(TouchEvent &event) __DEPRECATED("Please use the lower case variant","respondTouchBegin") { respondTouchBegin(event); }
+        
+        virtual void respondTouchMove(TouchEvent &event);
+        virtual void RespondTouchMove(TouchEvent &event) __DEPRECATED("Please use the lower case variant","respondTouchMove") { respondTouchMove(event); }
+        
+        virtual void respondTouchEnd(TouchEvent &event);
+        virtual void RespondTouchEnd(TouchEvent &event) __DEPRECATED("Please use the lower case variant","respondTouchMove") { respondTouchEnd(event); }
 
         /**
          * Add this responder to the responder chain

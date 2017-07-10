@@ -48,7 +48,7 @@ namespace mono { namespace display {
 
         void onSystemWakeFromSleep();
 
-        void OnSystemBatteryLow();
+        void onSystemBatteryLow();
         
         void tearingEffectHandler();
         

@@ -881,7 +881,7 @@ void ModuleSPICommunication::onSystemWakeFromSleep()
 {
     spiInterrupt.enable_irq();
 }
-void ModuleSPICommunication::OnSystemBatteryLow()
+void ModuleSPICommunication::onSystemBatteryLow()
 {
 
 }

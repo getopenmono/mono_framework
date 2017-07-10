@@ -51,7 +51,7 @@ namespace mono { namespace sensor {
         
         virtual void onSystemWakeFromSleep();
         
-        virtual void OnSystemBatteryLow();
+        virtual void onSystemBatteryLow();
         
     };
     
