@@ -102,6 +102,20 @@ namespace mono { namespace network {
         }
 
         /**
+         * @brief Callback for providing the length of the HTTP POST body
+         *
+         * You should provide a efficient method of getting the body length,
+         * since this callback is used multiple times under the request
+         * execution.
+         *
+         * @param cfunc Pointer to the function to call for request data length
+         */
+        void setBodyLengthCallback(uint16_t(*cfunc)(void))
+        {
+            frameDataLengthHandler.attach(cfunc);
+        }
+
+        /**
          * @brief Callback for providing the body content of the HTTP POST
          *
          * The internals of the request will ensure the provided `char*` is
@@ -114,6 +128,19 @@ namespace mono { namespace network {
         void setBodyDataCallback(Class *context, void(Class::*method)(char*))
         {
             frameDataHandler.attach<Class>(context, method);
+        }
+
+        /**
+         * @brief Callback for providing the body content of the HTTP POST
+         *
+         * The internals of the request will ensure the provided `char*` is
+         * large enough to hold the size of the HTTP body.
+         *
+         * @param cfunc Pointer to the function to call for request body data
+         */
+        void setBodyDataCallback(void(*cfunc)(char*))
+        {
+            frameDataHandler.attach(cfunc);
         }
 
         /**
