@@ -28,6 +28,7 @@ void Wifi::convenienceInit()
 {
     wifiInitInProgress = false;
     inited = false;
+    connected = false;
     
     redpine::Module::setNetworkReadyCallback<Wifi>(this, &Wifi::moduleNetworkReady);
     redpine::Module::setConnectFailedCallback(this, &Wifi::moduleNetworkError);
