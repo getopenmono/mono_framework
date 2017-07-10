@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <deprecated.h>
 
 namespace mono {
 
@@ -48,19 +49,22 @@ namespace mono {
          * @brief Add a new element to the back of the queue
          * Insert a pointer to an element on the back of the queue.
          */
-        void Enqueue(IQueueItem *item);
+        void enqueue(IQueueItem *item);
+        void Enqueue(IQueueItem *item) __DEPRECATED("Please use the lower case variant","enqueue") { enqueue(item); }
 
         /**
          * @brief Returns and removes the oldest element in the queue
          *
          */
-        IQueueItem* Dequeue();
+        IQueueItem* dequeue();
+        IQueueItem* Dequeue() __DEPRECATED("Please use the lower case variant","dequeue") { return dequeue(); }
 
         /**
          * @brief Return the oldest element in the queue, without removing it
          *
          */
-        IQueueItem* Peek();
+        IQueueItem* peek();
+        IQueueItem* Peek() __DEPRECATED("Please use the lower case variant","peek") { return peek(); }
 
         /**
          * @brief Get the next element in the queue, after the one you provide.
@@ -71,7 +75,8 @@ namespace mono {
          * @param item A pointer to an item in the queue
          * @return The next element in the queue, after the item you provided.
          */
-        IQueueItem* Next(IQueueItem *item);
+        IQueueItem* next(IQueueItem *item);
+        IQueueItem* Next(IQueueItem *item) __DEPRECATED("Please use the lower case variant","next") { return next(item); }
 
         /**
          * @brief Check that an object already exists in the queue.
@@ -81,9 +86,11 @@ namespace mono {
          *
          * @param item The element to search for in the queue
          */
-        bool Exists(IQueueItem *item);
+        bool exists(IQueueItem *item);
+        bool Exists(IQueueItem *item) __DEPRECATED("Please use the lower case variant","exists") { return exists(item); }
 
-        bool Remove(IQueueItem *item);
+        bool remove(IQueueItem *item);
+        bool Remove(IQueueItem *item) __DEPRECATED("Please use the lower case variant","remove") { return remove(item); };
 
         uint16_t Length();
 
@@ -105,35 +112,47 @@ namespace mono {
 
         GenericQueue() : Queue() {}
 
-        void Enqueue(Item *i)
+        void enqueue(Item *i)
         {
-            Queue::Enqueue((IQueueItem*)i);
-        }
-
-        Item* Dequeue()
-        {
-            return (Item*) Queue::Dequeue();
-        }
-
-        Item* Peek()
-        {
-            return (Item*) Queue::Peek();
-        }
-
-        Item* Next(Item *i)
-        {
-            return (Item*) Queue::Next((IQueueItem*)i);
-        }
-
-        bool Exists(Item *i)
-        {
-            return Queue::Exists((IQueueItem*) i);
+            Queue::enqueue((IQueueItem*)i);
         }
         
-        bool Remove(Item *i)
+        void Enqueue(Item *i) __DEPRECATED("Please use the lower case variant","enqueue") { enqueue(i); }
+
+        Item* dequeue()
         {
-            return Queue::Remove((IQueueItem*) i);
+            return (Item*) Queue::dequeue();
         }
+        
+        Item* Dequeue() __DEPRECATED("Please use the lower case variant","dequeue") { return dequeue(); }
+
+        Item* peek()
+        {
+            return (Item*) Queue::peek();
+        }
+        
+        Item* Peek() __DEPRECATED("Please use the lower case variant","peek") { return peek(); }
+
+        Item* next(Item *i)
+        {
+            return (Item*) Queue::next((IQueueItem*)i);
+        }
+        
+        Item* Next(Item *i) __DEPRECATED("Please use the lower case variant","next") { return next(i); }
+
+        bool exists(Item *i)
+        {
+            return Queue::exists((IQueueItem*) i);
+        }
+        
+        bool Exists(Item *i) __DEPRECATED("Please use the lower case variant","exists") { return exists(i); }
+        
+        bool remove(Item *i)
+        {
+            return Queue::remove((IQueueItem*) i);
+        }
+        
+        bool Remove(Item *i) __DEPRECATED("Please use the lower case variant","remove") { return remove(i); }
 
     };
 

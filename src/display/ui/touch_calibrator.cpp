@@ -175,7 +175,7 @@ void TouchCalibrateView::makeFirstResponder()
     {
         TouchResponder *oldFirst = FirstResponder();
         deactivate(); // remove myself from responder chain
-        ResponderChain.Dequeue(); // removes first responder!
+        ResponderChain.dequeue(); // removes first responder!
         activate(); // put myself as first responder
 
         if (oldFirst != NULL)

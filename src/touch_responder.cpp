@@ -30,23 +30,23 @@ void TouchResponder::RespondTouchEnd(mono::TouchEvent &event)
 
 void TouchResponder::activate()
 {
-    ResponderChain.Enqueue(this);
+    ResponderChain.enqueue(this);
 }
 
 void TouchResponder::deactivate()
 {
-    ResponderChain.Remove(this);
+    ResponderChain.remove(this);
 }
 
 void TouchResponder::RunResponderChainTouchBegin(mono::TouchEvent &event)
 {
-    if (ResponderChain.Peek() == NULL)
+    if (ResponderChain.peek() == NULL)
     {
         defaultSerial.printf("No first touch responder!\r\n");
         return;
     }
 
-    TouchResponder *res = ResponderChain.Peek();
+    TouchResponder *res = ResponderChain.peek();
 
     while (res != NULL) {
         res->RespondTouchBegin(event);
@@ -54,18 +54,18 @@ void TouchResponder::RunResponderChainTouchBegin(mono::TouchEvent &event)
         if (event.handled)
             return;
 
-        res = ResponderChain.Next(res);
+        res = ResponderChain.next(res);
     }
 }
 
 void TouchResponder::RunResponderChainTouchEnd(mono::TouchEvent &event)
 {
-    if (ResponderChain.Peek() == NULL)
+    if (ResponderChain.peek() == NULL)
     {
         return;
     }
 
-    TouchResponder *res = ResponderChain.Peek();
+    TouchResponder *res = ResponderChain.peek();
 
     while (res != NULL) {
 
@@ -74,28 +74,28 @@ void TouchResponder::RunResponderChainTouchEnd(mono::TouchEvent &event)
         if (event.handled)
             return;
 
-        res = ResponderChain.Next(res);
+        res = ResponderChain.next(res);
     }
 }
 
 void TouchResponder::RunResponderChainTouchMove(mono::TouchEvent &event)
 {
-    if (ResponderChain.Peek() == NULL)
+    if (ResponderChain.peek() == NULL)
     {
         return;
     }
 
-    TouchResponder *res = ResponderChain.Peek();
+    TouchResponder *res = ResponderChain.peek();
 
     while (res != NULL) {
 
         res->RespondTouchMove(event);
 
-        res = ResponderChain.Next(res);
+        res = ResponderChain.next(res);
     }
 }
 
 TouchResponder* TouchResponder::FirstResponder()
 {
-    return ResponderChain.Peek();
+    return ResponderChain.peek();
 }

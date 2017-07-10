@@ -11,10 +11,10 @@ Queue::Queue()
     endOfQueue = NULL;
 }
 
-void Queue::Enqueue(mono::IQueueItem *item)
+void Queue::enqueue(mono::IQueueItem *item)
 {
     //first check that this object does not already exist in the queue
-    if (this->Exists(item))
+    if (this->exists(item))
         return;
     
     // dont allow the new end of the queue to reference rubbish data
@@ -31,7 +31,7 @@ void Queue::Enqueue(mono::IQueueItem *item)
     }
 }
 
-IQueueItem* Queue::Dequeue()
+IQueueItem* Queue::dequeue()
 {
     if (topOfQueue == NULL)
         return NULL;
@@ -45,12 +45,12 @@ IQueueItem* Queue::Dequeue()
     return next;
 }
 
-IQueueItem* Queue::Peek()
+IQueueItem* Queue::peek()
 {
     return topOfQueue;
 }
 
-IQueueItem* Queue::Next(mono::IQueueItem *item)
+IQueueItem* Queue::next(mono::IQueueItem *item)
 {
     if (item == NULL)
         return NULL;
@@ -58,7 +58,7 @@ IQueueItem* Queue::Next(mono::IQueueItem *item)
     return item->_queueNextPointer;
 }
 
-bool Queue::Remove(IQueueItem *item)
+bool Queue::remove(IQueueItem *item)
 {
     IQueueItem *prev = NULL;
     IQueueItem *next = topOfQueue;
@@ -89,7 +89,7 @@ bool Queue::Remove(IQueueItem *item)
         return false;
 }
 
-bool Queue::Exists(mono::IQueueItem *item)
+bool Queue::exists(mono::IQueueItem *item)
 {
     IQueueItem *next = topOfQueue;
     

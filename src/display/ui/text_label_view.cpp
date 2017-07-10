@@ -302,7 +302,7 @@ void TextLabelView::scheduleRepaint()
         return;
 
     this->isDirty = true;
-    dirtyQueue.Enqueue((View*) this);
+    dirtyQueue.enqueue((View*) this);
 }
 
 void TextLabelView::repaint()

@@ -179,7 +179,7 @@ void Module::moduleEventHandler()
         if (comIntf->pollInputQueue())
         {
             //handle a response for any pending request
-            ManagementFrame *respFrame = responseFrameQueue.Peek();
+            ManagementFrame *respFrame = responseFrameQueue.peek();
             if (respFrame == NULL)
             {
                 debug("nothing on request queue!\r\n");
@@ -198,7 +198,7 @@ void Module::moduleEventHandler()
                 bool success = this->comIntf->readManagementFrameResponse(*respFrame);
 
                 if (!success) {
-                    responseFrameQueue.Remove(respFrame);
+                    responseFrameQueue.remove(respFrame);
                     debug("failed to handle incoming response for resp queue head\r\n");
                     respFrame->status = 1;
                     respFrame->triggerCompletionHandler();
@@ -206,7 +206,7 @@ void Module::moduleEventHandler()
                 else if (respFrame->lastResponseParsed)
                 {
                     //debug("Frame (0x%x): last response parsed!\r\n",respFrame->commandId);
-                    responseFrameQueue.Remove(respFrame);
+                    responseFrameQueue.remove(respFrame);
                     respFrame->triggerCompletionHandler();
 
                     if (respFrame->autoReleaseWhenParsed)
@@ -228,7 +228,7 @@ void Module::moduleEventHandler()
         // if no response is pending, send new request
         if (responseFrameQueue.Length() == 0 && requestFrameQueue.Length() > 0)
         {
-            ManagementFrame *request = requestFrameQueue.Dequeue();
+            ManagementFrame *request = requestFrameQueue.dequeue();
             //debug("Sending Mgmt request 0x%x\r\n",request->commandId);
             bool success = request->writeFrame();
 
@@ -244,7 +244,7 @@ void Module::moduleEventHandler()
                 return;
             }
 
-            responseFrameQueue.Enqueue(request);
+            responseFrameQueue.enqueue(request);
         }
     }
 }
