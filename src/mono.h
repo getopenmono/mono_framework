@@ -59,10 +59,12 @@
 // MARK: IO
 
 #include <io/file.h>
+#include <io/file_system.h>
 #include <io/filtered_analog_in.h>
 #include <io/hysteresis_trigger.h>
 #include <io/mn_digital_out.h>
 #include <queue_interrupt.h>
+#include <io/wifi.h>
 
 // MARK: Media
 
