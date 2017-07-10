@@ -13,7 +13,7 @@ GenericQueue<TouchResponder> TouchResponder::ResponderChain;
 
 TouchResponder::TouchResponder()
 {
-    Activate();
+    activate();
 }
 
 void TouchResponder::RespondTouchBegin(mono::TouchEvent &event)
@@ -28,12 +28,12 @@ void TouchResponder::RespondTouchEnd(mono::TouchEvent &event)
 {
 }
 
-void TouchResponder::Activate()
+void TouchResponder::activate()
 {
     ResponderChain.Enqueue(this);
 }
 
-void TouchResponder::Deactivate()
+void TouchResponder::deactivate()
 {
     ResponderChain.Remove(this);
 }

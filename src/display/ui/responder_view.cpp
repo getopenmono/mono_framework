@@ -8,13 +8,13 @@ using namespace mono::ui;
 
 ResponderView::ResponderView()
 {
-    Deactivate(); // view starts hidden, do not handle touch
+    deactivate(); // view starts hidden, do not handle touch
     touchActive = false;
 }
 
 ResponderView::ResponderView(geo::Rect rect) : View(rect)
 {
-    Deactivate(); // view starts hidden, do not handle touch
+    deactivate(); // view starts hidden, do not handle touch
     touchActive = false;
 }
 
@@ -91,11 +91,11 @@ void ResponderView::ToScreenCoords(mono::TouchEvent *event)
 void ResponderView::show()
 {
     View::show();
-    Activate();
+    activate();
 }
 
 void ResponderView::hide()
 {
-    Deactivate();
+    deactivate();
     View::hide();
 }

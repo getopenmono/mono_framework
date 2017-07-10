@@ -369,8 +369,6 @@ void HttpPostFrame::dataPayload(uint8_t *data)
     memcpy(strPnt, extraHeader(), extraHeader.Length());
     strPnt += extraHeader.Length()+1;
 
-    int dataLen = requestDataLengthCallback.call();
-
     if (requestDataCallback)
         requestDataCallback.call((char*)(strPnt));
 }

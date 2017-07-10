@@ -6,6 +6,7 @@
 
 #include "touch_event.h"
 #include "queue.h"
+#include "deprecated.h"
 
 class ITouchSystem; //forwd decl
 
@@ -73,12 +74,18 @@ namespace mono {
          * Add this responder to the responder chain
          *
          */
-        void Activate();
+        void activate();
+
+        void Activate() __DEPRECATED("Capitalized method calls syntax is being obsolted", "activate")
+        { activate(); }
 
         /**
          * Remove this responder from the responder chain
          */
-        void Deactivate();
+        void deactivate();
+
+        void Deactivate() __DEPRECATED("Capitalized method calls syntax is being obsolted", "deactivate")
+        { deactivate(); }
     };
 
 }
