@@ -20,6 +20,38 @@ PowerSaver::PowerSaver(int dimTimeoutMs, int sleepTimeoutMs,
     startDimTimer();
 }
 
+PowerSaver::PowerSaver(PowerSaver &other)
+{
+    enabled = other.enabled;
+    dimBright = other.dimBright;
+    fullBright = other.fullBright;
+    stepDir = DIM_NONE;
+
+    dimTimer.setCallback<PowerSaver>(this, &PowerSaver::dim);
+    sleepTimer.setCallback<PowerSaver>(this, &PowerSaver::sleepStep);
+
+    other.deactivate();
+
+    startDimTimer();
+}
+
+PowerSaver& PowerSaver::operator=(PowerSaver &other)
+{
+    enabled = other.enabled;
+    dimBright = other.dimBright;
+    fullBright = other.fullBright;
+    stepDir = DIM_NONE;
+
+    dimTimer.setCallback<PowerSaver>(this, &PowerSaver::dim);
+    sleepTimer.setCallback<PowerSaver>(this, &PowerSaver::sleepStep);
+
+    other.deactivate();
+
+    startDimTimer();
+
+    return *this;
+}
+
 void PowerSaver::sleepStep()
 {
     if (!enabled || stepDir != DIM_DOWN)

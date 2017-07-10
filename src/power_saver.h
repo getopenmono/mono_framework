@@ -75,6 +75,10 @@ namespace mono {
          */
         PowerSaver(int dimTimeoutMs = 10000, int sleepTimeoutMs = 10000, int dimBrightness = 30, int fullBrightness = 255);
 
+        PowerSaver(PowerSaver &other);
+
+        PowerSaver& operator=(PowerSaver &other);
+
         /**
          * @brief Starts the timer that will dim the display after the chosen timeout.
          * 
