@@ -24,6 +24,8 @@ namespace mono {
      *
      * Any object you wish to insert into a queue must inherit from this
      * interface.
+     *
+     * @see GenericQueue
      */
     class IQueueItem
     {

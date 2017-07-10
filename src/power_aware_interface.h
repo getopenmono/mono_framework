@@ -17,10 +17,10 @@ namespace mono { namespace power {
      * Classes that implements this interface canreceive power related events in
      * from of handler methods. This interface define the 3 handler methods:
      *
-     * 1. `@ref onSystemPowerOnReset` : Called reset or first power on
-     * 2. `@ref onSystemEnterSleep` : Called just before system enter sleep mode
-     * 3. `@ref onSystemWakeFromSleep` : Called right after the system has woken from sleep
-     * 4. `@ref onSystemBatteryLow` : Called when battery is critically low
+     * 1. @ref `onSystemPowerOnReset` : Called reset or first power on
+     * 2. @ref `onSystemEnterSleep` : Called just before system enter sleep mode
+     * 3. @ref `onSystemWakeFromSleep` : Called right after the system has woken from sleep
+     * 4. @ref `onSystemBatteryLow` : Called when battery is critically low
      *
      * Inheriting this interface is not enough to active the functionality. You
      * must remember to add your object instance to the @ref IPowerManagement 

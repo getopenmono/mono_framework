@@ -18,13 +18,6 @@ public:
     
     typedef redpine::Module::WifiSecurityModes SecurityMode;
     
-//    enum NetworkEvents
-//    {
-//        CONNECTED,
-//        CONNECT_ERROR,
-//        DISCONNECTED
-//    };
-    
 protected:
     
     mbed::SPI spi;
