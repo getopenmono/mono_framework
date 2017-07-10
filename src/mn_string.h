@@ -19,7 +19,7 @@ namespace mono {
      * string class hold its data on the HEAP, but behaves as it would reside on
      * the stack.
      *
-     * THis string class takes care of all alloc and dealloc of memory. It is a
+     * This string class takes care of all alloc and dealloc of memory. It is a
      * referenced based string class. You should not pass pointers of C++ references
      * to this class, but instead normal assignment or pass the full class to
      * functions. The efficient copy / assignment operator methods on the class

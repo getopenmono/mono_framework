@@ -12,3 +12,4 @@ resources/*.mkbak
 resources/icons.mk
 img2icon
 test/docker_run.sh
+frm

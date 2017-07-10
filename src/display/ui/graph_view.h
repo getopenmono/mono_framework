@@ -71,7 +71,7 @@ namespace mono { namespace ui {
          *
          * @return the size / length of the data source
          */
-        virtual int BufferLenght() = 0;
+        virtual int BufferLength() = 0;
 
         /*!
          * @brief The value span for the data samples.
