@@ -31,9 +31,9 @@ namespace mono {
     {
         friend class Queue;
         friend class GenericQueue<IQueueItem>;
-    private:
-        static const int GENERIC_QUEUE_ITEMS_MUST_INHERIT_FROM_QUEUEITEM = 0;
     public:
+
+        static const int GENERIC_QUEUE_ITEMS_MUST_INHERIT_FROM_QUEUEITEM = 0;
         
         IQueueItem *_queueNextPointer;
         

@@ -9,7 +9,7 @@ if [[ ! -d $EMUNO_DIR ]]; then
 	echo "Emuno does not exist, downloading..."
 	CUR_DIR=`pwd`
 	cd `dirname $EMUNO_DIR`
-	
+
 	if [[ $BITB_SSH_KEY ]]; then
 		echo "using SSH key"
 		echo "$BITB_SSH_KEY" > bitbucket_key
@@ -26,11 +26,23 @@ if [[ ! -d $EMUNO_DIR ]]; then
 		echo "Env. var. BITB_USERNAME is not set. Run docker with this var set!"
 		exit 1
 	fi
-	
+
 	cd $CUR_DIR
 fi
 
 echo "Building DateTime test case..."
 make -f date_time.mk && \
 echo "Running DateTime test..." && \
-./build/tests/date_time_test.o
+./build/tests/date_time_test.o && \
+echo "Building mono String test case..." && \
+make -f mn_string.mk && \
+echo "Running String test..." && \
+make -f mn_string.mk run &&
+echo "Building mono Queue test case..." && \
+make -f queue.mk && \
+echo "Running Queue test..." && \
+make -f queue.mk run &&
+echo "Building mono File I/O test case..." && \
+make -f file.mk && \
+echo "Running File I/O test..." && \
+make -f file.mk run
