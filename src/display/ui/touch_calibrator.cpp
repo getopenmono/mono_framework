@@ -132,7 +132,7 @@ void TouchCalibrateView::drawTouchBlock(geo::Rect &rect, geo::Rect &prevRect)
     painter.drawPixel(rect.X()+rect.Width()/2, rect.Y()+rect.Height()/2);
 }
 
-void TouchCalibrateView::RespondTouchBegin(TouchEvent &event)
+void TouchCalibrateView::respondTouchBegin(TouchEvent &event)
 {
     if (event.IsScreenCoords)
     {

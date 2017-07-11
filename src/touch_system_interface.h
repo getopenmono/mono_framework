@@ -11,7 +11,6 @@
 #include <deprecated.h>
 #include "rect.h"
 
-
 #include <stdio.h>
 
 namespace mono {

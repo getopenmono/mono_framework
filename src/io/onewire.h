@@ -1,10 +1,13 @@
 // This software is part of OpenMono, see http://developer.openmono.com
 // and is available under the MIT license, see LICENSE.txt
 
-#if !defined(__com_openmono_onewire_h)
+#ifndef __com_openmono_onewire_h
 #define __com_openmono_onewire_h
-#include <mono.h>
+
 #include <mbed.h>
+#include <mn_string.h>
+#include <mn_digital_out.h>
+#include <async.h>
 
 namespace mono { namespace io {
 

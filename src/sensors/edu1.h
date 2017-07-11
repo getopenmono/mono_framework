@@ -1,6 +1,6 @@
 
-#ifndef edu1_h
-#define edu1_h
+#ifndef _edu1_h
+#define _edu1_h
 
 #include <temperature_interface.h>
 #include <onewire.h>
