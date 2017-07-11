@@ -21,7 +21,6 @@ namespace mono { namespace ui {
      * will be loaded and the @ref setCalibrationDoneCallback handler will be called
      * immediately after the call to @ref show.
      *
-     * @see ISettings
      */
     class TouchCalibrateView : public ResponderView
     {
@@ -79,7 +78,7 @@ namespace mono { namespace ui {
 
         void show();
         
-        void RespondTouchBegin(TouchEvent &event);
+        void respondTouchBegin(TouchEvent &event);
         
         template <typename Owner>
         void setCalibrationDoneCallback(Owner *obj,void (Owner::*memPtr)(void))
