@@ -1,10 +1,12 @@
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #ifndef _edu1_h
 #define _edu1_h
 
 #include <temperature_interface.h>
 #include <onewire.h>
-#include <dht.hpp>
+#include <dht.h>
 #include <FunctionPointer.h>
 #include <power_aware_interface.h>
 

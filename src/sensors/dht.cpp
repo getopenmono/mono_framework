@@ -1,12 +1,7 @@
-//
-//  dht.cpp
-//  edu1
-//
-//  Created by Kristoffer Andersen on 28/03/2017.
-//  Copyright © 2017 Monolit ApS. All rights reserved.
-//
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
-#include <dht.hpp>
+#include <dht.h>
 #include <math.h>
 
 namespace mono { namespace sensor { namespace dht {

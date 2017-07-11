@@ -89,7 +89,7 @@
 #include <rtc_interface.h>
 #include <touch_event.h>
 #include <touch_responder.h>
-#include <dht.hpp>
+#include <dht.h>
 #include <edu1.h>
 
 #ifndef EMUNO
