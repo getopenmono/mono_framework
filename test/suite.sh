@@ -5,7 +5,9 @@ BITBUCKET_HOST=bitbucket.org
 EMUNO_URL="https://$BITB_USERNAME@bitbucket.org/openmono/emuno.git"
 EMUNO_SSH="git@bitbucket.org:openmono/emuno.git"
 
-TEST_APPS="https://github.com/getopenmono/simpletemp.git
+TEST_APPS="
+https://github.com/getopenmono/alarmclock.git
+https://github.com/getopenmono/simpletemp.git
 https://github.com/getopenmono/templog.git
 https://github.com/getopenmono/accelBeep.git
 https://github.com/getopenmono/temperature.git

@@ -10,24 +10,53 @@ ResponderView::ResponderView()
 {
     deactivate(); // view starts hidden, do not handle touch
     touchActive = false;
+    breakOldLoop = false;
 }
 
 ResponderView::ResponderView(geo::Rect rect) : View(rect)
 {
     deactivate(); // view starts hidden, do not handle touch
     touchActive = false;
+    breakOldLoop = false;
 }
 
 void ResponderView::touchBegin(mono::TouchEvent &event)
 {
+    if (breakOldLoop)
+        return;
+
+    breakOldLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    TouchBegin(event);
+#pragma GCC diagnostic pop
+    breakOldLoop = false;
 }
 
 void ResponderView::touchEnd(mono::TouchEvent &event)
 {
+    if (breakOldLoop)
+        return;
+
+    breakOldLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    TouchEnd(event);
+#pragma GCC diagnostic pop
+    breakOldLoop = false;
 }
 
 void ResponderView::touchMove(mono::TouchEvent &event)
 {
+    if (breakOldLoop)
+        return;
+
+    breakOldLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    TouchMove(event);
+#pragma GCC diagnostic pop
+    breakOldLoop = false;
 }
 
 void ResponderView::respondTouchBegin(mono::TouchEvent &event)

@@ -14,19 +14,47 @@ GenericQueue<TouchResponder> TouchResponder::ResponderChain;
 
 TouchResponder::TouchResponder()
 {
+    breakReponderLoop = false;
     activate();
 }
 
 void TouchResponder::respondTouchBegin(mono::TouchEvent &event)
 {
+    if (breakReponderLoop)
+        return;
+
+    breakReponderLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    RespondTouchBegin(event);
+#pragma GCC diagnostic pop
+    breakReponderLoop = false;
 }
 
 void TouchResponder::respondTouchMove(mono::TouchEvent &event)
 {
+    if (breakReponderLoop)
+        return;
+
+    breakReponderLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    RespondTouchMove(event);
+#pragma GCC diagnostic pop
+    breakReponderLoop = false;
 }
 
 void TouchResponder::respondTouchEnd(mono::TouchEvent &event)
 {
+    if (breakReponderLoop)
+        return;
+
+    breakReponderLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    RespondTouchEnd(event);
+#pragma GCC diagnostic pop
+    breakReponderLoop = false;
 }
 
 void TouchResponder::activate()
