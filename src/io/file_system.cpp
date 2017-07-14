@@ -2,7 +2,7 @@
 // Released under the MIT license, see LICENSE.txt
 
 #include "file_system.h"
-#include <application_context.h>
+#include <application_context_interface.h>
 
 using namespace mono::io;
 

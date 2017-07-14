@@ -61,7 +61,10 @@ namespace mono { namespace io {
      *
      * This class adds support for sleep mode to *mbed* FS functionality.
      */
-    class FileSystem : mono::power::IPowerAware, SDFileSystem
+    class FileSystem : mono::power::IPowerAware
+#ifndef EMUNO
+    , SDFileSystem
+#endif
     {
     public:
 

@@ -89,14 +89,14 @@
 #include <rtc_interface.h>
 #include <touch_event.h>
 #include <touch_responder.h>
-#include <dht.h>
-#include <edu1.h>
 
 #ifndef EMUNO
 #include <mono_battery.h>
 #include <http_client.h>
 #include <http_post_client.h>
 #include <dns_resolver.h>
+#include <dht.h>
+#include <edu1.h>
 #else
 #include <emuno.h>
 #endif
