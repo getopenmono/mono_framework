@@ -117,7 +117,7 @@ namespace mono {
          */
         void deactivate();
         
-        virtual void RespondTouchBegin(TouchEvent &event);
+        virtual void respondTouchBegin(TouchEvent &event);
     };
 }
 

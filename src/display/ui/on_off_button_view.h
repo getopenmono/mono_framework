@@ -20,7 +20,7 @@ namespace mono { namespace ui {
 
         uint16_t buttonSeparation;
 
-        virtual void TouchEnd(TouchEvent &event);
+        virtual void touchEnd(TouchEvent &event);
 
     public:
 

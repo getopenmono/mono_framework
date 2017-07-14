@@ -134,7 +134,7 @@ void PowerSaver::deactivate()
     dimTimer.stop();
 }
 
-void PowerSaver::RespondTouchBegin(TouchEvent &)
+void PowerSaver::respondTouchBegin(TouchEvent &)
 {
     if (enabled)
         undim();

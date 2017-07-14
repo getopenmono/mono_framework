@@ -13,9 +13,9 @@ namespace mono { namespace ui {
     protected:
         mbed::FunctionPointer clickHandler;
 
-        virtual void TouchBegin(TouchEvent &event);
-        virtual void TouchMove(TouchEvent &event);
-        virtual void TouchEnd(TouchEvent &event);
+        virtual void touchBegin(TouchEvent &event);
+        virtual void touchMove(TouchEvent &event);
+        virtual void touchEnd(TouchEvent &event);
 
         bool isPressedDown;
 
