@@ -68,7 +68,7 @@ namespace mono {
      * is that your function will not be executed _before_ the provided time
      * stamp.
      */
-    class ScheduledTask : IQueueItem
+    class ScheduledTask : public IQueueItem
     {
     protected:
 

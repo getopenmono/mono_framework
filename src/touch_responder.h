@@ -38,7 +38,7 @@ namespace mono {
      * @see ITouchSystem
      * @brief The TouchReponder handles incoming touch events
      */
-    class TouchResponder : IQueueItem
+    class TouchResponder : public IQueueItem
     {
         friend class ITouchSystem;
     protected:
