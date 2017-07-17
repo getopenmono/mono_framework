@@ -17,7 +17,7 @@ namespace mono { namespace ui {
         ResponderView();
         ResponderView(geo::Rect rect);
         
-        bool touchActive, breakOldLoop;
+        bool touchActive;
         
         /** Internal touch handler, you should not overwrite this */
         virtual void respondTouchBegin(TouchEvent &event);

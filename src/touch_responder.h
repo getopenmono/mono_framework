@@ -43,7 +43,6 @@ namespace mono {
         friend class ITouchSystem;
     protected:
         static GenericQueue<TouchResponder> ResponderChain;
-        bool breakReponderLoop;
     public:
         
         /**

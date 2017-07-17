@@ -14,12 +14,12 @@ GenericQueue<TouchResponder> TouchResponder::ResponderChain;
 
 TouchResponder::TouchResponder()
 {
-    breakReponderLoop = false;
     activate();
 }
 
 void TouchResponder::respondTouchBegin(mono::TouchEvent &event)
 {
+    static bool breakReponderLoop = false;
     if (breakReponderLoop)
         return;
 
@@ -33,6 +33,7 @@ void TouchResponder::respondTouchBegin(mono::TouchEvent &event)
 
 void TouchResponder::respondTouchMove(mono::TouchEvent &event)
 {
+    static bool breakReponderLoop = false;
     if (breakReponderLoop)
         return;
 
@@ -46,6 +47,7 @@ void TouchResponder::respondTouchMove(mono::TouchEvent &event)
 
 void TouchResponder::respondTouchEnd(mono::TouchEvent &event)
 {
+    static bool breakReponderLoop = false;
     if (breakReponderLoop)
         return;
 

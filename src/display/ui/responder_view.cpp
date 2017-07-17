@@ -10,18 +10,17 @@ ResponderView::ResponderView()
 {
     deactivate(); // view starts hidden, do not handle touch
     touchActive = false;
-    breakOldLoop = false;
 }
 
 ResponderView::ResponderView(geo::Rect rect) : View(rect)
 {
     deactivate(); // view starts hidden, do not handle touch
     touchActive = false;
-    breakOldLoop = false;
 }
 
 void ResponderView::touchBegin(mono::TouchEvent &event)
 {
+    static bool breakOldLoop = false;
     if (breakOldLoop)
         return;
 
@@ -35,6 +34,7 @@ void ResponderView::touchBegin(mono::TouchEvent &event)
 
 void ResponderView::touchEnd(mono::TouchEvent &event)
 {
+    static bool breakOldLoop = false;
     if (breakOldLoop)
         return;
 
@@ -48,6 +48,8 @@ void ResponderView::touchEnd(mono::TouchEvent &event)
 
 void ResponderView::touchMove(mono::TouchEvent &event)
 {
+    static bool breakOldLoop = false;
+    
     if (breakOldLoop)
         return;
 
