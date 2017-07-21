@@ -19,7 +19,7 @@
 
 namespace mbed {
 
-SPI::SPI(PinName mosi, PinName miso, PinName sclk, PinName _unused) :
+SPI::SPI(PinName mosi, PinName miso, PinName sclk, PinName) :
         _spi(),
         _bits(8),
         _mode(0),
