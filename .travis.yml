@@ -10,7 +10,6 @@ script:
   - docker run -e BRANCH=$TRAVIS_BRANCH -e TRAVIS_COMMIT=$TRAVIS_COMMIT -e DEPLOY=$DEPLOY -v `pwd`/artifacts:/Desktop monolit/monofrm
   - if [ $TRAVIS_BRANCH == "production" ]; then tar -czvf mono_frm.tgz . -C artifacts && ls -l; fi
 notifications:
-  email: false
   slack:
     on_success: change
     secure: QfyynbScr/yRSuIdM2EeSgCmGrUzTlMw0NTItkg39HCdpk9T3Gyd2bAMuADwvi9Q+dZJApkiFzg9oSzhNabik80oQeq9tgiro6djyY/ZLkqu2wzpT9P+SjBU7XZyPVZB+Hn37M08fdc9o5vss6Wyl1V7SgoNpqQalL5ek6RRFQC0AsY7atI1c8wVrWnMQhHK+YMkUf7/OhlodaPYiqWU/U7vt6gCVBB4cvEMJqkK6gGzfOSKYM7YrP3JxXXCzNiBL3DdiFHsJ2O6x/6mT4OJ3kZApklUsAtERGqbYouTEsVmC5raxUFOMzG9GSqIzYo6bM7y0od4lp+iQAnvtWjj32IM2v4nMnA+MoDLtJa2TKwarCjEo+JDcBls6nuVg+Z+FrTQL1UVBMAZ8qGz21Qor2arpIXGz0wqgOxsI0q6IneqCvFPUFlRQs7YV+15umYdW2SymxXgw20tcKKyZWaC1Oow3JxTFH5M42A/M0NHUOfJMYMUPbaGpdX5Zm7xk3q9vJI24T3+1o7JfjjNzw5gAzrzJOGCD/N+3AV9BOySULgvY7CjUrVoGoM7GNu8kNQj6r7NkkJh7hJQEccfO9Of74oTjp9mZ7/qYgZnWXRHnO17yLlIWpLL3/IAVt24jMNunhfFrQJmN3e08K4oNTjdTD4WQB576wRNW16B9xm/wRM=

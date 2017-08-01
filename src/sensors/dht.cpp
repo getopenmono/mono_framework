@@ -4,6 +4,8 @@
 #include <dht.h>
 #include <math.h>
 
+#define BYTES_IN_READING 5
+
 namespace mono { namespace sensor { namespace dht {
 
     bool isProperReading (uint8_t const * data, size_t size)
@@ -70,7 +72,7 @@ namespace mono { namespace sensor { namespace dht {
                 return NAN;
             return data[0] + data[1] / 10.0;
         }
-        
+
     } // dht11
 
 } } } // dht - sensor - mono
