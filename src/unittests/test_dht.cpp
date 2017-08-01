@@ -56,7 +56,7 @@ TEST_CASE("DHT11")
 {
     SECTION("detect bad reading")
     {
-        REQUIRE( ::isnan(dht::dht11::getTemperatureC(badChecksumReading,BYTES_IN_READING)) );
+        REQUIRE( std::isnan(dht::dht11::getTemperatureC(badChecksumReading,BYTES_IN_READING)) );
     }
     SECTION("good temperature reading")
     {
@@ -71,7 +71,7 @@ TEST_CASE("DHT22")
 {
     SECTION("detect bad reading")
     {
-        REQUIRE( ::isnan(dht::dht22::getTemperatureC(badChecksumReading,BYTES_IN_READING)) );
+        REQUIRE( std::isnan(dht::dht22::getTemperatureC(badChecksumReading,BYTES_IN_READING)) );
     }
     SECTION("positive temperature")
     {
