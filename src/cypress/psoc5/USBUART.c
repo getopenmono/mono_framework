@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USBUART.c
-* \version 3.0
+* \version 3.20
 *
 * \brief
 *  This file contains the global USBFS API functions.
@@ -12,7 +12,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -21,6 +21,7 @@
 #include "USBUART_pvt.h"
 #include "USBUART_cydmac.h"
 #include "USBUART_hid.h"
+#include "USBUART_Dp.h"
 
 
 /***************************************
@@ -412,7 +413,7 @@ void USBUART_Init(void)
 * Function Name: USBUART_InitComponent
 ****************************************************************************//**
 *
-*   This function initializes the componentís global variables and initiates
+*   This function initializes the component‚Äôs global variables and initiates
 *   communication with the host by pull-up D+ line.
 *
 * \param device:
@@ -749,6 +750,12 @@ void USBUART_Stop(void)
     /* Clear power active and standby mode templates. */
     USBUART_PM_ACT_CFG_REG  &= (uint8) ~USBUART_PM_ACT_EN_FSUSB;
     USBUART_PM_STBY_CFG_REG &= (uint8) ~USBUART_PM_STBY_EN_FSUSB;
+
+    /* Ensure single-ended disable bits are high (PRT15.INP_DIS[7:6])
+     * (input receiver disabled). */
+    USBUART_DM_INP_DIS_REG |= (uint8) USBUART_DM_MASK;
+    USBUART_DP_INP_DIS_REG |= (uint8) USBUART_DP_MASK;
+
 #endif /* (CY_PSOC4) */
 
     CyExitCriticalSection(enableInterrupts);
@@ -798,6 +805,13 @@ void USBUART_Stop(void)
     #if (USBUART_EP8_ISR_ACTIVE)
         CyIntDisable(USBUART_EP_8_VECT_NUM);
     #endif /* (USBUART_EP8_ISR_ACTIVE) */
+
+    #if (USBUART_DP_ISR_ACTIVE)
+        /* Clear active mode Dp interrupt source history. */
+        (void) USBUART_Dp_ClearInterrupt();
+        CyIntClearPending(USBUART_DP_INTC_VECT_NUM);
+    #endif /* (USBUART_DP_ISR_ACTIVE). */
+
 #endif /* (CY_PSOC4) */
 
     /* Reset component internal variables. */
@@ -1293,7 +1307,7 @@ uint16 USBUART_GetEPCount(uint8 epNumber)
 * Function Name: USBUART_LoadInEP
 ****************************************************************************//**
 *
-*  This function performs different functionality depending on the Componentís
+*  This function performs different functionality depending on the Component‚Äôs
 *  configured Endpoint Buffer Management. This parameter is defined in
 *  the Descriptor Root in Component Configure window.
 *
@@ -1441,13 +1455,11 @@ void USBUART_LoadInEP(uint8 epNumber, const uint8 pData[], uint16 length)
 
                 /* Configure DMA descriptor. */
                 USBUART_CyDmaSetConfiguration(channelNum, USBUART_DMA_DESCR1, USBUART_DMA_COMMON_CFG  |
-                                                        CYDMA_BYTE | CYDMA_ELEMENT_WORD | CYDMA_INC_SRC_ADDR | CYDMA_CHAIN);
+                                                        CYDMA_BYTE | CYDMA_ELEMENT_WORD | CYDMA_INC_SRC_ADDR | CYDMA_INVALIDATE | CYDMA_CHAIN);
 
                 /* Enable interrupt from DMA channel. */
                 USBUART_CyDmaSetInterruptMask(channelNum);
 
-                /* Validate descriptor 1. It will not be invalided during operation. */
-                USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR1);
 
                 /* Enable DMA channel: configuration complete. */
                 USBUART_CyDmaChEnable(channelNum);
@@ -1526,9 +1538,6 @@ void USBUART_LoadInEP(uint8 epNumber, const uint8 pData[], uint16 length)
                     USBUART_DmaEpLastBurstEl[epNumber] |= (0u != (USBUART_DmaEpBurstCnt[epNumber] & 0x1u)) ?
                                                                             USBUART_DMA_DESCR0_MASK : USBUART_DMA_DESCR1_MASK;
 
-                    /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
-                    USBUART_DmaEpBurstCnt[epNumber] = USBUART_DMA_GET_BURST_CNT(USBUART_DmaEpBurstCnt[epNumber]);
-
                     /* Restore DMA settings for current transfer. */
                     USBUART_CyDmaChDisable(channelNum);
 
@@ -1544,6 +1553,15 @@ void USBUART_LoadInEP(uint8 epNumber, const uint8 pData[], uint16 length)
                     /* Validate descriptor 0 and command to start with it. */
                     USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR0);
                     USBUART_CyDmaSetDescriptor0Next(channelNum);
+
+                    /* Validate descriptor 1. */
+                    if (USBUART_DmaEpBurstCnt[epNumber] > 1u)
+                    {
+                        USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR1); 
+                    }                   
+
+                    /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
+                    USBUART_DmaEpBurstCnt[epNumber] = USBUART_DMA_GET_BURST_CNT(USBUART_DmaEpBurstCnt[epNumber]);
 
                     /* Enable DMA channel: configuration complete. */
                     USBUART_CyDmaChEnable(channelNum);
@@ -1590,7 +1608,7 @@ void USBUART_LoadInEP(uint8 epNumber, const uint8 pData[], uint16 length)
 * Function Name: USBUART_ReadOutEP
 ****************************************************************************//**
 *
-*   This function performs different functionality depending on the Componentís
+*   This function performs different functionality depending on the Component‚Äôs
 *   configured Endpoint Buffer Management. This parameter is defined in the
 *   Descriptor Root in Component Configure window.
 *
@@ -1738,12 +1756,12 @@ uint16 USBUART_ReadOutEP(uint8 epNumber, uint8 pData[], uint16 length)
             USBUART_DmaEpLastBurstEl[epNumber] |= (0u != (USBUART_DmaEpBurstCnt[epNumber] & 0x1u)) ?
                                                                     USBUART_DMA_DESCR0_MASK : USBUART_DMA_DESCR1_MASK;
 
-            /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
-            USBUART_DmaEpBurstCnt[epNumber] = USBUART_DMA_GET_BURST_CNT(USBUART_DmaEpBurstCnt[epNumber]);
-
             /* Store address of buffer and burst counter for endpoint. */
             USBUART_DmaEpBufferAddrBackup[epNumber] = (uint32) pData;
             USBUART_DmaEpBurstCntBackup[epNumber]   = USBUART_DmaEpBurstCnt[epNumber];
+
+            /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
+            USBUART_DmaEpBurstCnt[epNumber] = USBUART_DMA_GET_BURST_CNT(USBUART_DmaEpBurstCnt[epNumber]);
 
             /* Disable DMA channel: start configuration. */
             USBUART_CyDmaChDisable(channelNum);
@@ -1761,14 +1779,18 @@ uint16 USBUART_ReadOutEP(uint8 epNumber, uint8 pData[], uint16 length)
 
             /* Configure DMA descriptor. */
             USBUART_CyDmaSetConfiguration(channelNum, USBUART_DMA_DESCR1, USBUART_DMA_COMMON_CFG  | lengthDescr1 |
-                                                    CYDMA_BYTE | CYDMA_WORD_ELEMENT | CYDMA_INC_DST_ADDR | CYDMA_CHAIN);
+                                                    CYDMA_BYTE | CYDMA_WORD_ELEMENT | CYDMA_INC_DST_ADDR | CYDMA_INVALIDATE | CYDMA_CHAIN);
 
             /* Enable interrupt from DMA channel. */
             USBUART_CyDmaSetInterruptMask(channelNum);
 
             /* Validate DMA descriptor 0 and 1. */
             USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR0);
-            USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR1);
+
+            if (USBUART_DmaEpBurstCntBackup[epNumber] > 1u)
+            {
+                USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR1);
+            }
 
             /* Enable DMA channel: configuration complete. */
             USBUART_CyDmaChEnable(channelNum);
@@ -1807,7 +1829,7 @@ uint16 USBUART_ReadOutEP(uint8 epNumber, uint8 pData[], uint16 length)
 * Function Name: USBUART_LoadInEP16
 ****************************************************************************//**
 *
-*  This function performs different functionality depending on the Componentís
+*  This function performs different functionality depending on the Component‚Äôs
 *  configured Endpoint Buffer Management. This parameter is defined in
 *  the Descriptor Root in Component Configure window.
 *
@@ -1944,13 +1966,10 @@ void USBUART_LoadInEP16(uint8 epNumber, const uint8 pData[], uint16 length)
 
                 /* Configure DMA descriptor. */
                 USBUART_CyDmaSetConfiguration(channelNum, USBUART_DMA_DESCR1, USBUART_DMA_COMMON_CFG  |
-                                                        CYDMA_HALFWORD | CYDMA_ELEMENT_WORD | CYDMA_INC_SRC_ADDR | CYDMA_CHAIN);
+                                                        CYDMA_HALFWORD | CYDMA_ELEMENT_WORD | CYDMA_INC_SRC_ADDR | CYDMA_INVALIDATE | CYDMA_CHAIN);
 
                 /* Enable interrupt from DMA channel. */
                 USBUART_CyDmaSetInterruptMask(channelNum);
-
-                /* Validate descriptor 1. It will not be invalided during operation. */
-                USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR1);
 
                 /* Enable DMA channel: configuration complete. */
                 USBUART_CyDmaChEnable(channelNum);
@@ -1987,9 +2006,6 @@ void USBUART_LoadInEP16(uint8 epNumber, const uint8 pData[], uint16 length)
                     USBUART_DmaEpLastBurstEl[epNumber] |= (0u != (USBUART_DmaEpBurstCnt[epNumber] & 0x1u)) ?
                                                                             USBUART_DMA_DESCR0_MASK : USBUART_DMA_DESCR1_MASK;
 
-                    /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
-                    USBUART_DmaEpBurstCnt[epNumber] = USBUART_DMA_GET_BURST_CNT(USBUART_DmaEpBurstCnt[epNumber]);
-
                     /* Restore DMA settings for current transfer. */
                     USBUART_CyDmaChDisable(channelNum);
 
@@ -2005,6 +2021,15 @@ void USBUART_LoadInEP16(uint8 epNumber, const uint8 pData[], uint16 length)
                     /* Validate descriptor 0 and command to start with it. */
                     USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR0);
                     USBUART_CyDmaSetDescriptor0Next(channelNum);
+
+                    /* Validate descriptor 1. */
+                    if (USBUART_DmaEpBurstCnt[epNumber] > 1u)
+                    {
+                        USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR1);
+                    }
+
+                    /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
+                    USBUART_DmaEpBurstCnt[epNumber] = USBUART_DMA_GET_BURST_CNT(USBUART_DmaEpBurstCnt[epNumber]);
 
                     /* Enable DMA channel: configuration complete. */
                     USBUART_CyDmaChEnable(channelNum);
@@ -2032,7 +2057,7 @@ void USBUART_LoadInEP16(uint8 epNumber, const uint8 pData[], uint16 length)
 * Function Name: USBUART_ReadOutEP16
 ****************************************************************************//**
 *
-*   This function performs different functionality depending on the Componentís
+*   This function performs different functionality depending on the Component‚Äôs
 *   configured Endpoint Buffer Management. This parameter is defined in the
 *   Descriptor Root in Component Configure window.
 *
@@ -2174,12 +2199,12 @@ uint16 USBUART_ReadOutEP16(uint8 epNumber, uint8 pData[], uint16 length)
             /* Mark that 16-bits access to data register is performed. */
             USBUART_DmaEpLastBurstEl[epNumber] |= USBUART_DMA_DESCR_16BITS;
 
-            /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
-            USBUART_DmaEpBurstCnt[epNumber] = USBUART_DMA_GET_BURST_CNT(USBUART_DmaEpBurstCnt[epNumber]);
-
             /* Store address of buffer and burst counter for endpoint. */
             USBUART_DmaEpBufferAddrBackup[epNumber] = (uint32) pData;
             USBUART_DmaEpBurstCntBackup[epNumber]   = USBUART_DmaEpBurstCnt[epNumber];
+
+            /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
+            USBUART_DmaEpBurstCnt[epNumber] = USBUART_DMA_GET_BURST_CNT(USBUART_DmaEpBurstCnt[epNumber]);
 
             /* Disable DMA channel: start configuration. */
             USBUART_CyDmaChDisable(channelNum);
@@ -2197,14 +2222,18 @@ uint16 USBUART_ReadOutEP16(uint8 epNumber, uint8 pData[], uint16 length)
 
             /* Configure DMA descriptor 1. */
             USBUART_CyDmaSetConfiguration(channelNum, USBUART_DMA_DESCR1, USBUART_DMA_COMMON_CFG  | lengthDescr1 |
-                                                    CYDMA_HALFWORD | CYDMA_WORD_ELEMENT | CYDMA_INC_DST_ADDR | CYDMA_CHAIN);
+                                                    CYDMA_HALFWORD | CYDMA_WORD_ELEMENT | CYDMA_INC_DST_ADDR | CYDMA_INVALIDATE | CYDMA_CHAIN);
 
             /* Enable interrupt from DMA channel. */
             USBUART_CyDmaSetInterruptMask(channelNum);
 
             /* Validate DMA descriptor 0 and 1. */
             USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR0);
-            USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR1);
+            
+            if (USBUART_DmaEpBurstCntBackup[epNumber] > 1u)
+            {
+                USBUART_CyDmaValidateDescriptor(channelNum, USBUART_DMA_DESCR1);
+            }
 
             /* Enable DMA channel: configuration complete. */
             USBUART_CyDmaChEnable(channelNum);
@@ -2282,7 +2311,7 @@ void USBUART_DisableOutEP(uint8 epNumber)
 * Function Name: USBUART_Force
 ****************************************************************************//**
 *
-*  This function forces a USB J, K, or SE0 state on the D+/Dñ lines. It provides
+*  This function forces a USB J, K, or SE0 state on the D+/D‚Äì lines. It provides
 *  the necessary mechanism for a USB device application to perform a USB Remote
 *  Wakeup. For more information, see the USB 2.0 Specification for details on
 *  Suspend and Resume.
@@ -2291,9 +2320,9 @@ void USBUART_DisableOutEP(uint8 epNumber)
 *        Symbolic names  and their associated values are listed here:
 *    State                      |Description
 *    ---------------------------|----------------------------------------------
-*    USBUART_FORCE_J   | Force a J State onto the D+/Dñ lines
-*    USBUART_FORCE_K   | Force a K State onto the D+/Dñ lines
-*    USBUART_FORCE_SE0 | Force a Single Ended 0 onto the D+/Dñ lines
+*    USBUART_FORCE_J   | Force a J State onto the D+/D‚Äì lines
+*    USBUART_FORCE_K   | Force a K State onto the D+/D‚Äì lines
+*    USBUART_FORCE_SE0 | Force a Single Ended 0 onto the D+/D‚Äì lines
 *    USBUART_FORCE_NONE| Return bus to SIE control
 *
 *
@@ -2509,8 +2538,8 @@ void USBUART_DisableSofInt(void)
     *   implement the BCD algorithm to detect the USB host port type.
     *   The USBFS_Start() API should be called after this API if the USB
     *   communication needs to be initiated with the host.
-    *   *Note* This API is generated only if the ìEnable Battery Charging 
-    *   Detectionî option is enabled in the ìAdvancedî tab of the component GUI.
+    *   *Note* This API is generated only if the ‚ÄúEnable Battery Charging 
+    *   Detection‚Äù option is enabled in the ‚ÄúAdvanced‚Äù tab of the component GUI.
     *   *Note* API implements the steps 2-4 of the BCD algorithm which are 
     *   - Data Contact Detect
     *   - Primary Detection 

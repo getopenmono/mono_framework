@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file USBUART_std.c
-* \version 3.0
+* \version 3.20
 *
 * \brief
 *  This file contains the USB Standard request handler.
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -1176,7 +1176,7 @@ uint8 USBUART_ClearEndpointHalt(void)
         USBUART_EP[ep].epToggle = 0u;
         
         /* Clear toggle bit for already armed packet */
-        USBUART_SIE_EP_BASE.sieEp[ep].epCnt0 = (uint8) ~(uint8)USBUART_EPX_CNT_DATA_TOGGLE;
+        USBUART_SIE_EP_BASE.sieEp[ep].epCnt0 &= (uint8) ~(uint8)USBUART_EPX_CNT_DATA_TOGGLE;
         
         /* Return API State as it was defined before */
         USBUART_EP[ep].apiEpState &= (uint8) ~USBUART_NO_EVENT_ALLOWED;

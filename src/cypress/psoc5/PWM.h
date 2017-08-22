@@ -18,8 +18,8 @@
 #if !defined(CY_PWM_PWM_H)
 #define CY_PWM_PWM_H
 
-#include "cytypes.h"
 #include "cyfitter.h"
+#include "cytypes.h"
 #include "CyLib.h" /* For CyEnterCriticalSection() and CyExitCriticalSection() functions */
 
 extern uint8 PWM_initVar;

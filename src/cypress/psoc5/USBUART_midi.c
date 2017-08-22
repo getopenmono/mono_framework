@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USBUART_midi.c
-* \version 3.0
+* \version 3.20
 *
 * \brief
 *  MIDI Streaming request handler.
@@ -13,7 +13,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -302,7 +302,7 @@ void USBUART_MIDI_Init(void)
             }
 
         #if (USBUART_EP_MANAGEMENT_DMA_AUTO)
-            /* Enable OUT endpoint for communiation. */
+            /* Enable OUT endpoint for communication */
             USBUART_EnableOutEP(USBUART_midi_out_ep);
         #endif  /* (USBUART_EP_MANAGEMENT_DMA_AUTO) */
         }
@@ -446,7 +446,7 @@ void USBUART_MIDI_Init(void)
     *  3 IN EP LENGTH | Complete SySEx message(without EOSEX byte) in midiMsg. The length is limited by the max BULK EP size(64)
     *  MIDI_SYSEX     | Start or continuation of SysEx message (put event bytes in midiMsg buffer)
     *  MIDI_EOSEX     | End of SysEx message (put event bytes in midiMsg buffer)
-    *  MIDI_TUNEREQ   | Tune Request message (single byte system common msg)
+    *  MIDI_TUNEREQ   | Tune Request message (single byte system common message)
     *  0xF8 - 0xFF    | Single byte real-time message
     *
     *  \param midiMsg: pointer to MIDI message.
@@ -475,7 +475,6 @@ void USBUART_MIDI_Init(void)
                                                                 
     {
         uint8 retError = USBUART_FALSE;
-        uint8 msgIndex;
 
         /* Protect PrepareInBuffer() function from concurrent calls */
     #if (USBUART_MIDI_EXT_MODE >= USBUART_ONE_EXT_INTRF)
@@ -498,44 +497,47 @@ void USBUART_MIDI_Init(void)
             {
                 USBUART_PrepareInBuffer(ic, midiMsg, ic, cable);
             }
-            else
+            else /* Only SysEx message is greater than 4 bytes */
             {
-                /* Only SysEx message is greater than 4 bytes */
-                msgIndex = 0u;
-
+                /* Convert SysEx message into midi message format */
+                uint8 idx = 0u;
                 do
                 {
-                    USBUART_PrepareInBuffer(USBUART_MIDI_SYSEX, &midiMsg[msgIndex],
+                    /* Process 3 bytes of message until 0-2 bytes are left. These bytes are handled by MIDI_EOSEX. */
+                    USBUART_PrepareInBuffer(USBUART_MIDI_SYSEX, &midiMsg[idx],
                                                      USBUART_EVENT_BYTE3, cable);
 
-                    ic -= USBUART_EVENT_BYTE3;
-                    msgIndex += USBUART_EVENT_BYTE3;
+                    /* Move to next 3 bytes of message */
+                    ic  -= USBUART_EVENT_BYTE3;
+                    idx += USBUART_EVENT_BYTE3;
 
                     if (USBUART_midiInPointer >
                         (USBUART_EP[USBUART_midi_in_ep].bufferSize - USBUART_EVENT_LENGTH))
                     {
+                        /* Load message into endpoint */
                         USBUART_MIDI_IN_EP_Service();
 
                         if (USBUART_midiInPointer >
                            (USBUART_EP[USBUART_midi_in_ep].bufferSize - USBUART_EVENT_LENGTH))
                         {
-                            /* Error condition. HOST is not ready to receive this packet. */
+                            /* Error condition. Host is not ready to receive this packet. */
                             retError = USBUART_TRUE;
                             break;
                         }
                     }
                 }
-                while (ic > USBUART_EVENT_BYTE3);
+                while (ic >= USBUART_EVENT_BYTE3);
 
                 if (retError == USBUART_FALSE)
                 {
-                    USBUART_PrepareInBuffer(USBUART_MIDI_EOSEX, midiMsg, ic, cable);
+                    /* Handle end of message: valid size of messages is 0, 1 and 2 */
+                    USBUART_PrepareInBuffer(USBUART_MIDI_EOSEX, &midiMsg[idx], ic, cable);
                 }
             }
         }
         else
         {
-            /* Error condition. HOST is not ready to receive this packet. */
+            /* Error condition. Host is not ready to receive this packet. */
             retError = USBUART_TRUE;
         }
 
@@ -645,8 +647,7 @@ void USBUART_MIDI_Init(void)
             switch (eventLen)
             {
                 case 0u:
-                    USBUART_midiInBuffer[USBUART_midiInPointer] =
-                                                                        USBUART_SYSEX_ENDS_WITH1 | cable;
+                    USBUART_midiInBuffer[USBUART_midiInPointer] = USBUART_SYSEX_ENDS_WITH1 | cable;
                     USBUART_midiInPointer++;
                     USBUART_midiInBuffer[USBUART_midiInPointer] = USBUART_MIDI_EOSEX;
                     USBUART_midiInPointer++;
@@ -656,8 +657,7 @@ void USBUART_MIDI_Init(void)
                     USBUART_midiInPointer++;
                     break;
                 case 1u:
-                    USBUART_midiInBuffer[USBUART_midiInPointer] =
-                                                                        USBUART_SYSEX_ENDS_WITH2 | cable;
+                    USBUART_midiInBuffer[USBUART_midiInPointer] = USBUART_SYSEX_ENDS_WITH2 | cable;
                     USBUART_midiInPointer++;
                     USBUART_midiInBuffer[USBUART_midiInPointer] = srcBuffZero;
                     USBUART_midiInPointer++;
@@ -667,8 +667,7 @@ void USBUART_MIDI_Init(void)
                     USBUART_midiInPointer++;
                     break;
                 case 2u:
-                    USBUART_midiInBuffer[USBUART_midiInPointer] =
-                                                                        USBUART_SYSEX_ENDS_WITH3 | cable;
+                    USBUART_midiInBuffer[USBUART_midiInPointer] = USBUART_SYSEX_ENDS_WITH3 | cable;
                     USBUART_midiInPointer++;
                     USBUART_midiInBuffer[USBUART_midiInPointer] = srcBuffZero;
                     USBUART_midiInPointer++;

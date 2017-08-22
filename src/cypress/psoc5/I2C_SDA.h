@@ -1,14 +1,14 @@
 /*******************************************************************************
 * File Name: I2C_SDA.h  
-* Version 2.10
+* Version 2.20
 *
 * Description:
-*  This file containts Control Register function prototypes and register defines
+*  This file contains Pin function prototypes and register defines
 *
 * Note:
 *
 ********************************************************************************
-* Copyright 2008-2014, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions, 
 * disclaimers, and limitations in the end user license agreement accompanying 
 * the software package with which this file was provided.
@@ -22,12 +22,6 @@
 #include "cypins.h"
 #include "I2C_SDA_aliases.h"
 
-/* Check to see if required defines such as CY_PSOC5A are available */
-/* They are defined starting with cy_boot v3.0 */
-#if !defined (CY_PSOC5A)
-    #error Component cy_pins_v2_10 requires cy_boot v3.0 or later
-#endif /* (CY_PSOC5A) */
-
 /* APIs are not generated for P15[7:6] */
 #if !(CY_PSOC5A &&\
 	 I2C_SDA__PORT == 15 && ((I2C_SDA__MASK & 0xC0) != 0))
@@ -37,31 +31,64 @@
 *        Function Prototypes             
 ***************************************/    
 
-void    I2C_SDA_Write(uint8 value) ;
-void    I2C_SDA_SetDriveMode(uint8 mode) ;
-uint8   I2C_SDA_ReadDataReg(void) ;
-uint8   I2C_SDA_Read(void) ;
-uint8   I2C_SDA_ClearInterrupt(void) ;
-
+/**
+* \addtogroup group_general
+* @{
+*/
+void    I2C_SDA_Write(uint8 value);
+void    I2C_SDA_SetDriveMode(uint8 mode);
+uint8   I2C_SDA_ReadDataReg(void);
+uint8   I2C_SDA_Read(void);
+void    I2C_SDA_SetInterruptMode(uint16 position, uint16 mode);
+uint8   I2C_SDA_ClearInterrupt(void);
+/** @} general */
 
 /***************************************
 *           API Constants        
 ***************************************/
-
-/* Drive Modes */
-#define I2C_SDA_DM_ALG_HIZ         PIN_DM_ALG_HIZ
-#define I2C_SDA_DM_DIG_HIZ         PIN_DM_DIG_HIZ
-#define I2C_SDA_DM_RES_UP          PIN_DM_RES_UP
-#define I2C_SDA_DM_RES_DWN         PIN_DM_RES_DWN
-#define I2C_SDA_DM_OD_LO           PIN_DM_OD_LO
-#define I2C_SDA_DM_OD_HI           PIN_DM_OD_HI
-#define I2C_SDA_DM_STRONG          PIN_DM_STRONG
-#define I2C_SDA_DM_RES_UPDWN       PIN_DM_RES_UPDWN
-
+/**
+* \addtogroup group_constants
+* @{
+*/
+    /** \addtogroup driveMode Drive mode constants
+     * \brief Constants to be passed as "mode" parameter in the I2C_SDA_SetDriveMode() function.
+     *  @{
+     */
+        #define I2C_SDA_DM_ALG_HIZ         PIN_DM_ALG_HIZ
+        #define I2C_SDA_DM_DIG_HIZ         PIN_DM_DIG_HIZ
+        #define I2C_SDA_DM_RES_UP          PIN_DM_RES_UP
+        #define I2C_SDA_DM_RES_DWN         PIN_DM_RES_DWN
+        #define I2C_SDA_DM_OD_LO           PIN_DM_OD_LO
+        #define I2C_SDA_DM_OD_HI           PIN_DM_OD_HI
+        #define I2C_SDA_DM_STRONG          PIN_DM_STRONG
+        #define I2C_SDA_DM_RES_UPDWN       PIN_DM_RES_UPDWN
+    /** @} driveMode */
+/** @} group_constants */
+    
 /* Digital Port Constants */
 #define I2C_SDA_MASK               I2C_SDA__MASK
 #define I2C_SDA_SHIFT              I2C_SDA__SHIFT
 #define I2C_SDA_WIDTH              1u
+
+/* Interrupt constants */
+#if defined(I2C_SDA__INTSTAT)
+/**
+* \addtogroup group_constants
+* @{
+*/
+    /** \addtogroup intrMode Interrupt constants
+     * \brief Constants to be passed as "mode" parameter in I2C_SDA_SetInterruptMode() function.
+     *  @{
+     */
+        #define I2C_SDA_INTR_NONE      (uint16)(0x0000u)
+        #define I2C_SDA_INTR_RISING    (uint16)(0x0001u)
+        #define I2C_SDA_INTR_FALLING   (uint16)(0x0002u)
+        #define I2C_SDA_INTR_BOTH      (uint16)(0x0003u) 
+    /** @} intrMode */
+/** @} group_constants */
+
+    #define I2C_SDA_INTR_MASK      (0x01u) 
+#endif /* (I2C_SDA__INTSTAT) */
 
 
 /***************************************
@@ -114,13 +141,21 @@ uint8   I2C_SDA_ClearInterrupt(void) ;
 /* Sync Output Enable Registers */
 #define I2C_SDA_PRTDSI__SYNC_OUT       (* (reg8 *) I2C_SDA__PRTDSI__SYNC_OUT) 
 
+/* SIO registers */
+#if defined(I2C_SDA__SIO_CFG)
+    #define I2C_SDA_SIO_HYST_EN        (* (reg8 *) I2C_SDA__SIO_HYST_EN)
+    #define I2C_SDA_SIO_REG_HIFREQ     (* (reg8 *) I2C_SDA__SIO_REG_HIFREQ)
+    #define I2C_SDA_SIO_CFG            (* (reg8 *) I2C_SDA__SIO_CFG)
+    #define I2C_SDA_SIO_DIFF           (* (reg8 *) I2C_SDA__SIO_DIFF)
+#endif /* (I2C_SDA__SIO_CFG) */
 
-#if defined(I2C_SDA__INTSTAT)  /* Interrupt Registers */
-
-    #define I2C_SDA_INTSTAT                (* (reg8 *) I2C_SDA__INTSTAT)
-    #define I2C_SDA_SNAP                   (* (reg8 *) I2C_SDA__SNAP)
-
-#endif /* Interrupt Registers */
+/* Interrupt Registers */
+#if defined(I2C_SDA__INTSTAT)
+    #define I2C_SDA_INTSTAT            (* (reg8 *) I2C_SDA__INTSTAT)
+    #define I2C_SDA_SNAP               (* (reg8 *) I2C_SDA__SNAP)
+    
+	#define I2C_SDA_0_INTTYPE_REG 		(* (reg8 *) I2C_SDA__0__INTTYPE)
+#endif /* (I2C_SDA__INTSTAT) */
 
 #endif /* CY_PSOC5A... */
 

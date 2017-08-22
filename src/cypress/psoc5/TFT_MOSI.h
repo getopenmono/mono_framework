@@ -1,14 +1,14 @@
 /*******************************************************************************
 * File Name: TFT_MOSI.h  
-* Version 2.10
+* Version 2.20
 *
 * Description:
-*  This file containts Control Register function prototypes and register defines
+*  This file contains Pin function prototypes and register defines
 *
 * Note:
 *
 ********************************************************************************
-* Copyright 2008-2014, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions, 
 * disclaimers, and limitations in the end user license agreement accompanying 
 * the software package with which this file was provided.
@@ -22,12 +22,6 @@
 #include "cypins.h"
 #include "TFT_MOSI_aliases.h"
 
-/* Check to see if required defines such as CY_PSOC5A are available */
-/* They are defined starting with cy_boot v3.0 */
-#if !defined (CY_PSOC5A)
-    #error Component cy_pins_v2_10 requires cy_boot v3.0 or later
-#endif /* (CY_PSOC5A) */
-
 /* APIs are not generated for P15[7:6] */
 #if !(CY_PSOC5A &&\
 	 TFT_MOSI__PORT == 15 && ((TFT_MOSI__MASK & 0xC0) != 0))
@@ -37,31 +31,64 @@
 *        Function Prototypes             
 ***************************************/    
 
-void    TFT_MOSI_Write(uint8 value) ;
-void    TFT_MOSI_SetDriveMode(uint8 mode) ;
-uint8   TFT_MOSI_ReadDataReg(void) ;
-uint8   TFT_MOSI_Read(void) ;
-uint8   TFT_MOSI_ClearInterrupt(void) ;
-
+/**
+* \addtogroup group_general
+* @{
+*/
+void    TFT_MOSI_Write(uint8 value);
+void    TFT_MOSI_SetDriveMode(uint8 mode);
+uint8   TFT_MOSI_ReadDataReg(void);
+uint8   TFT_MOSI_Read(void);
+void    TFT_MOSI_SetInterruptMode(uint16 position, uint16 mode);
+uint8   TFT_MOSI_ClearInterrupt(void);
+/** @} general */
 
 /***************************************
 *           API Constants        
 ***************************************/
-
-/* Drive Modes */
-#define TFT_MOSI_DM_ALG_HIZ         PIN_DM_ALG_HIZ
-#define TFT_MOSI_DM_DIG_HIZ         PIN_DM_DIG_HIZ
-#define TFT_MOSI_DM_RES_UP          PIN_DM_RES_UP
-#define TFT_MOSI_DM_RES_DWN         PIN_DM_RES_DWN
-#define TFT_MOSI_DM_OD_LO           PIN_DM_OD_LO
-#define TFT_MOSI_DM_OD_HI           PIN_DM_OD_HI
-#define TFT_MOSI_DM_STRONG          PIN_DM_STRONG
-#define TFT_MOSI_DM_RES_UPDWN       PIN_DM_RES_UPDWN
-
+/**
+* \addtogroup group_constants
+* @{
+*/
+    /** \addtogroup driveMode Drive mode constants
+     * \brief Constants to be passed as "mode" parameter in the TFT_MOSI_SetDriveMode() function.
+     *  @{
+     */
+        #define TFT_MOSI_DM_ALG_HIZ         PIN_DM_ALG_HIZ
+        #define TFT_MOSI_DM_DIG_HIZ         PIN_DM_DIG_HIZ
+        #define TFT_MOSI_DM_RES_UP          PIN_DM_RES_UP
+        #define TFT_MOSI_DM_RES_DWN         PIN_DM_RES_DWN
+        #define TFT_MOSI_DM_OD_LO           PIN_DM_OD_LO
+        #define TFT_MOSI_DM_OD_HI           PIN_DM_OD_HI
+        #define TFT_MOSI_DM_STRONG          PIN_DM_STRONG
+        #define TFT_MOSI_DM_RES_UPDWN       PIN_DM_RES_UPDWN
+    /** @} driveMode */
+/** @} group_constants */
+    
 /* Digital Port Constants */
 #define TFT_MOSI_MASK               TFT_MOSI__MASK
 #define TFT_MOSI_SHIFT              TFT_MOSI__SHIFT
 #define TFT_MOSI_WIDTH              1u
+
+/* Interrupt constants */
+#if defined(TFT_MOSI__INTSTAT)
+/**
+* \addtogroup group_constants
+* @{
+*/
+    /** \addtogroup intrMode Interrupt constants
+     * \brief Constants to be passed as "mode" parameter in TFT_MOSI_SetInterruptMode() function.
+     *  @{
+     */
+        #define TFT_MOSI_INTR_NONE      (uint16)(0x0000u)
+        #define TFT_MOSI_INTR_RISING    (uint16)(0x0001u)
+        #define TFT_MOSI_INTR_FALLING   (uint16)(0x0002u)
+        #define TFT_MOSI_INTR_BOTH      (uint16)(0x0003u) 
+    /** @} intrMode */
+/** @} group_constants */
+
+    #define TFT_MOSI_INTR_MASK      (0x01u) 
+#endif /* (TFT_MOSI__INTSTAT) */
 
 
 /***************************************
@@ -114,13 +141,21 @@ uint8   TFT_MOSI_ClearInterrupt(void) ;
 /* Sync Output Enable Registers */
 #define TFT_MOSI_PRTDSI__SYNC_OUT       (* (reg8 *) TFT_MOSI__PRTDSI__SYNC_OUT) 
 
+/* SIO registers */
+#if defined(TFT_MOSI__SIO_CFG)
+    #define TFT_MOSI_SIO_HYST_EN        (* (reg8 *) TFT_MOSI__SIO_HYST_EN)
+    #define TFT_MOSI_SIO_REG_HIFREQ     (* (reg8 *) TFT_MOSI__SIO_REG_HIFREQ)
+    #define TFT_MOSI_SIO_CFG            (* (reg8 *) TFT_MOSI__SIO_CFG)
+    #define TFT_MOSI_SIO_DIFF           (* (reg8 *) TFT_MOSI__SIO_DIFF)
+#endif /* (TFT_MOSI__SIO_CFG) */
 
-#if defined(TFT_MOSI__INTSTAT)  /* Interrupt Registers */
-
-    #define TFT_MOSI_INTSTAT                (* (reg8 *) TFT_MOSI__INTSTAT)
-    #define TFT_MOSI_SNAP                   (* (reg8 *) TFT_MOSI__SNAP)
-
-#endif /* Interrupt Registers */
+/* Interrupt Registers */
+#if defined(TFT_MOSI__INTSTAT)
+    #define TFT_MOSI_INTSTAT            (* (reg8 *) TFT_MOSI__INTSTAT)
+    #define TFT_MOSI_SNAP               (* (reg8 *) TFT_MOSI__SNAP)
+    
+	#define TFT_MOSI_0_INTTYPE_REG 		(* (reg8 *) TFT_MOSI__0__INTTYPE)
+#endif /* (TFT_MOSI__INTSTAT) */
 
 #endif /* CY_PSOC5A... */
 

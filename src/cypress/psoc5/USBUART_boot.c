@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file USBUART_boot.c
-* \version 3.0
+* \version 3.20
 *
 * \brief
 *  This file contains the Bootloader API for USBFS Component.
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -102,7 +102,7 @@ void USBUART_CyBtldrCommReset(void)
 *
 * \return
 *  Returns CYRET_SUCCESS if no problem was encountered or returns the value that 
-*  best describes the problem. For more information, see the ìReturn Codesî 
+*  best describes the problem. For more information, see the ‚ÄúReturn Codes‚Äù 
 *  section of the System Reference Guide.
 *
 * \reentrant
@@ -161,7 +161,7 @@ cystatus USBUART_CyBtldrCommWrite(const uint8 pData[], uint16 size, uint16 *coun
 *
 * \return
 *  Returns CYRET_SUCCESS if no problem was encountered or returns the value that 
-*  best describes the problem. For more information, see the ìReturn Codesî 
+*  best describes the problem. For more information, see the ‚ÄúReturn Codes‚Äù 
 *  section of the System Reference Guide.
 *
 * \reentrant

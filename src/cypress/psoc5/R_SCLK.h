@@ -1,14 +1,14 @@
 /*******************************************************************************
 * File Name: R_SCLK.h  
-* Version 2.10
+* Version 2.20
 *
 * Description:
-*  This file containts Control Register function prototypes and register defines
+*  This file contains Pin function prototypes and register defines
 *
 * Note:
 *
 ********************************************************************************
-* Copyright 2008-2014, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions, 
 * disclaimers, and limitations in the end user license agreement accompanying 
 * the software package with which this file was provided.
@@ -22,12 +22,6 @@
 #include "cypins.h"
 #include "R_SCLK_aliases.h"
 
-/* Check to see if required defines such as CY_PSOC5A are available */
-/* They are defined starting with cy_boot v3.0 */
-#if !defined (CY_PSOC5A)
-    #error Component cy_pins_v2_10 requires cy_boot v3.0 or later
-#endif /* (CY_PSOC5A) */
-
 /* APIs are not generated for P15[7:6] */
 #if !(CY_PSOC5A &&\
 	 R_SCLK__PORT == 15 && ((R_SCLK__MASK & 0xC0) != 0))
@@ -37,31 +31,64 @@
 *        Function Prototypes             
 ***************************************/    
 
-void    R_SCLK_Write(uint8 value) ;
-void    R_SCLK_SetDriveMode(uint8 mode) ;
-uint8   R_SCLK_ReadDataReg(void) ;
-uint8   R_SCLK_Read(void) ;
-uint8   R_SCLK_ClearInterrupt(void) ;
-
+/**
+* \addtogroup group_general
+* @{
+*/
+void    R_SCLK_Write(uint8 value);
+void    R_SCLK_SetDriveMode(uint8 mode);
+uint8   R_SCLK_ReadDataReg(void);
+uint8   R_SCLK_Read(void);
+void    R_SCLK_SetInterruptMode(uint16 position, uint16 mode);
+uint8   R_SCLK_ClearInterrupt(void);
+/** @} general */
 
 /***************************************
 *           API Constants        
 ***************************************/
-
-/* Drive Modes */
-#define R_SCLK_DM_ALG_HIZ         PIN_DM_ALG_HIZ
-#define R_SCLK_DM_DIG_HIZ         PIN_DM_DIG_HIZ
-#define R_SCLK_DM_RES_UP          PIN_DM_RES_UP
-#define R_SCLK_DM_RES_DWN         PIN_DM_RES_DWN
-#define R_SCLK_DM_OD_LO           PIN_DM_OD_LO
-#define R_SCLK_DM_OD_HI           PIN_DM_OD_HI
-#define R_SCLK_DM_STRONG          PIN_DM_STRONG
-#define R_SCLK_DM_RES_UPDWN       PIN_DM_RES_UPDWN
-
+/**
+* \addtogroup group_constants
+* @{
+*/
+    /** \addtogroup driveMode Drive mode constants
+     * \brief Constants to be passed as "mode" parameter in the R_SCLK_SetDriveMode() function.
+     *  @{
+     */
+        #define R_SCLK_DM_ALG_HIZ         PIN_DM_ALG_HIZ
+        #define R_SCLK_DM_DIG_HIZ         PIN_DM_DIG_HIZ
+        #define R_SCLK_DM_RES_UP          PIN_DM_RES_UP
+        #define R_SCLK_DM_RES_DWN         PIN_DM_RES_DWN
+        #define R_SCLK_DM_OD_LO           PIN_DM_OD_LO
+        #define R_SCLK_DM_OD_HI           PIN_DM_OD_HI
+        #define R_SCLK_DM_STRONG          PIN_DM_STRONG
+        #define R_SCLK_DM_RES_UPDWN       PIN_DM_RES_UPDWN
+    /** @} driveMode */
+/** @} group_constants */
+    
 /* Digital Port Constants */
 #define R_SCLK_MASK               R_SCLK__MASK
 #define R_SCLK_SHIFT              R_SCLK__SHIFT
 #define R_SCLK_WIDTH              1u
+
+/* Interrupt constants */
+#if defined(R_SCLK__INTSTAT)
+/**
+* \addtogroup group_constants
+* @{
+*/
+    /** \addtogroup intrMode Interrupt constants
+     * \brief Constants to be passed as "mode" parameter in R_SCLK_SetInterruptMode() function.
+     *  @{
+     */
+        #define R_SCLK_INTR_NONE      (uint16)(0x0000u)
+        #define R_SCLK_INTR_RISING    (uint16)(0x0001u)
+        #define R_SCLK_INTR_FALLING   (uint16)(0x0002u)
+        #define R_SCLK_INTR_BOTH      (uint16)(0x0003u) 
+    /** @} intrMode */
+/** @} group_constants */
+
+    #define R_SCLK_INTR_MASK      (0x01u) 
+#endif /* (R_SCLK__INTSTAT) */
 
 
 /***************************************
@@ -114,13 +141,21 @@ uint8   R_SCLK_ClearInterrupt(void) ;
 /* Sync Output Enable Registers */
 #define R_SCLK_PRTDSI__SYNC_OUT       (* (reg8 *) R_SCLK__PRTDSI__SYNC_OUT) 
 
+/* SIO registers */
+#if defined(R_SCLK__SIO_CFG)
+    #define R_SCLK_SIO_HYST_EN        (* (reg8 *) R_SCLK__SIO_HYST_EN)
+    #define R_SCLK_SIO_REG_HIFREQ     (* (reg8 *) R_SCLK__SIO_REG_HIFREQ)
+    #define R_SCLK_SIO_CFG            (* (reg8 *) R_SCLK__SIO_CFG)
+    #define R_SCLK_SIO_DIFF           (* (reg8 *) R_SCLK__SIO_DIFF)
+#endif /* (R_SCLK__SIO_CFG) */
 
-#if defined(R_SCLK__INTSTAT)  /* Interrupt Registers */
-
-    #define R_SCLK_INTSTAT                (* (reg8 *) R_SCLK__INTSTAT)
-    #define R_SCLK_SNAP                   (* (reg8 *) R_SCLK__SNAP)
-
-#endif /* Interrupt Registers */
+/* Interrupt Registers */
+#if defined(R_SCLK__INTSTAT)
+    #define R_SCLK_INTSTAT            (* (reg8 *) R_SCLK__INTSTAT)
+    #define R_SCLK_SNAP               (* (reg8 *) R_SCLK__SNAP)
+    
+	#define R_SCLK_0_INTTYPE_REG 		(* (reg8 *) R_SCLK__0__INTTYPE)
+#endif /* (R_SCLK__INTSTAT) */
 
 #endif /* CY_PSOC5A... */
 

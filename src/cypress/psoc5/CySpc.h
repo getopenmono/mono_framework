@@ -1,14 +1,14 @@
-/*******************************************************************************
-* File Name: CySpc.c
-* Version 5.0
+/***************************************************************************//**
+* \file CySpc.c
+* \version 5.60
 *
-* Description:
-*  Provides definitions for the System Performance Component API.
+* \brief Provides definitions for the System Performance Component API.
 *  The SPC functions are not meant to be called directly by the user
 *  application.
 *
 ********************************************************************************
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* \copyright
+* Copyright 2008-2017, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.

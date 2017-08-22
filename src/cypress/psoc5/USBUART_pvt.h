@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file .h
-* \version 3.0
+* \version 3.20
 *
 * \brief
 *  This file provides private function prototypes and constants for the 
@@ -8,7 +8,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2013-2015, Cypress Semiconductor Corporation. All rights reserved.
+* Copyright 2013-2016, Cypress Semiconductor Corporation. All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -193,7 +193,8 @@ const T_USBUART_LUT CYCODE *USBUART_GetDeviceTablePtr(void)           ;
 #if (USBUART_BOS_ENABLE)
     const T_USBUART_LUT CYCODE *USBUART_GetBOSPtr(void)               ;
 #endif /* (USBUART_BOS_ENABLE) */
-const uint8 CYCODE *USBUART_GetInterfaceClassTablePtr(void)                    ;uint8 USBUART_ClearEndpointHalt(void)                                          ;
+const uint8 CYCODE *USBUART_GetInterfaceClassTablePtr(void)                    ;
+uint8 USBUART_ClearEndpointHalt(void)                                          ;
 uint8 USBUART_SetEndpointHalt(void)                                            ;
 uint8 USBUART_ValidateAlternateSetting(void)                                   ;
 
