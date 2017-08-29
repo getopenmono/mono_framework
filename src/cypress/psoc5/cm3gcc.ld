@@ -21,8 +21,8 @@ SEARCH_DIR(.)
 GROUP(-lgcc -lc -lnosys)
 
 /* Code sharing support */
-INCLUDE cycodeshareexport.ld
-INCLUDE cycodeshareimport.ld
+/* INCLUDE cycodeshareexport.ld */
+/* INCLUDE cycodeshareimport.ld */
 
 
 MEMORY
@@ -194,7 +194,7 @@ SECTIONS
 	/***************************************************************************
     * Checksum Exclude Section for non-bootloadable projects. See below.
     ***************************************************************************/
-    
+
 
 
 	.ramvectors (NOLOAD) : ALIGN(8)
