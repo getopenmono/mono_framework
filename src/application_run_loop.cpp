@@ -125,7 +125,10 @@ bool AppRunLoop::addDynamicTask(mono::IRunLoopTask *task)
         IRunLoopTask *item = taskQueueHead;
         while (item->nextTask != NULL)
         {
-            item = item->nextTask;
+            if (item == task)
+                return false;
+            else
+                item = item->nextTask;
         }
 
         item->nextTask = task;
@@ -167,6 +170,18 @@ void AppRunLoop::removeTaskInQueue(IRunLoopTask *item)
 
     if (taskQueueHead == item)
         taskQueueHead = item->nextTask;
+}
+
+int AppRunLoop::taskCount() const
+{
+    int cnt = 0;
+    IRunLoopTask *task = taskQueueHead;
+    while(task != 0) {
+        cnt++;
+        task = task->nextTask;
+    }
+
+    return cnt;
 }
 
 void AppRunLoop::checkUsbUartState()

@@ -249,9 +249,10 @@ namespace mono { namespace redpine {
          *
          * @param data A pointer to the raw data to write to the module
          * @param byteLength The length of the data in bytes
+         * @param force4ByteMultiple Optional: Set to false, to bot enforce payload to be a 4-byte multiple
          * @return `true` upon success, `false` otherwise.
          */
-        virtual bool writePayloadData(uint8_t *data, uint16_t byteLength) = 0;
+        virtual bool writePayloadData(uint8_t *data, uint16_t byteLength, bool force4ByteMultiple = true) = 0;
         
         /**
          * Interrupt callback function, called by the communication interface.
@@ -365,7 +366,10 @@ namespace mono { namespace redpine {
         
         
     public:
-        
+
+        /** Initialize invalid SPI communication */
+        ModuleSPICommunication();
+
         /** 
          * Create a communication class, and assign a SPI hardware interface
          * 
@@ -404,14 +408,14 @@ namespace mono { namespace redpine {
         
         bool writeFrame(ManagementFrame *frame);
         
-        bool writePayloadData(uint8_t *data, uint16_t byteLength);
+        bool writePayloadData(uint8_t *data, uint16_t byteLength, bool force4ByteMultiple = true);
 
         // MARK: Power Aware Interface
 
         virtual void onSystemPowerOnReset();
         virtual void onSystemEnterSleep();
         virtual void onSystemWakeFromSleep();
-        virtual void OnSystemBatteryLow();
+        virtual void onSystemBatteryLow();
     };
     
 }}

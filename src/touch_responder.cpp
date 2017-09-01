@@ -4,6 +4,7 @@
 #include "touch_responder.h"
 #include <stdio.h>
 #include "consoles.h"
+#include <deprecated.h>
 
 #include <mbed_debug.h>
 
@@ -13,89 +14,119 @@ GenericQueue<TouchResponder> TouchResponder::ResponderChain;
 
 TouchResponder::TouchResponder()
 {
-    Activate();
+    activate();
 }
 
-void TouchResponder::RespondTouchBegin(mono::TouchEvent &event)
+void TouchResponder::respondTouchBegin(mono::TouchEvent &event)
 {
+    static bool breakReponderLoop = false;
+    if (breakReponderLoop)
+        return;
+
+    breakReponderLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    RespondTouchBegin(event);
+#pragma GCC diagnostic pop
+    breakReponderLoop = false;
 }
 
-void TouchResponder::RespondTouchMove(mono::TouchEvent &event)
+void TouchResponder::respondTouchMove(mono::TouchEvent &event)
 {
+    static bool breakReponderLoop = false;
+    if (breakReponderLoop)
+        return;
+
+    breakReponderLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    RespondTouchMove(event);
+#pragma GCC diagnostic pop
+    breakReponderLoop = false;
 }
 
-void TouchResponder::RespondTouchEnd(mono::TouchEvent &event)
+void TouchResponder::respondTouchEnd(mono::TouchEvent &event)
 {
+    static bool breakReponderLoop = false;
+    if (breakReponderLoop)
+        return;
+
+    breakReponderLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    RespondTouchEnd(event);
+#pragma GCC diagnostic pop
+    breakReponderLoop = false;
 }
 
-void TouchResponder::Activate()
+void TouchResponder::activate()
 {
-    ResponderChain.Enqueue(this);
+    ResponderChain.enqueue(this);
 }
 
-void TouchResponder::Deactivate()
+void TouchResponder::deactivate()
 {
-    ResponderChain.Remove(this);
+    ResponderChain.remove(this);
 }
 
-void TouchResponder::RunResponderChainTouchBegin(mono::TouchEvent &event)
+void TouchResponder::runResponderChainTouchBegin(mono::TouchEvent &event)
 {
-    if (ResponderChain.Peek() == NULL)
+    if (ResponderChain.peek() == NULL)
     {
         defaultSerial.printf("No first touch responder!\r\n");
         return;
     }
 
-    TouchResponder *res = ResponderChain.Peek();
+    TouchResponder *res = ResponderChain.peek();
 
     while (res != NULL) {
-        res->RespondTouchBegin(event);
+        res->respondTouchBegin(event);
 
         if (event.handled)
             return;
 
-        res = ResponderChain.Next(res);
+        res = ResponderChain.next(res);
     }
 }
 
-void TouchResponder::RunResponderChainTouchEnd(mono::TouchEvent &event)
+void TouchResponder::runResponderChainTouchEnd(mono::TouchEvent &event)
 {
-    if (ResponderChain.Peek() == NULL)
+    if (ResponderChain.peek() == NULL)
     {
         return;
     }
 
-    TouchResponder *res = ResponderChain.Peek();
+    TouchResponder *res = ResponderChain.peek();
 
     while (res != NULL) {
 
-        res->RespondTouchEnd(event);
+        res->respondTouchEnd(event);
 
         if (event.handled)
             return;
 
-        res = ResponderChain.Next(res);
+        res = ResponderChain.next(res);
     }
 }
 
-void TouchResponder::RunResponderChainTouchMove(mono::TouchEvent &event)
+void TouchResponder::runResponderChainTouchMove(mono::TouchEvent &event)
 {
-    if (ResponderChain.Peek() == NULL)
+    if (ResponderChain.peek() == NULL)
     {
         return;
     }
 
-    TouchResponder *res = ResponderChain.Peek();
+    TouchResponder *res = ResponderChain.peek();
 
     while (res != NULL) {
 
-        res->RespondTouchMove(event);
+        res->respondTouchMove(event);
 
-        res = ResponderChain.Next(res);
+        res = ResponderChain.next(res);
     }
 }
 
 TouchResponder* TouchResponder::FirstResponder()
 {
-    return ResponderChain.Peek();
+    return ResponderChain.peek();
 }

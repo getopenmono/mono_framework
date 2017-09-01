@@ -14,18 +14,18 @@ namespace mono { namespace ui {
 
     /**
      * @brief A Push Button UI Widget
-     * 
-     * This is a common state-less push button. It is basicaaly a bordered text
+     *
+     * This is a common state-less push button. It is basically a bordered text
      * label. This button reacts to touch input (pushes) and can call a function
      * when it is pushed.
      *
-     * You provide the button with a callback function, that gets called when 
+     * You provide the button with a callback function, that gets called when
      * the button is pushed. A valid button push is a touch that begins *and ends*
-     * within the button boundaries. If a touch begins inside the buttons 
+     * within the button boundaries. If a touch begins inside the buttons
      * boudaries, but ends outside - the button click callback is not triggered.
      *
      *
-     * You define the button dimensions by the @ref Rect you provide in the 
+     * You define the button dimensions by the @ref Rect you provide in the
      * constructor. Note that the resistive touch panel is not that precise,
      * you should not create buttons smaller than 40x35 pixels. Also note that
      * buttons do not automatically scale, when you set their text content.
@@ -45,36 +45,36 @@ namespace mono { namespace ui {
     class ButtonView : public ResponderView
     {
     protected:
-        
+
         mbed::FunctionPointer clickHandler;
-        
-        virtual void TouchBegin(TouchEvent &event);
-        virtual void TouchMove(TouchEvent &event);
-        virtual void TouchEnd(TouchEvent &event);
-        
+
+        virtual void touchBegin(TouchEvent &event);
+        virtual void touchMove(TouchEvent &event);
+        virtual void touchEnd(TouchEvent &event);
+
         TextLabelView textLabel;
-        
+
         bool isPressedDown;
-        
+
         Color borderColor, textColor;
         Color borderColorPressed;
         Color background;
-        
+
         void initButton();
-        
+
     public:
 
         /**
          * @brief Construct an empty button
-         * 
+         *
          * The button will have zero dimensions and no text.
          */
         ButtonView();
-        
+
 
         /**
          * @brief Construct a button with dimensions and text
-         * 
+         *
          * Creates a button with the provided dimensions and text to display. You
          * still need to setup a callback and call @ref show.
          *
@@ -98,8 +98,8 @@ namespace mono { namespace ui {
 
         /**
          * @brief Set the text content
-         * 
-         * Sets the text that is displayed on the button. Note that the width 
+         *
+         * Sets the text that is displayed on the button. Note that the width
          * and height of the button is not changed. You must change the buttons
          * @ref viewRect if your text is larger than the buttons dimensions.
          *
@@ -111,7 +111,7 @@ namespace mono { namespace ui {
 
         /**
          * @brief Change the button fontface (font family and size)
-         * 
+         *
          * You can change the buttons font to use a larger (or smaller) font.
          *
          * @deprecated Use the GfxFont variant
@@ -136,7 +136,7 @@ namespace mono { namespace ui {
          * @param c The new border color
          */
         void setBorder(Color c);
-        
+
         /**
          * @brief Sets the text color
          *
@@ -152,7 +152,7 @@ namespace mono { namespace ui {
          *
          * The highlight color is the color used to represented a button that is
          * currently being pushed. This means that a touch event has started
-         * inside its boundaries. The highlight color is applied to both border 
+         * inside its boundaries. The highlight color is applied to both border
          * and text.
          *
          * This method will not schedule repaint! You must @ref scheduleRepaint
@@ -176,7 +176,7 @@ namespace mono { namespace ui {
         void setBackground(Color c);
 
         void setRect(geo::Rect r);
-        
+
         /**
          * @brief Get a reference to the internal TextLabel object
          *
@@ -185,13 +185,13 @@ namespace mono { namespace ui {
          */
         const TextLabelView& TextLabel() const;
 
-        
+
         /**
          * @brief Attach a member function as the button click handler
-         * 
+         *
          * Provide the callback member function you ewant to be called when
          * the button is clicked.
-         * 
+         *
          * **NOTE:** THere can only be one callback function
          *
          * @param obj A pointer to the object where the callback method exists
@@ -220,10 +220,10 @@ namespace mono { namespace ui {
 
 
         virtual void repaint();
-        
+
     };
-    
-    
+
+
 } }
 
 #endif /* button_view_h */

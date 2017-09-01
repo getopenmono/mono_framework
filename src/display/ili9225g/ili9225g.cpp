@@ -264,7 +264,7 @@ void ILI9225G::onSystemWakeFromSleep()
     init();
 }
 
-void ILI9225G::OnSystemBatteryLow()
+void ILI9225G::onSystemBatteryLow()
 {
     debug("ILI9225: battery low, set brightness to 12%\t\n");
     setBrightness(32);

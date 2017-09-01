@@ -37,7 +37,7 @@ namespace mono {
         void onSystemPowerOnReset();
         void onSystemEnterSleep();
         void onSystemWakeFromSleep();
-        void OnSystemBatteryLow();
+        void onSystemBatteryLow();
         
     public:
         
@@ -50,8 +50,8 @@ namespace mono {
         void setCalibration(TouchCalibration &cal);
         TouchCalibration CurrentCalibration();
         
-        int ToScreenCoordsX(int touchPos, uint16_t screenWidth);
-        int ToScreenCoordsY(int touchPos, uint16_t screenHeight);
+        int toScreenCoordsX(int touchPos, uint16_t screenWidth);
+        int toScreenCoordsY(int touchPos, uint16_t screenHeight);
     };
 }
 

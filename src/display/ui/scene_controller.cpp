@@ -1,3 +1,5 @@
+// This software is part of OpenMono, see http://developer.openmono.com
+// Released under the MIT license, see LICENSE.txt
 
 #include "scene_controller.h"
 #include <view.h>
@@ -56,14 +58,14 @@ void SceneController::show()
 {
     if (Visible())
         return;
-    
+
     background.show();
     visible = true;
     for(std::list<IViewALike*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
     {
         (*it)->show();
     }
-    
+
     showHandler.call(*this);
 }
 
@@ -71,13 +73,13 @@ void SceneController::hide()
 {
     if (!Visible())
         return;
-    
+
     visible = false;
     for(std::list<IViewALike*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
     {
         (*it)->hide();
     }
-    
+
     background.hide();
     hideHandler.call(*this);
 }
@@ -86,7 +88,7 @@ void SceneController::scheduleRepaint()
 {
     //paint it black?
     background.scheduleRepaint();
-    
+
     for(std::list<IViewALike*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
     {
         (*it)->scheduleRepaint();
@@ -114,5 +116,3 @@ mono::geo::Size& SceneController::Size()
 {
     return viewRect;
 }
-
-

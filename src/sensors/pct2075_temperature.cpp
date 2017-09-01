@@ -111,7 +111,7 @@ void PCT2075Temperature::onSystemWakeFromSleep()
 
 }
 
-void PCT2075Temperature::OnSystemBatteryLow()
+void PCT2075Temperature::onSystemBatteryLow()
 {
 
 }

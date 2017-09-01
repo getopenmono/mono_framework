@@ -42,7 +42,7 @@ namespace mono {
      * @code
      * Timer timr(1000);
      * timr.setCallback<MyClass>(this, &MyClass::callback);
-     * timr.Start();
+     * timr.start();
      * @endcode
      *
      * The member function `callback` will now be called every second.
@@ -119,7 +119,7 @@ namespace mono {
         void start();
         
         /** @deprecated Use non-capitalized version instead */
-        void Start() __DEPRECATED("Capitalized method calls syntax is being obsolted", "start");
+        void Start() __DEPRECATED("Capitalized method calls syntax is being obsoleted", "start");
         
         /**
          * @brief Stop the timer, any pending callback will not be executed
@@ -127,7 +127,7 @@ namespace mono {
         void stop();
         
         /** @deprecated Use non-capitalized version instead */
-        void Stop() __DEPRECATED("Capitalized method calls syntax is being obsolted", "stop");
+        void Stop() __DEPRECATED("Capitalized method calls syntax is being obsoleted", "stop");
         
         /**
          * See if the timer is single shot.

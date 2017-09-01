@@ -7,22 +7,22 @@
 
 using namespace mono::ui;
 
-// MARK: Conructors
+// MARK: Constructors
 
 void ButtonView::initButton()
 {
     textLabel.setAlignment(TextLabelView::ALIGN_CENTER);
-    
+
     //align text horizontal center
     geo::Size dimen = textLabel.TextDimension();
     int hSpacing = viewRect.Height() - dimen.Height();
-    
+
     if (hSpacing > 0)
     {
         textLabel.Position().setY(viewRect.Y() + hSpacing/2 );
         textLabel.Size().setHeight(viewRect.Height() - hSpacing);
     }
-    
+
     isPressedDown = false;
     textColor = StandardTextColor;
     borderColor = StandardBorderColor;
@@ -44,26 +44,26 @@ ButtonView::ButtonView(geo::Rect rect, String text) :
 }
 
 ButtonView::ButtonView(geo::Rect rect, const char *text) :
-ResponderView(rect),
-textLabel(geo::Rect(rect), String(text)),
-borderColor(StandardBorderColor),
-borderColorPressed(StandardHighlightColor)
+    ResponderView(rect),
+    textLabel(geo::Rect(rect), String(text)),
+    borderColor(StandardBorderColor),
+    borderColorPressed(StandardHighlightColor)
 {
     initButton();
 }
 
 // MARK: Touch Handlers
 
-void ButtonView::TouchBegin(mono::TouchEvent &)
+void ButtonView::touchBegin(mono::TouchEvent &)
 {
     isPressedDown = true;
     this->scheduleRepaint();
 }
 
-void ButtonView::TouchMove(mono::TouchEvent &event)
+void ButtonView::touchMove(mono::TouchEvent &event)
 {
     bool inRect = viewRect.contains(event.Position);
-    
+
     if (isPressedDown && !inRect) {
         isPressedDown = false;
         scheduleRepaint();
@@ -75,18 +75,18 @@ void ButtonView::TouchMove(mono::TouchEvent &event)
     }
 }
 
-void ButtonView::TouchEnd(mono::TouchEvent &event)
+void ButtonView::touchEnd(mono::TouchEvent &event)
 {
     bool shouldRepaint = isPressedDown;
-    
+
     isPressedDown = false;
-    
+
     // touch is stil within button area,
     if (viewRect.contains(event.Position))
     {
         clickHandler.call();
     }
-    
+
     if (shouldRepaint)
         scheduleRepaint();
 }
@@ -151,8 +151,8 @@ void ButtonView::repaint()
     textLabel.incrementalRepaint = false;
     textLabel.setText( isPressedDown ? borderColorPressed : textColor );
     textLabel.repaint();
-    
+
     painter.setForegroundColor( isPressedDown ? borderColorPressed : borderColor );
     painter.drawRect(viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height());
-    
+
 }

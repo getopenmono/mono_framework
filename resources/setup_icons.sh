@@ -32,6 +32,7 @@ if hash qmake; then
 	DIST=../dist
 	if [[ $# > 1 ]]; then
 		DIST=$2
+		echo "Using custom destination: $DIST"
 	fi
 	if [[ ! -d $DIST ]]; then
 		mkdir -p $DIST
@@ -41,7 +42,16 @@ if hash qmake; then
 		if ! git clone $GIT_REPO; then
 			exit 1
 		fi
+	else
+		echo "img2icon repo already exists, clean & update repo..."
+		cd img2icon && \
+		git reset --hard && \
+		git clean -fXd && \
+		git checkout && \
+		git pull && \
+		cd .. || exit 1
 	fi
+	
 	PWD=`pwd`
 	sed -ibak "s@IMGICON=.*img2icon@IMGICON=$PWD/img2icon/img2icon@" $MKFILE && \
 	sed -ibak "s@DIST=../dist@DIST=$DIST@" $MKFILE
@@ -53,20 +63,21 @@ if hash qmake; then
 	if [[ $# > 2 && $3 == "win" ]]; then
 		echo "Building for Windows with MSVC++ toolchain..."
 		cd img2icon && \
-			qmake -tp vc && \
-			MSBuild.exe img2icon.vcxproj //p:Configuration=Release && \ 
-			cd .. && \
+			qmake -tp vc project.pro && \
 			ls -l && \
+			MSBuild.exe img2icon.vcxproj //p:Configuration=Release //p:Platform=x86 && \ 
+			cd .. && \
 			sed -ibak "s@IMGICON=.*img2icon@IMGICON=$PWD/img2icon/release/img2icon.exe@" $MKFILE && \
 			echo "SUCCESS: You can run icons makefile" && \
-			exit 0
+			cat $MKFILE && \
+			exit 0 || exit 1
 	else
 		cd img2icon && \
 			qmake && \
 			make && \
 			cd .. && \
 			echo "SUCCESS: You can run icons makefile" && \
-			exit 0
+			exit 0 || exit 1
 	fi
 	
 	echo "ERROR: Compile error!"

@@ -59,10 +59,15 @@
 // MARK: IO
 
 #include <io/file.h>
+#include <io/file_system.h>
 #include <io/filtered_analog_in.h>
 #include <io/hysteresis_trigger.h>
 #include <io/mn_digital_out.h>
+#include <io/mn_serial.h>
+#include <io/onewire.h>
+#include <io/running_average_filter.h>
 #include <queue_interrupt.h>
+#include <io/wifi.h>
 
 // MARK: Media
 
@@ -81,12 +86,17 @@
 #include <buzzer_interface.h>
 #include <temperature_interface.h>
 #include <accelerometer_interface.h>
+#include <rtc_interface.h>
+#include <touch_event.h>
+#include <touch_responder.h>
 
 #ifndef EMUNO
 #include <mono_battery.h>
 #include <http_client.h>
 #include <http_post_client.h>
 #include <dns_resolver.h>
+#include <dht.h>
+#include <edu1.h>
 #else
 #include <emuno.h>
 #endif

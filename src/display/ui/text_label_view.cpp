@@ -21,7 +21,7 @@ TextLabelView::TextLabelView(String txt) :
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     currentFont = TextLabelView::StandardTextFont;
-    
+
     this->text = txt;
     this->textMultiline = isTextMultiline();
     this->setTextSize(2);
@@ -241,18 +241,17 @@ void TextLabelView::setAlignment(VerticalTextAlignment vAlign)
 
 void TextLabelView::setText(const char *text)
 {
-    this->setText(text);
+    this->setText(String(text));
 }
-
 
 void TextLabelView::setText(mono::String text)
 {
     this->text = text;
     this->textMultiline = isTextMultiline();
-    
+
     if (isDirty)
         return;
-    
+
     scheduleRepaint();
     incrementalRepaint = true;
 }
@@ -273,7 +272,7 @@ void TextLabelView::setFont(const MonoFont &newFont)
     currentFont = &newFont;
     currentGfxFont = 0;
     incrementalRepaint = false;
-    
+
     scheduleRepaint();
 }
 
@@ -282,7 +281,7 @@ void TextLabelView::setFont(GFXfont const &font)
     currentGfxFont = &font;
     currentFont = 0;
     incrementalRepaint = false;
-    
+
     scheduleRepaint();
 }
 
@@ -303,12 +302,12 @@ void TextLabelView::scheduleRepaint()
         return;
 
     this->isDirty = true;
-    dirtyQueue.Enqueue((View*) this);
+    dirtyQueue.enqueue((View*) this);
 }
 
 void TextLabelView::repaint()
 {
-    
+
     geo::Rect txtRct;
 
     painter.setBackgroundColor(bgColor);
@@ -373,7 +372,7 @@ void TextLabelView::repaintLegacy(geo::Rect &)
 
         int cnt = 0;
         char c = text[cnt];
-        
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
         View::painter.setTextSize(TextSize());

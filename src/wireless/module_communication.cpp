@@ -108,6 +108,14 @@ SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
 
 // MARK: Module SPI Communication
 
+ModuleSPICommunication::ModuleSPICommunication() :
+    spiChipSelect(NC),
+    resetLine(NC),
+    spiInterrupt(NC)
+{
+
+}
+
 ModuleSPICommunication::ModuleSPICommunication(mbed::SPI &spi, PinName chipSelect, PinName resetPin, PinName interruptPin) :
     spiChipSelect(chipSelect, 1),
     resetLine(resetPin, 1),
@@ -773,8 +781,8 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     // write the mgmt/cmd frame
     statusCode = spiWrite((uint8_t*)&rawFrame, sizeof(rawFrame));
 
-
-    if (frame->payloadLength() <= 0)
+    int payLen = frame->payloadLength();
+    if (payLen <= 0)
     {
         return true;
     }
@@ -782,18 +790,19 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     // write the data frame with payload
     // the size of 872 comes from redpines documentation of POST data,
     // but this size might be too large for embedded memory sizes
-    uint8_t payloadBuffer[872];
-    memset(payloadBuffer, 0, 872);
-
-    if (frame->payloadLength() > 872)
+    if (payLen > 872)
     {
-        debug("Frame payload data is too large! More than 300 bytes!\r\n");
+        debug("Frame payload data is too large! More than 872 bytes!\r\n");
         return false;
     }
 
+    uint8_t payloadBuffer[payLen+1]; // Reserve an additional byte for an optional NULL terminator
+    memset(payloadBuffer, 0, payLen+1);
+
     frame->dataPayload(payloadBuffer);
 
-    bool success = writePayloadData(payloadBuffer, frame->payloadLength());
+    // Http post frames are not forced to be 4-byte multiples
+    bool success = writePayloadData(payloadBuffer, payLen, frame->commandId != ModuleFrame::HttpPost);
 
     if (!success)
     {
@@ -803,9 +812,9 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     return true;
 }
 
-bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength)
+bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength, bool force4byte)
 {
-    if (byteLength != (byteLength & ~3))
+    if (force4byte && byteLength != (byteLength & ~3))
     {
         debug("Data Frame payload data is not 4-byte aligned!\r\n");
         return false;
@@ -872,7 +881,7 @@ void ModuleSPICommunication::onSystemWakeFromSleep()
 {
     spiInterrupt.enable_irq();
 }
-void ModuleSPICommunication::OnSystemBatteryLow()
+void ModuleSPICommunication::onSystemBatteryLow()
 {
 
 }

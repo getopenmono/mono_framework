@@ -8,6 +8,11 @@
 
 namespace mono { namespace power {
 
+    /**
+     * @brief Static class to get Mono's battery voltage or percentage
+     *
+     * @author Markus Laire
+     */
     class MonoBattery
     {
     public:    

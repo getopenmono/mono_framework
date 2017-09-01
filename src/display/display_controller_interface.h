@@ -60,7 +60,7 @@ namespace mono { namespace display
          * @param height The display height (vertical) in pixels
          * @returns The display controller instance.
          */
-        IDisplayController(int width, int height) : refreshHandler(NULL) {}
+        IDisplayController(int, int) : refreshHandler(NULL) {}
         
         /**
          * Initalizing the hardware display controller means setting up the

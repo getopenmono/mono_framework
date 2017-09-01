@@ -8,81 +8,112 @@ using namespace mono::ui;
 
 ResponderView::ResponderView()
 {
-    Deactivate(); // view starts hidden, do not handle touch
+    deactivate(); // view starts hidden, do not handle touch
     touchActive = false;
 }
 
 ResponderView::ResponderView(geo::Rect rect) : View(rect)
 {
-    Deactivate(); // view starts hidden, do not handle touch
+    deactivate(); // view starts hidden, do not handle touch
     touchActive = false;
 }
 
-void ResponderView::TouchBegin(mono::TouchEvent &event)
+void ResponderView::touchBegin(mono::TouchEvent &event)
 {
+    static bool breakOldLoop = false;
+    if (breakOldLoop)
+        return;
+
+    breakOldLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    TouchBegin(event);
+#pragma GCC diagnostic pop
+    breakOldLoop = false;
 }
 
-void ResponderView::TouchEnd(mono::TouchEvent &event)
+void ResponderView::touchEnd(mono::TouchEvent &event)
 {
+    static bool breakOldLoop = false;
+    if (breakOldLoop)
+        return;
+
+    breakOldLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    TouchEnd(event);
+#pragma GCC diagnostic pop
+    breakOldLoop = false;
 }
 
-void ResponderView::TouchMove(mono::TouchEvent &event)
+void ResponderView::touchMove(mono::TouchEvent &event)
 {
+    static bool breakOldLoop = false;
+    
+    if (breakOldLoop)
+        return;
+
+    breakOldLoop = true;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    TouchMove(event);
+#pragma GCC diagnostic pop
+    breakOldLoop = false;
 }
 
-void ResponderView::RespondTouchBegin(mono::TouchEvent &event)
+void ResponderView::respondTouchBegin(mono::TouchEvent &event)
 {
     if (!event.IsScreenCoords)
     {
-        this->ToScreenCoords(&event);
+        this->toScreenCoords(&event);
     }
     
     if (this->viewRect.contains(event.Position))
     {
         touchActive = true;
-        TouchBegin(event);
+        touchBegin(event);
         event.handled = true;
     }
     
 }
 
-void ResponderView::RespondTouchMove(mono::TouchEvent &event)
+void ResponderView::respondTouchMove(mono::TouchEvent &event)
 {
     
     if (touchActive)
     {
         if (!event.IsScreenCoords)
         {
-            this->ToScreenCoords(&event);
+            this->toScreenCoords(&event);
         }
         
-        TouchMove(event);
+        touchMove(event);
         event.handled = true;
     }
     
 }
 
-void ResponderView::RespondTouchEnd(mono::TouchEvent &event)
+void ResponderView::respondTouchEnd(mono::TouchEvent &event)
 {
     
     if (touchActive == true)
     {
         if (!event.IsScreenCoords) {
-            this->ToScreenCoords(&event);
+            this->toScreenCoords(&event);
         }
         
-        TouchEnd(event);
+        touchEnd(event);
         event.handled = true;
         touchActive = false;
     }
 }
 
-void ResponderView::ToScreenCoords(mono::TouchEvent *event)
+void ResponderView::toScreenCoords(mono::TouchEvent *event)
 {
-    int x = event->TouchController->ToScreenCoordsX(event->Position.X(), DisplayWidth());
+    int x = event->TouchController->toScreenCoordsX(event->Position.X(), DisplayWidth());
     event->Position.setX(x);
     
-    int y = event->TouchController->ToScreenCoordsY(event->Position.Y(), DisplayHeight());
+    int y = event->TouchController->toScreenCoordsY(event->Position.Y(), DisplayHeight());
     event->Position.setY(y);
     
     event->IsScreenCoords = true;
@@ -91,11 +122,11 @@ void ResponderView::ToScreenCoords(mono::TouchEvent *event)
 void ResponderView::show()
 {
     View::show();
-    Activate();
+    activate();
 }
 
 void ResponderView::hide()
 {
-    Deactivate();
+    deactivate();
     View::hide();
 }

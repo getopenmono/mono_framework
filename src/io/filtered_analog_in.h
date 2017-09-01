@@ -30,8 +30,8 @@ namespace mono { namespace io {
      *
      * @code
      * FilteredAnalogIn<32> input(J_RING1);
-     * uint16_t filteredSample = input.rea_u16();
-     * @endcode
+     * uint16_t filteredSample = input.read_u16();
+     * @endcode
      *
      * @see RunningAverageFilter
      */

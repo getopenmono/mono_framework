@@ -338,8 +338,7 @@ int HttpPostFrame::payloadLength()
     if (requestDataLengthCallback)
         size += requestDataLengthCallback.call();
 
-    // the padding zeroes becomes a part of the request body (but 4-byte alignment is required by the API)
-    return (size+3) & ~3; //4 byte align
+    return size;
 }
 
 void HttpPostFrame::dataPayload(uint8_t *data)
@@ -370,21 +369,8 @@ void HttpPostFrame::dataPayload(uint8_t *data)
     memcpy(strPnt, extraHeader(), extraHeader.Length());
     strPnt += extraHeader.Length()+1;
 
-    int dataLen = requestDataLengthCallback.call();;
-
     if (requestDataCallback)
         requestDataCallback.call((char*)(strPnt));
-
-    strPnt += dataLen;
-
-    int remainder = payLength - (strPnt - (uint8_t*)frm);
-
-
-    if (remainder > 0)
-    {
-        debug("Padding packet with spaces (0x20) to align with 4-byte length!\r\n");
-        memset(strPnt, ' ', remainder);
-    }
 }
 
 

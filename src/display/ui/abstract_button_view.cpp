@@ -12,13 +12,13 @@ AbstractButtonView::AbstractButtonView(geo::Rect rct) : ResponderView(rct) {}
 
 // MARK: Touch Handlers
 
-void AbstractButtonView::TouchBegin(mono::TouchEvent &)
+void AbstractButtonView::touchBegin(mono::TouchEvent &)
 {
     isPressedDown = true;
     this->scheduleRepaint();
 }
 
-void AbstractButtonView::TouchMove(mono::TouchEvent &event)
+void AbstractButtonView::touchMove(mono::TouchEvent &event)
 {
     bool inRect = viewRect.contains(event.Position);
 
@@ -33,7 +33,7 @@ void AbstractButtonView::TouchMove(mono::TouchEvent &event)
     }
 }
 
-void AbstractButtonView::TouchEnd(mono::TouchEvent &event)
+void AbstractButtonView::touchEnd(mono::TouchEvent &event)
 {
     bool shouldRepaint = isPressedDown;
 

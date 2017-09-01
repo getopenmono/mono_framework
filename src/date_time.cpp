@@ -29,7 +29,7 @@ const uint8_t DateTime::DaysPerMonth[13] =
 
 DateTime::DateTime()
 {
-    secs = mins = hours = day = month -1;
+    secs = mins = hours = day = month = -1;
     year = 1970;
     
     type = UNKNOWN_TIME_ZONE;

@@ -15,7 +15,7 @@ namespace mono { namespace io {
      *
      * Filter sample values are akways unsigned 16-bit integers, since this is
      * the return type of 
-     * [`mbed::AnalogIn`](https://developer.mbed.org/handbook/AnalogIn)
+     * [mbed::AnalogIn](https://developer.mbed.org/handbook/AnalogIn)
      *
      * ## Moving Average Low pass filtering
      *

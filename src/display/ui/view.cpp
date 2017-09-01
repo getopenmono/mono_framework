@@ -25,11 +25,11 @@ void View::repaintScheduledViews()
 {
 
     //early exit if queue is empty
-    if (View::dirtyQueue.Peek() == NULL)
+    if (View::dirtyQueue.peek() == NULL)
         return;
 
     uint32_t start = us_ticker_read();
-    View *view = View::dirtyQueue.Dequeue();
+    View *view = View::dirtyQueue.dequeue();
     while (view != NULL) {
 
         if (view->isDirty)
@@ -43,7 +43,7 @@ void View::repaintScheduledViews()
         }
 
 
-        view = View::dirtyQueue.Dequeue();
+        view = View::dirtyQueue.dequeue();
     }
     uint32_t end = us_ticker_read();
 
@@ -70,7 +70,7 @@ View::View(geo::Rect rect) : viewRect(rect)
 View::~View()
 {
     //remove me from the dirty queue, if I am present there
-    dirtyQueue.Remove(this);
+    dirtyQueue.remove(this);
 }
 
 void View::callRepaintScheduledViews()
@@ -114,7 +114,7 @@ void View::scheduleRepaint()
         return;
 
     isDirty = true;
-    dirtyQueue.Enqueue((View*) this);
+    dirtyQueue.enqueue((View*) this);
 }
 
 bool View::Visible() const
@@ -132,7 +132,7 @@ void View::hide()
 {
     visible = false;
     isDirty = false;
-    dirtyQueue.Remove(this);
+    dirtyQueue.remove(this);
 }
 
 //// Static methods

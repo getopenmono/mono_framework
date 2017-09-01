@@ -6,6 +6,7 @@
 
 #include "touch_event.h"
 #include "queue.h"
+#include "deprecated.h"
 
 class ITouchSystem; //forwd decl
 
@@ -37,12 +38,11 @@ namespace mono {
      * @see ITouchSystem
      * @brief The TouchReponder handles incoming touch events
      */
-    class TouchResponder : IQueueItem
+    class TouchResponder : public IQueueItem
     {
         friend class ITouchSystem;
     protected:
         static GenericQueue<TouchResponder> ResponderChain;
-
     public:
         
         /**
@@ -52,9 +52,9 @@ namespace mono {
          */
         static TouchResponder* FirstResponder();
         
-        static void RunResponderChainTouchBegin(TouchEvent &event);
-        static void RunResponderChainTouchEnd(TouchEvent &event);
-        static void RunResponderChainTouchMove(TouchEvent &event);
+        static void runResponderChainTouchBegin(TouchEvent &event);
+        static void runResponderChainTouchEnd(TouchEvent &event);
+        static void runResponderChainTouchMove(TouchEvent &event);
         
         /**
          * @brief Create a new responder object that receives touch input.
@@ -65,20 +65,31 @@ namespace mono {
          */
         TouchResponder();
 
-        virtual void RespondTouchBegin(TouchEvent &event);
-        virtual void RespondTouchMove(TouchEvent &event);
-        virtual void RespondTouchEnd(TouchEvent &event);
+        virtual void respondTouchBegin(TouchEvent &event);
+        virtual void RespondTouchBegin(TouchEvent &event) __DEPRECATED("Please use the lower case variant","respondTouchBegin") { respondTouchBegin(event); }
+        
+        virtual void respondTouchMove(TouchEvent &event);
+        virtual void RespondTouchMove(TouchEvent &event) __DEPRECATED("Please use the lower case variant","respondTouchMove") { respondTouchMove(event); }
+        
+        virtual void respondTouchEnd(TouchEvent &event);
+        virtual void RespondTouchEnd(TouchEvent &event) __DEPRECATED("Please use the lower case variant","respondTouchMove") { respondTouchEnd(event); }
 
         /**
          * Add this responder to the responder chain
          *
          */
-        void Activate();
+        void activate();
+
+        void Activate() __DEPRECATED("Capitalized method calls syntax is being obsolted", "activate")
+        { activate(); }
 
         /**
          * Remove this responder from the responder chain
          */
-        void Deactivate();
+        void deactivate();
+
+        void Deactivate() __DEPRECATED("Capitalized method calls syntax is being obsolted", "deactivate")
+        { deactivate(); }
     };
 
 }
