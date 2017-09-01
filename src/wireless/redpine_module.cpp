@@ -181,7 +181,7 @@ bool Module::sendDataFrame(const uint8_t *dataPayload, uint32_t length)
 
 bool Module::discardIfNeeded(ManagementFrame *respFrame)
 {
-    responseFrameQueue.Remove(respFrame);
+    responseFrameQueue.remove(respFrame);
     respFrame->triggerCompletionHandler();
 
     if (respFrame->autoReleaseWhenParsed)
@@ -208,7 +208,7 @@ void Module::moduleEventHandler()
         if (comIntf->pollInputQueue())
         {
             //handle a response for any pending request
-            ManagementFrame *respFrame = responseFrameQueue.Peek();
+            ManagementFrame *respFrame = responseFrameQueue.peek();
             DataReceiveBuffer buffer;
             if (respFrame == 0 && defaultDataFramePayloadHandler != 0)
             {
@@ -270,7 +270,7 @@ void Module::moduleEventHandler()
         // if no response is pending, send new request
         if (responseFrameQueue.Length() == 0 && requestFrameQueue.Length() > 0)
         {
-            ManagementFrame *request = requestFrameQueue.Dequeue();
+            ManagementFrame *request = requestFrameQueue.dequeue();
 
             //debug("Sending Mgmt request 0x%x\r\n",request->commandId);
 
