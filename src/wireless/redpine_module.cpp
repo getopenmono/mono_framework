@@ -169,7 +169,7 @@ bool Module::IsNetworkReady()
     return self->networkInitialized && self->joinFailed == false;
 }
 
-bool Module::sendDataFrame(const char *dataPayload, uint32_t length)
+bool Module::sendDataFrame(const uint8_t *dataPayload, uint32_t length)
 {
     if (networkInitialized)
         return this->comIntf->writeDataFrame(dataPayload, length);

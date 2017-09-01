@@ -209,7 +209,7 @@ namespace mono { namespace redpine {
          * Use this to probe what kind of frame is coming from the module
          * and read the frame payload later using the dedicated methods.
          *
-         * @param rawHeader A pointer to the pre-alloced memory to hold the header
+         * @param rawFrame A pointer to the pre-alloced memory to hold the header
          * @return True on read success, false otherwise
          */
         virtual bool readFrame(DataReceiveBuffer &rawFrame) = 0;
@@ -255,7 +255,7 @@ namespace mono { namespace redpine {
          */
         virtual bool readDataFrame(DataReceiveBuffer &buffer, DataPayloadHandler &payloadHandler) = 0;
 
-        virtual bool writeDataFrame(const char *data, uint32_t length) = 0;
+        virtual bool writeDataFrame(const uint8_t *data, uint32_t length) = 0;
 
         /**
          * Internal function to read from a memory address. This is used when
@@ -298,7 +298,7 @@ namespace mono { namespace redpine {
          * @param force4ByteMultiple Optional: Set to false, to bot enforce payload to be a 4-byte multiple
          * @return `true` upon success, `false` otherwise.
          */
-        virtual bool writePayloadData(uint8_t *data, uint16_t byteLength, bool force4ByteMultiple = true) = 0;
+        virtual bool writePayloadData(const uint8_t *data, uint16_t byteLength, bool force4ByteMultiple = true) = 0;
         
         /**
          * Interrupt callback function, called by the communication interface.
@@ -399,7 +399,7 @@ namespace mono { namespace redpine {
          * @param thirtyTwoBitFormat Set this to `true` to use 32-bit mode, default is `false`
          * @return the last read value on the SPI bus
          */
-        int spiWrite(const char *data, int byteLength, bool thirtyTwoBitFormat = false);
+        int spiWrite(const uint8_t *data, int byteLength, bool thirtyTwoBitFormat = false);
         
         /**
          * Sets the SPI chip select for the module. This must be called before 
@@ -456,13 +456,13 @@ namespace mono { namespace redpine {
 
         bool readDataFrame(DataReceiveBuffer &buffer, DataPayloadHandler &payloadHandler);
 
-        bool writeDataFrame(const char *data, uint32_t length);
+        bool writeDataFrame(const uint8_t *data, uint32_t length);
         
         bool writeFrame(ManagementFrame *frame);
 
-        bool writeRawFrame(const char *rawFrame);
+        bool writeRawFrame(const uint8_t *rawFrame);
         
-        bool writePayloadData(uint8_t *data, uint16_t byteLength, bool force4ByteMultiple = true);
+        bool writePayloadData(const uint8_t *data, uint16_t byteLength, bool force4ByteMultiple = true);
 
 
         // MARK: Power Aware Interface

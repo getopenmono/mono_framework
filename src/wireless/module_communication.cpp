@@ -431,7 +431,7 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     return true;
 }
 
-int ModuleSPICommunication::spiWrite(const char *data, int byteLength, bool thirtyTwoBitMode)
+int ModuleSPICommunication::spiWrite(const uint8_t *data, int byteLength, bool thirtyTwoBitMode)
 {
     if (thirtyTwoBitMode)
     {
@@ -753,7 +753,7 @@ bool ModuleSPICommunication::readDataFrame(DataReceiveBuffer &buffer, DataPayloa
     return true;
 }
 
-bool ModuleSPICommunication::writeRawFrame(const char *rawFrame)
+bool ModuleSPICommunication::writeRawFrame(const uint8_t *rawFrame)
 {
     //see if there is room in the module input buffer
     uint8_t regval = readRegister(SPI_HOST_INTR);
@@ -810,13 +810,13 @@ bool ModuleSPICommunication::writeRawFrame(const char *rawFrame)
     return true;
 }
 
-bool ModuleSPICommunication::writeDataFrame(const char *data, uint32_t length)
+bool ModuleSPICommunication::writeDataFrame(const uint8_t *data, uint32_t length)
 {
     dataFrameRaw frame;
     memset(&frame, 0, sizeof(dataFrameRaw));
     frame.LengthType = length | (0x50 << 8); // 0x50 for data frame type
 
-    bool success = writeRawFrame((char*)&frame);
+    bool success = writeRawFrame((uint8_t*)&frame);
     if (!success)
     {
         return false;
@@ -837,7 +837,7 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     mgmtFrameRaw rawFrame;
     frame->rawFrameFormat(&rawFrame);
 
-    bool success = writeRawFrame((char*)&rawFrame);
+    bool success = writeRawFrame((uint8_t*)&rawFrame);
 
     if (!success)
         return false;
@@ -873,7 +873,7 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     return true;
 }
 
-bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength, bool force4byte)
+bool ModuleSPICommunication::writePayloadData(const uint8_t *data, uint16_t byteLength, bool force4byte)
 {
     if (force4byte && byteLength != (byteLength & ~3))
     {

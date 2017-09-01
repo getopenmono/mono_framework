@@ -233,7 +233,7 @@ namespace mono { namespace redpine {
          */
         void moduleEventHandler();
 
-        bool sendDataFrame(const char *dataPayload, uint32_t length);
+        bool sendDataFrame(const uint8_t *dataPayload, uint32_t length);
 
         /**
          * Obtain a reference to the singleton module object

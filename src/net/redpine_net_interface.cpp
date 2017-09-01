@@ -134,7 +134,7 @@ bool RedpineSocketInterface::writeData(const char *data, uint32_t length, uint32
     memcpy(frame->destIPaddr.ipv4_address, ipAddr, 4);
     memcpy(((char*)frame)+frmHeaderSize, data, length - extraAlignmentPadding);
 
-    bool success = Module::Instance()->sendDataFrame((char*)frame, totalSize);
+    bool success = Module::Instance()->sendDataFrame((uint8_t*)frame, totalSize);
     free(frame);
 
     return success;
