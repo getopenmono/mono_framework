@@ -352,10 +352,7 @@ bool ModuleSPICommunication::readFrame(DataReceiveBuffer &rawFrame)
 
 bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, SPIReceiveDataBuffer &buffer)
 {
-    uint32_t frameLength = frameHeader.totalBytes - 4 - frameHeader.dummyBytes;
-    
-    //align 4-byte granularity, by AND with 0b111111100
-    int readLength = (frameLength + 3) & (~3);
+    uint32_t frameLength = frameHeader.totalBytes - 4;
 
     // Setup init command structure
     CommandC1 c1;
@@ -377,10 +374,8 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
         return false;
     }
 
-    spiCommandC3 c3 = readLength & 0xFF; // lower byte
-    spiCommandC4 c4 = (readLength & 0xFF00) >> 8; // upper byte
-
-    //mono::defaultSerial.printf("Frm read, length: %i\r\n",readLength);
+    spiCommandC3 c3 = frameLength & 0xFF; // lower byte
+    spiCommandC4 c4 = (frameLength & 0xFF00) >> 8; // upper byte
 
     setChipSelect(true);
     // send read-length
@@ -402,15 +397,15 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
         printf("reading dummy bytes: ");
         setChipSelect(true);
         for (int i=0; i<frameHeader.dummyBytes; i++) {
-            //spi->write(0);
             printf("0x%x ", spi->write(0) );
         }
         setChipSelect(false);
-        
+
         printf("\r\n");
     }
 
-    //raed the real data bytes
+    int readLength = frameLength - frameHeader.dummyBytes;
+    // read the real data bytes
     if (buffer.length < readLength)
     {
         mono::defaultSerial.printf("Module frame read failed: Receive buffer too small!\r\n");
