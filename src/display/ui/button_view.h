@@ -148,16 +148,6 @@ namespace mono { namespace ui {
         void setText(Color c);
 
         /**
-         * @brief Sets the text color
-         *
-         * This method will not schedule repaint! You must @ref scheduleRepaint
-         * manually.
-         *
-         * @param c The new text color
-         */
-        void setText(Color c);
-
-        /**
          * @brief Sets the highlight color (border & text)
          *
          * The highlight color is the color used to represented a button that is

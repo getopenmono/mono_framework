@@ -842,7 +842,8 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     if (!success)
         return false;
 
-    if (frame->payloadLength() <= 0)
+    int payLen = frame->payloadLength();
+    if (payLen <= 0)
     {
         return true;
     }
@@ -862,7 +863,7 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     frame->dataPayload(payloadBuffer);
 
     // Http post frames are not forced to be 4-byte multiples
-    bool success = writePayloadData(payloadBuffer, payLen, frame->commandId != ModuleFrame::HttpPost);
+    success = writePayloadData(payloadBuffer, payLen, frame->commandId != ModuleFrame::HttpPost);
 
     if (!success)
     {
