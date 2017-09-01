@@ -68,7 +68,7 @@ namespace mono {
      * is that your function will not be executed _before_ the provided time
      * stamp.
      */
-    class ScheduledTask : IQueueItem
+    class ScheduledTask : public IQueueItem
     {
     protected:
 
@@ -151,7 +151,7 @@ namespace mono {
         {
             handler.attach<Class>(context, memptr);
             if (time.isValid() && time > DateTime::now())
-                queue.Enqueue(this);
+                queue.enqueue(this);
         }
         
         ~ScheduledTask();

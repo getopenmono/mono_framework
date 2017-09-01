@@ -1,8 +1,8 @@
 // This software is part of OpenMono, see http://developer.openmono.com
 // and is available under the MIT license, see LICENSE.txt
 
-#ifndef __i2c_power_test__power_subsystem_interface__
-#define __i2c_power_test__power_subsystem_interface__
+#ifndef __power_subsystem_interface__
+#define __power_subsystem_interface__
 
 #include <FunctionPointer.h>
 
@@ -89,7 +89,7 @@ namespace mono { namespace power {
          *
          * @param active `true` will cut the power, `false` will power the peripherals
          */
-        virtual void setPowerFence(bool) {}
+        virtual void setPowerFence(bool active) {}
 
         /**
          * @brief Get the current charge status for the attached battery
@@ -141,4 +141,4 @@ namespace mono { namespace power {
     
 } }
 
-#endif /* defined(__i2c_power_test__power_system_interface__) */
+#endif /* defined(__power_system_interface__) */

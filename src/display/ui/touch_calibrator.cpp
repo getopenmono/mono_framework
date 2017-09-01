@@ -132,7 +132,7 @@ void TouchCalibrateView::drawTouchBlock(geo::Rect &rect, geo::Rect &prevRect)
     painter.drawPixel(rect.X()+rect.Width()/2, rect.Y()+rect.Height()/2);
 }
 
-void TouchCalibrateView::RespondTouchBegin(TouchEvent &event)
+void TouchCalibrateView::respondTouchBegin(TouchEvent &event)
 {
     if (event.IsScreenCoords)
     {
@@ -153,7 +153,7 @@ void TouchCalibrateView::RespondTouchBegin(TouchEvent &event)
 
         //deactive touch input, since we must allow the user to lift her finger
         // from the screen. (Touch de-bouncing)
-        Deactivate();
+        deactivate();
         activateTouchOnRepaint = true;
         scheduleRepaint();
     }
@@ -161,7 +161,7 @@ void TouchCalibrateView::RespondTouchBegin(TouchEvent &event)
     if (calStep == 4)
     {
         activateTouchOnRepaint = false;
-        Deactivate();
+        deactivate();
         calibrationDone = true;
         scheduleRepaint();
         calDone();
@@ -174,12 +174,12 @@ void TouchCalibrateView::makeFirstResponder()
     if (FirstResponder() != this)
     {
         TouchResponder *oldFirst = FirstResponder();
-        Deactivate(); // remove myself from responder chain
-        ResponderChain.Dequeue(); // removes first responder!
-        Activate(); // put myself as first responder
+        deactivate(); // remove myself from responder chain
+        ResponderChain.dequeue(); // removes first responder!
+        activate(); // put myself as first responder
 
         if (oldFirst != NULL)
-            oldFirst->Activate(); // insert old first responder into chain
+            oldFirst->activate(); // insert old first responder into chain
     }
 }
 

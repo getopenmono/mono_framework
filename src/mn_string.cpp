@@ -95,7 +95,7 @@ uint32_t String::Length() const
 
 String& String::operator=(const char *str)
 {
-    if (this != NULL)
+    if (this != 0)
         this->~String();
 
     stringData = (char*) str;
@@ -107,7 +107,7 @@ String& String::operator=(const char *str)
 
 String& String::operator=(const String &str)
 {
-    if (this != NULL)
+    if (this != 0)
         this->~String();
 
     if (str.malloced)
@@ -164,6 +164,11 @@ char String::operator[](uint32_t pos) const
 }
 
 char* String::operator()() const
+{
+    return CString();
+}
+
+char* String::CString() const
 {
     return this->stringData;
 }

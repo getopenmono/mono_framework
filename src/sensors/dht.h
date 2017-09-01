@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define BYTES_IN_READING 5
-
 namespace mono { namespace sensor { namespace dht {
 
     enum SensorType { Unknown, DHT11, DHT22 };

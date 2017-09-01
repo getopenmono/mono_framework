@@ -87,7 +87,7 @@ bool OnOffButtonView::isActive() const
 
 // MARK: Touch
 
-void OnOffButtonView::TouchEnd(mono::TouchEvent &event)
+void OnOffButtonView::touchEnd(mono::TouchEvent &event)
 {
     bool shouldRepaint = isPressedDown;
 

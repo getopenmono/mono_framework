@@ -141,6 +141,18 @@ namespace mono { namespace network {
         {
             this->completionHandler.attach(cnxt, memPtr);
         }
+
+        /**
+         * To receive a notification callback when the underlying network request
+         * finishes successfully, use this method to install a callback function.
+         *
+         * @brief Set the completion handler callback function
+         * @param cfunc A pointer to the function handling completion
+         */
+        void setCompletionCallback(void(*cfunc)(CompletionEvent*))
+        {
+            this->completionHandler.attach(cfunc);
+        }
         
         /**
          * To receive a notification callback if this request fails, set a 
@@ -155,6 +167,18 @@ namespace mono { namespace network {
         {
             this->errorHandler.attach(cnxt, memPtr);
         }
+
+        /**
+         * To receive a notification callback if this request fails, set a
+         * callback function here.
+         *
+         * @brief Set an error handler callback function
+         * @param cfunc A pointer to the function handling errors
+         */
+        void setErrorCallback(void(*cfunc)(ErrorEvent*))
+        {
+            this->errorHandler.attach(cfunc);
+        }
         
         /**
          * To receive notifications of state changes to the underlying network
@@ -168,6 +192,18 @@ namespace mono { namespace network {
         void setStateChangeEventCallback(Owner *cnxt, void(Owner::*memPtr)(StateChangeEvent*))
         {
             this->stateChangeHandler.attach(cnxt, memPtr);
+        }
+
+        /**
+         * To receive notifications of state changes to the underlying network
+         * request, install a callback function with this method.
+         *
+         * @brief Set a state change observer callback
+         * @param cfunc A pointer to the function handling request state changes
+         */
+        void setStateChangeEventCallback(void(*cfunc)(StateChangeEvent*))
+        {
+            this->stateChangeHandler.attach(cfunc);
         }
     };
     

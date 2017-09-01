@@ -4,6 +4,7 @@
 #ifndef mono_power_aware_interface_h
 #define mono_power_aware_interface_h
 
+#include <deprecated.h>
 
 namespace mono { namespace power {
     
@@ -16,10 +17,10 @@ namespace mono { namespace power {
      * Classes that implements this interface canreceive power related events in
      * from of handler methods. This interface define the 3 handler methods:
      *
-     * 1. `@ref onSystemPowerOnReset` : Called reset or first power on
-     * 2. `@ref onSystemEnterSleep` : Called just before system enter sleep mode
-     * 3. `@ref onSystemWakeFromSleep` : Called right after the system has woken from sleep
-     * 4. `@ref OnSystemBatteryLow` : Called when battery is critically low
+     * 1. @ref `onSystemPowerOnReset` : Called reset or first power on
+     * 2. @ref `onSystemEnterSleep` : Called just before system enter sleep mode
+     * 3. @ref `onSystemWakeFromSleep` : Called right after the system has woken from sleep
+     * 4. @ref `onSystemBatteryLow` : Called when battery is critically low
      *
      * Inheriting this interface is not enough to active the functionality. You
      * must remember to add your object instance to the @ref IPowerManagement 
@@ -39,7 +40,7 @@ namespace mono { namespace power {
         IPowerAware *_pwrawr_nextPowerAware;
         
         /**
-         * Previous pointer in the power awareness queue.
+         * @brief Previous pointer in the power awareness queue.
          */
         IPowerAware *_pwrawr_previousPowerAware;
         
@@ -64,7 +65,7 @@ namespace mono { namespace power {
          * preserve battery by power down any peripheral, that is not needed
          * during sleep.
          *
-         * This method can be called many times during the firmware life cycle.
+         * This method can be called many times during your apps life cycle.
          * (That is between resets.) After each sleep period, when the MCU wakes
          * the @ref onSystemWakeFromSleep is guaranteed to be called.
          *
@@ -73,17 +74,37 @@ namespace mono { namespace power {
         virtual void onSystemEnterSleep() { };
         
         /**
-         * <# description #>
+         * @brief Override to get notified when system wakes from sleep
          *
-         * @brief <# brief desc #>
-         * @param <# param desc #>
-         * @param <# param desc #>
-         * @returns <# return desc #>
+         * You can override this method to get wake-up notifications. When the
+         * CPU starts executing intructions and the power system has powered up
+         * all peripherals - this method gets called.
+         *
+         * Use this method to setup your app to resume after sleep mode.
+         *
+         * This method can be called many times during your apps life cycle.
+         * (That is between resets.)
          */
         virtual void onSystemWakeFromSleep() { };
         
-        
-        virtual void OnSystemBatteryLow() { };
+        /**
+         * @brief Override to get notified when the battery voltage reaches a
+         * critical level.
+         *
+         * You can override this method to get *battery low* notifications. When
+         * this methods gets called, you have some time to finish critical tasks.
+         * That might writing state to file system or transfer data over the
+         * network.
+         *
+         * Depending on the health of the battery, the time between this
+         * notification and the actual system enforced power off, might vary.
+         *
+         * In contrast to the other *power aware* methods this is only called
+         * once in the application life cycle. After the enforced power off, when
+         * the battery is charged, the system will automatically reset.
+         */
+        virtual void onSystemBatteryLow() { };
+        virtual void OnSystemBatteryLow() __DEPRECATED("Capitalized method calls syntax is being obsoleted","onSystemBatteryLow") { onSystemBatteryLow(); }
     };
     
     

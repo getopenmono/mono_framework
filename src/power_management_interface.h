@@ -130,7 +130,7 @@ namespace mono { namespace power {
             IPowerAware *task = powerAwarenessQueue;
             while (task != NULL) {
                 
-                task->OnSystemBatteryLow();
+                task->onSystemBatteryLow();
                 task = task->_pwrawr_nextPowerAware;
             }
         }

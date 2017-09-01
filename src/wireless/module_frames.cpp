@@ -23,8 +23,8 @@ ModuleFrame::~ModuleFrame()
     {
         debug("freeing frame: 0x%x from queues...\r\n",commandId);
         Module *mod = Module::Instance();
-        mod->requestFrameQueue.Remove((ManagementFrame*)this);
-        if (mod->responseFrameQueue.Remove((ManagementFrame*)this))
+        mod->requestFrameQueue.remove((ManagementFrame*)this);
+        if (mod->responseFrameQueue.remove((ManagementFrame*)this))
         {
             warning("A Redpine response queue frame was freed! The communication will be out of sync!\r\n");
         }
@@ -163,7 +163,7 @@ void ManagementFrame::commitAsync()
 
     Module *module = Module::Instance();
 
-    module->requestFrameQueue.Enqueue(this);
+    module->requestFrameQueue.enqueue(this);
 
 
     Timer::callOnce<Module>(0, module, &Module::moduleEventHandler);
@@ -174,7 +174,7 @@ void ManagementFrame::abort()
     debug("Aborting MGMT Frame: 0x%x\r\n",commandId);
 
     Module *mod = Module::Instance();
-    mod->requestFrameQueue.Remove(this);
+    mod->requestFrameQueue.remove(this);
 
     this->completionHandler.attach<ManagementFrame>(NULL, NULL);
 }

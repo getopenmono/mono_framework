@@ -158,6 +158,16 @@ namespace mono { namespace network {
         {
             dataHandler.attach(cnxt, memPtr);
         }
+
+        /**
+         * @brief Provide your callback function to handle response data
+         *
+         * @param cfunc A pointer to the function that handles the data response
+         */
+        void setDataReadyCallback(void(*cfunc)(const HttpResponseData&))
+        {
+            dataHandler.attach(cfunc);
+        }
     };
 
 

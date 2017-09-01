@@ -68,7 +68,7 @@ bool GraphView::CursorActive() const
 
 void GraphView::updateStride()
 {
-    if (source == NULL || source->BufferLenght() <= 0)
+    if (source == NULL || source->BufferLength() <= 0)
     {
         bufferStride = 1;
         return;
@@ -80,10 +80,10 @@ void GraphView::updateStride()
         return;
     }
 
-    if (source->BufferLenght() > viewRect.Width())
-        bufferStride = source->BufferLenght() / viewRect.Width();
+    if (source->BufferLength() > viewRect.Width())
+        bufferStride = source->BufferLength() / viewRect.Width();
     else
-        bufferStride = viewRect.Width() / source->BufferLenght();
+        bufferStride = viewRect.Width() / source->BufferLength();
 }
 
 void GraphView::updateMapping()
@@ -146,7 +146,7 @@ void GraphView::repaint()
     int outRect = us_ticker_read();
 
     // draw graph line
-    bool viewSmallerThanBuffer = source->BufferLenght() > viewRect.Width();
+    bool viewSmallerThanBuffer = source->BufferLength() > viewRect.Width();
 
 
     int newestIndexMapped = 0;

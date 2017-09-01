@@ -54,13 +54,13 @@ ButtonView::ButtonView(geo::Rect rect, const char *text) :
 
 // MARK: Touch Handlers
 
-void ButtonView::TouchBegin(mono::TouchEvent &)
+void ButtonView::touchBegin(mono::TouchEvent &)
 {
     isPressedDown = true;
     this->scheduleRepaint();
 }
 
-void ButtonView::TouchMove(mono::TouchEvent &event)
+void ButtonView::touchMove(mono::TouchEvent &event)
 {
     bool inRect = viewRect.contains(event.Position);
 
@@ -75,7 +75,7 @@ void ButtonView::TouchMove(mono::TouchEvent &event)
     }
 }
 
-void ButtonView::TouchEnd(mono::TouchEvent &event)
+void ButtonView::touchEnd(mono::TouchEvent &event)
 {
     bool shouldRepaint = isPressedDown;
 

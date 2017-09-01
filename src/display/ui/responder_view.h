@@ -20,20 +20,26 @@ namespace mono { namespace ui {
         bool touchActive;
         
         /** Internal touch handler, you should not overwrite this */
-        virtual void RespondTouchBegin(TouchEvent &event);
+        virtual void respondTouchBegin(TouchEvent &event);
         
         /** Internal touch handler, you should not overwrite this */
-        virtual void RespondTouchMove(TouchEvent &event);
+        virtual void respondTouchMove(TouchEvent &event);
         
         /** Internal touch handler, you should not overwrite this */
-        virtual void RespondTouchEnd(TouchEvent &event);
+        virtual void respondTouchEnd(TouchEvent &event);
         
         
-        virtual void TouchBegin(TouchEvent &event);
-        virtual void TouchEnd(TouchEvent &event);
-        virtual void TouchMove(TouchEvent &event);
+        virtual void touchBegin(TouchEvent &event);
+        virtual void TouchBegin(TouchEvent &event) __DEPRECATED("Capitalized method calls syntax is being obsoleted","touchBegin") { touchBegin(event); }
         
-        virtual void ToScreenCoords(TouchEvent *event);
+        virtual void touchEnd(TouchEvent &event);
+        virtual void TouchEnd(TouchEvent &event) __DEPRECATED("Capitalized method calls syntax is being obsoleted","touchEnd") { touchEnd(event); }
+        
+        virtual void touchMove(TouchEvent &event);
+        virtual void TouchMove(TouchEvent &event) __DEPRECATED("Capitalized method calls syntax is being obsoleted","touchMove") { touchMove(event); }
+        
+        virtual void toScreenCoords(TouchEvent *event);
+        virtual void ToScreenCoords(TouchEvent *event) __DEPRECATED("Capitalized method calls syntax is being obsoleted","toScreenCoords") { toScreenCoords(event); }
         
     public:
         

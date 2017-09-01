@@ -8,9 +8,8 @@
 #include "point.h"
 #include "touch_responder.h"
 #include "touch_event.h"
-
+#include <deprecated.h>
 #include "rect.h"
-
 
 #include <stdio.h>
 
@@ -51,7 +50,7 @@ namespace mono {
         void runTouchBegin(geo::Point &pos)
         {
             lastTouchBegin = TouchEvent(TouchEvent::TOUCH_BEGIN, pos, this);
-            TouchResponder::RunResponderChainTouchBegin(lastTouchBegin);
+            TouchResponder::runResponderChainTouchBegin(lastTouchBegin);
         }
         
         /**
@@ -66,7 +65,7 @@ namespace mono {
         {
             TouchEvent event(TouchEvent::TOUCH_MOVE, pos, this);
             event.TouchBeginEvent = &lastTouchBegin;
-            TouchResponder::RunResponderChainTouchMove(event);
+            TouchResponder::runResponderChainTouchMove(event);
         }
         
         /**
@@ -81,7 +80,7 @@ namespace mono {
         {
             TouchEvent event(TouchEvent::TOUCH_END, pos, this);
             event.TouchBeginEvent = &lastTouchBegin;
-            TouchResponder::RunResponderChainTouchEnd(event);
+            TouchResponder::runResponderChainTouchEnd(event);
         }
         
     public:
@@ -108,12 +107,14 @@ namespace mono {
         /**
          * @brief Sub-classes must convert corrdinates to screen pixels (X axis)
          */
-        virtual int ToScreenCoordsX(int touchPos, uint16_t screenWidth) = 0;
+        virtual int toScreenCoordsX(int touchPos, uint16_t screenWidth) = 0;
+        virtual int ToScreenCoordsX(int touchPos, uint16_t screenWidth) __DEPRECATED("Capitalized method calls syntax is being obsoleted","toScreenCoordsX") { return toScreenCoordsX(touchPos, screenWidth); }
         
         /**
          * @brief Sub-classes must convert corrdinates to screen pixels (Y axis)
          */
-        virtual int ToScreenCoordsY(int touchPos, uint16_t screenHeight) = 0;
+        virtual int toScreenCoordsY(int touchPos, uint16_t screenHeight) = 0;
+        virtual int ToScreenCoordsY(int touchPos, uint16_t screenHeight) __DEPRECATED("Capitalized method calls syntax is being obsoleted","toScreenCoordsY") { return toScreenCoordsY(touchPos, screenHeight); }
 
         /**
          * @brief Get the touch systems current calibration config.

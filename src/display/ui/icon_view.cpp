@@ -1,3 +1,5 @@
+// This software is part of OpenMono, see http://developer.openmono.com
+// and is available under the MIT license, see LICENSE.txt
 
 #include "icon_view.h"
 
@@ -28,6 +30,11 @@ void IconView::setBackground(Color c)
     background = c;
 }
 
+void IconView::setIcon(const MonoIcon *icon)
+{
+    this->icon = icon;
+}
+
 Color IconView::Foreground() const
 {
     return foreground;
@@ -38,15 +45,14 @@ Color IconView::Background() const
     return background;
 }
 
-
 void IconView::repaint()
 {
     if (icon == 0)
         return;
-    
+
     display::IDisplayController *ctrl = painter.DisplayController();
     ctrl->setWindow(viewRect.X(), viewRect.Y(), viewRect.Width(), viewRect.Height());
-    
+
     int cnt = 0;
     for(int y=0; y<icon->height; y++)
     {

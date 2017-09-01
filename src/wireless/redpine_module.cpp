@@ -288,7 +288,7 @@ void Module::moduleEventHandler()
                 return;
             }
 
-            responseFrameQueue.Enqueue(request);
+            responseFrameQueue.enqueue(request);
         }
     }
 }
@@ -414,7 +414,7 @@ void Module::onSystemWakeFromSleep()
 
 }
 
-void Module::OnSystemBatteryLow()
+void Module::onSystemBatteryLow()
 {
 
 }

@@ -1,10 +1,13 @@
 { "build_systems":
   [ { "file_regex": "^([^\n:]+):([0-9]+):([0-9]+): (.*)$"
-    , "name": "MonoFramework"
+    , "name": "Framework"
     , "cmd": "make"
     , "variants":
       [ { "name": "Clean"
         , "cmd": ["make","clean"]
+        }
+      , { "name": "Tests"
+        , "cmd": ["make","unittests"]
         }
       , { "name": "Release"
         , "cmd": ["make","release"]

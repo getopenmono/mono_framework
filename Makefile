@@ -82,7 +82,7 @@ MKDIR=mkdir
 MONOPROG=monoprog
 ELFTOOL='C:\Program Files (x86)\Cypress\PSoC Creator\3.1\PSoC Creator\bin\cyelftool.exe'
 INCS = -I . $(addprefix -I, $(MONO_INCLUDES) $(MBED_INCLUDES) $(INCLUDE_DIR))
-CDEFS= 
+CDEFS=
 ASDEFS=
 AS_FLAGS = -c -g -Wall -mcpu=cortex-m3 -mthumb -mthumb-interwork -march=armv7-m
 CC_FLAGS = -c -g -Wall -mcpu=cortex-m3 -mthumb $(OPTIMIZATION) -mthumb-interwork -fno-common -fmessage-length=0 -ffunction-sections -fdata-sections -march=armv7-m
@@ -92,14 +92,15 @@ LDSCRIPT = -T $(LINKER_SCRIPT)
 LD_FLAGS = -g -mcpu=cortex-m3 -mthumb -march=armv7-m -fno-rtti -Wl,--gc-sections -specs=nano.specs
 LD_SYS_LIBS = -lstdc++ -lsupc++ -lm -lc -lgcc -lnosys
 COPY_FLAGS = -j .text -j .eh_frame -j .rodata -j .ramvectors -j .noinit -j .data -j .bss -j .stack -j .heap -j .cyloadablemeta
-	
+
 # Makro for using newlines in rules.
 define \n
 
 
 endef
 
-all: $(MONO_FRAMEWORK)
+.PHONY: all
+all: unittests $(MONO_FRAMEWORK)
 
 .PHONY: release
 release: all
@@ -160,15 +161,17 @@ $(MBED_LIB):
 	@echo "Building mbed library..."
 	@make -C $(MBED_PATH)
 
-.PHONY:
+.PHONY: icons
 icons:
 	@echo "Converting icon files..."
-	
 	make -C resources -f icons.mk all
 
+.PHONY: clean
 clean:
 	$(RRM) $(BUILD_DIR)
 	$(RRM) $(RELEASE_DIR)
+
+include $(FRAMEWORK_PATH)/unittests/unittests.mk
 
 # Debugging this Makefile
 

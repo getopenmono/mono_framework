@@ -196,7 +196,7 @@ namespace mono { namespace redpine {
 
         void onSystemWakeFromSleep();
 
-        void OnSystemBatteryLow();
+        void onSystemBatteryLow();
 
         /**
          * Handles an incomming data frame (expect that it contain socket data
@@ -310,6 +310,11 @@ namespace mono { namespace redpine {
         {
             Module::Instance()->networkReadyHandler.attach<Owner>(obj, memPtr);
         }
+
+        static void setNetworkReadyCallback(void(*cfunc)(void))
+        {
+            Module::Instance()->networkReadyHandler.attach(cfunc);
+        }
         
         template <typename Owner>
         static void setConnectFailedCallback(Owner *obj, void (Owner::*memPtr)(void))
@@ -317,10 +322,20 @@ namespace mono { namespace redpine {
             Module::Instance()->connectFailedHandler.attach<Owner>(obj, memPtr);
         }
 
+        static void setConnectFailedCallback(void(*cfunc)(void))
+        {
+            Module::Instance()->connectFailedHandler.attach(cfunc);
+        }
+
         template <typename Owner>
         static void setStaticIPCallback(Owner *obj, void (Owner::*memPtr)(StaticIPParams*))
         {
             Module::Instance()->staticIPHandler.attach<Owner>(obj, memPtr);
+        }
+
+        static void setStaticIPCallback(void(*cfunc)(StaticIPParams*))
+        {
+            Module::Instance()->staticIPHandler.attach(cfunc);
         }
     };
 

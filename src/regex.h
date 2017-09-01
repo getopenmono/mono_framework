@@ -47,7 +47,6 @@ namespace mono {
     {
         String pattern;
         
-        uint32_t currentMatchNum;
     public:
         
         /**

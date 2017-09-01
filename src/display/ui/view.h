@@ -14,7 +14,7 @@ namespace mono {
     class IApplicationContext;
     namespace ui {
 
-        class Animator; // forward declaration
+    class Animator;
 
     /**
      * @brief Abstract interface for all UI Views, parent class for all views
@@ -36,7 +36,7 @@ namespace mono {
      *
      * @see ResponderView
      */
-        class View : public IViewALike, public IQueueItem
+    class View : public IViewALike, public IQueueItem
     {
         friend class mono::IApplicationContext;
         friend class Animator;
@@ -219,7 +219,7 @@ namespace mono {
 
         /**
          * @brief Get the views *view rect*
-         * 
+         *
          * This method returns a reference to the views current view rect.
          */
         virtual const geo::Rect &ViewRect() const;

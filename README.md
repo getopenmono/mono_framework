@@ -1,6 +1,6 @@
 # Mono Framework
 
-[![Build Status](https://travis-ci.org/getopenmono/mono_framework.svg?branch=master)](https://travis-ci.org/getopenmono/mono_framework) [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.txt) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/getopenmono/mono_framework?branch=master&svg=true "AppVeyor Build Status")](https://ci.appveyor.com/project/stoffera/mono_framework)
+[![Build Status](https://travis-ci.org/getopenmono/mono_framework.svg?branch=master)](https://travis-ci.org/getopenmono/mono_framework) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/getopenmono/mono_framework?branch=master&svg=true "AppVeyor Build Status")](https://ci.appveyor.com/project/stoffera/mono_framework) [![Docker Build Statu](https://img.shields.io/docker/build/monolit/framework.svg)](https://hub.docker.com/r/monolit/framework/) [![Documentation Status](https://readthedocs.org/projects/mono-developer-documentation/badge/?version=latest)](http://developer.openmono.com/en/latest/?badge=latest) [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE.txt) [![Twitter Follow](https://img.shields.io/twitter/follow/getopenmono.svg?style=social&label=Follow)](https://twitter.com/getopenmono)
 
 This is a framework for developing [Mono](http://openmono.com) applications.  For documentation on how to install and use this framework, see the [developer site](http://developer.openmono.com/).  If you want to generate the documentation, see [DOXYGEN.md](src/DOXYGEN.md).
 
@@ -20,6 +20,8 @@ Run
 ```
 $ bash resources/setup_icons.sh resources/icons.mk.tmp 
 ```
+
+(If you have problems with XCode, you might need to run `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.)
 
 Run
 ```
