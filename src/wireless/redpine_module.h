@@ -198,13 +198,42 @@ namespace mono { namespace redpine {
 
         void onSystemBatteryLow();
 
+        /**
+         * Handles an incomming data frame (expect that it contain socket data
+         */
+        void handleDataPayload(ModuleCommunication::DataPayload const &payload);
+
+        /**
+         * Initiazes (constructs) the correct subclass of an async mgmt frame
+         */
+        bool initAsyncFrame(const DataReceiveBuffer &buffer, ManagementFrame **frame);
+
+        bool discardIfNeeded(ManagementFrame *frame);
+
     public:
+
+        /*
+         * @brief A pointer to the data frame payload handler
+         *
+         * A network subsystem should set this variable, to allow the module
+         * to handle data frames.
+         */
+        ModuleCommunication::DataPayloadHandler *defaultDataFramePayloadHandler;
+
+        /**
+         * @brief The default handler for async incoming management frames
+         *
+         * Such frames are power, socket connect and disconnect events.
+         */
+        mbed::FunctionPointerArg1<bool, ManagementFrame *> *asyncManagementFrameHandler;
 
         /**
          * Callback function installed into the CommunicationInterface interrupt
          * callback listener.
          */
         void moduleEventHandler();
+
+        bool sendDataFrame(const uint8_t *dataPayload, uint32_t length);
 
         /**
          * Obtain a reference to the singleton module object

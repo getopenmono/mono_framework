@@ -34,6 +34,7 @@ MONO_OBJECTS =	$(patsubst %.c,%.o,$(wildcard $(FRAMEWORK_PATH)/*.c)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/wireless/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/media/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/io/*.cpp)) \
+				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/net/*.cpp)) \
 				$(patsubst %.cpp,%.o,$(wildcard $(FRAMEWORK_PATH)/sensors/*.cpp))
 
 MONO_INCLUDES_REL = . \
@@ -44,6 +45,7 @@ MONO_INCLUDES_REL = . \
 					io \
 					wireless \
 					media \
+					net \
 					sensors
 
 MONO_INCLUDES =	$(foreach PATH, $(MONO_INCLUDES_REL), $(FRAMEWORK_PATH)/$(PATH))

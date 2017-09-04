@@ -136,7 +136,7 @@ namespace mono { namespace ui {
          * @param c The new border color
          */
         void setBorder(Color c);
-
+        
         /**
          * @brief Sets the text color
          *

@@ -32,39 +32,94 @@ bool ModuleCommunication::bufferIsDataFrame(DataReceiveBuffer &buffer)
         return false;
 }
 
+// NARK: Generic Data Buffer
 
-SPIReceiveDataBuffer::SPIReceiveDataBuffer(int size, uint16_t fwVer) : DataReceiveBuffer()
+DataReceiveBuffer::DataReceiveBuffer()
+{
+    length = 0;
+    bytesToRead = 0;
+    buffer = 0;
+    refCount = 0;
+}
+
+DataReceiveBuffer::DataReceiveBuffer(int size)
 {
     this->length = size;
-    this->ownsMemory = true;
-    this->firmwareVersion = fwVer;
+    this->bytesToRead = this->length;
+    this->buffer = 0;
+    this->refCount = 0;
+    alloc(size);
+}
 
-    //mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\r\n");
-    this->buffer = (uint8_t*) malloc(size);
+void DataReceiveBuffer::alloc(int len)
+{
+    if (this->buffer != 0 && *this->refCount <= 1)
+    {
+        free(this->buffer);
+    }
+
+    if (len <= 0)
+    {
+        buffer = 0;
+        refCount = 0;
+    }
+
+    this->buffer = (uint8_t*) malloc(len+sizeof(int));
     if (buffer == NULL)
     {
         error("HEAP overflow!\r\n");
     }
+
+    this->refCount = (int*) (this->buffer + len);
+    (*this->refCount) = 1;
 }
 
-SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead, uint16_t fwVer)
+DataReceiveBuffer::DataReceiveBuffer(const DataReceiveBuffer &other)
+{
+    this->length = other.length;
+    this->refCount = other.refCount;
+    this->buffer = other.buffer;
+    this->bytesToRead = other.bytesToRead;
+    (*this->refCount)++;
+}
+
+DataReceiveBuffer& DataReceiveBuffer::operator=(const DataReceiveBuffer &other)
+{
+    this->length = other.length;
+    this->refCount = other.refCount;
+    this->buffer = other.buffer;
+    this->bytesToRead = other.bytesToRead;
+    (*this->refCount)++;
+
+    return *this;
+}
+
+DataReceiveBuffer::~DataReceiveBuffer()
+{
+    if (buffer != 0 && refCount != 0)
+    {
+        (*this->refCount)--;
+        if (*this->refCount <= 0)
+        {
+            free(this->buffer);
+        }
+    }
+}
+
+// MARK: SPI Data Buffer
+
+SPIReceiveDataBuffer::SPIReceiveDataBuffer(int size, uint16_t fwVer) : DataReceiveBuffer(size)
 {
     this->firmwareVersion = fwVer;
 
-    if (firmwareVersion == 0xab15) {
-        this->length = (frmHead.totalBytes + 3) & (~3); // old protocol 1.5
-    }
-    else
-        this->length = ((frmHead.totalBytes - 4) + 3) & (~3); // -4 needed for version 1.6
+}
 
-    this->ownsMemory = true;
+SPIReceiveDataBuffer::SPIReceiveDataBuffer(frameDescriptorHeader &frmHead, uint16_t fwVer) : DataReceiveBuffer()
+{
+    this->firmwareVersion = fwVer;
+    this->length = ((frmHead.totalBytes - 4) + 3) & (~3); // -4 needed for version 1.6
 
-    //mono::warning("SPIReceiveDataBuffer: allocating buffer on HEAP!\r\n");
-    this->buffer = (uint8_t*) malloc(this->length);
-    if (buffer == NULL)
-    {
-        error("HEAP overflow! Could not alloc: %i bytes\r\n",this->length);
-    }
+    alloc(this->length);
 
     this->bytesToRead = this->length;
 }
@@ -85,25 +140,17 @@ SPIReceiveDataBuffer& SPIReceiveDataBuffer::operator<<(mbed::SPI *spi)
     while (this->bytesToRead > 0)
     {
         buf = spi->write(0);
+        mono::defaultSerial.printf("0x%X ", buf);
         //set LSByte on index 0, and MSByte on index 3
         *writePtr = (buf & 0xFF)<<24 | (buf & 0xFF00)<<8 | (buf & 0xFF0000)>>8 | (buf&0xFF000000)>>24;
 
         bytesToRead -= 4;
         writePtr++; // increment 4 bytes
     }
-
+    mono::defaultSerial.printf("\r\n");
     spi->format(8);
 
     return *this;
-}
-
-SPIReceiveDataBuffer::~SPIReceiveDataBuffer()
-{
-    if (ownsMemory)
-    {
-        free(this->buffer);
-    }
-
 }
 
 // MARK: Module SPI Communication
@@ -233,7 +280,7 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     cmd1.TransferLength = CommandC1::FOUR_BYTES; // ignored
 
     CommandC2 cmd2;
-    cmd2.DataGranularity = CommandC2::THIRTYTWO_BITMODE;
+    cmd2.DataGranularity = CommandC2::EIGHT_BITMODE;
     cmd2.RegisterSelect = 0; // ignored
 
     int status = sendC1C2(cmd1, cmd2);
@@ -262,7 +309,8 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     //receive frame head 4-bytes
     spi->format(8);
 
-    uint8_t readBuf[4];
+    uint16_t frmDesc[2];
+    char *readBuf = (char*) frmDesc;
     setChipSelect(true);
     readBuf[0] = spi->write(0);
     readBuf[1] = spi->write(0);
@@ -270,37 +318,41 @@ bool ModuleSPICommunication::readFrameDescriptorHeader(frameDescriptorHeader *bu
     readBuf[3] = spi->write(0);
     setChipSelect(false);
 
-//    setChipSelect(true);
-//    *((int*)readBuf) = spi->write(0);
-//    setChipSelect(false);
+    buffer->dummyBytes = frmDesc[1] - 4;
+    buffer->totalBytes = frmDesc[0];
 
-//    mono::defaultSerial.printf("Header: 0x%x 0x%x 0x%x 0x%x\r\n",readBuf[0],readBuf[1],readBuf[2],readBuf[3]);
+    return true;
+}
 
-    spi->format(8);
+bool ModuleSPICommunication::readFrame(DataReceiveBuffer &rawFrame)
+{
+    // get the size of the incoming frame
+    frameDescriptorHeader frmHead;
+    bool success = readFrameDescriptorHeader(&frmHead);
 
-    // convert number to the current architecture endian
-    // (module send as little-endian)
-//    if (InterfaceVersion == 0xab15)
-//        buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8); // old version where protocol is different
-//    else
-        buffer->dummyBytes = (readBuf[1] | readBuf[0] << 8) - 4; // version 1.6 needs this
+    if (!success)
+    {
+        mono::defaultSerial.printf("Failed to read FrameDescriptor Header from input\r\n");
+        return false;
+    }
 
-    buffer->totalBytes = readBuf[3] | readBuf[2] << 8;
+    //mono::defaultSerial.printf("frm head: 0x%x dummy, 0x%x total\r\n", frmHead.dummyBytes,frmHead.totalBytes);
+
+    //alloc memory for incoming frame
+    SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
+
+    success = readFrameBody(frmHead, buffer);
+    if (!success)
+        return false;
+
+    rawFrame = buffer;
 
     return true;
 }
 
 bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, SPIReceiveDataBuffer &buffer)
 {
-    // this is big-endian
-    uint32_t frameLength;
-//    if (this->InterfaceVersion == 0xab15)
-//        frameLength = frameHeader.dummyBytes + frameHeader.totalBytes; // old firmware version
-//    else
-        frameLength = frameHeader.dummyBytes + frameHeader.totalBytes - 4; // version 1.6 needs this
-
-    //align 4-byte granularity, by AND with 0b111111100
-    int readLength = (frameLength + 3) & (~3);
+    uint32_t frameLength = frameHeader.totalBytes - 4;
 
     // Setup init command structure
     CommandC1 c1;
@@ -312,7 +364,7 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     c1.TransferLength = CommandC1::ONE_BYTE; // ignored
 
     CommandC2 c2;
-    c2.DataGranularity = CommandC2::THIRTYTWO_BITMODE;
+    c2.DataGranularity = CommandC2::EIGHT_BITMODE;
     c2.RegisterSelect = 0; // ignored
 
     // send the commands to read a frame
@@ -322,10 +374,8 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
         return false;
     }
 
-    spiCommandC3 c3 = readLength & 0xFF; // lower byte
-    spiCommandC4 c4 = (readLength & 0xFF00) >> 8; // upper byte
-
-    //mono::defaultSerial.printf("Frm read, length: 0x%x\r\n",readLength);
+    spiCommandC3 c3 = frameLength & 0xFF; // lower byte
+    spiCommandC4 c4 = (frameLength & 0xFF00) >> 8; // upper byte
 
     setChipSelect(true);
     // send read-length
@@ -344,41 +394,39 @@ bool ModuleSPICommunication::readFrameBody(frameDescriptorHeader &frameHeader, S
     // read and discard any dummy bytes
     // dummy bytes are not 32-bit aligned
     if (frameHeader.dummyBytes > 0) {
-        //mono::defaultSerial.printf("reading dummy bytes: ");
+        printf("reading dummy bytes: ");
         setChipSelect(true);
         for (int i=0; i<frameHeader.dummyBytes; i++) {
-            spi->write(0);
-            //mono::defaultSerial.printf("0x%x ", spi->write(0) );
+            printf("0x%x ", spi->write(0) );
         }
         setChipSelect(false);
 
-        //mono::defaultSerial.printf("\r\n");
+        printf("\r\n");
     }
 
-    //raed the real data bytes
-    if (buffer.length < readLength - frameHeader.dummyBytes)
+    int readLength = frameLength - frameHeader.dummyBytes;
+    // read the real data bytes
+    if (buffer.length < readLength)
     {
         mono::defaultSerial.printf("Module frame read failed: Receive buffer too small!\r\n");
         return false;
     }
 
-    spi->format(32);
-
-    buffer.bytesToRead = readLength - frameHeader.dummyBytes;
+    buffer.bytesToRead = readLength;
 
     setChipSelect(true);
-    buffer << spi;
+    uint8_t *ptr = buffer.buffer;
+    while (readLength > ptr - buffer.buffer) {
+        *ptr = spi->write(0);
+        ptr++;
+    }
+
     setChipSelect(false);
-
-    spi->format(8);
-
-    //mono::defaultSerial.printf("Raw frm body:\r\n");
-    //mono::memdump(buffer.buffer, buffer.length);
 
     return true;
 }
 
-int ModuleSPICommunication::spiWrite(uint8_t *data, int byteLength, bool thirtyTwoBitMode)
+int ModuleSPICommunication::spiWrite(const uint8_t *data, int byteLength, bool thirtyTwoBitMode)
 {
     if (thirtyTwoBitMode)
     {
@@ -626,73 +674,22 @@ bool ModuleSPICommunication::interruptActive()
     return spiInterrupt.read();
 }
 
-bool ModuleSPICommunication::readManagementFrame(ManagementFrame &frame)
+bool ModuleSPICommunication::readManagementFrame(DataReceiveBuffer &buffer,  ManagementFrame &frame)
 {
-    // get the size of the incoming frame
-    frameDescriptorHeader frmHead;
-    bool success = readFrameDescriptorHeader(&frmHead);
-
-    if (!success)
-    {
-        mono::defaultSerial.printf("Failed to read FrameDescriptor Header from input\r\n");
-        return false;
-    }
-
-    //mono::defaultSerial.printf("frm head: 0x%x dummy, 0x%x total\r\n", frmHead.dummyBytes,frmHead.totalBytes);
-
-    //alloc memory for incoming frame
-    SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
-
-    success = readFrameBody(frmHead, buffer);
-
-    if (!success)
-    {
-        mono::defaultSerial.printf("Failed to read frame body from input\r\n");
-        return false;
-    }
-
-    if (!bufferIsMgmtFrame(buffer))
-    {
-        mono::defaultSerial.printf("Frame is not a management frame!\r\n");
-        return false;
-    }
-
     mgmtFrameRaw *rawFrame = (mgmtFrameRaw*) buffer.buffer;
     frame = ManagementFrame(rawFrame);
 
     return true;
 }
 
-bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &request)
+bool ModuleSPICommunication::readManagementFrameResponse(DataReceiveBuffer &buffer, ManagementFrame &request)
 {
-    // get the size of the incoming frame
-    frameDescriptorHeader frmHead;
-    bool success = readFrameDescriptorHeader(&frmHead);
-
-    if (!success)
-    {
-        debug("Failed to read FrameDescriptor Header from input\r\n");
-        return false;
-    }
-
-    //alloc memory for incoming frame
-    SPIReceiveDataBuffer buffer(frmHead, this->InterfaceVersion);
-
-    success = readFrameBody(frmHead, buffer);
-
-    if (!success)
-    {
-        debug("Failed to read frame body from input\r\n");
-        return false;
-    }
-
     if (!bufferIsMgmtFrame(buffer))
     {
         memdump(buffer.buffer, buffer.length);
         debug("Frame is not a management frame!\r\n");
         return false;
     }
-
 
     mgmtFrameRaw *rawFrame = (mgmtFrameRaw*) buffer.buffer;
 
@@ -726,7 +723,32 @@ bool ModuleSPICommunication::readManagementFrameResponse(ManagementFrame &reques
     return rawFrame->status == 0;
 }
 
-bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
+bool ModuleSPICommunication::readDataFrame(DataReceiveBuffer &buffer, DataPayloadHandler &payloadHandler)
+{
+    if (!bufferIsDataFrame(buffer))
+    {
+        mono::defaultSerial.printf("Frame is not a data frame!\n\r");
+        memdump(buffer.buffer, buffer.length);
+        return false;
+    }
+
+    dataFrameRaw *rawFrame = (dataFrameRaw*) buffer.buffer;
+
+    // check for payload
+    if ((rawFrame->LengthType & 0xFFF) > 0)
+    {
+        struct DataPayload payload = { ((uint8_t*)rawFrame)+16, (uint16_t)(rawFrame->LengthType & 0xFFF) };
+        payloadHandler.call(payload);
+    }
+    else
+    {
+        debug("Data frame with no payload!\t\n");
+    }
+
+    return true;
+}
+
+bool ModuleSPICommunication::writeRawFrame(const uint8_t *rawFrame)
 {
     //see if there is room in the module input buffer
     uint8_t regval = readRegister(SPI_HOST_INTR);
@@ -736,11 +758,6 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
         debug("Cannot write frame to module, input buffer is full!\r\n");
         return false;
     }
-
-    mgmtFrameRaw rawFrame;
-    frame->rawFrameFormat(&rawFrame);
-
-    // Write the command / mgmt frame
 
     CommandC1 cmd1;
     cmd1.CommandType = CommandC1::READ_WRITE;
@@ -755,15 +772,13 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     c2.RegisterSelect = 0; // ignored
 
     int statusCode = sendC1C2(cmd1, c2);
-    //int statusCode = sendC1C2(0x7c, 0x40);
-
     if (statusCode != CMD_SUCCESS)
     {
         debug("Failed to write frame to module, error status: 0x%x\r\n", statusCode);
         return false;
     }
 
-    spiCommandC3 c3 = frame->size & 0xFF; // lower byte
+    spiCommandC3 c3 = 16 & 0xFF; // lower bytes
     spiCommandC4 c4 = 0; // upper byte
 
     // send write-length
@@ -779,7 +794,48 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     }
 
     // write the mgmt/cmd frame
-    statusCode = spiWrite((uint8_t*)&rawFrame, sizeof(rawFrame));
+    statusCode = spiWrite(rawFrame, 16);
+
+    if (statusCode != CMD_SUCCESS)
+    {
+        debug("Failed to send raw frame to module, got response: 0x%x\r\n",statusCode);
+        return false;
+    }
+
+    return true;
+}
+
+bool ModuleSPICommunication::writeDataFrame(const uint8_t *data, uint32_t length)
+{
+    dataFrameRaw frame;
+    memset(&frame, 0, sizeof(dataFrameRaw));
+    frame.LengthType = length | (0x50 << 8); // 0x50 for data frame type
+
+    bool success = writeRawFrame((uint8_t*)&frame);
+    if (!success)
+    {
+        return false;
+    }
+
+    success = writePayloadData(data, length);
+
+    if (!success)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
+{
+    mgmtFrameRaw rawFrame;
+    frame->rawFrameFormat(&rawFrame);
+
+    bool success = writeRawFrame((uint8_t*)&rawFrame);
+
+    if (!success)
+        return false;
 
     int payLen = frame->payloadLength();
     if (payLen <= 0)
@@ -802,7 +858,7 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     frame->dataPayload(payloadBuffer);
 
     // Http post frames are not forced to be 4-byte multiples
-    bool success = writePayloadData(payloadBuffer, payLen, frame->commandId != ModuleFrame::HttpPost);
+    success = writePayloadData(payloadBuffer, payLen, frame->commandId != ModuleFrame::HttpPost);
 
     if (!success)
     {
@@ -812,7 +868,7 @@ bool ModuleSPICommunication::writeFrame(ManagementFrame *frame)
     return true;
 }
 
-bool ModuleSPICommunication::writePayloadData(uint8_t *data, uint16_t byteLength, bool force4byte)
+bool ModuleSPICommunication::writePayloadData(const uint8_t *data, uint16_t byteLength, bool force4byte)
 {
     if (force4byte && byteLength != (byteLength & ~3))
     {

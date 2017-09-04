@@ -12,12 +12,10 @@
 #include <queue_interrupt.h>
 #include <mn_timer.h>
 #include <mn_digital_out.h>
-
 #include "spi_commands.h"
 #include "module_frames.h"
-
 #include <power_aware_interface.h>
-
+#include <managed_pointer.h>
 
 #include <stdint.h>
 
@@ -36,8 +34,15 @@ namespace mono { namespace redpine {
      */
     class DataReceiveBuffer
     {
+    protected:
+
+        void alloc(int len);
+
     public:
-        
+
+        /** Whould free memory buffer on dealloc */
+        int *refCount;
+
         /** The pointer to the buffer */
         uint8_t *buffer;
         
@@ -52,6 +57,16 @@ namespace mono { namespace redpine {
          * to read.
          */
         int bytesToRead;
+
+        DataReceiveBuffer();
+
+        DataReceiveBuffer(int size);
+
+        DataReceiveBuffer(const DataReceiveBuffer &other);
+
+        DataReceiveBuffer &operator=(const DataReceiveBuffer &other);
+
+        ~DataReceiveBuffer();
     };
     
     
@@ -63,9 +78,6 @@ namespace mono { namespace redpine {
     class SPIReceiveDataBuffer : public DataReceiveBuffer
     {
     public:
-        
-        /** Whould free memory buffer on dealloc */
-        bool ownsMemory;
         
         /** The protocol version used by the RP firmware */
         uint16_t firmwareVersion;
@@ -99,7 +111,7 @@ namespace mono { namespace redpine {
          */
         SPIReceiveDataBuffer& operator<<(mbed::SPI *spi);
         
-        ~SPIReceiveDataBuffer();
+
     };
     
     
@@ -120,7 +132,15 @@ namespace mono { namespace redpine {
 //        virtual void taskHandler() = 0;
         
     public:
-        
+
+        /** Structure to describe the data payload pointer and length for Data frame payloads */
+        struct DataPayload {
+            uint8_t *data;
+            uint16_t length;
+        };
+
+        typedef mbed::FunctionPointerArg1<void, const struct DataPayload&> DataPayloadHandler;
+
         /** 
          * Defines the communication protocol version to use.
          * Redpine change the way FrameDescriptor headers return frame length in
@@ -182,7 +202,18 @@ namespace mono { namespace redpine {
          * present.
          */
         virtual bool interruptActive() = 0;
-        
+
+        /**
+         * @brief Read the frame header (the first 16 bytes)
+         * 
+         * Use this to probe what kind of frame is coming from the module
+         * and read the frame payload later using the dedicated methods.
+         *
+         * @param rawFrame A pointer to the pre-alloced memory to hold the header
+         * @return True on read success, false otherwise
+         */
+        virtual bool readFrame(DataReceiveBuffer &rawFrame) = 0;
+
         /**
          * Read the first available frame from the modules input queue
          * This function should be called when you are sure there is data pending
@@ -190,7 +221,7 @@ namespace mono { namespace redpine {
          * @param frame A reference to management frame placeholder object
          * @return True on success, false otherwise
          */
-        virtual bool readManagementFrame(ManagementFrame &frame) = 0;
+        virtual bool readManagementFrame(DataReceiveBuffer &buffer, ManagementFrame &frame) = 0;
         
         /**
          * Read a pending frame from the module, and interpret it as a response
@@ -209,8 +240,23 @@ namespace mono { namespace redpine {
          * @param request A reference to the request frame, that is awaiting a response
          * @return `true` on success, `false` otherwise.
          */
-        virtual bool readManagementFrameResponse(ManagementFrame &request) = 0;
-        
+        virtual bool readManagementFrameResponse(DataReceiveBuffer &buffer, ManagementFrame &request) = 0;
+
+        /**
+         * @brief Read a pending frame a Data frame.
+         * 
+         * Data frame arrive out-of-order with anything else. Also, we expect that
+         * they deliver data to any open socket. This method read the data from
+         * the module and call the @ref DataPayloadHandler function provided.
+         * This function then takes care of the actual data payload!
+         *
+         * @param payloadHandler A reference the data payload callback handler
+         * @return `true`on succs, `false` otherwise
+         */
+        virtual bool readDataFrame(DataReceiveBuffer &buffer, DataPayloadHandler &payloadHandler) = 0;
+
+        virtual bool writeDataFrame(const uint8_t *data, uint32_t length) = 0;
+
         /**
          * Internal function to read from a memory address. This is used when
          * communicating with the Redpine Modules Bootloader.
@@ -252,7 +298,7 @@ namespace mono { namespace redpine {
          * @param force4ByteMultiple Optional: Set to false, to bot enforce payload to be a 4-byte multiple
          * @return `true` upon success, `false` otherwise.
          */
-        virtual bool writePayloadData(uint8_t *data, uint16_t byteLength, bool force4ByteMultiple = true) = 0;
+        virtual bool writePayloadData(const uint8_t *data, uint16_t byteLength, bool force4ByteMultiple = true) = 0;
         
         /**
          * Interrupt callback function, called by the communication interface.
@@ -263,7 +309,7 @@ namespace mono { namespace redpine {
     };
     
     
-    
+    // MARK: SPI Communication
     
     
     /**
@@ -279,7 +325,7 @@ namespace mono { namespace redpine {
         {
             SPI_HOST_INTR   /**< SPI Interrupt occured register */
         };
-        
+
         
     protected:
         mbed::SPI *spi;
@@ -353,7 +399,7 @@ namespace mono { namespace redpine {
          * @param thirtyTwoBitFormat Set this to `true` to use 32-bit mode, default is `false`
          * @return the last read value on the SPI bus
          */
-        int spiWrite(uint8_t *data, int byteLength, bool thirtyTwoBitFormat = false);
+        int spiWrite(const uint8_t *data, int byteLength, bool thirtyTwoBitFormat = false);
         
         /**
          * Sets the SPI chip select for the module. This must be called before 
@@ -401,14 +447,23 @@ namespace mono { namespace redpine {
         bool pollInputQueue();
         
         bool interruptActive();
+
+        bool readFrame(DataReceiveBuffer &rawFrame);
+
+        bool readManagementFrame(DataReceiveBuffer &buffer, ManagementFrame &frame);
         
-        bool readManagementFrame(ManagementFrame &frame);
-        
-        bool readManagementFrameResponse(ManagementFrame &request);
+        bool readManagementFrameResponse(DataReceiveBuffer &buffer, ManagementFrame &request);
+
+        bool readDataFrame(DataReceiveBuffer &buffer, DataPayloadHandler &payloadHandler);
+
+        bool writeDataFrame(const uint8_t *data, uint32_t length);
         
         bool writeFrame(ManagementFrame *frame);
+
+        bool writeRawFrame(const uint8_t *rawFrame);
         
-        bool writePayloadData(uint8_t *data, uint16_t byteLength, bool force4ByteMultiple = true);
+        bool writePayloadData(const uint8_t *data, uint16_t byteLength, bool force4ByteMultiple = true);
+
 
         // MARK: Power Aware Interface
 

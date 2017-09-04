@@ -81,8 +81,6 @@ ManagementFrame::ManagementFrame(const ManagementFrame &other)
 
 ManagementFrame &ManagementFrame::operator=(const mono::redpine::ManagementFrame &other)
 {
-    debug("mgmt frame assign\r\n");
-
     direction = other.direction;
     commandId = other.commandId;
     responsePayload = other.responsePayload;
@@ -120,8 +118,7 @@ bool ManagementFrame::commit()
     {
         //wait for response
         int retries = 0;
-        while (retries < 20) {
-
+        while (retries < 22) {
             if (mod->comIntf->interruptActive())
                 break;
 
@@ -130,15 +127,19 @@ bool ManagementFrame::commit()
         }
 
         // sum(50*x, x=1..20) = 10,5 secs timeout
-        if (retries == 20)
+        if (retries == 22)
         {
             debug("Response interrupt for frame timed out!\r\n");
             return false;
         }
 
         //mono::Debug << "Got frame response in " << retries << " retries\r\n";
+        DataReceiveBuffer buffer;
+        success = mod->comIntf->readFrame(buffer);
+        if (!success)
+            return false;
 
-        success = mod->comIntf->readManagementFrameResponse(*this);
+        success = mod->comIntf->readManagementFrameResponse(buffer, *this);
 
         if (!success)
         {

@@ -633,8 +633,217 @@ namespace mono { namespace redpine {
             this->dataReadyHandler.attach<Owner>(obj, memPtr);
         }
     };
-    
-    
+
+    /**
+     * This command opens a TCP/UDP/SSL/Websoket client socket, a Listening 
+     * TCP/UDP/SSL socket.
+     *
+     */
+    class OpenSocketFrame : public ManagementFrame
+    {
+    public:
+
+        static const uint8_t WebSocketMaxUrlLen   = 51; /**< If Websocket this is the max url length */
+        static const uint8_t WebSocketMaxHostLen  = 51; /**< If WebSocket this is the max hostname length */
+
+        /** The available types of IP sockets */
+        enum SocketTypes
+        {
+            TCP_SSL_CLIENT = 0, /**< A TCP or SSL Client Socket */
+            TCP_SSL_SERVER = 2, /**< A TCP or SSL Server / Listening Socket */
+            UDP_LISTEN = 4      /**< An UDP Server / Listening Socket */
+        };
+
+        /** The Types of services, as defined by the IPv4 standard */
+        enum TypeOfServices {
+            TOS_BEST_EFFORT = 0,
+            TOS_PRIORITY = 1,
+            TOS_IMMEDIATE = 2,
+            TOS_FLASH = 3,
+            TOS_FLASH_OVERRIDE = 4,
+            TOS_CRITICAL = 5,
+            TOS_INTERNET = 6,
+            TOS_NETWORK = 7
+        };
+
+        /** Raw command sent to the module */
+        struct socketFrameSnd {
+            uint16_t  ip_version;   /**< IP version used, either 4 or 6. */
+            uint16_t  socketType;   /**< Type of the socket, @ref SocketTypes */
+            uint16_t  moduleSocket; /**< Port number of the socket in the module. Value ranges from 1024 to 49151 */
+            uint16_t  destSocket;   /**< destination port. Value ranges from 1024 to 49151. Ignored when TCP server or Listening UDP sockets are to be opened. */
+            union{
+                /**
+                 * @brief IP Address of the target server.
+                 * Ignored when TCP server or Listening UDP sockets are to be opened.
+                 * If ip_version is 4 then only first four bytes of the ipv4_address
+                 * is filled rest twelve bytes will be 0.
+                 */
+                uint8_t   ipv4_address[4];
+                /**
+                 * @brief IPv6 Address of the target server.
+                 * Ignored when TCP server or Listening UDP sockets are to be opened.
+                 * All 16 bytes are filled if ip_version is 6.
+                 */
+                uint32_t   ipv6_address[4];
+            } destIPaddr;           /**< The sockets destination IP (clients only) */
+            uint16_t max_count;     /**< Maximum number of clients can be connect in case of listening socket. */
+            uint32_t tos;           /**< type of service field. @ref TypeOfServices */
+            uint8_t ssl_ws_enable;  /**< This field is used to enable SSL and/or WebSockets */
+            uint8_t ssl_ciphers;    /**< 1 byte bitmap used to select the various cipher modes. */
+            uint8_t webs_resource_name[WebSocketMaxUrlLen];
+            uint8_t webs_host_name[WebSocketMaxHostLen];
+        };
+
+        /** Response payload for the open socket command */
+        struct socketFrameRcv {
+            uint16_t  ip_version;       /**< IP version used, either 4 or 6 */
+            uint16_t  socketType;       /**< Type of the created socket. @ref SocketTypes */
+            uint16_t  socketDescriptor; /**< Created socket’s descriptor or handle, starts from 1. sockeDescriptor ranges from 1 to 10. */
+            uint16_t  moduleSocket;     /**< Port number of the socket in the module. */
+            union{
+                /**
+                 * @brief The IPv4 address of the module.
+                 * Only first four bytes of ipv4_address is filled rest 12 bytes
+                 * are `0` in case of IPv4.
+                 */
+                uint8_t ipv4_addr[4];
+                /**
+                 * The IPv6 address of the module in case of IPv6
+                 */
+                uint32_t ipv6_addr[4];
+            }moduleIPaddr;              /**< Modules IP address */
+            uint16_t  mss;              /**< maximum segment size of the remote peer. In case of Ludp/Ltcp this field will not present. */
+            uint32_t  window_size;      /**< Window size of the remote peer. In case of Ludp/Ltcp this field will not present. */
+        };
+
+
+        // MARK: Socket receive frame
+
+        static const uint8_t RxDataOffsetTcpV4 = 26;
+        static const uint8_t RxDataOffsetTcpV6 = 46;
+        static const uint8_t RxDataOffsetUdpV4 = 14;
+        static const uint8_t RxDataOffsetUdpV6 = 34;
+        static const uint16_t TcpMaxPayloadSize = 1460;
+        static const uint16_t UdpMaxPayloadSize = 1472;
+
+        typedef struct {
+            uint16_t ip_version;
+            uint16_t recvSocket;
+            uint32_t recvBufLen;
+            uint16_t recvDataOffsetSize;
+            uint16_t fromPortNum;
+            union{
+                uint8_t     ipv4_address[4];
+                uint8_t     ipv6_address[16];
+            } fromIPaddr;
+            uint8_t recvDataOffsetBuf[RxDataOffsetTcpV4];
+            char recvDataBuf[TcpMaxPayloadSize];
+        } recvFrameTcp;
+
+        static const uint8_t TxDataOffsetTcp = 56;
+        static const uint8_t TxDataOffsetUdp = 44;
+
+        typedef struct {
+            uint16_t   ip_version;
+            uint16_t   socketDescriptor;
+            uint32_t   sendBufLen;
+            uint16_t   sendDataOffsetSize;
+            uint16_t   destPort;
+            union{
+                uint8_t ipv4_address[4];
+                uint8_t ipv6_address[16];
+            } destIPaddr;
+            char *sendDataBuf;
+        } rsi_frameSend;
+
+    protected:
+
+        struct socketFrameSnd frameData;
+
+    public:
+
+        mbed::FunctionPointerArg1<void, const socketFrameRcv*> createdHandler;
+
+        OpenSocketFrame();
+        OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t localPort, uint16_t remotePort, uint8_t maxConnections = 0);
+
+        void dataPayload(uint8_t *data);
+
+        void responsePayloadHandler(uint8_t *data);
+
+        int payloadLength();
+    };
+
+    // MARK: Async TCP (Client) Connection Estanlished
+
+    class AsyncTcpClientConnect : public ManagementFrame
+    {
+    public:
+        /** LTCP socket establish request structure */
+        typedef struct rsi_rsp_ltcp_est_s
+        {
+            uint16_t  ip_version;
+            uint16_t  socket_id;            /**< socket handle */
+            uint16_t  dest_port;            /**< remote port number */
+            union{
+                uint8_t   ipv4_address[4];
+                uint8_t   ipv6_address[16];
+            } dest_ip_addr;
+            uint16_t  mss;                  /**< remote peer MSS size */
+            uint32_t  window_size;          /**< remote peer Window size */
+            uint16_t  src_port_num;         /**< source port number */
+            
+        } rsi_rsp_ltcp_est;
+
+        mbed::FunctionPointerArg1<void, const rsi_rsp_ltcp_est*> respHandler;
+
+        AsyncTcpClientConnect(mgmtFrameRaw *raw);
+
+        void responsePayloadHandler(uint8_t *data);
+    };
+
+    // MARK: Close socket
+
+    class CloseSocketFrame : public ManagementFrame
+    {
+    public:
+        /** Socket close command request structure */
+        typedef struct rsi_req_socket_close_s
+        {
+            uint16_t   socket_id;   /**< socket that will be closed */
+            uint16_t   port_number;
+            
+        } rsi_req_socket_close;
+
+        //** socket close command response structure */
+        typedef struct rsi_rsp_socket_close_s
+        {
+            uint16_t   socket_id;       /**< socket that was closed */
+            uint32_t   sent_bytes_count;
+            
+        } rsi_rsp_socket_close;
+
+        rsi_req_socket_close rawPayload;
+
+        mbed::FunctionPointerArg1<void, const rsi_rsp_socket_close*> closedHandler;
+
+        CloseSocketFrame();
+
+        CloseSocketFrame(uint32_t descriptor, uint16_t port);
+
+        CloseSocketFrame(mgmtFrameRaw *raw);
+
+        void dataPayload(uint8_t *data);
+
+        void responsePayloadHandler(uint8_t *data);
+
+        int payloadLength();
+    };
+
+
+    // MARK: HTTP POST FRAME
+
     class HttpPostFrame : public HttpGetFrame
     {
     public:
@@ -654,7 +863,24 @@ namespace mono { namespace redpine {
         int payloadLength();
     };
 
-    
+    // MARK: Query Firm
+
+    class QueryFirmwareFrame : public ManagementFrame
+    {
+    public:
+
+        mbed::FunctionPointerArg1<void, mono::String> responseCb;
+
+        typedef struct {
+            uint8 fwversion[20];
+        } rsi_qryFwversionFrameRecv;
+
+        QueryFirmwareFrame();
+
+        void responsePayloadHandler(uint8_t *payloadBuffer);
+
+    };
+
     /**
      * Command to set the module into one of 5 power saving modes. Some modes is
      * used while connected to an AP, other are full sleep modes, where module is

@@ -8,8 +8,7 @@
 #include <queue.h>
 
 namespace mono { namespace redpine {
-    
-    
+
     /**
      * Management Frame structure as sent from/to the module
      * This frame type deliver commands and status information to and from
@@ -38,7 +37,14 @@ namespace mono { namespace redpine {
         uint8_t  reserved[13];  /**< Reserved for future use */
     } dataFrameRaw;
     
-    
+
+    typedef union RawFrameHeaderU {
+            uint16_t LengthType;    /**< LSB is the frame data length, MSB is always 0x40 on mgmt and 0x50 on data frames */
+            mgmtFrameRaw MgmtFrame;
+            dataFrameRaw DataFrame;
+    } RawFrameHeader;
+
+
     /**
      * A generic frame that is used to communicate which the module
      * Subclasses of this will represent data or management frames.
@@ -84,6 +90,7 @@ namespace mono { namespace redpine {
             SocketCreate        = 0x42, /**<  */
             SocketClose         = 0x43, /**<  */
             DnsResolution       = 0x44, /**< DNS Resolution lookup command */
+            QueryFirmware       = 0x49, /**< Query the modules firmware version */
             HttpGet             = 0x51, /**< HTTP Client, GET request */
             HttpPost            = 0x52, /**< HTTP Client, POST request */
             WakeFromSleep       = 0xCD,
@@ -94,6 +101,8 @@ namespace mono { namespace redpine {
         enum RxCommandIds
         {
             AsyncConnAcceptReq  = 0x30, /**< Async connection accept request from remote wfd device */
+            AsyncTcpConnect     = 0x61, /**< Async TCP Socket Connection Established */
+            AsyncSckTerminated  = 0x62, /**< Async Socket Remote Terminate */
             CardReady           = 0x89 /**< Card Ready command, when module is initialized and ready */
         };
         

@@ -61,6 +61,7 @@ void SceneController::show()
 
     background.show();
     visible = true;
+
     for(std::list<IViewALike*>::iterator it = childviewList.begin(); it != childviewList.end(); ++it)
     {
         (*it)->show();

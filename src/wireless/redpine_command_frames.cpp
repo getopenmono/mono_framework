@@ -322,6 +322,8 @@ HttpGetFrame::~HttpGetFrame()
     //debug("dealloc HttpGetFrame\r\n");
 }
 
+
+
 // MARK: HTTP POST FRAME
 
 HttpPostFrame::HttpPostFrame(String hostname, String serverIp, String Url, FILE *destFile, uint32_t serverPort) :
@@ -373,6 +375,119 @@ void HttpPostFrame::dataPayload(uint8_t *data)
         requestDataCallback.call((char*)(strPnt));
 }
 
+
+
+// MARK: OPEN SOCKET FRAME
+
+OpenSocketFrame::OpenSocketFrame() : ManagementFrame(SocketCreate)
+{
+    this->responsePayload = true;
+}
+
+OpenSocketFrame::OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t localPort, uint16_t remotePort, uint8_t maxConnections) : ManagementFrame(SocketCreate)
+{
+    this->responsePayload = true;
+
+    this->frameData.ip_version = 4;
+    frameData.socketType = type;
+    frameData.moduleSocket = localPort;
+    frameData.destSocket = remotePort;
+
+    memcpy((void*)frameData.destIPaddr.ipv4_address, ipAddress, 4);
+
+    frameData.max_count = maxConnections;
+    frameData.tos = 0;
+    frameData.ssl_ws_enable = 0;
+    frameData.ssl_ciphers = 0;
+}
+
+void OpenSocketFrame::dataPayload(uint8_t *data)
+{
+    memcpy((void*)data, (void*)&frameData, sizeof(socketFrameSnd));
+
+}
+
+void OpenSocketFrame::responsePayloadHandler(uint8_t *data)
+{
+    printf("Response:\t\n");
+
+    struct socketFrameRcv *revc = (struct socketFrameRcv*) data;
+    printf("SocDesc: %u\n\tPort: %u\t\n",revc->socketDescriptor, revc->moduleSocket);
+
+    this->lastResponseParsed = true;
+
+    createdHandler.call(revc);
+}
+
+int OpenSocketFrame::payloadLength()
+{
+    return sizeof(socketFrameSnd);
+}
+
+// MARK: Async TCP (Client) Connection Estanlished
+
+AsyncTcpClientConnect::AsyncTcpClientConnect(mgmtFrameRaw *raw) :  ManagementFrame(raw)
+{
+    responsePayload = true;
+}
+
+void AsyncTcpClientConnect::responsePayloadHandler(uint8_t *data)
+{
+    rsi_rsp_ltcp_est *resp = (rsi_rsp_ltcp_est*) data;
+    respHandler.call(resp);
+}
+
+// MARK: Close Socket FRAME
+
+CloseSocketFrame::CloseSocketFrame() : ManagementFrame(SocketClose) {}
+CloseSocketFrame::CloseSocketFrame(mgmtFrameRaw *raw) : ManagementFrame(raw)
+{
+    responsePayload = true;
+}
+CloseSocketFrame::CloseSocketFrame(uint32_t descriptor, uint16_t port) : ManagementFrame(SocketClose)
+{
+    responsePayload = true;
+    rawPayload.socket_id = descriptor;
+    rawPayload.port_number = port;
+}
+
+
+
+void CloseSocketFrame::dataPayload(uint8_t *data)
+{
+    memcpy(data, &rawPayload, sizeof(rawPayload));
+}
+
+void CloseSocketFrame::responsePayloadHandler(uint8_t *data)
+{
+    rsi_rsp_socket_close *resp = (rsi_rsp_socket_close*) data;
+    closedHandler.call(resp);
+
+    lastResponseParsed = true;
+}
+
+int CloseSocketFrame::payloadLength()
+{
+    return sizeof(rawPayload);
+}
+
+// MARK: QUERY FIRMWARE
+
+QueryFirmwareFrame::QueryFirmwareFrame() : ManagementFrame(QueryFirmware)
+{
+    this->responsePayload = true;
+    this->length = 0;
+}
+
+void QueryFirmwareFrame::responsePayloadHandler(uint8_t *payloadBuffer)
+{
+    QueryFirmwareFrame::rsi_qryFwversionFrameRecv *recv = (QueryFirmwareFrame::rsi_qryFwversionFrameRecv*) payloadBuffer;
+
+    memdump(payloadBuffer, sizeof(rsi_qryFwversionFrameRecv));
+    String firm((char*)recv->fwversion, 20);
+
+    responseCb.call(firm);
+}
 
 
 // MARK: SET POWER MODE FRAME
