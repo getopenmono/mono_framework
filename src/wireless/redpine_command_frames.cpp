@@ -387,7 +387,8 @@ OpenSocketFrame::OpenSocketFrame() : ManagementFrame(SocketCreate)
 OpenSocketFrame::OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t localPort, uint16_t remotePort, uint8_t maxConnections) : ManagementFrame(SocketCreate)
 {
     this->responsePayload = true;
-
+    memset(&frameData, 0, sizeof(socketFrameSnd));
+    
     this->frameData.ip_version = 4;
     frameData.socketType = type;
     frameData.moduleSocket = localPort;
@@ -399,20 +400,24 @@ OpenSocketFrame::OpenSocketFrame(SocketTypes type, uint8_t *ipAddress, uint16_t 
     frameData.tos = 0;
     frameData.ssl_ws_enable = 0;
     frameData.ssl_ciphers = 0;
+    
+    frameData.tcp_retry_count = 0;
+    frameData.socket_bitmap = 0;
+    frameData.rx_window_size = 0;
 }
 
 void OpenSocketFrame::dataPayload(uint8_t *data)
 {
     memcpy((void*)data, (void*)&frameData, sizeof(socketFrameSnd));
-
+    
 }
 
 void OpenSocketFrame::responsePayloadHandler(uint8_t *data)
 {
-    printf("Response:\t\n");
+    printf("Response:\r\n");
 
     struct socketFrameRcv *revc = (struct socketFrameRcv*) data;
-    printf("SocDesc: %u\n\tPort: %u\t\n",revc->socketDescriptor, revc->moduleSocket);
+    printf("SocDesc: %u\n\tPort: %u\r\n",revc->socketDescriptor, revc->moduleSocket);
 
     this->lastResponseParsed = true;
 
@@ -446,6 +451,7 @@ CloseSocketFrame::CloseSocketFrame(mgmtFrameRaw *raw) : ManagementFrame(raw)
 }
 CloseSocketFrame::CloseSocketFrame(uint32_t descriptor, uint16_t port) : ManagementFrame(SocketClose)
 {
+    memset(&rawPayload, 0, sizeof(rsi_req_socket_close));
     responsePayload = true;
     rawPayload.socket_id = descriptor;
     rawPayload.port_number = port;

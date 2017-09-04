@@ -693,6 +693,9 @@ namespace mono { namespace redpine {
             uint8_t ssl_ciphers;    /**< 1 byte bitmap used to select the various cipher modes. */
             uint8_t webs_resource_name[WebSocketMaxUrlLen];
             uint8_t webs_host_name[WebSocketMaxHostLen];
+            uint8   tcp_retry_count;
+            uint8   socket_bitmap;
+            uint8   rx_window_size;
         };
 
         /** Response payload for the open socket command */
