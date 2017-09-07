@@ -164,10 +164,10 @@ void TextRender::drawChar(const geo::Point &position, const GFXfont &gfxFont, co
 {
     uint8_t  *bitmap = (uint8_t *)gfxFont.bitmap;
     
-    uint16_t bo = glyph->bitmapOffset;
-    uint8_t  w  = glyph->width,
+    uint32_t bo = glyph->bitmapOffset;
+    uint16_t  w  = glyph->width,
              h  = glyph->height;
-    int8_t   xo = glyph->xOffset,
+    int16_t   xo = glyph->xOffset,
              yo = glyph->yOffset;
     
     mono::geo::Rect glyphBounds(position.X() + xo,
@@ -177,7 +177,7 @@ void TextRender::drawChar(const geo::Point &position, const GFXfont &gfxFont, co
     if (!bounds.contains(glyphBounds, true))
         return;
     
-    uint8_t  xx, yy, bits = 0, bit = 0;
+    uint16_t  xx, yy, bits = 0, bit = 0;
     bool rePosCursor = false;
     
     for(yy=0; yy<h; yy++) {
@@ -188,9 +188,11 @@ void TextRender::drawChar(const geo::Point &position, const GFXfont &gfxFont, co
                 bits = bitmap[bo++];
             }
             if(bits & 0x80) {
-                if (rePosCursor)
+                if (rePosCursor) {
                     dispCtrl->setCursor(position.X() + xo + xx,
                                         position.Y() + yy + lineHeight + glyph->yOffset);
+                    rePosCursor = false;
+                }
                 dispCtrl->write(foregroundColor);
             }
             else
