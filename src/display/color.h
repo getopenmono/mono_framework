@@ -41,14 +41,32 @@ namespace mono { namespace display {
 
         // MARK: Constructors
 
-
+        /**
+         * @brief Construct a black color
+         */
         Color();
 
+        /**
+         * @brief Construct a color from an existing 5-6-5 encoded value
+         *
+         * This constructor takes a an integer an casts it to a 5-6-5 RGB color,
+         * from from the integers LSB's.
+         * @param col The 5-6-5 RGB color value
+         */
         Color(const int col);
 
-        Color(const Color &color);
-
+        /**
+         * @brief Construct a color from individual RGB components
+         *
+         * You provide 8-bit RGB components to create the color.
+         *
+         * @param R The red component, 0 to 255
+         * @param G The red component, 0 to 255
+         * @param B The red component, 0 to 255
+         */
         Color(uint8_t R, uint8_t G, uint8_t B);
+        
+        Color(const Color &color);
 
         // MARK: Getters
 
@@ -83,6 +101,22 @@ namespace mono { namespace display {
         /** Return the inverse */
         Color invert() const;
 
+        /**
+         * @brief Blend this color with another using a provided intensity
+         *
+         * Alpha blending is done when you need to combine two colors, say you
+         * wish to realize a gradient. If you blend black and white the intensity
+         * will define all the grayscales in between.
+         *
+         * Use this method to realize an alpha channel that controls how
+         * transparent a certain color is. The alpha channel controls the
+         * intensity, and you must provide the color that lies *behind* the
+         * alpha blended color.
+         *
+         * @param intensity The intensity of this color, 0 to 255.
+         * @param other The color to blend with
+         * @return The new blended color
+         */
         Color alphaBlend(uint8_t intensity, Color const &other) const;
 
         uint8_t* BytePointer();
