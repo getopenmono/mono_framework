@@ -82,16 +82,31 @@ namespace mono { namespace net {
             connectHandler.attach<Context>(cnxt, memptr);
         }
 
+        void setConnectAcceptCallback(void(*funcptr)(ClientConnection&))
+        {
+            connectHandler.attach(funcptr);
+        }
+
         template <typename Context>
         void setStateChangeCallback(Context *cnxt, void(Context::*memptr)(SocketState))
         {
             stateHandler.attach<Context>(cnxt, memptr);
         }
 
+        void setStateChangeCallback(void(*funcptr)(SocketState))
+        {
+            stateHandler.attach(funcptr);
+        }
+
         template <typename Context>
         void setDataCallback(Context *cnxt, void(Context::*memptr)(ClientData&))
         {
             dataHandler.attach<Context>(cnxt, memptr);
+        }
+
+        void setDataCallback(void(*funcptr)(ClientData&))
+        {
+            dataHandler.attach(funcptr);
         }
 
 
