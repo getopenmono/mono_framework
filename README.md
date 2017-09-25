@@ -11,6 +11,7 @@ This text describes how to build the framework.
 Install version 5 of the [ARM GCC Embedded toolchain](https://launchpad.net/gcc-arm-embedded).  Then add the path to your command-line environment if needed:
 
 * MacOS: `/usr/local/openmono/gcc-arm-none-eabi-5_2-2015q4/bin`
+* MacOS: XCode.  If problems, see [solution](https://bugreports.qt.io/browse/QTCREATORBUG-17494).
 * Windows: `C:/openmono/gcc-arm-none-eabi-5_2-2015q4/bin`
 
 ## Building
