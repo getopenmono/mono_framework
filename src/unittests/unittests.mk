@@ -19,7 +19,6 @@ unittests-sources := $(wildcard $(UNITTESTS_PATH)/*.cpp) $(wildcard $(UNITTESTS_
 $(BUILD_DIR)/unittests: $(unittests-sources) $(unittests-libsources) $(unittests-libheaders)
 	-mkdir -p $(BUILD_DIR)
 	g++ -Wall -Wno-unused-result \
-		-g -Wl,-map,$(BUILD_DIR)/unittests.map \
 		-I $(UNITTESTS_PATH)/lib \
 		$(INCS) \
 		-o $@ \
